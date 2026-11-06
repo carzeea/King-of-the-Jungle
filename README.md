@@ -201,3 +201,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Results: the winner's portrait in a gold spotlight with a rotating light burst and the crown dropping onto it (grey, with no crown, when you lose to the CPU).
 - Gold metallic titles, crown logo in the header, matching gold and glass buttons.
 - Fix: all six touch buttons now fit on narrow upright phones (ATK was cut off).
+
+## Web build 2.5: Holden announcer voice (ready for recordings)
+- 34 labeled announcer slots for Holden's voice (ID 3c9d6053-6334-592c-8997-4e325286af3f) in `game/audio/voice/holden-*.mp3`. The full list to record is in `docs/HOLDEN_VOICE_LINES.md`.
+- Each spoken call uses Holden's recording when the file exists and falls back to the browser voice when it doesn't. New calls (Lockout, You win/lose, <Fighter> wins, King of the Jungle, Round one/Final fight) play only once recorded.

@@ -67,6 +67,48 @@ Every sound has a labeled file in this folder. `audio-manifest.json` lists each 
 | `ultra/ultra-hippo.mp3` | Hippo – Ultra Combo | Hippo lands an Ultra Combo |
 | `ultra/ultra-elephant.mp3` | Elephant – Ultra Combo | Elephant lands an Ultra Combo |
 
+
+## Announcer voice lines (Holden)
+
+Recordings go in `voice/`. Until a file exists, that line uses the browser voice. The full recording list is in `docs/HOLDEN_VOICE_LINES.md`.
+
+| File | Line | Plays when |
+|---|---|---|
+| `voice/holden-fight.mp3` | Fight! | Start of every fight |
+| `voice/holden-round-one.mp3` | Round one! | Before "Fight!" in VS CPU and 2 Player |
+| `voice/holden-final-fight.mp3` | Final fight! | Tower Mode, the Elephant boss fight |
+| `voice/holden-danger.mp3` | Danger! | A fighter drops into the danger zone |
+| `voice/holden-combo-breaker.mp3` | Combo breaker! | A combo is broken |
+| `voice/holden-lockout.mp3` | Lockout! | Mistimed combo breaker |
+| `voice/holden-instinct.mp3` | Instinct! | Instinct mode activated |
+| `voice/holden-ultra-combo.mp3` | Ultra combo! | Ultra Combo lands |
+| `voice/holden-ko.mp3` | K.O.! | Knockout |
+| `voice/holden-time.mp3` | Time! | Timer runs out |
+| `voice/holden-you-win.mp3` | You win! | You beat the CPU |
+| `voice/holden-you-lose.mp3` | You lose. | The CPU beats you |
+| `voice/holden-king-of-the-jungle.mp3` | King of the Jungle! | Tower Mode completed |
+| `voice/holden-triple-combo.mp3` | Triple combo! | A combo of that rank ends |
+| `voice/holden-super-combo.mp3` | Super combo! | A combo of that rank ends |
+| `voice/holden-hyper-combo.mp3` | Hyper combo! | A combo of that rank ends |
+| `voice/holden-brutal-combo.mp3` | Brutal combo! | A combo of that rank ends |
+| `voice/holden-savage-combo.mp3` | Savage combo! | A combo of that rank ends |
+| `voice/holden-feral-combo.mp3` | Feral combo! | A combo of that rank ends |
+| `voice/holden-primal-combo.mp3` | Primal combo! | A combo of that rank ends |
+| `voice/holden-monster-combo.mp3` | Monster combo! | A combo of that rank ends |
+| `voice/holden-apex-combo.mp3` | Apex combo! | A combo of that rank ends |
+| `voice/holden-king-combo.mp3` | King combo! | A combo of that rank ends |
+| `voice/holden-badger-wins.mp3` | Badger wins! | Badger wins a fight |
+| `voice/holden-wolf-wins.mp3` | Wolf wins! | Wolf wins a fight |
+| `voice/holden-hyena-wins.mp3` | Hyena wins! | Hyena wins a fight |
+| `voice/holden-leopard-wins.mp3` | Leopard wins! | Leopard wins a fight |
+| `voice/holden-jaguar-wins.mp3` | Jaguar wins! | Jaguar wins a fight |
+| `voice/holden-crocodile-wins.mp3` | Crocodile wins! | Crocodile wins a fight |
+| `voice/holden-lion-wins.mp3` | Lion wins! | Lion wins a fight |
+| `voice/holden-tiger-wins.mp3` | Tiger wins! | Tiger wins a fight |
+| `voice/holden-grizzly-wins.mp3` | Grizzly wins! | Grizzly wins a fight |
+| `voice/holden-hippo-wins.mp3` | Hippo wins! | Hippo wins a fight |
+| `voice/holden-elephant-wins.mp3` | Elephant wins! | Elephant wins a fight |
+
 ## Notes
 - Arena 1 (Jungle Temple) uses the Main Theme until its own track is made. The original sound batch had no Temple track.
 - The built-in synthesized sounds remain as a backup for any clip that hasn't loaded yet, and for Combo Breaker, Lockout and Instinct, which have no recorded clips yet.

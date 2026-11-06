@@ -54,7 +54,7 @@ setBackdrop('assets/arenas/cover-bg.webp');
 (function cover(){
  const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src='assets/characters/portraits/'+f.id+'.jpg';im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
  const startCover=()=>{const m=$('menu');if(m.classList.contains('started'))return;m.classList.add('started');try{ac()}catch(_){}
-  if(window.KOTJAudio){KOTJAudio.unlock();KOTJAudio.music('music.menu');KOTJAudio.preload(['sfx.punch','sfx.heavyImpact','sfx.claw','sfx.bite','sfx.block','sfx.groundSlam'])}
+  if(window.KOTJAudio){KOTJAudio.unlock();KOTJAudio.music('music.menu');KOTJAudio.preload(['sfx.punch','sfx.heavyImpact','sfx.claw','sfx.bite','sfx.block','sfx.groundSlam']);KOTJAudio.ready.then(()=>KOTJAudio.preload(Object.keys(KOTJAudio.clips).filter(k=>k.startsWith('voice.'))))}
   setTimeout(()=>{const b=document.querySelector('.cover-menu button');if(b)b.focus({preventScroll:true})},60)};
  window.__startCover=startCover;
  $('press-start').onclick=startCover;
@@ -126,7 +126,12 @@ function hitSound(f,mv){
  if(mv.shadow)return snd(f.hitsDone%2?'sfx.claw':'sfx.punch','hit',.85,r);
  return snd('sfx.punch','hit',.9,r);
 }
+const VOICE_KEY=t=>'voice.'+t.toLowerCase().replace(/\./g,'').replace(/\s+/g,'-').replace(/^k-o$/,'ko');
 function say(text){
+ if(soundOn&&AU&&AU.now(VOICE_KEY(text),1))return;   // Holden's recorded line, if present
+ speak(text);
+}
+function speak(text){
  if(!soundOn||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.pitch=.35;u.rate=.92;u.volume=1;
   const v=speechSynthesis.getVoices().find(v=>/en/i.test(v.lang)&&/male|david|daniel|fred|alex|google uk english male/i.test(v.name));if(v)u.voice=v;speechSynthesis.speak(u)}catch(_){}
 }
@@ -253,7 +258,12 @@ function start(){
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
  banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);
- if(AU&&soundOn){AU.music('music.'+arena.id);AU.has('announcer.fight')?AU.announce():say('Fight')}else say('Fight');
+ if(AU&&soundOn){AU.music('music.'+arena.id);
+  const pre=tower&&tower.index===tower.ladder.length-1?'voice.final-fight':(tower?null:'voice.round-one');
+  if(AU.loaded('voice.fight')){                         // Holden: "Round one!" / "Final fight!" then "Fight!"
+   if(pre&&AU.loaded(pre)){AU.now(pre);setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1000)}else AU.now('voice.fight');
+  }else if(AU.has('announcer.fight'))AU.announce(); else speak('Fight');
+ }else say('Fight');
  pad.classList.toggle('hidden',!isTouch());
  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
@@ -315,7 +325,7 @@ function update(dt){
    f.bufA=0;f.bufS=0;
    if(rawAtk&&o.combo>=1&&!f.lockout){
     if(o.breakWindow>0)comboBreaker(i);
-    else{f.lockout=2.2;sfx('lockout');floatText(f.x,f.y-300,'LOCKOUT','#ff5a4a');}
+    else{f.lockout=2.2;sfx('lockout');soundOn&&AU&&AU.now('voice.lockout');floatText(f.x,f.y-300,'LOCKOUT','#ff5a4a');}
    }
    if(f.stun<=0)endCombo(1-i,false);
    physics(f,dt);return;
@@ -487,6 +497,9 @@ function finish(){
   $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt="">${f.name}</div>`).join('');
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
+ if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
+  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':cpu2&&!draw_?(p1won?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
+  if(line)setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting');cancelAnimationFrame(raf);show('result');

@@ -252,6 +252,312 @@
    "used_for": "Elephant lands an Ultra Combo",
    "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_e1dbe11e-3774-40cc-b9c2-f2ae51c26865.mp3",
    "volume": 1.0
+  },
+  "voice.fight": {
+   "file": "voice/holden-fight.mp3",
+   "label": "Announcer (Holden) – \"Fight!\"",
+   "used_for": "Start of every fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Fight!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.round-one": {
+   "file": "voice/holden-round-one.mp3",
+   "label": "Announcer (Holden) – \"Round one!\"",
+   "used_for": "Before \"Fight!\" in VS CPU and 2 Player",
+   "source": null,
+   "volume": 1.0,
+   "line": "Round one!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.final-fight": {
+   "file": "voice/holden-final-fight.mp3",
+   "label": "Announcer (Holden) – \"Final fight!\"",
+   "used_for": "Tower Mode, the Elephant boss fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Final fight!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.danger": {
+   "file": "voice/holden-danger.mp3",
+   "label": "Announcer (Holden) – \"Danger!\"",
+   "used_for": "A fighter drops into the danger zone",
+   "source": null,
+   "volume": 1.0,
+   "line": "Danger!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.combo-breaker": {
+   "file": "voice/holden-combo-breaker.mp3",
+   "label": "Announcer (Holden) – \"Combo breaker!\"",
+   "used_for": "A combo is broken",
+   "source": null,
+   "volume": 1.0,
+   "line": "Combo breaker!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.lockout": {
+   "file": "voice/holden-lockout.mp3",
+   "label": "Announcer (Holden) – \"Lockout!\"",
+   "used_for": "Mistimed combo breaker",
+   "source": null,
+   "volume": 1.0,
+   "line": "Lockout!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.instinct": {
+   "file": "voice/holden-instinct.mp3",
+   "label": "Announcer (Holden) – \"Instinct!\"",
+   "used_for": "Instinct mode activated",
+   "source": null,
+   "volume": 1.0,
+   "line": "Instinct!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.ultra-combo": {
+   "file": "voice/holden-ultra-combo.mp3",
+   "label": "Announcer (Holden) – \"Ultra combo!\"",
+   "used_for": "Ultra Combo lands",
+   "source": null,
+   "volume": 1.0,
+   "line": "Ultra combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.ko": {
+   "file": "voice/holden-ko.mp3",
+   "label": "Announcer (Holden) – \"K.O.!\"",
+   "used_for": "Knockout",
+   "source": null,
+   "volume": 1.0,
+   "line": "K.O.!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.time": {
+   "file": "voice/holden-time.mp3",
+   "label": "Announcer (Holden) – \"Time!\"",
+   "used_for": "Timer runs out",
+   "source": null,
+   "volume": 1.0,
+   "line": "Time!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.you-win": {
+   "file": "voice/holden-you-win.mp3",
+   "label": "Announcer (Holden) – \"You win!\"",
+   "used_for": "You beat the CPU",
+   "source": null,
+   "volume": 1.0,
+   "line": "You win!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.you-lose": {
+   "file": "voice/holden-you-lose.mp3",
+   "label": "Announcer (Holden) – \"You lose.\"",
+   "used_for": "The CPU beats you",
+   "source": null,
+   "volume": 1.0,
+   "line": "You lose.",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.king-of-the-jungle": {
+   "file": "voice/holden-king-of-the-jungle.mp3",
+   "label": "Announcer (Holden) – \"King of the Jungle!\"",
+   "used_for": "Tower Mode completed",
+   "source": null,
+   "volume": 1.0,
+   "line": "King of the Jungle!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.triple-combo": {
+   "file": "voice/holden-triple-combo.mp3",
+   "label": "Announcer (Holden) – \"Triple combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Triple combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.super-combo": {
+   "file": "voice/holden-super-combo.mp3",
+   "label": "Announcer (Holden) – \"Super combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Super combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.hyper-combo": {
+   "file": "voice/holden-hyper-combo.mp3",
+   "label": "Announcer (Holden) – \"Hyper combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Hyper combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.brutal-combo": {
+   "file": "voice/holden-brutal-combo.mp3",
+   "label": "Announcer (Holden) – \"Brutal combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Brutal combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.savage-combo": {
+   "file": "voice/holden-savage-combo.mp3",
+   "label": "Announcer (Holden) – \"Savage combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Savage combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.feral-combo": {
+   "file": "voice/holden-feral-combo.mp3",
+   "label": "Announcer (Holden) – \"Feral combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Feral combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.primal-combo": {
+   "file": "voice/holden-primal-combo.mp3",
+   "label": "Announcer (Holden) – \"Primal combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Primal combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.monster-combo": {
+   "file": "voice/holden-monster-combo.mp3",
+   "label": "Announcer (Holden) – \"Monster combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Monster combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.apex-combo": {
+   "file": "voice/holden-apex-combo.mp3",
+   "label": "Announcer (Holden) – \"Apex combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "Apex combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.king-combo": {
+   "file": "voice/holden-king-combo.mp3",
+   "label": "Announcer (Holden) – \"King combo!\"",
+   "used_for": "A combo of that rank ends",
+   "source": null,
+   "volume": 1.0,
+   "line": "King combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.badger-wins": {
+   "file": "voice/holden-badger-wins.mp3",
+   "label": "Announcer (Holden) – \"Badger wins!\"",
+   "used_for": "Badger wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Badger wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.wolf-wins": {
+   "file": "voice/holden-wolf-wins.mp3",
+   "label": "Announcer (Holden) – \"Wolf wins!\"",
+   "used_for": "Wolf wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Wolf wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.hyena-wins": {
+   "file": "voice/holden-hyena-wins.mp3",
+   "label": "Announcer (Holden) – \"Hyena wins!\"",
+   "used_for": "Hyena wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Hyena wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.leopard-wins": {
+   "file": "voice/holden-leopard-wins.mp3",
+   "label": "Announcer (Holden) – \"Leopard wins!\"",
+   "used_for": "Leopard wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Leopard wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.jaguar-wins": {
+   "file": "voice/holden-jaguar-wins.mp3",
+   "label": "Announcer (Holden) – \"Jaguar wins!\"",
+   "used_for": "Jaguar wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Jaguar wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.crocodile-wins": {
+   "file": "voice/holden-crocodile-wins.mp3",
+   "label": "Announcer (Holden) – \"Crocodile wins!\"",
+   "used_for": "Crocodile wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Crocodile wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.lion-wins": {
+   "file": "voice/holden-lion-wins.mp3",
+   "label": "Announcer (Holden) – \"Lion wins!\"",
+   "used_for": "Lion wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Lion wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.tiger-wins": {
+   "file": "voice/holden-tiger-wins.mp3",
+   "label": "Announcer (Holden) – \"Tiger wins!\"",
+   "used_for": "Tiger wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Tiger wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.grizzly-wins": {
+   "file": "voice/holden-grizzly-wins.mp3",
+   "label": "Announcer (Holden) – \"Grizzly wins!\"",
+   "used_for": "Grizzly wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Grizzly wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.hippo-wins": {
+   "file": "voice/holden-hippo-wins.mp3",
+   "label": "Announcer (Holden) – \"Hippo wins!\"",
+   "used_for": "Hippo wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Hippo wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.elephant-wins": {
+   "file": "voice/holden-elephant-wins.mp3",
+   "label": "Announcer (Holden) – \"Elephant wins!\"",
+   "used_for": "Elephant wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Elephant wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
   }
  }
 }

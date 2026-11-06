@@ -10,6 +10,7 @@ let ok = 0, kept = 0, failed = 0;
 await Promise.all(Object.entries(clips).map(async ([key, c]) => {
   const out = join(root, c.file);
   try { await access(out); kept++; return; } catch {}
+  if (!c.source) { console.log('waiting ', c.file, '-', c.label, '(add this file to use it)'); return; }
   try {
     const r = await fetch(c.source);
     if (!r.ok) throw new Error('HTTP ' + r.status);

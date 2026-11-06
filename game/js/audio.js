@@ -16,7 +16,7 @@
  async function load(key){
   if(buffers[key])return buffers[key];if(loading[key])return loading[key];
   const c=clips[key];if(!c||!ac())return null;
-  loading[key]=(async()=>{for(const local of [true,false]){try{const r=await fetch(urlFor(c,local));if(!r.ok)continue;
+  loading[key]=(async()=>{for(const local of [true,false]){if(!local&&!c.source)continue;try{const r=await fetch(urlFor(c,local));if(!r.ok)continue;
     const b=await ctx.decodeAudioData(await r.arrayBuffer());return buffers[key]=b}catch(_){}}return null})();
   return loading[key];
  }
@@ -27,7 +27,7 @@
  // Long clips (music, announcer, Shadow/Ultra cues) stream through <audio>.
  function stream(key,{loop=false,vol=1}={}){
   const c=clips[key];if(!c)return null;const a=new Audio();a.preload='auto';a.loop=loop;a.volume=Math.min(1,(c.volume??1)*vol);
-  let triedSource=false;a.onerror=()=>{if(!triedSource){triedSource=true;a.src=urlFor(c,false);a.play().catch(()=>{})}};
+  let triedSource=false;a.onerror=()=>{if(!triedSource&&c.source){triedSource=true;a.src=urlFor(c,false);a.play().catch(()=>{})}};
   a.src=urlFor(c,true);return a;
  }
  const cues=new Set();
@@ -54,6 +54,7 @@
   now(key,vol=1,rate=1){if(!enabled||!clips[key])return false;const b=buffers[key];if(!b||!ctx){load(key);return false}
    const s=ctx.createBufferSource(),g=ctx.createGain();s.buffer=b;s.playbackRate.value=rate;g.gain.value=(clips[key].volume??1)*vol;s.connect(g).connect(master);s.start();return true},
   has:k=>!!clips[k],
+  loaded:k=>!!buffers[k],
   get clips(){return clips}
  };
 })();
