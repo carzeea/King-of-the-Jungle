@@ -164,3 +164,11 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - All 11 fighters now draw from the standardized animation set (KOTJ_V2_Fighter_Animations): one strip per animation in `assets/characters/<animal>/frames/`, each with its own ground anchor point, so fighters no longer slide or jump between poses.
 - Fixes carried in: Hippo get-up, Grizzly uppercut slashes, Wolf run and defeat, stray fragments.
 - Frames are stored at about the sprite sheets' original resolution; the game enlarges them when drawing. The old `sprites/` strips are removed.
+
+## Web build 1.9: New title screen
+- Full-screen cover: Royal Colosseum backdrop with a slow camera drift, rotating gold light rays, rising embers, and the Lion as the hero art with a gold glow.
+- Metallic gold KING OF THE JUNGLE title with crown and red V2 badge, and a light sweep across "JUNGLE".
+- PRESS START: tap, click, any key or controller A reveals the menu (Tower Mode / VS CPU / Local 2 Player), which a controller can navigate with the D-pad.
+- Roster strip of all 11 fighters, plus "Game made by J. Hardy".
+- Fixed: the Lion title art showed inside a bright green box (green screen never removed). It is now cut out cleanly (`assets/characters/lion/lion-hero.webp`).
+- Separate layouts for desktop, upright phone and sideways phone.
