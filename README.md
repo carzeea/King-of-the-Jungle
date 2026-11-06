@@ -186,3 +186,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 2.2: Crown falling off the K
 - The small crown above the title is now the realistic gold crown (`assets/ui/crown.webp`). It drops in, lands on the K in KING, tips over the corner, and keeps teetering like it's about to fall.
+
+## Web build 2.3: Sound
+- Added the KOTJ V2 audio package: 36 labeled clips in `game/audio/` (announcer, menu theme, 6 arena tracks, 6 hit/impact sounds, a Shadow cue and an Ultra cue for each of the 11 fighters). The full table is in `game/audio/README.md`.
+- Netlify downloads the clips while deploying (`scripts/fetch-audio.mjs`, run from `netlify.toml`). If a file is missing, the game streams its source link.
+- Where they play: Main Theme on the title, select and result screens; each arena's own music during fights; the announcer at fight start; punch, claw, bite, block, heavy impact and ground slam on hits; each fighter's own Shadow and Ultra cues. Music pauses with the game and quiets during K.O. and Ultra.
+- New sound engine `game/js/audio.js`. The SOUND button controls everything. The original package's notes and link list are kept in `docs/audio-package/`.

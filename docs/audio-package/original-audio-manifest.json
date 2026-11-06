@@ -1,0 +1,46 @@
+{
+  "announcer": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_222624_373039b5-9ef1-4af2-89d3-6d8e9fde8923.wav",
+  "music": {
+    "main": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221604_0a84fde5-08bc-4707-8ef6-50188789ab58.mp3",
+    "temple": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221604_0a84fde5-08bc-4707-8ef6-50188789ab58.mp3",
+    "inferno": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_219e389f-ac9b-4601-a28f-b20073431c4f.mp3",
+    "frozen": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_563da76a-69e6-4501-9826-b504cf3cb022.mp3",
+    "savannah": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_1fe83c73-1779-4f1a-aed4-afe00142e145.mp3",
+    "swamp": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_936d383c-7bfd-4934-b97b-b5f811ab47d4.mp3",
+    "colosseum": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_f168bc02-2371-418c-8ae6-f4ecf5c564af.mp3"
+  },
+  "sfx": {
+    "punch": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_d0370d12-9860-4267-93ff-1412c12c34a7.mp3",
+    "heavyImpact": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_1db5662b-59be-4c21-84a2-71eccc648965.mp3",
+    "claw": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_769bca5c-a63f-4f95-9809-47b7b75e7049.mp3",
+    "bite": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_a2dac4d5-c1c0-4cfd-90ca-3b9d1c9c4ee6.mp3",
+    "block": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_bd2a4412-0120-4b97-af94-ac70aecd4419.mp3",
+    "groundSlam": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_4675611d-473d-4200-b315-c55f01830ab5.mp3"
+  },
+  "shadow": {
+    "badger": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_f63d81da-a424-41c7-99c7-cd90046042f0.mp3",
+    "wolf": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_83471119-1adc-448c-a462-ea304b8e2fd6.mp3",
+    "hyena": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223325_49ff7c64-780a-4fda-8ddc-3dea5b3481d1.mp3",
+    "leopard": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_0ef5fbf3-0f9a-4753-a0ff-d9a3d1331ed1.mp3",
+    "jaguar": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223325_5edbd836-0095-4a41-bf74-0d238452f9e1.mp3",
+    "crocodile": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_7dd12240-dccf-440f-b316-f0998c2d106d.mp3",
+    "lion": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_307e9a9a-2c10-4fdd-a28b-b8cfd1d11bef.mp3",
+    "tiger": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_1062d4d2-e5a7-4234-a212-14076bd905b3.mp3",
+    "grizzly": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_e208ab68-bc50-4c88-a297-b49944145102.mp3",
+    "hippo": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_d5a37067-2842-4060-9d8e-7c322086cf59.mp3",
+    "elephant": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_237232f4-83c8-4d6e-bfff-3d20a7d39729.mp3"
+  },
+  "ultra": {
+    "badger": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_59d8f327-04f7-4c69-8aa4-018900de01b0.mp3",
+    "wolf": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_0b02d59b-2b0e-4e25-a776-2beb3b761ef3.mp3",
+    "hyena": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_23db5af3-53c9-4b95-b0ef-53a375e020a4.mp3",
+    "leopard": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_ee416244-112a-49e3-a4c3-4f5a017e31c6.mp3",
+    "jaguar": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_56e5dd44-64c4-442d-9932-69b339120360.mp3",
+    "crocodile": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_251520fc-567d-4aa8-8985-477c8449cd83.mp3",
+    "lion": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_9717934f-0e7d-42b8-ab84-d6490594bc7b.mp3",
+    "tiger": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223434_b5564244-2733-4b54-8321-9d590b9eb830.mp3",
+    "grizzly": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_fdee542e-0708-4aab-9ee2-76708bc686af.mp3",
+    "hippo": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_222c88fd-7347-4cac-b7b6-8d7549a0d2da.mp3",
+    "elephant": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_e1dbe11e-3774-40cc-b9c2-f2ae51c26865.mp3"
+  }
+}

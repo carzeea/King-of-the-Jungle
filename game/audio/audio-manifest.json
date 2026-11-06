@@ -1,0 +1,257 @@
+{
+ "_about": "King of the Jungle sound library. Every clip has a labeled file under game/audio/. Netlify downloads any missing files from \"source\" while deploying (scripts/fetch-audio.mjs); if a local file is missing the game streams \"source\" instead.",
+ "clips": {
+  "announcer.fight": {
+   "file": "announcer/announcer-fight-intro.wav",
+   "label": "Announcer – fight intro call",
+   "used_for": "Start of every fight",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_222624_373039b5-9ef1-4af2-89d3-6d8e9fde8923.wav",
+   "volume": 1.0
+  },
+  "music.menu": {
+   "file": "music/menu-main-theme.mp3",
+   "label": "Main Theme",
+   "used_for": "Title screen, fighter select and stage select",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221604_0a84fde5-08bc-4707-8ef6-50188789ab58.mp3",
+   "volume": 0.45
+  },
+  "music.jungle-temple": {
+   "file": "music/arena-1-jungle-temple.mp3",
+   "label": "Arena 1 – Jungle Temple (uses Main Theme until its own track exists)",
+   "used_for": "Fight music in the Jungle Temple",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221604_0a84fde5-08bc-4707-8ef6-50188789ab58.mp3",
+   "volume": 0.42
+  },
+  "music.inferno-fortress": {
+   "file": "music/arena-2-inferno-fortress.mp3",
+   "label": "Arena 2 – Inferno Fortress",
+   "used_for": "Fight music in the Inferno Fortress",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_219e389f-ac9b-4601-a28f-b20073431c4f.mp3",
+   "volume": 0.42
+  },
+  "music.frozen-kingdom": {
+   "file": "music/arena-3-frozen-kingdom.mp3",
+   "label": "Arena 3 – Frozen Kingdom",
+   "used_for": "Fight music in the Frozen Kingdom",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_563da76a-69e6-4501-9826-b504cf3cb022.mp3",
+   "volume": 0.42
+  },
+  "music.savage-plains": {
+   "file": "music/arena-4-savage-plains.mp3",
+   "label": "Arena 4 – Savage Plains",
+   "used_for": "Fight music in the Savage Plains",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_1fe83c73-1779-4f1a-aed4-afe00142e145.mp3",
+   "volume": 0.42
+  },
+  "music.shadow-swamp": {
+   "file": "music/arena-5-shadow-swamp.mp3",
+   "label": "Arena 5 – Shadow Swamp",
+   "used_for": "Fight music in the Shadow Swamp",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_936d383c-7bfd-4934-b97b-b5f811ab47d4.mp3",
+   "volume": 0.42
+  },
+  "music.royal-colosseum": {
+   "file": "music/arena-6-royal-colosseum.mp3",
+   "label": "Arena 6 – Royal Colosseum (final boss)",
+   "used_for": "Fight music in the Royal Colosseum",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_f168bc02-2371-418c-8ae6-f4ecf5c564af.mp3",
+   "volume": 0.42
+  },
+  "sfx.punch": {
+   "file": "sfx/hit-punch.mp3",
+   "label": "Punch hit",
+   "used_for": "Light attacks and auto-double hits",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_d0370d12-9860-4267-93ff-1412c12c34a7.mp3",
+   "volume": 0.7
+  },
+  "sfx.heavyImpact": {
+   "file": "sfx/hit-heavy-impact.mp3",
+   "label": "Heavy impact",
+   "used_for": "Enders, specials landing, bar broken, K.O.",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_1db5662b-59be-4c21-84a2-71eccc648965.mp3",
+   "volume": 0.9
+  },
+  "sfx.claw": {
+   "file": "sfx/hit-claw-slash.mp3",
+   "label": "Claw slash",
+   "used_for": "Heavy claw swipes in combos",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_769bca5c-a63f-4f95-9809-47b7b75e7049.mp3",
+   "volume": 0.75
+  },
+  "sfx.bite": {
+   "file": "sfx/hit-bite.mp3",
+   "label": "Bite",
+   "used_for": "Bite attacks",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_a2dac4d5-c1c0-4cfd-90ca-3b9d1c9c4ee6.mp3",
+   "volume": 0.8
+  },
+  "sfx.block": {
+   "file": "sfx/block.mp3",
+   "label": "Block",
+   "used_for": "Attack blocked",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_bd2a4412-0120-4b97-af94-ac70aecd4419.mp3",
+   "volume": 0.65
+  },
+  "sfx.groundSlam": {
+   "file": "sfx/ground-slam.mp3",
+   "label": "Ground slam",
+   "used_for": "Badger Earth Slam, heavyweight specials, Ultra finisher",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223127_4675611d-473d-4200-b315-c55f01830ab5.mp3",
+   "volume": 0.95
+  },
+  "shadow.badger": {
+   "file": "shadow/shadow-badger.mp3",
+   "label": "Badger – Shadow move",
+   "used_for": "Badger uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_f63d81da-a424-41c7-99c7-cd90046042f0.mp3",
+   "volume": 1.0
+  },
+  "ultra.badger": {
+   "file": "ultra/ultra-badger.mp3",
+   "label": "Badger – Ultra Combo",
+   "used_for": "Badger lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_59d8f327-04f7-4c69-8aa4-018900de01b0.mp3",
+   "volume": 1.0
+  },
+  "shadow.wolf": {
+   "file": "shadow/shadow-wolf.mp3",
+   "label": "Wolf – Shadow move",
+   "used_for": "Wolf uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_83471119-1adc-448c-a462-ea304b8e2fd6.mp3",
+   "volume": 1.0
+  },
+  "ultra.wolf": {
+   "file": "ultra/ultra-wolf.mp3",
+   "label": "Wolf – Ultra Combo",
+   "used_for": "Wolf lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_0b02d59b-2b0e-4e25-a776-2beb3b761ef3.mp3",
+   "volume": 1.0
+  },
+  "shadow.hyena": {
+   "file": "shadow/shadow-hyena.mp3",
+   "label": "Hyena – Shadow move",
+   "used_for": "Hyena uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223325_49ff7c64-780a-4fda-8ddc-3dea5b3481d1.mp3",
+   "volume": 1.0
+  },
+  "ultra.hyena": {
+   "file": "ultra/ultra-hyena.mp3",
+   "label": "Hyena – Ultra Combo",
+   "used_for": "Hyena lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_23db5af3-53c9-4b95-b0ef-53a375e020a4.mp3",
+   "volume": 1.0
+  },
+  "shadow.leopard": {
+   "file": "shadow/shadow-leopard.mp3",
+   "label": "Leopard – Shadow move",
+   "used_for": "Leopard uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_0ef5fbf3-0f9a-4753-a0ff-d9a3d1331ed1.mp3",
+   "volume": 1.0
+  },
+  "ultra.leopard": {
+   "file": "ultra/ultra-leopard.mp3",
+   "label": "Leopard – Ultra Combo",
+   "used_for": "Leopard lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_ee416244-112a-49e3-a4c3-4f5a017e31c6.mp3",
+   "volume": 1.0
+  },
+  "shadow.jaguar": {
+   "file": "shadow/shadow-jaguar.mp3",
+   "label": "Jaguar – Shadow move",
+   "used_for": "Jaguar uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223325_5edbd836-0095-4a41-bf74-0d238452f9e1.mp3",
+   "volume": 1.0
+  },
+  "ultra.jaguar": {
+   "file": "ultra/ultra-jaguar.mp3",
+   "label": "Jaguar – Ultra Combo",
+   "used_for": "Jaguar lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_56e5dd44-64c4-442d-9932-69b339120360.mp3",
+   "volume": 1.0
+  },
+  "shadow.crocodile": {
+   "file": "shadow/shadow-crocodile.mp3",
+   "label": "Crocodile – Shadow move",
+   "used_for": "Crocodile uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_7dd12240-dccf-440f-b316-f0998c2d106d.mp3",
+   "volume": 1.0
+  },
+  "ultra.crocodile": {
+   "file": "ultra/ultra-crocodile.mp3",
+   "label": "Crocodile – Ultra Combo",
+   "used_for": "Crocodile lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_251520fc-567d-4aa8-8985-477c8449cd83.mp3",
+   "volume": 1.0
+  },
+  "shadow.lion": {
+   "file": "shadow/shadow-lion.mp3",
+   "label": "Lion – Shadow move",
+   "used_for": "Lion uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_307e9a9a-2c10-4fdd-a28b-b8cfd1d11bef.mp3",
+   "volume": 1.0
+  },
+  "ultra.lion": {
+   "file": "ultra/ultra-lion.mp3",
+   "label": "Lion – Ultra Combo",
+   "used_for": "Lion lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_9717934f-0e7d-42b8-ab84-d6490594bc7b.mp3",
+   "volume": 1.0
+  },
+  "shadow.tiger": {
+   "file": "shadow/shadow-tiger.mp3",
+   "label": "Tiger – Shadow move",
+   "used_for": "Tiger uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_1062d4d2-e5a7-4234-a212-14076bd905b3.mp3",
+   "volume": 1.0
+  },
+  "ultra.tiger": {
+   "file": "ultra/ultra-tiger.mp3",
+   "label": "Tiger – Ultra Combo",
+   "used_for": "Tiger lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223434_b5564244-2733-4b54-8321-9d590b9eb830.mp3",
+   "volume": 1.0
+  },
+  "shadow.grizzly": {
+   "file": "shadow/shadow-grizzly.mp3",
+   "label": "Grizzly – Shadow move",
+   "used_for": "Grizzly uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_e208ab68-bc50-4c88-a297-b49944145102.mp3",
+   "volume": 1.0
+  },
+  "ultra.grizzly": {
+   "file": "ultra/ultra-grizzly.mp3",
+   "label": "Grizzly – Ultra Combo",
+   "used_for": "Grizzly lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_fdee542e-0708-4aab-9ee2-76708bc686af.mp3",
+   "volume": 1.0
+  },
+  "shadow.hippo": {
+   "file": "shadow/shadow-hippo.mp3",
+   "label": "Hippo – Shadow move",
+   "used_for": "Hippo uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_d5a37067-2842-4060-9d8e-7c322086cf59.mp3",
+   "volume": 1.0
+  },
+  "ultra.hippo": {
+   "file": "ultra/ultra-hippo.mp3",
+   "label": "Hippo – Ultra Combo",
+   "used_for": "Hippo lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_222c88fd-7347-4cac-b7b6-8d7549a0d2da.mp3",
+   "volume": 1.0
+  },
+  "shadow.elephant": {
+   "file": "shadow/shadow-elephant.mp3",
+   "label": "Elephant – Shadow move",
+   "used_for": "Elephant uses a Shadow move (BLOCK + SPECIAL)",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223338_237232f4-83c8-4d6e-bfff-3d20a7d39729.mp3",
+   "volume": 1.0
+  },
+  "ultra.elephant": {
+   "file": "ultra/ultra-elephant.mp3",
+   "label": "Elephant – Ultra Combo",
+   "used_for": "Elephant lands an Ultra Combo",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223433_e1dbe11e-3774-40cc-b9c2-f2ae51c26865.mp3",
+   "volume": 1.0
+  }
+ }
+}

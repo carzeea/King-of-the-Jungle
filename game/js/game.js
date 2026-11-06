@@ -32,6 +32,7 @@ const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));docum
 (function cover(){
  const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src='assets/characters/portraits/'+f.id+'.jpg';im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
  const startCover=()=>{const m=$('menu');if(m.classList.contains('started'))return;m.classList.add('started');try{ac()}catch(_){}
+  if(window.KOTJAudio){KOTJAudio.unlock();KOTJAudio.music('music.menu');KOTJAudio.preload(['sfx.punch','sfx.heavyImpact','sfx.claw','sfx.bite','sfx.block','sfx.groundSlam'])}
   setTimeout(()=>{const b=document.querySelector('.cover-menu button');if(b)b.focus({preventScroll:true})},60)};
  window.__startCover=startCover;
  $('press-start').onclick=startCover;
@@ -91,11 +92,23 @@ function sfx(type){
  else if(type==='ultra'){noise(.07,3000,.45);tone(400,120,.08,.3,'square')}
  else if(type==='boom'){noise(.6,900,.9);tone(80,25,.7,.9)}
 }
+const AU=window.KOTJAudio;
+// Play a labeled clip from the sound library; if it isn't loaded yet, use the built-in synth sound.
+function snd(key,fallback,vol=1,rate=1){if(!soundOn)return;if(!(AU&&AU.now(key,vol,rate))&&fallback)sfx(fallback)}
+const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
+function hitSound(f,mv){
+ const r=.94+Math.random()*.12;
+ if(mv===MOVES.bite)return snd('sfx.bite','heavy',1,r);
+ if(mv===MOVES.special)return snd(HEAVY_SPECIAL.includes(f.data.id)?'sfx.groundSlam':'sfx.heavyImpact','heavy',1,r);
+ if(mv===MOVES.double&&f.chain%2)return snd('sfx.claw','hit',.9,r);
+ if(mv.shadow)return snd(f.hitsDone%2?'sfx.claw':'sfx.punch','hit',.85,r);
+ return snd('sfx.punch','hit',.9,r);
+}
 function say(text){
  if(!soundOn||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.pitch=.35;u.rate=.92;u.volume=1;
   const v=speechSynthesis.getVoices().find(v=>/en/i.test(v.lang)&&/male|david|daniel|fred|alex|google uk english male/i.test(v.name));if(v)u.voice=v;speechSynthesis.speak(u)}catch(_){}
 }
-$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='SOUND: '+(soundOn?'ON':'OFF');if(!soundOn&&window.speechSynthesis)speechSynthesis.cancel()};
+$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='SOUND: '+(soundOn?'ON':'OFF');if(!soundOn&&window.speechSynthesis)speechSynthesis.cancel();AU&&AU.setEnabled(soundOn)};
 
 /* ---------- Menus ---------- */
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();openSelect(b.dataset.mode)});
@@ -217,12 +230,13 @@ function start(){
  if(cpu2)game.fighters[1].ai=cpuBrain(tower?Math.min(1,.1+tower.index*.09):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
- banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);say('Fight');
+ banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);
+ if(AU&&soundOn){AU.music('music.'+arena.id);AU.has('announcer.fight')?AU.announce():say('Fight')}else say('Fight');
  pad.classList.toggle('hidden',!isTouch());
  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
 function banner(text,sub,life=1.1,color='#ffd36b'){game.banner={text,sub,t:0,life,color}}
-function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE'}
+function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';AU&&AU.pauseMusic(paused)}
 function loop(t){
  if(!game)return;let real=Math.min((t-last)/1000,.035);last=t;
  if(!paused){
@@ -340,7 +354,7 @@ function doMove(f,name){
  if(name==='claw'||name==='bite'){f.vx=f.dir*(name==='bite'?110:60);sfx('whiff')}
  if(name==='special'){f.vx=f.dir*(f.data.id==='badger'?260:420);f.vy=f.data.id==='badger'?-120:-230;f.ground=false}
  if(name==='ender'){f.vx=f.dir*200;f.vy=-140;f.ground=false;floatText(f.x,f.y-300,'ENDER','#ffd36b')}
- if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
+ if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
 }
 function resolveHit(i,mv){
  const f=game.fighters[i],o=game.fighters[1-i];
@@ -351,7 +365,7 @@ function resolveHit(i,mv){
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
-  o.vx=f.dir*90;f.meter=Math.min(100,f.meter+2);sfx('block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+  o.vx=f.dir*90;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
  }
  // Ultra Combo: an ender that lands while the opponent is in DANGER.
  const isEnder=mv.ender||(mv.shadow&&f.hitsDone===mv.hits.length&&comboing);
@@ -362,12 +376,12 @@ function resolveHit(i,mv){
  else{o.hp-=dmg;}
  if(isEnder){ // cash in everything: potential becomes real, bonus for long combos
   o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*mv.push;o.vy=-330;o.ground=false;
-  sfx('heavy');game.shake=.25;game.hitstop=.09;spark(o.x,o.y-160,'#ffd36b',18);
+  snd('sfx.heavyImpact','heavy');game.shake=.25;game.hitstop=.09;spark(o.x,o.y-160,'#ffd36b',18);
   resolveBars(o,f);endCombo(i,true);
  }else{
   o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.vx=f.dir*mv.push;if(!o.ground)o.vy=-160;
   f.vx=f.dir*Math.max(20,mv.push*.4);
-  sfx(mv===MOVES.special||mv===MOVES.bite?'heavy':'hit');game.hitstop=mv===MOVES.double?.035:.06;
+  hitSound(f,mv);game.hitstop=mv===MOVES.double?.035:.06;
   if(!mv.potential)resolveBars(o,f);
  }
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
@@ -378,7 +392,7 @@ function resolveHit(i,mv){
 }
 function resolveBars(o,f){
  if(o.hp>0)return;
- if(o.bars>1){o.bars--;o.hp+=BAR;o.potential=Math.min(o.potential,BAR-o.hp);floatText(o.x,o.y-320,'BAR BROKEN','#ff9a4a');game.shake=.3;sfx('boom');}
+ if(o.bars>1){o.bars--;o.hp+=BAR;o.potential=Math.min(o.potential,BAR-o.hp);floatText(o.x,o.y-320,'BAR BROKEN','#ff9a4a');game.shake=.3;snd('sfx.heavyImpact','boom',1,.85);}
  else{o.hp=0;o.potential=0;koFinish(o,f,false)}
 }
 function endCombo(i,ended){
@@ -402,7 +416,7 @@ function comboBreaker(i){
 function startUltra(i){
  const f=game.fighters[i],o=game.fighters[1-i];
  game.ultra={i,t:0,next:0,hits:0,max:18+Math.floor(f.combo*.8),start:o.hp};
- o.potential=0;o.stun=9;f.attack=9;setAction(f,'ultraseq',9);game.flash=1;sfx('boom');
+ o.potential=0;o.stun=9;f.attack=9;setAction(f,'ultraseq',9);game.flash=1;snd('sfx.heavyImpact','boom');if(AU&&soundOn&&AU.has('ultra.'+f.data.id)){AU.duckMusic(.3);AU.ultra(f.data.id)}
  banner('ULTRA','',.6,'#ff5ad8');say('Ultra combo');
 }
 function ultraStep(dt){
@@ -413,12 +427,12 @@ function ultraStep(dt){
  if(u.t>=u.next&&u.hits<u.max){
   u.hits++;u.next=u.t+(u.hits<6?.13:.075);f.combo++;
   o.hp=Math.max(0,u.start*(1-u.hits/u.max));o.hitFlash=.06;o.vx=0;
-  sfx('ultra');spark(o.x-o.dir*10,o.y-120-Math.random()*110,u.hits%3?'#ffd36b':'#ff6ae0',8);game.flash=Math.max(game.flash,.25);game.shake=.12;
+  snd(u.hits%2?'sfx.claw':'sfx.punch','ultra',.75,1+Math.random()*.2);spark(o.x-o.dir*10,o.y-120-Math.random()*110,u.hits%3?'#ffd36b':'#ff6ae0',8);game.flash=Math.max(game.flash,.25);game.shake=.12;
   $('p'+(u.i+1)+'-combo').textContent=f.combo+' HITS';$('p'+(u.i+1)+'-combo').classList.add('active');hud();
  }
  if(u.hits>=u.max&&u.t>=u.next+.15){
   game.ultra=null;o.hp=0;o.potential=0;o.stun=0;f.attack=0;f.action='claw';
-  o.vx=f.dir*520;o.vy=-420;o.ground=false;game.slow=.25;game.slowT=1.1;game.flash=1;game.shake=.5;sfx('boom');
+  o.vx=f.dir*520;o.vy=-420;o.ground=false;game.slow=.25;game.slowT=1.1;game.flash=1;game.shake=.5;snd('sfx.groundSlam','boom');
   spark(o.x,o.y-150,'#ffffff',40);hud();
   banner('ULTRA COMBO',f.combo+' HITS',2.6,'#ff6ae0');setTimeout(()=>say('Ultra combo'),350);
   koFinish(o,f,true);
@@ -426,6 +440,7 @@ function ultraStep(dt){
 }
 function koFinish(o,f,ultra){
  if(game.ko)return;o.koTime=0;game.ko=ultra?3.2:2.2;
+ AU&&AU.duckMusic(.4);
  if(!ultra){banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say(f.combo>=3?rankName(f.combo)+' combo':'K O');game.slow=.35;game.slowT=.8;game.shake=.35;}
 }
 
@@ -437,7 +452,7 @@ function fxUpdate(dt){game.fx=game.fx.filter(p=>{p.t+=dt;if(p.kind==='spark'){p.
 
 /* ---------- Results ---------- */
 function finish(){
- if(game.over)return;game.over=true;
+ if(game.over)return;game.over=true;AU&&soundOn&&AU.music('music.menu');
  const [p,q]=game.fighters,tp=total(p),tq=total(q),draw_=Math.abs(tp-tq)<.01,p1won=tp>tq,cpu2=mode!=='versus';
  let title=draw_?'DRAW':p1won?(cpu2?'YOU WIN':'PLAYER 1 WINS'):(cpu2?'CPU WINS':'PLAYER 2 WINS');
  let copy=draw_?'Neither fighter claimed the crown.':(p1won?picks[0].name:picks[1].name)+' claims the arena.';
@@ -455,7 +470,7 @@ function finish(){
 $('tower-next').onclick=()=>{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()};
 $('rematch').onclick=()=>{if(tower){if(tower.done){tower.done=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
-function menu(){clean();tower=null;show('menu')}
+function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;$('back-menu').onclick=menu;$('result-menu').onclick=menu;
 
 /* ---------- Rendering ---------- */
