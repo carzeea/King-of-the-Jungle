@@ -1,0 +1,10 @@
+# Netlify reads this automatically when the site is linked to this repository.
+[build]
+  publish = "game"   # the playable site lives in /game
+  command = ""       # no build step: plain HTML/JS
+
+# Let phones cache fighter frames and arena art so repeat visits load fast.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
