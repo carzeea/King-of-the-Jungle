@@ -210,3 +210,11 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Added Holden's 8 recorded calls (`game/audio/voice/`, trimmed and volume-matched; original WAVs in `docs/audio-package/holden-original/`).
 - Round one! → Fight! at every fight start · Combo! when a 3+ hit combo ends · Shadow attack! on Shadow moves · Finish him! when a fighter drops into DANGER · Ultra! when an Ultra starts · Knockout! on every K.O. · Flawless victory! when the winner took no damage (also shown on the results screen).
 - An Ultra Combo no longer calls "Ultra" twice: it's Ultra! at the start and Knockout! at the finish.
+
+## Web build 2.7: Full-screen fights, up to 4K
+- Fights fill the whole screen on every device (phone, laptop, TV), with the HUD laid over the action instead of a small framed window. On a 1920-wide screen the arena went from 1096×476 to full screen.
+- Fighting-game camera: follows the fighters, zooms in when they're close, widens when they separate and keeps jumps in frame. It fits any screen shape with no stretching.
+- Renders at the screen's real pixel count up to 4K (3840×2160). Dynamic resolution lowers the render scale only if the device can't keep ~60 fps.
+- High-detail fighter art (`assets/characters/<animal>/frames-hd/`, `js/sprites-hd.js`) loads automatically on large, sharp screens, only for the two fighters in the match. Arenas now use the full-resolution clean art.
+- FULL SCREEN button (also locks phones sideways where allowed). During play only PAUSE shows; Main Menu, Sound, Full Screen and the control guide are on the pause screen.
+- Upright phones: bigger arena (82% of the width) with a "turn sideways" hint; sideways phones: fully full-screen with the controls over the arena.

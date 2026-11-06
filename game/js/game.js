@@ -8,6 +8,13 @@ const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','se
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
+const cam={x:0,y:0,z:1,snap:true};
+// Dynamic resolution: full detail (up to 4K) when the device keeps up, lower render scale if frames drop.
+const RES={scale:1,acc:0,n:0,cool:0};
+function resTick(real){RES.acc+=real;RES.n++;RES.cool=Math.max(0,RES.cool-real);
+ if(RES.acc<1)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;if(RES.cool>0)return;
+ if(avg>1/50&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*.8);RES.cool=1}
+ else if(avg<1/58&&RES.scale<1){RES.scale=Math.min(1,RES.scale*1.1);RES.cool=2}}
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:'ROYAL COLOSSEUM'}];
@@ -257,7 +264,8 @@ function start(){
  $('p1-tag').textContent='PLAYER 1';$('p2-tag').textContent=cpu2?'CPU':'PLAYER 2';
  $('mode-label').textContent=mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
  $('round-label').textContent=tower?`FIGHT ${tower.index+1} / ${tower.ladder.length}`:'ROUND 1';
- time=99;paused=false;
+ time=99;paused=false;cam.z=1;cam.snap=true;
+ setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(tower?Math.min(1,.1+tower.index*.09):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
@@ -269,13 +277,13 @@ function start(){
    if(pre&&AU.loaded(pre)){AU.now(pre);setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1000)}else AU.now('voice.fight');
   }else if(AU.has('announcer.fight'))AU.announce(); else speak('Fight');
  }else say('Fight');
- pad.classList.toggle('hidden',!isTouch());
+ pad.classList.toggle('hidden',!isTouch());document.body.classList.toggle('touch',isTouch());document.body.classList.remove('paused');
  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
 function banner(text,sub,life=1.1,color='#ffd36b'){game.banner={text,sub,t:0,life,color}}
-function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';AU&&AU.pauseMusic(paused)}
+function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
 function loop(t){
- if(!game)return;let real=Math.min((t-last)/1000,.035);last=t;
+ if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;if(!paused&&rawDt<.5)resTick(rawDt);
  if(!paused){
   if(game.slowT>0){game.slowT-=real;if(game.slowT<=0)game.slow=1}
   const dt=real*game.slow;game.dt=dt;
@@ -509,13 +517,20 @@ function finish(){
   if(line)setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
- pad.classList.add('hidden');document.body.classList.remove('fighting');cancelAnimationFrame(raf);show('result');
+ pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);show('result');
 }
 $('tower-next').onclick=()=>{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()};
 $('rematch').onclick=()=>{if(tower){if(tower.done){tower.done=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
-function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
+function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
-$('pause').onclick=togglePause;$('back-menu').onclick=menu;$('result-menu').onclick=menu;
+$('pause').onclick=togglePause;
+// Full screen (and sideways lock on phones that allow it)
+(function(){const b=$('fullscreen'),el=document.documentElement,can=!!(el.requestFullscreen||el.webkitRequestFullscreen);
+ if(!can){b.style.display='none';return}
+ const label=()=>b.textContent=document.fullscreenElement||document.webkitFullscreenElement?'EXIT FULL SCREEN':'FULL SCREEN';
+ b.onclick=async()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement){await (document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+  else{await (el.requestFullscreen||el.webkitRequestFullscreen).call(el);try{await screen.orientation.lock('landscape')}catch(_){}}}catch(_){}label()};
+ document.addEventListener('fullscreenchange',label);document.addEventListener('webkitfullscreenchange',label)})();$('back-menu').onclick=menu;$('result-menu').onclick=menu;
 
 /* ---------- Rendering ---------- */
 
@@ -558,13 +573,28 @@ const SPRITES={
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
 const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp';spriteImg[id][k]=im}}
+// High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
+const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
+function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=900}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
- const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=1100,h=520;
- if(canvas.width!==Math.round(rect.width*dpr)||canvas.height!==Math.round(rect.height*dpr)){canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr)}
- c.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);c.clearRect(0,0,w,h);c.lineJoin='round';c.miterLimit=2;
+ const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
+ // Render at the screen's real pixel count, up to 4K (3840 x 2160).
+ let pw=Math.max(1,Math.round(rect.width*dpr*RES.scale)),ph=Math.max(1,Math.round(rect.height*dpr*RES.scale));const cap=Math.min(1,3840/pw,2160/ph);pw=Math.round(pw*cap);ph=Math.round(ph*cap);
+ if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph}
+ c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,pw,ph);c.lineJoin='round';c.miterLimit=2;
+ // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
+ const aspect=pw/ph,F=game.fighters,gap=Math.abs(F[0].x-F[1].x);
+ let vh=Math.min(570,1210/aspect);                                    // largest view that stays inside the arena art
+ const want=Math.max(1,Math.min(1.4,(vh*aspect*.9)/(gap+360)))*(game.zoom||1);
+ cam.z+=(want-cam.z)*.08;vh/=cam.z;const vw=vh*aspect;
+ const air=Math.min(F[0].y,F[1].y);                                   // keep jumping fighters in shot
+ let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*.5;
+ tx=Math.max(-60,Math.min(1160-vw,tx));ty=Math.max(-30,Math.min(550-vh,ty));
+ if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*.12;cam.y+=(ty-cam.y)*.12}
+ const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
  if(game.shake>0)c.translate((Math.random()-.5)*22*Math.min(1,game.shake/.3),(Math.random()-.5)*14*Math.min(1,game.shake/.3));
- if(game.zoom>1.001){const F=game.fighters,cx=(F[0].x+F[1].x)/2,cy=300;c.translate(cx,cy);c.scale(game.zoom,game.zoom);c.translate(-cx,-cy);}
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
  const t=performance.now()/1000;
  const bgi=arenaImg[arena.id];
@@ -590,10 +620,10 @@ function draw(){
  game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter='hue-rotate(220deg) saturate(3)';drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
  game.fighters.forEach((f,i)=>drawFighter(f,i));
  drawFx();
- c.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
- if(game.flash>0){c.fillStyle=`rgba(255,255,255,${Math.min(.75,game.flash*.6)})`;c.fillRect(0,0,w,h)}
+ {const s=Math.min(pw/w,ph/h);c.setTransform(s,0,0,s,(pw-w*s)/2,(ph-h*s)/2);}
+ if(game.flash>0){c.fillStyle=`rgba(255,255,255,${Math.min(.75,game.flash*.6)})`;c.fillRect(-w,-h,3*w,3*h)}
  drawComboCounters();drawBanner();
- if(paused){c.fillStyle='#000a';c.fillRect(0,0,w,h);c.fillStyle='#f5ecd8';c.font='900 54px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('PAUSED',550,270);}
+ if(paused){c.fillStyle='#000a';c.fillRect(-w,-h,3*w,3*h);c.fillStyle='#f5ecd8';c.font='900 54px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('PAUSED',550,270);}
 }
 function drawFx(){
  for(const p of game.fx){const k=1-p.t/p.life;
@@ -654,8 +684,11 @@ function drawSprite(f){
   case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
   default:anim='idle';fr=Math.floor(now*9);
  }
- const img=spriteImg[f.data.id][anim];if(!img||!img.complete||!img.naturalWidth)return false;
- const [n,fw,fh,px,py]=A[anim],sc=S.s;fr=((fr|0)%n+n)%n;
+ let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
+ const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
+ if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
+ if(!img||!img.complete||!img.naturalWidth)return false;
+ const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
  if(f.action==='earthslam'&&p>.5){c.save();c.globalAlpha=.8*(1-p);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+p*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
  if(f.hitFlash>0)c.filter='brightness(2.4)';
  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);c.filter='none';

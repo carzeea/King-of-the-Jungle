@@ -8,7 +8,7 @@
 <body>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">THE WILD FIGHTING CHAMPIONSHIP</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 2.6</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">THE WILD FIGHTING CHAMPIONSHIP</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 2.7</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -41,17 +41,17 @@
     <section id="fight" class="screen hidden">
       <div class="fight-hud"><div class="player-hud"><div class="player-label"><img id="p1-face" class="hud-face" alt=""><span id="p1-tag">PLAYER 1</span> <strong id="p1-name">LION</strong></div><div class="health-track"><div id="p1-pot" class="health-pot"></div><div id="p1-health" class="health-fill"></div></div><div class="bar-pips" id="p1-pips"><i></i><i></i></div></div><div class="round-info"><span id="mode-label">VERSUS</span><strong id="timer">99</strong><small id="round-label">ROUND 1</small></div><div class="player-hud right"><div class="player-label"><span id="p2-tag">PLAYER 2</span> <strong id="p2-name">TIGER</strong><img id="p2-face" class="hud-face" alt=""></div><div class="health-track"><div id="p2-pot" class="health-pot"></div><div id="p2-health" class="health-fill"></div></div><div class="bar-pips" id="p2-pips"><i></i><i></i></div></div></div>
       <div class="combat-readouts"><div class="combo-readout" id="p1-combo">0 HIT COMBO</div><div class="combat-center" id="combat-callout">FIGHT!</div><div class="combo-readout" id="p2-combo">0 HIT COMBO</div></div>
-      <div class="arena"><div class="arena-sun"></div><div class="arena-back"></div><div class="arena-floor"></div><canvas id="game-canvas" width="1100" height="520" aria-label="Fighting game arena"></canvas><div class="arena-title" id="arena-title">JUNGLE TEMPLE</div></div>
+      <div class="arena"><div class="arena-sun"></div><div class="arena-back"></div><div class="arena-floor"></div><canvas id="game-canvas" width="1100" height="520" aria-label="Fighting game arena"></canvas><div class="arena-title" id="arena-title">JUNGLE TEMPLE</div><div class="rotate-hint">↻ Turn your phone sideways for full-screen fights</div></div>
       <div id="touch-pad" class="touch-pad hidden">
         <div class="pad-left"><button data-k="l" aria-label="Move left">◀</button><button data-k="j" aria-label="Jump">▲</button><button data-k="r" aria-label="Move right">▶</button><button data-k="bl" class="wide" aria-label="Block">BLOCK</button></div>
         <div class="pad-right"><button data-k="ins" class="ins" aria-label="Instinct">INS</button><button data-k="sp" class="sp" aria-label="Special">SPC</button><button data-k="at" class="at" aria-label="Attack">ATK</button></div>
       </div>
       <div class="controls"><div><b>PLAYER 1</b><span>A/D MOVE · W JUMP · S BLOCK · F ATTACK · S+F HEAVY BITE · G SPECIAL · S+G SHADOW · H INSTINCT</span></div><div><b>PLAYER 2</b><span>←/→ MOVE · ↑ JUMP · ↓ BLOCK · K ATTACK · ↓+K HEAVY · L SPECIAL · ↓+L SHADOW · ; INSTINCT</span></div><div><b>CONTROLLER</b><span>STICK MOVE · A/✕ JUMP · X/□ ATTACK · Y/△ SPECIAL · B/○ or LT BLOCK · RB/R1 or RT INSTINCT · START PAUSE</span></div></div>
       <div class="meter-row"><div class="meter-panel"><span>P1 INSTINCT</span><div class="meter-track"><div id="p1-meter" class="meter-fill"></div></div></div><div class="breaker-hint">COMBO: ATTACK → ATTACK (auto-double) → SPECIAL (ender) · GETTING COMBOED? TAP ATTACK ON THE GOLD FLASH TO BREAK</div><div class="meter-panel right"><span>P2 INSTINCT</span><div class="meter-track"><div id="p2-meter" class="meter-fill"></div></div></div></div>
-      <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button></div>
+      <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button><button id="fullscreen" class="secondary">FULL SCREEN</button></div>
     </section>
     <section id="result" class="screen result-screen hidden"><div class="winner-art"><div class="winner-burst"></div><img id="winner-portrait" alt=""><img class="winner-crown" src="assets/ui/crown.webp" alt=""></div><p class="eyebrow">THE ARENA HAS SPOKEN</p><h2 id="winner-title">PLAYER 1 WINS</h2><p id="winner-copy">The crown belongs to the victor.</p><div id="tower-ladder" class="tower-ladder"></div><button id="tower-next" class="primary hidden">NEXT FIGHT</button><button id="rematch" class="primary">REMATCH</button><button id="result-menu" class="secondary">MAIN MENU</button></section>
     <footer><span>© KING OF THE JUNGLE</span><span>Game made by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js"></script><script src="js/audio.js"></script><script src="js/game.js"></script>
+  <script src="js/roster.js"></script><script src="js/sprites-hd.js"></script><script src="js/audio.js"></script><script src="js/game.js"></script>
 </body></html>

@@ -279,3 +279,80 @@ footer{background:rgba(6,5,8,.6);border-top:1px solid rgba(232,185,91,.2);color:
 /* during fights the backdrop is a still image (keeps the game at full frame rate) */
 body.fighting .bd-img{animation:none;filter:blur(8px) saturate(1.2) brightness(.38);transition:none}
 body.fighting .bd-rays,body.fighting #bd-embers{display:none}
+
+/* ============ 2.7: full-screen fights on every device ============ */
+body.fighting{overflow:hidden}
+body.fighting .topbar,body.fighting footer{display:none!important}
+body.fighting #fight{position:fixed!important;inset:0!important;padding:0!important;margin:0!important;z-index:20;background:#000;overflow:hidden;min-height:0!important}
+body.fighting .arena{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;aspect-ratio:auto!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body.fighting .arena canvas{width:100%!important;height:100%!important}
+body.fighting .arena-title{display:none}
+body.fighting .combat-readouts{display:none!important}
+/* HUD overlay */
+body.fighting .fight-hud{position:absolute;top:0;left:0;right:0;z-index:5;margin:0!important;padding:clamp(6px,1.6vh,22px) clamp(12px,3vw,56px) clamp(18px,4vh,46px);
+ background:linear-gradient(180deg,rgba(0,0,0,.72),rgba(0,0,0,.35) 60%,transparent);grid-template-columns:1fr clamp(58px,7vw,120px) 1fr!important;gap:clamp(8px,2vw,30px)!important;pointer-events:none}
+body.fighting .player-label{font-size:clamp(11px,1.25vw,22px)!important}
+body.fighting .hud-face{width:clamp(26px,3vw,56px)!important;height:clamp(26px,3vw,56px)!important}
+body.fighting .health-track{height:clamp(10px,1.9vh,24px)!important}
+body.fighting .bar-pips i{width:clamp(16px,1.8vw,34px);height:clamp(4px,.7vh,8px)}
+body.fighting #timer{font-size:clamp(24px,3.4vw,60px)!important;text-shadow:0 2px 8px #000}
+body.fighting .round-info small,body.fighting #mode-label{font-size:clamp(7px,.7vw,12px)!important}
+/* Instinct meters along the bottom */
+body.fighting .meter-row{position:absolute;left:0;right:0;bottom:0;z-index:5;margin:0!important;padding:clamp(14px,4vh,40px) clamp(12px,3vw,56px) clamp(6px,1.6vh,20px)!important;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent);pointer-events:none}
+body.fighting .meter-panel{font-size:clamp(8px,.8vw,14px)!important}
+body.fighting .meter-track{height:clamp(8px,1.2vh,14px);max-width:clamp(160px,22vw,420px)}
+body.fighting .breaker-hint{display:none!important}
+/* slim action buttons, top center under the timer */
+body.fighting .fight-actions{position:absolute;z-index:6;left:50%;transform:translateX(-50%);top:clamp(64px,10vh,130px);display:flex;gap:6px;margin:0!important}
+body.fighting .fight-actions button{padding:5px 10px!important;font-size:clamp(9px,.8vw,13px)!important;letter-spacing:.12em;opacity:.55;transition:opacity .2s;clip-path:none!important}
+body.fighting .fight-actions button:hover,body.fighting.paused .fight-actions button{opacity:1}
+/* control hints appear on the pause screen instead of under the arena */
+body.fighting .controls{display:none!important}
+body.fighting.paused .controls{display:flex!important;flex-direction:column;gap:10px;position:absolute;z-index:7;left:50%;top:58%;transform:translate(-50%,-50%);width:min(92vw,760px);padding:18px 22px;
+ background:rgba(8,6,10,.88);border:1px solid rgba(232,185,91,.55);border-radius:8px;font-size:clamp(10px,1vw,14px)}
+.rotate-hint{display:none}
+/* touch devices (sideways): buttons float over the arena, meters move under the health bars */
+body.fighting .touch-pad{position:absolute!important;inset:auto 0 0 0!important;z-index:6;padding:clamp(6px,2vh,16px) clamp(8px,2vw,24px)!important;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-end}
+body.fighting .touch-pad.hidden{display:none!important}
+body.fighting .touch-pad button{pointer-events:auto;background:rgba(0,0,0,.38)!important;backdrop-filter:blur(2px)}
+body.fighting .pad-left,body.fighting .pad-right{position:static!important}
+body.fighting.touch .meter-row{top:clamp(52px,15vh,110px);bottom:auto;background:none;padding-top:0!important}
+body.fighting.touch .fight-actions{top:auto;bottom:clamp(8px,2vh,16px)}
+@media (max-height:560px) and (orientation:landscape){
+ body.fighting .pad-right{flex-direction:row!important;align-items:flex-end}
+ body.fighting .touch-pad button{width:50px!important;height:50px!important}
+ body.fighting .pad-right .at{width:68px!important;height:68px!important}
+ body.fighting .pad-right .ins{width:40px!important;height:40px!important}
+}
+/* upright phones: full-width arena on top, controls underneath */
+@media (orientation:portrait) and (max-width:760px){
+ body.fighting .arena{inset:auto 0 auto 0!important;top:clamp(58px,9vh,80px)!important;height:62vw!important}
+ body.fighting .fight-hud{background:linear-gradient(180deg,#000,rgba(0,0,0,.85))}
+ body.fighting .rotate-hint{display:block;position:absolute;left:0;right:0;bottom:-34px;text-align:center;font:700 11px Inter;letter-spacing:.12em;color:#f4d58c}
+ body.fighting .meter-row{top:calc(clamp(58px,9vh,80px) + 62vw + 40px);bottom:auto;background:none}
+ body.fighting .touch-pad{bottom:clamp(10px,4vh,40px)!important}
+ body.fighting.touch .fight-actions{bottom:auto;top:calc(clamp(58px,9vh,80px) + 62vw + 76px)}
+ body.fighting #fight{background:radial-gradient(ellipse at 50% 30%,#2a1a0c,#050407 70%)}
+}
+
+@media (orientation:portrait) and (max-width:760px){
+ body.fighting .arena{top:clamp(62px,9vh,80px)!important;height:82vw!important}
+ body.fighting .rotate-hint{bottom:-30px}
+ body.fighting.touch .meter-row,body.fighting .meter-row{top:calc(clamp(62px,9vh,80px) + 82vw + 40px)!important;bottom:auto!important;background:none!important;padding-top:0!important}
+ body.fighting.touch .fight-actions,body.fighting .fight-actions{top:calc(clamp(62px,9vh,80px) + 82vw + 74px)!important;bottom:auto!important}
+}
+/* only PAUSE during play; the rest appear on the pause screen */
+body.fighting .fight-actions{top:clamp(56px,11vh,120px)!important;bottom:auto!important}
+body.fighting:not(.paused) .fight-actions button:not(#pause){display:none}
+body.fighting.paused .fight-actions{top:34%!important;flex-wrap:wrap;justify-content:center;width:min(92vw,560px)}
+body.fighting.paused .fight-actions button{opacity:1;padding:10px 16px!important;font-size:clamp(12px,1.2vw,17px)!important}
+body.fighting.paused .controls{top:62%}
+@media (max-height:560px) and (orientation:landscape){
+ body.fighting .pad-left .wide{width:auto!important;height:40px!important;border-radius:20px}
+ body.fighting.paused .fight-actions{top:22%!important}
+ body.fighting.paused .controls{display:none!important}
+}
+@media (orientation:portrait) and (max-width:760px){
+ body.fighting.paused .fight-actions{top:calc(clamp(62px,9vh,80px) + 82vw + 74px)!important}
+ body.fighting.paused .controls{display:none!important}
+}
