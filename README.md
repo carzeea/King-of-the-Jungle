@@ -192,3 +192,12 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Netlify downloads the clips while deploying (`scripts/fetch-audio.mjs`, run from `netlify.toml`). If a file is missing, the game streams its source link.
 - Where they play: Main Theme on the title, select and result screens; each arena's own music during fights; the announcer at fight start; punch, claw, bite, block, heavy impact and ground slam on hits; each fighter's own Shadow and Ultra cues. Music pauses with the game and quiets during K.O. and Ultra.
 - New sound engine `game/js/audio.js`. The SOUND button controls everything. The original package's notes and link list are kept in `docs/audio-package/`.
+
+## Web build 2.4: Atmospheric screens
+- Every screen past the title has a living backdrop: blurred art with a slow drift, gold light rays, vignette and rising embers.
+- Fighter select: the backdrop takes on the highlighted fighter's art, with gold-framed tiles that glow and shine when selected and a glass-style info card.
+- Stage select: the backdrop becomes the highlighted arena.
+- Fight: a blurred copy of the arena surrounds a gold-framed fight window. The backdrop is a still image during fights, so the game keeps a full 60 fps.
+- Results: the winner's portrait in a gold spotlight with a rotating light burst and the crown dropping onto it (grey, with no crown, when you lose to the CPU).
+- Gold metallic titles, crown logo in the header, matching gold and glass buttons.
+- Fix: all six touch buttons now fit on narrow upright phones (ATK was cut off).

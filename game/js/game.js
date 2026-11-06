@@ -13,7 +13,7 @@ const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',n
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:'ROYAL COLOSSEUM'}];
 const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp';arenaImg[a.id]=im});
 let arena=ARENAS[0],stagePick=0; // stagePick: 0-5 arena, 6 = random
-function renderStages(){
+function renderStages(){setBackdrop(stagePick===6?'assets/arenas/cover-bg.webp':'assets/arenas/'+ARENAS[stagePick].id+'.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
  ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(stagePick===i?' selected':'');
   b.innerHTML=`<span class="num">${i+1}</span><img src="assets/arenas/${a.id}-thumb.webp" alt="${a.name}"><strong>${a.name}</strong>`;
@@ -28,6 +28,28 @@ $('stage-back').onclick=()=>{step=mode==='versus'||mode==='cpu'?2:1;chosen=picks
 function towerArena(){const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
 
 const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
+/* ---------- Atmospheric backdrop behind every non-title screen ---------- */
+const BD={cur:'',flip:false};
+function setBackdrop(url){
+ if(!url||url===BD.cur)return;BD.cur=url;const im=new Image();im.onload=()=>{
+  const a=document.querySelector(BD.flip?'.bd-a':'.bd-b'),b=document.querySelector(BD.flip?'.bd-b':'.bd-a');BD.flip=!BD.flip;
+  a.style.backgroundImage=`url("${url}")`;a.classList.add('on');b.classList.remove('on')};im.src=url;
+}
+setBackdrop('assets/arenas/cover-bg.webp');
+(function bdEmbers(){
+ const cv=document.getElementById('bd-embers'),cx=cv.getContext('2d');let P=[],W=0,H=0,last=performance.now();
+ function tick(t){const dt=Math.min(.05,(t-last)/1000);last=t;
+  if(!document.body.classList.contains('on-cover')&&!document.body.classList.contains('fighting')){
+   if(cv.clientWidth!==W||cv.clientHeight!==H){const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)}
+   const max=Math.min(110,W/10);
+   while(P.length<max)P.push({x:Math.random()*W,y:H+10,r:.6+Math.random()*1.9,vy:18+Math.random()*50,vx:-8+Math.random()*16,life:0,max:5+Math.random()*7,w:Math.random()*6.28});
+   cx.clearRect(0,0,W,H);cx.globalCompositeOperation='lighter';
+   for(const p of P){p.life+=dt;p.w+=dt*2;p.y-=p.vy*dt;p.x+=(p.vx+Math.sin(p.w)*12)*dt;const k=Math.max(0,1-p.life/p.max);
+    const g=cx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);g.addColorStop(0,`rgba(255,200,110,${.8*k})`);g.addColorStop(1,'rgba(255,120,30,0)');cx.fillStyle=g;cx.beginPath();cx.arc(p.x,p.y,p.r*4,0,7);cx.fill()}
+   P=P.filter(p=>p.life<p.max&&p.y>-20)}
+  requestAnimationFrame(tick)}
+ requestAnimationFrame(tick);
+})();
 /* ---------- Cover / title screen ---------- */
 (function cover(){
  const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src='assets/characters/portraits/'+f.id+'.jpg';im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
@@ -124,7 +146,7 @@ function render(){
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
  card(chosen,roster.indexOf(chosen));
 }
-function card(f,i){$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
+function card(f,i){setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
 $('confirm-fighter').onclick=()=>{
  ac();picks[step-1]=chosen;
  if(mode==='tower'){tower={player:chosen,ladder:roster.filter(f=>f.id!==chosen.id),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();return start()}
@@ -218,7 +240,7 @@ function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:2,potential:
  combo:0,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
- show('fight');document.body.classList.add('fighting');$('arena-title').textContent=arena.name;
+ show('fight');document.body.classList.add('fighting');setBackdrop('assets/arenas/'+arena.id+'.webp');$('arena-title').textContent=arena.name;
  const cpu2=mode!=='versus';
  $('p1-name').textContent=picks[0].name;$('p2-name').textContent=picks[1].name;
  $('p1-face').src=portrait(picks[0].id);$('p2-face').src=portrait(picks[1].id);
@@ -465,6 +487,8 @@ function finish(){
   $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt="">${f.name}</div>`).join('');
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
+ const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
+ $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting');cancelAnimationFrame(raf);show('result');
 }
 $('tower-next').onclick=()=>{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()};
