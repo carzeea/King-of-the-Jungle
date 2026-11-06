@@ -174,3 +174,11 @@ body.on-cover .topbar,body.on-cover footer{display:none}
  .cover.started .cover-hero{height:46vh;opacity:.9;transition:height .5s,opacity .5s}
 }
 @media (max-height:560px) and (orientation:landscape){.v2{right:-26px;top:30px;font-size:30px}}
+
+/* 2.0: credit line under the title */
+.credit{margin:10px 0 0 6px;font:700 clamp(12px,1.25vw,15px) Inter,sans-serif;letter-spacing:.32em;color:rgba(255,244,214,.88);text-shadow:0 2px 6px #000;display:flex;align-items:center;gap:12px}
+.credit b{font-weight:900;color:#ffd77a;letter-spacing:.24em}
+.credit::before{content:"";width:34px;height:2px;background:linear-gradient(90deg,transparent,#e8b95b)}
+@media (max-width:760px){.credit{justify-content:center;margin:8px 0 0}.credit::before{display:none}}
+@media (max-height:560px) and (orientation:landscape){.credit{margin-top:6px;font-size:11px}}
+@media (max-height:560px) and (orientation:landscape){.cover-hero{height:93vh}.cover-meta span:last-child{display:none}}

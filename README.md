@@ -172,3 +172,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Roster strip of all 11 fighters, plus "Game made by J. Hardy".
 - Fixed: the Lion title art showed inside a bright green box (green screen never removed). It is now cut out cleanly (`assets/characters/lion/lion-hero.webp`).
 - Separate layouts for desktop, upright phone and sideways phone.
+
+## Web build 2.0: Crowned Lion
+- The title-screen Lion now wears a gold jeweled crown, drawn to fit his head (master art saved as `docs/references/lion-hero-crowned.png`).
+- Removed the V2 badge and "V2" from the page title.
+- "GAME MADE BY J. HARDY" credit line under the title on every layout.
+- Sideways phone: the crown is no longer clipped at the top.
