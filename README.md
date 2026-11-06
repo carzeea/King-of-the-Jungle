@@ -183,3 +183,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - The title-screen Lion's crown is redone as a realistic royal crown: polished gold with reflections, swept spires topped with pearls, faceted rubies, sapphires and emeralds, engraved band, red velvet cap.
 - His belt medallion now shows a raised gold **J** in place of the lion face.
 - Generator scripts are in `docs/art-tools/`, and the finished art is `docs/references/lion-hero-crowned.png`.
+
+## Web build 2.2: Crown falling off the K
+- The small crown above the title is now the realistic gold crown (`assets/ui/crown.webp`). It drops in, lands on the K in KING, tips over the corner, and keeps teetering like it's about to fall.
