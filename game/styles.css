@@ -95,7 +95,7 @@ body.on-cover .topbar,body.on-cover footer{display:none}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .cover-embers{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .cover-vignette{position:absolute;inset:0;z-index:-2;background:radial-gradient(ellipse at 62% 42%,transparent 25%,rgba(6,4,8,.55) 62%,rgba(4,3,6,.95) 100%),linear-gradient(90deg,rgba(5,4,7,.92) 0%,rgba(5,4,7,.55) 34%,transparent 60%),linear-gradient(0deg,rgba(5,4,7,.95) 0%,transparent 28%)}
-.cover-hero{position:absolute;right:4vw;bottom:0;height:min(96vh,940px);aspect-ratio:888/1222;z-index:0;pointer-events:none;animation:heroIn 1.2s cubic-bezier(.2,.9,.2,1) both}
+.cover-hero{position:absolute;right:4vw;bottom:0;height:min(96vh,940px);aspect-ratio:888/1230;z-index:0;pointer-events:none;animation:heroIn 1.2s cubic-bezier(.2,.9,.2,1) both}
 .cover-hero img{position:relative;height:100%;width:auto;display:block;filter:drop-shadow(0 0 2px #ffcf6a) drop-shadow(0 0 26px rgba(255,170,60,.55)) drop-shadow(0 30px 40px rgba(0,0,0,.8));animation:breathe 4.5s ease-in-out infinite}
 .hero-glow{position:absolute;left:50%;top:38%;width:120%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,190,80,.55),rgba(255,120,30,.18) 40%,transparent 66%);filter:blur(10px);animation:pulse 4.5s ease-in-out infinite}
 @keyframes heroIn{from{opacity:0;transform:translateX(8vw) scale(1.05)}to{opacity:1;transform:none}}

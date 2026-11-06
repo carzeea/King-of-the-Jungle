@@ -178,3 +178,8 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Removed the V2 badge and "V2" from the page title.
 - "GAME MADE BY J. HARDY" credit line under the title on every layout.
 - Sideways phone: the crown is no longer clipped at the top.
+
+## Web build 2.1: Royal crown and J belt
+- The title-screen Lion's crown is redone as a realistic royal crown: polished gold with reflections, swept spires topped with pearls, faceted rubies, sapphires and emeralds, engraved band, red velvet cap.
+- His belt medallion now shows a raised gold **J** in place of the lion face.
+- Generator scripts are in `docs/art-tools/`, and the finished art is `docs/references/lion-hero-crowned.png`.
