@@ -218,3 +218,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - High-detail fighter art (`assets/characters/<animal>/frames-hd/`, `js/sprites-hd.js`) loads automatically on large, sharp screens, only for the two fighters in the match. Arenas now use the full-resolution clean art.
 - FULL SCREEN button (also locks phones sideways where allowed). During play only PAUSE shows; Main Menu, Sound, Full Screen and the control guide are on the pause screen.
 - Upright phones: bigger arena (82% of the width) with a "turn sideways" hint; sideways phones: fully full-screen with the controls over the arena.
+
+## Web build 2.8: Smoothness fix
+- Fixed flicker: the dynamic resolution kept switching every few seconds (sharp/soft/sharp). It now calibrates once during the round intro, holds steady, remembers the setting for the next fight, and steps down only if the device clearly struggles.
+- Camera follow and zoom are time-based, so they move evenly even if the frame rate varies.

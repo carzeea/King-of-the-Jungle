@@ -10,11 +10,22 @@ let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,r
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
 // Dynamic resolution: full detail (up to 4K) when the device keeps up, lower render scale if frames drop.
-const RES={scale:1,acc:0,n:0,cool:0};
-function resTick(real){RES.acc+=real;RES.n++;RES.cool=Math.max(0,RES.cool-real);
- if(RES.acc<1)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;if(RES.cool>0)return;
- if(avg>1/50&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*.8);RES.cool=1}
- else if(avg<1/58&&RES.scale<1){RES.scale=Math.min(1,RES.scale*1.1);RES.cool=2}}
+// Picks a render resolution during the first seconds of a fight, then holds it steady
+// (no flickering between sharp and soft). Only steps down again if the device really struggles.
+let savedScale=1;try{savedScale=Math.min(1,Math.max(.4,+localStorage.getItem('kotj-res')||1))}catch(_){}
+let frameDt=1/60;
+const RES={scale:savedScale,acc:0,n:0,t:0,slow:0};
+function resStart(){RES.acc=0;RES.n=0;RES.t=0;RES.slow=0;if(RES.scale<1)RES.scale=Math.min(1,RES.scale*1.15)}
+function resTick(real){RES.t+=real;RES.acc+=real;RES.n++;
+ if(RES.t<1.2)return;                                   // ignore loading hiccups at fight start
+ if(RES.acc<1.5)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;
+ if(RES.t<6){ // calibration window: settle quickly, downward only
+  if(avg>1/52&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*Math.max(.55,Math.min(.85,(1/55)/avg)));}
+ }else{       // locked: only step down if it stays clearly slow
+  RES.slow=avg>1/40?RES.slow+1:0;if(RES.slow>=2&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*.8);RES.slow=0}
+ }
+ try{localStorage.setItem('kotj-res',RES.scale.toFixed(3))}catch(_){}
+}
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:'ROYAL COLOSSEUM'}];
@@ -264,7 +275,7 @@ function start(){
  $('p1-tag').textContent='PLAYER 1';$('p2-tag').textContent=cpu2?'CPU':'PLAYER 2';
  $('mode-label').textContent=mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
  $('round-label').textContent=tower?`FIGHT ${tower.index+1} / ${tower.ladder.length}`:'ROUND 1';
- time=99;paused=false;cam.z=1;cam.snap=true;
+ time=99;paused=false;cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(tower?Math.min(1,.1+tower.index*.09):.45);
@@ -283,7 +294,7 @@ function start(){
 function banner(text,sub,life=1.1,color='#ffd36b'){game.banner={text,sub,t:0,life,color}}
 function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
 function loop(t){
- if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;if(!paused&&rawDt<.5)resTick(rawDt);
+ if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;frameDt=real;if(!paused&&rawDt<.5)resTick(rawDt);
  if(!paused){
   if(game.slowT>0){game.slowT-=real;if(game.slowT<=0)game.slow=1}
   const dt=real*game.slow;game.dt=dt;
@@ -588,11 +599,11 @@ function draw(){
  const aspect=pw/ph,F=game.fighters,gap=Math.abs(F[0].x-F[1].x);
  let vh=Math.min(570,1210/aspect);                                    // largest view that stays inside the arena art
  const want=Math.max(1,Math.min(1.4,(vh*aspect*.9)/(gap+360)))*(game.zoom||1);
- cam.z+=(want-cam.z)*.08;vh/=cam.z;const vw=vh*aspect;
+ const kz=1-Math.pow(.92,frameDt*60),kp=1-Math.pow(.88,frameDt*60);cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
  const air=Math.min(F[0].y,F[1].y);                                   // keep jumping fighters in shot
  let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*.5;
  tx=Math.max(-60,Math.min(1160-vw,tx));ty=Math.max(-30,Math.min(550-vh,ty));
- if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*.12;cam.y+=(ty-cam.y)*.12}
+ if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*kp;cam.y+=(ty-cam.y)*kp}
  const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
  if(game.shake>0)c.translate((Math.random()-.5)*22*Math.min(1,game.shake/.3),(Math.random()-.5)*14*Math.min(1,game.shake/.3));
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
