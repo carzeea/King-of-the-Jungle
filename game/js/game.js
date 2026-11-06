@@ -127,8 +127,13 @@ function hitSound(f,mv){
  return snd('sfx.punch','hit',.9,r);
 }
 const VOICE_KEY=t=>'voice.'+t.toLowerCase().replace(/\./g,'').replace(/\s+/g,'-').replace(/^k-o$/,'ko');
+// Holden fallbacks: a specific recording first, then his general call, then the browser voice.
+const VOICE_ALT={'voice.ultra-combo':'voice.ultra','voice.danger':'voice.finish-him'};
 function say(text){
- if(soundOn&&AU&&AU.now(VOICE_KEY(text),1))return;   // Holden's recorded line, if present
+ if(soundOn&&AU){const k=VOICE_KEY(text);
+  if(AU.now(k,1))return;
+  if(VOICE_ALT[k]&&AU.now(VOICE_ALT[k],1))return;
+  if(/-combo$/.test(k)&&k!=='voice.ultra-combo'&&AU.now('voice.combo',1))return;}
  speak(text);
 }
 function speak(text){
@@ -386,7 +391,7 @@ function doMove(f,name){
  if(name==='claw'||name==='bite'){f.vx=f.dir*(name==='bite'?110:60);sfx('whiff')}
  if(name==='special'){f.vx=f.dir*(f.data.id==='badger'?260:420);f.vy=f.data.id==='badger'?-120:-230;f.ground=false}
  if(name==='ender'){f.vx=f.dir*200;f.vy=-140;f.ground=false;floatText(f.x,f.y-300,'ENDER','#ffd36b')}
- if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
+ if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;soundOn&&AU&&AU.now('voice.shadow-attack');if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
 }
 function resolveHit(i,mv){
  const f=game.fighters[i],o=game.fighters[1-i];
@@ -466,14 +471,14 @@ function ultraStep(dt){
   game.ultra=null;o.hp=0;o.potential=0;o.stun=0;f.attack=0;f.action='claw';
   o.vx=f.dir*520;o.vy=-420;o.ground=false;game.slow=.25;game.slowT=1.1;game.flash=1;game.shake=.5;snd('sfx.groundSlam','boom');
   spark(o.x,o.y-150,'#ffffff',40);hud();
-  banner('ULTRA COMBO',f.combo+' HITS',2.6,'#ff6ae0');setTimeout(()=>say('Ultra combo'),350);
+  banner('ULTRA COMBO',f.combo+' HITS',2.6,'#ff6ae0');setTimeout(()=>say('K O'),350);
   koFinish(o,f,true);
  }
 }
 function koFinish(o,f,ultra){
  if(game.ko)return;o.koTime=0;game.ko=ultra?3.2:2.2;
  AU&&AU.duckMusic(.4);
- if(!ultra){banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say(f.combo>=3?rankName(f.combo)+' combo':'K O');game.slow=.35;game.slowT=.8;game.shake=.35;}
+ if(!ultra){banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say('K O');game.slow=.35;game.slowT=.8;game.shake=.35;}
 }
 
 /* ---------- FX ---------- */
@@ -488,6 +493,8 @@ function finish(){
  const [p,q]=game.fighters,tp=total(p),tq=total(q),draw_=Math.abs(tp-tq)<.01,p1won=tp>tq,cpu2=mode!=='versus';
  let title=draw_?'DRAW':p1won?(cpu2?'YOU WIN':'PLAYER 1 WINS'):(cpu2?'CPU WINS':'PLAYER 2 WINS');
  let copy=draw_?'Neither fighter claimed the crown.':(p1won?picks[0].name:picks[1].name)+' claims the arena.';
+ const winnerF=draw_?null:(p1won?p:q),flawless=!!winnerF&&total(winnerF)>=2*BAR-.01;
+ if(flawless)copy='FLAWLESS VICTORY · '+copy;
  $('tower-next').classList.add('hidden');$('rematch').textContent='REMATCH';$('tower-ladder').innerHTML='';
  if(tower){
   if(p1won){tower.index++;
@@ -498,7 +505,7 @@ function finish(){
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
-  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':cpu2&&!draw_?(p1won?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
+  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':cpu2&&!draw_?(p1won?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   if(line)setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);

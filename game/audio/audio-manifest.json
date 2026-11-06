@@ -260,7 +260,8 @@
    "source": null,
    "volume": 1.0,
    "line": "Fight!",
-   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
   },
   "voice.round-one": {
    "file": "voice/holden-round-one.mp3",
@@ -269,7 +270,8 @@
    "source": null,
    "volume": 1.0,
    "line": "Round one!",
-   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
   },
   "voice.final-fight": {
    "file": "voice/holden-final-fight.mp3",
@@ -327,12 +329,13 @@
   },
   "voice.ko": {
    "file": "voice/holden-ko.mp3",
-   "label": "Announcer (Holden) – \"K.O.!\"",
+   "label": "Announcer (Holden) – \"Knockout!\"",
    "used_for": "Knockout",
    "source": null,
    "volume": 1.0,
-   "line": "K.O.!",
-   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+   "line": "Knockout!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
   },
   "voice.time": {
    "file": "voice/holden-time.mp3",
@@ -558,6 +561,56 @@
    "volume": 1.0,
    "line": "Elephant wins!",
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.combo": {
+   "file": "voice/holden-combo.mp3",
+   "label": "Announcer (Holden) – \"Combo!\"",
+   "used_for": "A 3+ hit combo ends (if that combo rank has no recording of its own)",
+   "source": null,
+   "volume": 1.0,
+   "line": "Combo!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
+  },
+  "voice.shadow-attack": {
+   "file": "voice/holden-shadow-attack.mp3",
+   "label": "Announcer (Holden) – \"Shadow attack!\"",
+   "used_for": "Any fighter uses a Shadow move",
+   "source": null,
+   "volume": 1.0,
+   "line": "Shadow attack!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
+  },
+  "voice.ultra": {
+   "file": "voice/holden-ultra.mp3",
+   "label": "Announcer (Holden) – \"Ultra!\"",
+   "used_for": "An Ultra Combo starts",
+   "source": null,
+   "volume": 1.0,
+   "line": "Ultra!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
+  },
+  "voice.finish-him": {
+   "file": "voice/holden-finish-him.mp3",
+   "label": "Announcer (Holden) – \"Finish him!\"",
+   "used_for": "A fighter drops into DANGER (Ultra Combo now possible)",
+   "source": null,
+   "volume": 1.0,
+   "line": "Finish him!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
+  },
+  "voice.flawless-victory": {
+   "file": "voice/holden-flawless-victory.mp3",
+   "label": "Announcer (Holden) – \"Flawless victory!\"",
+   "used_for": "Win without losing any health",
+   "source": null,
+   "volume": 1.0,
+   "line": "Flawless victory!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
+   "recorded": true
   }
  }
 }

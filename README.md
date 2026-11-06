@@ -205,3 +205,8 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 2.5: Holden announcer voice (ready for recordings)
 - 34 labeled announcer slots for Holden's voice (ID 3c9d6053-6334-592c-8997-4e325286af3f) in `game/audio/voice/holden-*.mp3`. The full list to record is in `docs/HOLDEN_VOICE_LINES.md`.
 - Each spoken call uses Holden's recording when the file exists and falls back to the browser voice when it doesn't. New calls (Lockout, You win/lose, <Fighter> wins, King of the Jungle, Round one/Final fight) play only once recorded.
+
+## Web build 2.6: Holden's announcer calls
+- Added Holden's 8 recorded calls (`game/audio/voice/`, trimmed and volume-matched; original WAVs in `docs/audio-package/holden-original/`).
+- Round one! → Fight! at every fight start · Combo! when a 3+ hit combo ends · Shadow attack! on Shadow moves · Finish him! when a fighter drops into DANGER · Ultra! when an Ultra starts · Knockout! on every K.O. · Flawless victory! when the winner took no damage (also shown on the results screen).
+- An Ultra Combo no longer calls "Ultra" twice: it's Ultra! at the start and Knockout! at the finish.

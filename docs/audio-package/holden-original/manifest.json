@@ -1,0 +1,16 @@
+{
+  "game": "KOTJ: King of the Jungle",
+  "category": "announcer_calls",
+  "voice": "Holden",
+  "format": "wav",
+  "clips": [
+    {"event":"ROUND_ONE","file":"individual_calls/01_ROUND_ONE.wav"},
+    {"event":"FIGHT","file":"individual_calls/02_FIGHT.wav"},
+    {"event":"COMBO","file":"individual_calls/03_COMBO.wav"},
+    {"event":"SHADOW_ATTACK","file":"individual_calls/04_SHADOW_ATTACK.wav"},
+    {"event":"ULTRA","file":"individual_calls/05_ULTRA.wav"},
+    {"event":"FINISH_HIM","file":"individual_calls/06_FINISH_HIM.wav"},
+    {"event":"KNOCKOUT","file":"individual_calls/07_KNOCKOUT.wav"},
+    {"event":"FLAWLESS_VICTORY","file":"individual_calls/08_FLAWLESS_VICTORY.wav"}
+  ]
+}
