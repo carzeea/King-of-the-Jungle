@@ -356,3 +356,6 @@ body.fighting.paused .controls{top:62%}
  body.fighting.paused .fight-actions{top:calc(clamp(62px,9vh,80px) + 82vw + 74px)!important}
  body.fighting.paused .controls{display:none!important}
 }
+
+/* blood setting on the title menu */
+.cover-menu .cover-setting{align-self:flex-start;flex-direction:row;padding:6px 14px!important;margin-top:4px;background:rgba(12,10,14,.6);color:#e8b95b;border:1px solid rgba(232,185,91,.4);font:800 11px Inter;letter-spacing:.2em;clip-path:none}

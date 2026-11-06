@@ -222,3 +222,8 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 2.8: Smoothness fix
 - Fixed flicker: the dynamic resolution kept switching every few seconds (sharp/soft/sharp). It now calibrates once during the round intro, holds steady, remembers the setting for the next fight, and steps down only if the device clearly struggles.
 - Camera follow and zoom are time-based, so they move evenly even if the frame rate varies.
+
+## Web build 2.9: Blood setting + sharper close-ups
+- New BLOOD setting: OFF (default) / LIGHT / HEAVY. The button is on the title menu (under Local 2 Player) and on the pause screen, and it's remembered on each device.
+- Blood amount follows the hit: light on punches, more on claw slashes, bites, specials and enders, a burst on K.O. and Ultra hits. Drops fall to the floor and leave stains; LIGHT stains fade during the round, HEAVY stains stay faintly. Blocked hits never bleed.
+- Sharper fighters: high-detail art now loads on most screens (not just very large ones), and the camera zooms in less, so close-ups no longer turn blurry.

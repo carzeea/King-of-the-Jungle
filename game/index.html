@@ -8,7 +8,7 @@
 <body>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">THE WILD FIGHTING CHAMPIONSHIP</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 2.8</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">THE WILD FIGHTING CHAMPIONSHIP</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 2.9</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -24,6 +24,7 @@
           <button class="primary" data-mode="tower"><b>TOWER MODE</b><small>Climb 10 fights to the throne</small></button>
           <button class="secondary" data-mode="cpu"><b>VS CPU</b><small>Any fighter, any arena</small></button>
           <button class="secondary" data-mode="versus"><b>LOCAL 2 PLAYER</b><small>Same screen, two fighters</small></button>
+          <button class="blood-btn cover-setting">BLOOD: OFF</button>
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
@@ -48,7 +49,7 @@
       </div>
       <div class="controls"><div><b>PLAYER 1</b><span>A/D MOVE · W JUMP · S BLOCK · F ATTACK · S+F HEAVY BITE · G SPECIAL · S+G SHADOW · H INSTINCT</span></div><div><b>PLAYER 2</b><span>←/→ MOVE · ↑ JUMP · ↓ BLOCK · K ATTACK · ↓+K HEAVY · L SPECIAL · ↓+L SHADOW · ; INSTINCT</span></div><div><b>CONTROLLER</b><span>STICK MOVE · A/✕ JUMP · X/□ ATTACK · Y/△ SPECIAL · B/○ or LT BLOCK · RB/R1 or RT INSTINCT · START PAUSE</span></div></div>
       <div class="meter-row"><div class="meter-panel"><span>P1 INSTINCT</span><div class="meter-track"><div id="p1-meter" class="meter-fill"></div></div></div><div class="breaker-hint">COMBO: ATTACK → ATTACK (auto-double) → SPECIAL (ender) · GETTING COMBOED? TAP ATTACK ON THE GOLD FLASH TO BREAK</div><div class="meter-panel right"><span>P2 INSTINCT</span><div class="meter-track"><div id="p2-meter" class="meter-fill"></div></div></div></div>
-      <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button><button id="fullscreen" class="secondary">FULL SCREEN</button></div>
+      <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button><button id="fullscreen" class="secondary">FULL SCREEN</button><button class="secondary blood-btn">BLOOD: OFF</button></div>
     </section>
     <section id="result" class="screen result-screen hidden"><div class="winner-art"><div class="winner-burst"></div><img id="winner-portrait" alt=""><img class="winner-crown" src="assets/ui/crown.webp" alt=""></div><p class="eyebrow">THE ARENA HAS SPOKEN</p><h2 id="winner-title">PLAYER 1 WINS</h2><p id="winner-copy">The crown belongs to the victor.</p><div id="tower-ladder" class="tower-ladder"></div><button id="tower-next" class="primary hidden">NEXT FIGHT</button><button id="rematch" class="primary">REMATCH</button><button id="result-menu" class="secondary">MAIN MENU</button></section>
     <footer><span>© KING OF THE JUNGLE</span><span>Game made by J. Hardy</span></footer>

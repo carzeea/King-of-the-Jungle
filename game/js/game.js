@@ -9,6 +9,11 @@ const portrait=id=>'assets/characters/portraits/'+id+'.jpg';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
+/* ---------- Blood setting: 0 = OFF (default), 1 = LIGHT, 2 = HEAVY. Remembered on this device. ---------- */
+let blood=0;try{blood=Math.max(0,Math.min(2,+(localStorage.getItem('kotj-blood')||0)))}catch(_){}
+const BLOOD_LABEL=['OFF','LIGHT','HEAVY'];
+function setBlood(v){blood=v;try{localStorage.setItem('kotj-blood',String(v))}catch(_){}
+ document.querySelectorAll('.blood-btn').forEach(b=>b.textContent='BLOOD: '+BLOOD_LABEL[blood]);if(game&&!blood)game.stains=[]}
 // Dynamic resolution: full detail (up to 4K) when the device keeps up, lower render scale if frames drop.
 // Picks a render resolution during the first seconds of a fight, then holds it steady
 // (no flickering between sharp and soft). Only steps down again if the device really struggles.
@@ -277,7 +282,7 @@ function start(){
  $('round-label').textContent=tower?`FIGHT ${tower.index+1} / ${tower.ladder.length}`:'ROUND 1';
  time=99;paused=false;cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
- game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
+ game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(tower?Math.min(1,.1+tower.index*.09):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
@@ -443,6 +448,7 @@ function resolveHit(i,mv){
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
  f.meter=Math.min(100,f.meter+(f.instinct?0:4));o.meter=Math.min(100,o.meter+(o.instinct?0:2.5));
  spark(o.x-o.dir*10,o.y-160-Math.random()*40,mv.shadow?'#c68bff':'#fff0b0',10);
+ bleed(o.x-o.dir*12,o.y-150-Math.random()*50,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:(mv===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
  const p='p'+(i+1);if(f.combo>=2){$(p+'-combo').textContent=f.combo+' HITS';$(p+'-combo').classList.toggle('active',f.combo>=3)}
  hud();
 }
@@ -483,28 +489,44 @@ function ultraStep(dt){
  if(u.t>=u.next&&u.hits<u.max){
   u.hits++;u.next=u.t+(u.hits<6?.13:.075);f.combo++;
   o.hp=Math.max(0,u.start*(1-u.hits/u.max));o.hitFlash=.06;o.vx=0;
-  snd(u.hits%2?'sfx.claw':'sfx.punch','ultra',.75,1+Math.random()*.2);spark(o.x-o.dir*10,o.y-120-Math.random()*110,u.hits%3?'#ffd36b':'#ff6ae0',8);game.flash=Math.max(game.flash,.25);game.shake=.12;
+  snd(u.hits%2?'sfx.claw':'sfx.punch','ultra',.75,1+Math.random()*.2);bleed(o.x-o.dir*10,o.y-130-Math.random()*90,f.dir,5);spark(o.x-o.dir*10,o.y-120-Math.random()*110,u.hits%3?'#ffd36b':'#ff6ae0',8);game.flash=Math.max(game.flash,.25);game.shake=.12;
   $('p'+(u.i+1)+'-combo').textContent=f.combo+' HITS';$('p'+(u.i+1)+'-combo').classList.add('active');hud();
  }
  if(u.hits>=u.max&&u.t>=u.next+.15){
   game.ultra=null;o.hp=0;o.potential=0;o.stun=0;f.attack=0;f.action='claw';
   o.vx=f.dir*520;o.vy=-420;o.ground=false;game.slow=.25;game.slowT=1.1;game.flash=1;game.shake=.5;snd('sfx.groundSlam','boom');
-  spark(o.x,o.y-150,'#ffffff',40);hud();
+  spark(o.x,o.y-150,'#ffffff',40);bleed(o.x,o.y-150,f.dir,18);hud();
   banner('ULTRA COMBO',f.combo+' HITS',2.6,'#ff6ae0');setTimeout(()=>say('K O'),350);
   koFinish(o,f,true);
  }
 }
 function koFinish(o,f,ultra){
  if(game.ko)return;o.koTime=0;game.ko=ultra?3.2:2.2;
- AU&&AU.duckMusic(.4);
+ AU&&AU.duckMusic(.4);if(!ultra)bleed(o.x,o.y-150,f.dir,14);
  if(!ultra){banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say('K O');game.slow=.35;game.slowT=.8;game.shake=.35;}
 }
 
 /* ---------- FX ---------- */
+// Blood: droplets fly with the hit direction, fall with gravity and leave stains on the floor that fade during the round.
+function bleed(x,y,dir,power){
+ if(!blood||!game)return;const amt=Math.round(power*(blood===2?2.2:1));
+ for(let k=0;k<amt;k++){
+  game.fx.push({kind:'blood',x:x+(Math.random()-.5)*14,y:y+(Math.random()-.5)*20,vx:dir*(40+Math.random()*(blood===2?300:200)),vy:-(60+Math.random()*(blood===2?240:170)),
+   r:1.6+Math.random()*(blood===2?3.6:2.4),t:0,life:2.2,shade:Math.random()})}
+ if(blood===2&&power>=8)for(let k=0;k<4;k++)game.fx.push({kind:'mist',x:x+(Math.random()-.5)*20,y:y+(Math.random()-.5)*20,vx:dir*(40+Math.random()*80),vy:-20-Math.random()*40,r:10+Math.random()*14,t:0,life:.45})
+}
 function spark(x,y,color,n){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2,s=180+Math.random()*420;game.fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,t:0,life:.18+Math.random()*.2,color,kind:'spark'})}
  game.fx.push({x,y,t:0,life:.16,color,kind:'ring'})}
 function floatText(x,y,text,color){game.fx.push({x,y,t:0,life:1,text,color,kind:'text'})}
-function fxUpdate(dt){game.fx=game.fx.filter(p=>{p.t+=dt;if(p.kind==='spark'){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.9;p.vy*=.9}if(p.kind==='text')p.y-=40*dt;return p.t<p.life})}
+function fxUpdate(dt){
+ const FLOOR=400,maxStains=blood===2?160:70;
+ for(const p of game.fx)if(p.kind==='blood'&&!p.dead){p.vy+=1500*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.985;
+  if(p.y>=FLOOR+2+p.shade*26){p.dead=true;if(Math.random()<(blood===2?.75:.45))game.stains.push({x:p.x,y:FLOOR+6+p.shade*34,rx:p.r*(2+Math.random()*2.4),ry:p.r*(.7+Math.random()*.6),a:.85,shade:p.shade})}}
+ game.fx=game.fx.filter(p=>!(p.kind==='blood'&&p.dead));
+ if(game.stains.length>maxStains)game.stains.splice(0,game.stains.length-maxStains);
+ for(const s of game.stains)s.a=Math.max(blood===2?.45:0,s.a-dt*(blood===2?.004:.03));
+ game.stains=game.stains.filter(s=>s.a>.02);
+ game.fx=game.fx.filter(p=>{p.t+=dt;if(p.kind==='mist'){p.x+=p.vx*dt;p.y+=p.vy*dt}if(p.kind==='spark'){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.9;p.vy*=.9}if(p.kind==='text')p.y-=40*dt;return p.t<p.life})}
 
 /* ---------- Results ---------- */
 function finish(){
@@ -535,6 +557,7 @@ $('rematch').onclick=()=>{if(tower){if(tower.done){tower.done=false;tower.index=
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;
+document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();setBlood((blood+1)%3)});setBlood(blood);
 // Full screen (and sideways lock on phones that allow it)
 (function(){const b=$('fullscreen'),el=document.documentElement,can=!!(el.requestFullscreen||el.webkitRequestFullscreen);
  if(!can){b.style.display='none';return}
@@ -586,7 +609,7 @@ const SPRITES={
 const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
-function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=900}
+function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
@@ -598,7 +621,7 @@ function draw(){
  // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
  const aspect=pw/ph,F=game.fighters,gap=Math.abs(F[0].x-F[1].x);
  let vh=Math.min(570,1210/aspect);                                    // largest view that stays inside the arena art
- const want=Math.max(1,Math.min(1.4,(vh*aspect*.9)/(gap+360)))*(game.zoom||1);
+ const want=Math.max(1,Math.min(1.12,(vh*aspect*.9)/(gap+360)))*(game.zoom||1);
  const kz=1-Math.pow(.92,frameDt*60),kp=1-Math.pow(.88,frameDt*60);cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
  const air=Math.min(F[0].y,F[1].y);                                   // keep jumping fighters in shot
  let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*.5;
@@ -628,6 +651,7 @@ function draw(){
  }
  // Ultra / Instinct darken the stage so the fighters pop.
  const dim=game.ultra?.55:game.fighters.some(f=>f.instinct)?.18:0;if(dim){c.fillStyle=`rgba(10,0,20,${dim})`;c.fillRect(-60,-60,w+120,h+120)}
+ drawStains();
  game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter='hue-rotate(220deg) saturate(3)';drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
  game.fighters.forEach((f,i)=>drawFighter(f,i));
  drawFx();
@@ -636,9 +660,18 @@ function draw(){
  drawComboCounters();drawBanner();
  if(paused){c.fillStyle='#000a';c.fillRect(-w,-h,3*w,3*h);c.fillStyle='#f5ecd8';c.font='900 54px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.fillText('PAUSED',550,270);}
 }
+function drawStains(){
+ if(!blood||!game.stains.length)return;
+ for(const s of game.stains){c.globalAlpha=s.a;c.fillStyle=s.shade<.5?'#5a0608':'#7a0b0d';c.beginPath();c.ellipse(s.x,s.y,s.rx,s.ry,0,0,Math.PI*2);c.fill();
+  c.globalAlpha=s.a*.35;c.fillStyle='#c0262a';c.beginPath();c.ellipse(s.x-s.rx*.2,s.y-s.ry*.25,s.rx*.4,s.ry*.3,0,0,Math.PI*2);c.fill()}
+ c.globalAlpha=1;
+}
 function drawFx(){
  for(const p of game.fx){const k=1-p.t/p.life;
   if(p.kind==='spark'){c.strokeStyle=p.color;c.globalAlpha=k;c.lineWidth=3;c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-p.vx*.03,p.y-p.vy*.03);c.stroke()}
+  else if(p.kind==='blood'){c.globalAlpha=1;c.fillStyle=p.shade<.5?'#8a0c10':'#b3161b';c.beginPath();
+   const sp=Math.min(3,Math.hypot(p.vx,p.vy)/260);c.ellipse(p.x,p.y,p.r*(1+sp*.6),p.r,Math.atan2(p.vy,p.vx),0,Math.PI*2);c.fill()}
+  else if(p.kind==='mist'){c.globalAlpha=.35*k;c.fillStyle='#9c1015';c.beginPath();c.arc(p.x,p.y,p.r*(1+p.t*2.5),0,Math.PI*2);c.fill()}
   else if(p.kind==='ring'){c.strokeStyle=p.color;c.globalAlpha=k;c.lineWidth=5*k;c.beginPath();c.arc(p.x,p.y,20+p.t*420,0,Math.PI*2);c.stroke()}
   else if(p.kind==='text'){c.globalAlpha=Math.min(1,k*2);c.font='900 30px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#000';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y)}
  }c.globalAlpha=1;
