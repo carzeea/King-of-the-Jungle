@@ -288,3 +288,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Tagline is now **A LEGACY UNLEASHED** and the credit reads **Created and Developed by J. Hardy** (title screen, header, footer, ending credits).
 - The cover-art splash stays up until the player taps, clicks, presses a key or presses a controller button. It no longer skips ahead by itself.
 - The link-preview description no longer mentions a secret boss.
+
+## Web build 4.4: The fighter in the reveal
+- During the story reveal after defeating MAJIC, the fighter stands beside the story, animated, and comes out of the shadows part by part. Part 1 is a dark silhouette with a purple glow, Part 2 is barely lit, Part 3 is mostly lit, and Part 4 is fully lit in gold doing their victory pose. On upright phones they stand faded behind the text.
+- The champion screen after MAJIC now opens with that fighter's own first line of their truth, not a shared one. The shared "eleven voices" text is now an Epilogue card before the tower's history.

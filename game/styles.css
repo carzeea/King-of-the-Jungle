@@ -408,3 +408,8 @@ body.fighting.paused .controls{top:62%}
 @keyframes forgottenPulse{to{box-shadow:0 0 30px rgba(140,100,255,.6)}}
 .echo-face{filter:grayscale(1) brightness(.6) contrast(1.2)}
 .tower-ladder .q{display:grid;place-items:center;width:100%;aspect-ratio:1;background:#0b0812;border:1px solid #4b3a6e;color:#cdb8ff;font:900 22px/1 'Barlow Condensed',Impact,sans-serif}
+
+/* Fighter beside the story reveal (build 4.4) */
+.story-fig{display:none;position:absolute;left:4vw;bottom:4vh;height:82vh;max-width:44vw;background-repeat:no-repeat;transition:filter 1.2s ease;pointer-events:none}
+.story-screen.has-fig .story-card{margin-left:min(36vw,520px);width:min(560px,56vw)}
+@media(max-width:800px),(orientation:portrait){.story-fig{left:50%;transform:translateX(-50%);height:60vh;max-width:90vw;opacity:.45}.story-screen.has-fig .story-card{margin-left:0;width:min(560px,92vw)}}

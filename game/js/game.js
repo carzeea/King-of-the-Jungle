@@ -585,6 +585,18 @@ const storyOf=id=>(STORY.fighters||{})[id]||{};
 const BASE_IDS=KOTJ_ROSTER.filter(f=>f.id!=='majic').map(f=>f.id);
 const forgottenOpen=()=>!!SAVE.get('forgotten',false);
 function forgottenMenu(){const b=document.querySelector('.forgotten-btn');if(b)b.classList.toggle('hidden',!forgottenOpen())}
+// The fighter shown beside a story card: a silhouette in the shadows that is lit a little more each part.
+let figTimer=0;
+function storyFig(o){
+ const el=$('story-fig');clearInterval(figTimer);$('story').classList.toggle('has-fig',!!o);
+ if(!o){el.style.display='none';return}
+ const A=(HD[o.id]||{}).anims||{},anim=A[o.anim]?o.anim:'idle',[n,fw,fh]=A[anim]||[1,1,1];
+ el.style.display='block';el.style.aspectRatio=fw+'/'+fh;
+ el.style.backgroundImage=`url(assets/characters/${o.id}/frames-hd/${anim}.webp?v=3.9)`;el.style.backgroundSize=`${n*100}% 100%`;
+ const L=o.light;el.style.filter=L>=1?'drop-shadow(0 0 28px rgba(255,200,90,.85)) drop-shadow(0 0 4px rgba(255,230,160,.9))':
+  `brightness(${.04+L*.9}) contrast(${1.3-L*.3}) drop-shadow(0 0 ${10+L*14}px rgba(${L>.5?'255,190,90':'160,120,255'},${.55+L*.3}))`;
+ let i=0;const step=()=>{el.style.backgroundPosition=n>1?`${(i%n)*100/(n-1)}% 0`:'0 0';i=o.hold&&i>=n-1?n-1:i+1};step();figTimer=setInterval(step,o.hold?130:120);
+}
 // One story card; skipped entirely when its text is empty.
 function storyCard(o,next){
  const t=(o.text||'').trim();if(!t)return next();
@@ -592,7 +604,8 @@ function storyCard(o,next){
  const im=$('story-face');if(o.face){im.src=portrait(o.face);im.classList.remove('none')}else im.classList.add('none');
  $('story-eyebrow').textContent=o.eyebrow||'';$('story-title').textContent=o.title||'';
  $('story-text').innerHTML=t.split(/\n+/).map(x=>'<p>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</p>').join('');
- $('story-next').onclick=()=>{ac();next()};show('story');setTimeout(()=>$('story-next').focus({preventScroll:true}),50);
+ storyFig(o.fig);
+ $('story-next').onclick=()=>{ac();storyFig(null);next()};show('story');setTimeout(()=>$('story-next').focus({preventScroll:true}),50);
 }
 const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, crocodile tail and claws of every predator. Twice the size of anything in the jungle.',power:13,speed:6,defense:13,color:'#d9a43a'};
 const secretUnlocked=()=>!!SAVE.get('secret',false);
@@ -617,7 +630,7 @@ function champion(f){
  else{newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}$('champ-unlock').textContent='MAJIC HAS JOINED THE ROSTER'}
  forgottenMenu();
  $('champ-name').textContent=f.name;
- $('champ-copy').textContent=secret?(STORY.forgotten.trueEnding||`${f.name} reached the summit and defeated MAJIC.`):(`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
+ $('champ-copy').textContent=secret?(((storyOf(f.id).trueEnding||'').split(/(?<=[.!?])\s/)[0])||`${f.name} reached the summit and defeated MAJIC.`):(`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
  $('champ-crowns').textContent=secret?'':`TOWER CROWNS: ${list.filter(id=>BASE_IDS.includes(id)).length} / ${BASE_IDS.length}`+(firstCrown?' · NEW CROWN!':'');
  $('champ-unlock').classList.toggle('hidden',!(newUnlock||awaken));
  document.querySelector('#champion .champ-text h2').textContent=secret?'THE TRUE KING':'KING OF THE JUNGLE';
@@ -660,10 +673,11 @@ function champion(f){
   champRaf=requestAnimationFrame(draw)})(t0);
 }
 $('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten'){const p=tower.player,S=storyOf(p.id),cl=S.clues||{},clues=[cl[3],cl[6],cl[9]].filter(Boolean).join('\n');
-  storyCard({face:p.id,eyebrow:`${p.name} · PART 1`,title:'WHY THEY CAME',text:S.intro},()=>
-  storyCard({face:p.id,eyebrow:`${p.name} · PART 2`,title:'THE CLUES',text:clues},()=>
-  storyCard({face:p.id,eyebrow:`${p.name} · PART 3`,title:'THE CROWN',text:S.ending},()=>
-  storyCard({face:p.id,eyebrow:`${p.name} · PART 4`,title:'THE TRUTH, AT LAST',text:S.trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result'))))))}else show('result')};
+  storyCard({dark:1,fig:{id:p.id,anim:'idle',light:.12},eyebrow:`${p.name} · PART 1`,title:'WHY THEY CAME',text:S.intro},()=>
+  storyCard({dark:1,fig:{id:p.id,anim:'walk_forward',light:.35},eyebrow:`${p.name} · PART 2`,title:'THE CLUES',text:clues},()=>
+  storyCard({fig:{id:p.id,anim:'idle',light:.65},eyebrow:`${p.name} · PART 3`,title:'THE CROWN',text:S.ending},()=>
+  storyCard({fig:{id:p.id,anim:'victory',light:1,hold:1},eyebrow:`${p.name} · PART 4`,title:'THE TRUTH, AT LAST',text:S.trueEnding},()=>
+  storyCard({dark:1,eyebrow:'EPILOGUE',title:'',text:STORY.forgotten.trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result')))))))}else show('result')};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;
