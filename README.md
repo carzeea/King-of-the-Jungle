@@ -233,3 +233,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Every frame was re-cut from the original sheets in `docs/sprite-sheets/`. Only black that connects to the outside of the fighter (and real gaps, such as between an arm and the body) is removed now, so the bodies are fully solid.
 - Frame sizes and anchor points are unchanged, so no game code changed. Badger was already solid and is untouched.
 - The tool is `docs/art-tools/recut_solid.py` (`python3 docs/art-tools/recut_solid.py lion tiger ...`).
+
+## Web build 3.1: Striped Tiger
+- The Tiger now uses J. Hardy's new striped sheet (orange fur with black tiger stripes) instead of the old spotted one, so he no longer looks like the Leopard or Jaguar. `docs/sprite-sheets/tiger/tiger-sheet.png` is the new sheet.
+- Every frame was cut solid, at the same size and anchor points as before, so his moves and timing are unchanged.
+- The sheet's gold row lines were removed before cutting, so no line slivers sit above his head.
+- Three end frames (last pounce frame, last heavy-hit frame, last get-up frame) reuse the frame before them, because they had no match on the sheet.
