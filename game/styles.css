@@ -396,3 +396,15 @@ body.fighting.paused .controls{top:62%}
 #splash .splash-hint{position:absolute;bottom:11px;left:0;right:0;text-align:center;color:#ffe3a0;font:800 13px/1 Inter,sans-serif;letter-spacing:.3em;text-shadow:0 2px 6px #000;animation:blink 1.2s .8s infinite}
 #splash.out{opacity:0;transition:opacity .6s}
 @keyframes splashIn{from{opacity:0}to{opacity:1}}@keyframes splashFade{from{opacity:0}to{opacity:1}}
+
+/* Story cards and the secret tower (build 3.9) */
+.story-screen{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 35%,rgba(40,28,10,.75),rgba(0,0,0,.92))}
+.story-card{width:min(680px,92vw);max-height:92vh;overflow:auto;text-align:center;padding:28px 26px;border:1px solid #6b5426;background:linear-gradient(#17120acc,#0a0805ee);box-shadow:0 0 50px rgba(0,0,0,.8),inset 0 0 40px rgba(232,185,91,.06);animation:champIn .6s both}
+#story-face{width:110px;height:132px;object-fit:cover;border:2px solid #e8b95b;box-shadow:0 0 18px rgba(232,185,91,.45);margin-bottom:10px}#story-face.none{display:none}
+#story-title{margin:.15em 0 .5em;font:italic 900 clamp(30px,5vw,52px)/1 "Barlow Condensed",Impact,sans-serif;color:#ffd36b;text-shadow:0 0 18px rgba(255,190,80,.5)}
+#story-text p{margin:0 0 .9em;color:#f5ecd8;font-size:clamp(14px,1.8vw,17px);line-height:1.6}
+.story-screen.dark{background:radial-gradient(ellipse at 50% 35%,rgba(30,16,50,.8),rgba(0,0,0,.96))}.story-screen.dark .story-card{border-color:#4b3a6e}.story-screen.dark #story-title{color:#d9c7ff;text-shadow:0 0 18px rgba(150,110,255,.6)}
+.forgotten-btn{border-color:#4b3a6e!important;background:linear-gradient(#1a1226,#0b0812)!important;color:#cdb8ff!important;box-shadow:0 0 18px rgba(120,80,220,.35)!important;animation:forgottenPulse 2.6s infinite alternate}
+@keyframes forgottenPulse{to{box-shadow:0 0 30px rgba(140,100,255,.6)}}
+.echo-face{filter:grayscale(1) brightness(.6) contrast(1.2)}
+.tower-ladder .q{display:grid;place-items:center;width:100%;aspect-ratio:1;background:#0b0812;border:1px solid #4b3a6e;color:#cdb8ff;font:900 22px/1 'Barlow Condensed',Impact,sans-serif}

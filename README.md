@@ -266,3 +266,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - **Link previews:** sharing the site link (texts, Facebook, Discord, X) now shows the cover art (`og-cover.jpg`, 1200×630) with the title and a short description.
 - (Build 3.8) The splash, and the link preview, always show the entire cover; nothing is cropped. The cropped Lion-face icons were removed.
 - Removed a leftover debug screenshot (`dbg.png`).
+
+## Web build 3.9: The Forgotten Tower (secret storyline)
+- **MAJIC is never shown before he's earned.** He no longer appears after the Elephant, there's no locked 12th tile, and nothing on the menus, select screen or cover names him. Each fighter's Tower ends with the Elephant in Majic's Lair and that fighter's champion ending.
+- **Story cards:** each fighter's Tower can show an intro (before fight 1), clues after fights 3, 6 and 9, and an ending on the champion screen. The text lives in `game/js/story.js`; empty lines are skipped, so unfinished story never shows.
+- **The secret tower:** winning all 11 fighter Towers (11 crowns) shows "SOMETHING HAS AWAKENED", and an unnamed "? ? ?" option appears on the main menu. Inside, the chosen fighter faces 3 shadowy echoes ("FALLEN …", gray with a purple glow) in Shadow Swamp, Frozen Kingdom and Inferno Fortress. Then comes the summit, the reveal, and MAJIC in Majic's Lair.
+- **After defeating MAJIC:** "THE TRUE KING" ending (true-ending text), the tower's history card, and MAJIC joins the roster with his full profile and moves. Saved per device.

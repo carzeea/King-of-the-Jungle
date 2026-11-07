@@ -4,7 +4,7 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
@@ -48,7 +48,7 @@ function openStage(){renderStages();show('stage')}
 $('stage-go').onclick=()=>{ac();arena=stagePick===6?ARENAS[Math.floor(Math.random()*6)]:ARENAS[stagePick];start()};
 $('stage-back').onclick=()=>{step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
 // Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
-function towerArena(){const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
+function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||ARENAS[5];const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
 
 const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
 /* ---------- Atmospheric backdrop behind every non-title screen ---------- */
@@ -84,7 +84,7 @@ setBackdrop('assets/arenas/cover-bg.webp');
  $('menu').addEventListener('pointerdown',e=>{if(!e.target.closest('.cover-menu'))startCover()});
  window.addEventListener('keydown',e=>{if($('menu').classList.contains('hidden'))return;
   if(!$('menu').classList.contains('started')){if(['Enter',' ','f','k'].includes(e.key)||e.key.length===1){e.preventDefault();startCover()}return}
-  const bs=[...document.querySelectorAll('.cover-menu button')],i=bs.indexOf(document.activeElement);
+  const bs=[...document.querySelectorAll('.cover-menu button')].filter(b=>b.offsetParent),i=bs.indexOf(document.activeElement);
   if(e.key==='ArrowDown'||e.key==='s'){e.preventDefault();bs[(i+1)%bs.length].focus()}
   if(e.key==='ArrowUp'||e.key==='w'){e.preventDefault();bs[(i-1+bs.length)%bs.length].focus()}});
  // embers
@@ -170,20 +170,24 @@ document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();openSele
 function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];render();show('select')}
 function render(){
  const who=mode==='versus'?`PLAYER ${step}`:'PLAYER 1';
- $('select-instruction').textContent=mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
- $('confirm-fighter').textContent=mode==='tower'?'START THE TOWER':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
+  $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
+ $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
  $('roster').innerHTML='';
- roster.forEach((f,i)=>{const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');
+ roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');
   b.innerHTML=`<img src="${portrait(f.id)}" alt="${f.name}"><strong>${f.name}</strong>`+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
- if(!secretUnlocked())$('roster').append(mysteryTile());
  card(chosen,roster.indexOf(chosen));
 }
 function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
 $('confirm-fighter').onclick=()=>{
  ac();picks[step-1]=chosen;
- if(mode==='tower'){tower={player:chosen,ladder:roster.filter(f=>f.id!==chosen.id&&f.id!=='majic'),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();return start()}
+ if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>f.id!==chosen.id&&f.id!=='majic'),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();
+  return storyCard({face:chosen.id,eyebrow:'TOWER MODE',title:chosen.name,text:storyOf(chosen.id).intro},start)}
+ if(mode==='forgotten'){if(chosen.id==='majic')return;
+  const others=roster.filter(f=>f.id!==chosen.id&&f.id!=='majic').sort(()=>Math.random()-.5).slice(0,3).map(f=>({...f,name:'FALLEN '+f.name,echo:true}));
+  tower={kind:'forgotten',player:chosen,ladder:others,index:0};picks=[chosen,others[0]];arena=towerArena();
+  return storyCard({dark:1,title:'',text:STORY.forgotten.enter},()=>storyCard({dark:1,title:'ECHO 1',text:STORY.forgotten.echoes[0]},start))}
  if(step===1){step=2;chosen=picks[1].id===picks[0].id?roster[(roster.indexOf(picks[0])+1)%roster.length]:picks[1];render()}else openStage();
 };
 
@@ -219,13 +223,14 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
  const vis=screens.find(s=>!$(s).classList.contains('hidden'));
  if(vis==='menu'){const m=$('menu');
   if(!m.classList.contains('started')){if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))window.__startCover()}
-  else{const bs=[...document.querySelectorAll('.cover-menu button')];let i=Math.max(0,bs.indexOf(document.activeElement));
+  else{const bs=[...document.querySelectorAll('.cover-menu button')].filter(b=>b.offsetParent);let i=Math.max(0,bs.indexOf(document.activeElement));
    if((g.l&&!p.l)||(g.up&&!p.up))bs[(i-1+bs.length)%bs.length].focus();
    if((g.r&&!p.r)||(g.dn&&!p.dn))bs[(i+1)%bs.length].focus();
    if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))(document.activeElement&&bs.includes(document.activeElement)?document.activeElement:bs[0]).click()}}
  if(vis==='select'){const i=roster.indexOf(chosen);let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
   if(n!==i){chosen=roster[n];render()}if((g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.bl&&!p.bl)show('menu')}
  if(vis==='stage'){let n=stagePick;if(g.r&&!p.r)n=(n+1)%7;if(g.l&&!p.l)n=(n+6)%7;if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
+ if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
  if(vis==='champion'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('champ-continue').click();
  if(vis==='result'&&g.j&&!p.j)(!$('tower-next').classList.contains('hidden')?$('tower-next'):$('rematch')).click();
 },60);
@@ -280,17 +285,19 @@ function start(){
  $('p1-name').textContent=picks[0].name;$('p2-name').textContent=picks[1].name;
  $('p1-face').src=portrait(picks[0].id);$('p2-face').src=portrait(picks[1].id);
  $('p1-tag').textContent='PLAYER 1';$('p2-tag').textContent=cpu2?'CPU':'PLAYER 2';
- $('mode-label').textContent=mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
- $('round-label').textContent=tower?(tower.boss?'SECRET BOSS':`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
+ $('mode-label').textContent=mode==='forgotten'?'? ? ?':mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
+ $('round-label').textContent=tower?(tower.boss?'THE SUMMIT':tower.kind==='forgotten'?`ECHO ${tower.index+1} / 3`:`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
+ $('p2-face').classList.toggle('echo-face',!!picks[1].echo);
  time=99;paused=false;cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
- if(cpu2)game.fighters[1].ai=cpuBrain(tower?Math.min(1,.1+tower.index*.09):.45);
+ if(cpu2)game.fighters[1].ai=cpuBrain(tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
- const finalBoss=tower&&tower.index===tower.ladder.length-1;
+ const finalBoss=tower&&tower.kind==='tower'&&tower.index===tower.ladder.length-1;
  if(tower&&tower.boss){game.intro=2.9;banner('MAJIC','THE JUNGLE TITAN · ALL 11 IN ONE',2.8,'#ffcc33');game.shake=14}
  else if(finalBoss){game.intro=2.4;banner('FINAL BOSS',`${picks[1].name} AWAITS IN ${arena.name}`,2.3,'#ff5a3a')}
+ else if(tower&&tower.kind==='forgotten')banner(`ECHO ${tower.index+1}`,`${picks[1].name} · ${arena.name}`,1.8,'#b9a0ff');
  else banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);
  if(AU&&soundOn){AU.music('music.'+arena.id);
   const pre=tower&&tower.index===tower.ladder.length-1?'voice.final-fight':(tower?null:'voice.round-one');
@@ -546,13 +553,13 @@ function finish(){
  if(flawless)copy='FLAWLESS VICTORY · '+copy;
  $('tower-next').classList.add('hidden');$('rematch').textContent='REMATCH';$('tower-ladder').innerHTML='';
  if(tower){
-  if(p1won&&tower.boss){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered the Tower and defeated MAJIC.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
+  if(p1won&&tower.boss){title='THE TRUE KING';copy=`${tower.player.name} defeated MAJIC at the summit.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
   else if(p1won){tower.index++;
-   if(tower.index>=tower.ladder.length&&tower.player.id!=='majic'){tower.reveal=true;title='A NEW CHALLENGER';copy="The ground shakes in Majic's Lair. MAJIC, THE JUNGLE TITAN, all 11 beasts in one, has risen.";$('tower-next').textContent='FACE MAJIC';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT'}
+   if(tower.index>=tower.ladder.length&&tower.kind==='forgotten'){tower.reveal=true;title='THE SUMMIT';copy='';$('tower-next').textContent='ASCEND';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT'}
    else if(tower.index>=tower.ladder.length){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered all ${tower.ladder.length} challengers and takes the crown.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
-   else{title='VICTORY';copy=`Next up: ${tower.ladder[tower.index].name}.`;$('tower-next').textContent='NEXT FIGHT';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT';}
-  }else{title='DEFEATED';copy=tower.boss?'MAJIC crushes your challenge. The Jungle Titan still rules.':`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
-  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt="">${f.name}</div>`).join('')+(tower.reveal||tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:'');
+   else{title='VICTORY';copy=tower.kind==='forgotten'?'':`Next up: ${tower.ladder[tower.index].name}.`;$('tower-next').textContent='NEXT FIGHT';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT';}
+  }else{title='DEFEATED';copy=tower.boss?'MAJIC crushes your challenge. The Jungle Titan still rules.':tower.kind==='forgotten'?`${picks[1].name} drags you back into the dark.`:`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
+  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt=""${f.echo?' class="echo-face"':''}>${f.name}</div>`).join('')+(tower.kind==='forgotten'?(tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:`<div class="${tower.reveal?'next':''}"><span class="q">?</span>???</div>`):'');
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
@@ -560,15 +567,34 @@ function finish(){
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
- if(tower&&tower.reveal){$('winner-portrait').src=portrait('majic');$('winner-portrait').alt='MAJIC';setTimeout(()=>setBackdrop('assets/ui/majic-reveal.webp'),50);if(soundOn)setTimeout(()=>speak('A new challenger approaches!'),700)}
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
  if(tower&&tower.done)champion(tower.player);else show('result');
 }
-$('tower-next').onclick=()=>{if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=ARENAS[5]}else{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('tower-next').onclick=()=>{
+ if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=ARENAS[5];
+  return storyCard({dark:1,title:'THE SUMMIT',text:STORY.forgotten.summit},()=>storyCard({dark:1,title:'THE TRUTH',text:STORY.forgotten.reveal},start))}
+ picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
+ if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
+ const clue=(storyOf(tower.player.id).clues||{})[tower.index];
+ storyCard({face:tower.player.id,eyebrow:`AFTER FIGHT ${tower.index}`,title:'A CLUE',text:clue},start)};
 $('rematch').onclick=()=>{if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
 const crowns=()=>SAVE.get('crowns',[]);
+const STORY=window.KOTJ_STORY||{fighters:{},forgotten:{echoes:[]}};STORY.forgotten=STORY.forgotten||{echoes:[]};STORY.forgotten.echoes=STORY.forgotten.echoes||[];
+const storyOf=id=>(STORY.fighters||{})[id]||{};
+const BASE_IDS=KOTJ_ROSTER.filter(f=>f.id!=='majic').map(f=>f.id);
+const forgottenOpen=()=>!!SAVE.get('forgotten',false);
+function forgottenMenu(){const b=document.querySelector('.forgotten-btn');if(b)b.classList.toggle('hidden',!forgottenOpen())}
+// One story card; skipped entirely when its text is empty.
+function storyCard(o,next){
+ const t=(o.text||'').trim();if(!t)return next();
+ const sc=$('story');sc.classList.toggle('dark',!!o.dark);
+ const im=$('story-face');if(o.face){im.src=portrait(o.face);im.classList.remove('none')}else im.classList.add('none');
+ $('story-eyebrow').textContent=o.eyebrow||'';$('story-title').textContent=o.title||'';
+ $('story-text').innerHTML=t.split(/\n+/).map(x=>'<p>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</p>').join('');
+ $('story-next').onclick=()=>{ac();next()};show('story');setTimeout(()=>$('story-next').focus({preventScroll:true}),50);
+}
 const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, crocodile tail and claws of every predator. Twice the size of anything in the jungle.',power:13,speed:6,defense:13,color:'#d9a43a'};
 const secretUnlocked=()=>!!SAVE.get('secret',false);
 const LOCK_SVG='<svg viewBox="0 0 24 24" width="44%" fill="none" stroke="#e8b95b" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -586,12 +612,16 @@ function mysteryTile(){
 document.querySelectorAll('.build-tag').forEach(e=>e.textContent=$('cover-build').textContent); // one build number everywhere
 let champRaf=0;
 function champion(f){
- const list=crowns(),firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}
- const newUnlock=!secretUnlocked()&&!!tower.boss;if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}
+ const secret=tower.kind==='forgotten',list=crowns();let firstCrown=false,awaken=false,newUnlock=false;
+ if(!secret){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}
+  if(BASE_IDS.every(id=>list.includes(id))&&!forgottenOpen()){SAVE.set('forgotten',true);awaken=true;$('champ-unlock').textContent='SOMETHING HAS AWAKENED · RETURN TO THE MAIN MENU'}}
+ else{newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}$('champ-unlock').textContent='MAJIC HAS JOINED THE ROSTER'}
+ forgottenMenu();
  $('champ-name').textContent=f.name;
- $('champ-copy').textContent=tower.boss?`${f.name} conquered all ${tower.ladder.length} challengers and slew MAJIC, the Jungle Titan, in his own lair.`:`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`;
- $('champ-crowns').textContent=`TOWER CROWNS: ${list.length} / ${roster.length}`+(firstCrown?' · NEW CROWN!':'');
- $('champ-unlock').classList.toggle('hidden',!newUnlock);
+ $('champ-copy').textContent=secret?(STORY.forgotten.trueEnding||`${f.name} reached the summit and defeated MAJIC.`):(storyOf(f.id).ending||`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
+ $('champ-crowns').textContent=secret?'':`TOWER CROWNS: ${list.filter(id=>BASE_IDS.includes(id)).length} / ${BASE_IDS.length}`+(firstCrown?' · NEW CROWN!':'');
+ $('champ-unlock').classList.toggle('hidden',!(newUnlock||awaken));
+ document.querySelector('#champion .champ-text h2').textContent=secret?'THE TRUE KING':'KING OF THE JUNGLE';
  const cr=$('champ-credits');cr.innerHTML=`<div class="roll"><h3>KING OF THE JUNGLE</h3><p class="big">Game made by J. Hardy</p>
   <p class="lbl">THE FIGHTERS</p><p>${roster.map(r=>r.name).join(' · ')}</p>
   <p class="lbl">THE ARENAS</p><p>${ARENAS.map(a=>a.name).join(' · ')}</p>
@@ -604,7 +634,7 @@ function champion(f){
  im.onload=()=>{const w=im.width/n,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
   const d=g.getImageData(0,0,c.width,c.height).data;tops=[];
   for(let i=0;i<n;i++){let t=im.height*.15;outer:for(let y=0;y<im.height;y++)for(let x=Math.floor(i*w+w*.3);x<(i+1)*w-w*.3;x++)if(d[(y*c.width+x)*4+3]>128){t=y;break outer}tops.push(t)}};
- im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=3.5`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
+ im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=3.9`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
  const conf=[];for(let i=0;i<140;i++)conf.push({x:Math.random(),y:-Math.random()*1.2,v:.08+Math.random()*.12,r:Math.random()*6.28,s:.5+Math.random(),c:['#ffd36b','#e8b95b','#fff3c4','#b94738'][i%4]});
  const t0=performance.now();let lt=t0;cancelAnimationFrame(champRaf);
  (function draw(now){
@@ -630,7 +660,7 @@ function champion(f){
    cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-4*dpr*p.s,-2*dpr*p.s,8*dpr*p.s,4*dpr*p.s);cx.restore()}
   champRaf=requestAnimationFrame(draw)})(t0);
 }
-$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);show('result')};
+$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten')storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result'));else show('result')};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;
@@ -686,11 +716,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=3.5';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=3.9';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=3.5';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=3.9';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -814,7 +844,7 @@ function drawSprite(f){
  if(!img||!img.complete||!img.naturalWidth)return false;
  const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
  if(f.action==='earthslam'&&p>.5){c.save();c.globalAlpha=.8*(1-p);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+p*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
- if(f.hitFlash>0)c.filter='brightness(2.4)';
+ c.filter=f.hitFlash>0?'brightness(2.4)':(f.data.echo?'grayscale(1) brightness(.55) contrast(1.25) drop-shadow(0 0 8px rgba(150,110,255,.9))':'none');
  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);c.filter='none';
  return true;
 }
@@ -836,6 +866,7 @@ function drawGeneric(f,i){
 }
 
 if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
+forgottenMenu();
 render();show('menu');
-window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={player:picks[0],ladder:roster.filter(f=>f.id!==a&&f.id!=='majic'),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>f.id!==a&&f.id!=='majic'),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();
