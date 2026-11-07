@@ -254,3 +254,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - **Secret unlock:** a 12th "LOCKED" tile is on the fighter select. Beating the Tower once unlocks it ("???", the beast forged from all 11 fighters). It isn't playable until that character's art is added.
 - The header build label now always matches the title screen. It had been stuck on "2.9".
 - Holden hasn't recorded "Final fight!" and "King of the Jungle!" yet, so those use the browser voice until his clips are added.
+
+## Web build 3.5: MAJIC, the secret final boss
+- **MAJIC, the Jungle Titan** (all 11 beasts in one) is a hidden boss. He never appears on the select screen or the Tower ladder. After you beat the Elephant at the top of the Tower, the results screen reveals "A NEW CHALLENGER" with his art, and **FACE MAJIC** starts a secret boss fight in Majic's Lair with a "MAJIC · THE JUNGLE TITAN" intro.
+- He's drawn about 30% larger than the Elephant, reaches 30% further, keeps more space around him, and has POWER 13 / SPEED 6 / DEFENSE 13. The CPU plays him at max difficulty.
+- Beating Majic plays the champion ending and **unlocks him as a playable fighter** (saved in the browser), in VS CPU, Local 2 Player and Tower. Losing to him lets you retry the Majic fight directly.
+- His frames are cut from J. Hardy's Majic sprite sheet (`docs/sprite-sheets/majic/`, `docs/art-tools/cut_majic.py`), solid, with the same 16 animations as everyone else.

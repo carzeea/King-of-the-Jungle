@@ -177,13 +177,13 @@ function render(){
   b.innerHTML=`<img src="${portrait(f.id)}" alt="${f.name}"><strong>${f.name}</strong>`+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
- $('roster').append(mysteryTile());
+ if(!secretUnlocked())$('roster').append(mysteryTile());
  card(chosen,roster.indexOf(chosen));
 }
 function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
 $('confirm-fighter').onclick=()=>{
  ac();picks[step-1]=chosen;
- if(mode==='tower'){tower={player:chosen,ladder:roster.filter(f=>f.id!==chosen.id),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();return start()}
+ if(mode==='tower'){tower={player:chosen,ladder:roster.filter(f=>f.id!==chosen.id&&f.id!=='majic'),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();return start()}
  if(step===1){step=2;chosen=picks[1].id===picks[0].id?roster[(roster.indexOf(picks[0])+1)%roster.length]:picks[1];render()}else openStage();
 };
 
@@ -281,7 +281,7 @@ function start(){
  $('p1-face').src=portrait(picks[0].id);$('p2-face').src=portrait(picks[1].id);
  $('p1-tag').textContent='PLAYER 1';$('p2-tag').textContent=cpu2?'CPU':'PLAYER 2';
  $('mode-label').textContent=mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
- $('round-label').textContent=tower?`FIGHT ${tower.index+1} / ${tower.ladder.length}`:'ROUND 1';
+ $('round-label').textContent=tower?(tower.boss?'SECRET BOSS':`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
  time=99;paused=false;cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
@@ -289,12 +289,14 @@ function start(){
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
  const finalBoss=tower&&tower.index===tower.ladder.length-1;
- if(finalBoss){game.intro=2.4;banner('FINAL BOSS',`${picks[1].name} AWAITS IN ${arena.name}`,2.3,'#ff5a3a')}
+ if(tower&&tower.boss){game.intro=2.9;banner('MAJIC','THE JUNGLE TITAN · ALL 11 IN ONE',2.8,'#ffcc33');game.shake=14}
+ else if(finalBoss){game.intro=2.4;banner('FINAL BOSS',`${picks[1].name} AWAITS IN ${arena.name}`,2.3,'#ff5a3a')}
  else banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);
  if(AU&&soundOn){AU.music('music.'+arena.id);
   const pre=tower&&tower.index===tower.ladder.length-1?'voice.final-fight':(tower?null:'voice.round-one');
   if(AU.loaded('voice.fight')){                         // Holden: "Round one!" / "Final fight!" then "Fight!"
    if(pre&&AU.loaded(pre)){AU.now(pre);setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1000)}
+   else if(tower&&tower.boss){speak('Majic! The jungle titan!');setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},2200)}
    else if(finalBoss){speak('Final fight!');setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1500)}
    else AU.now('voice.fight');
   }else if(AU.has('announcer.fight'))AU.announce(); else speak('Fight');
@@ -398,7 +400,7 @@ function update(dt){
   if(f.attack<=0)f.action=f.block?'block':(!f.ground?'jump':Math.abs(move)>35?'walk':(Math.floor(performance.now()/1800)%3===0?'breathing':'idle'));
   f.walk+=Math.abs(move)*dt*.025;
  });
- const gap=Math.abs(a.x-b.x),minGap=122;
+ const gap=Math.abs(a.x-b.x),minGap=122+((a.data.id==='majic'||b.data.id==='majic')?45:0);
  if(gap<minGap&&Math.abs(a.y-b.y)<120){const push=(minGap-gap)/2,s=a.x<b.x?-1:1;a.x=clampX(a.x+push*s);b.x=clampX(b.x-push*s);}
  if(a.hp>0&&b.hp>0&&!a.attack&&!a.stun)a.dir=b.x>=a.x?1:-1;
  if(a.hp>0&&b.hp>0&&!b.attack&&!b.stun)b.dir=a.x>=b.x?1:-1;
@@ -427,7 +429,7 @@ function resolveHit(i,mv){
  const f=game.fighters[i],o=game.fighters[1-i];
  if(o.down>0||(o.hp<=0&&o.bars<=1))return;
  const d=Math.abs(f.x-o.x),facing=(o.x-f.x)*f.dir>=-15;
- if(!(d<mv.range&&Math.abs(f.y-o.y)<130&&facing))return;
+ if(!(d<mv.range*(f.data.id==='majic'?1.3:1)&&Math.abs(f.y-o.y)<130&&facing))return;
  const comboing=o.stun>0&&f.combo>0;
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
@@ -544,11 +546,13 @@ function finish(){
  if(flawless)copy='FLAWLESS VICTORY · '+copy;
  $('tower-next').classList.add('hidden');$('rematch').textContent='REMATCH';$('tower-ladder').innerHTML='';
  if(tower){
-  if(p1won){tower.index++;
-   if(tower.index>=tower.ladder.length){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered all ${tower.ladder.length} challengers and takes the crown.`;$('rematch').textContent='CLIMB AGAIN';tower.index=0;tower.done=true}
-   else{title='VICTORY';copy=`Next up: ${tower.ladder[tower.index].name}.`;$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT';}
-  }else{title='DEFEATED';copy=`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
-  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt="">${f.name}</div>`).join('');
+  if(p1won&&tower.boss){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered the Tower and defeated MAJIC.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
+  else if(p1won){tower.index++;
+   if(tower.index>=tower.ladder.length&&tower.player.id!=='majic'){tower.reveal=true;title='A NEW CHALLENGER';copy="The ground shakes in Majic's Lair. MAJIC, THE JUNGLE TITAN, all 11 beasts in one, has risen.";$('tower-next').textContent='FACE MAJIC';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT'}
+   else if(tower.index>=tower.ladder.length){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered all ${tower.ladder.length} challengers and takes the crown.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
+   else{title='VICTORY';copy=`Next up: ${tower.ladder[tower.index].name}.`;$('tower-next').textContent='NEXT FIGHT';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT';}
+  }else{title='DEFEATED';copy=tower.boss?'MAJIC crushes your challenge. The Jungle Titan still rules.':`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
+  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt="">${f.name}</div>`).join('')+(tower.reveal||tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:'');
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
@@ -556,14 +560,16 @@ function finish(){
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
+ if(tower&&tower.reveal){$('winner-portrait').src=portrait('majic');$('winner-portrait').alt='MAJIC';setTimeout(()=>setBackdrop('assets/ui/majic-reveal.webp'),50);if(soundOn)setTimeout(()=>speak('A new challenger approaches!'),700)}
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
  if(tower&&tower.done)champion(tower.player);else show('result');
 }
-$('tower-next').onclick=()=>{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()};
-$('rematch').onclick=()=>{if(tower){if(tower.done){tower.done=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('tower-next').onclick=()=>{if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=ARENAS[5]}else{picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('rematch').onclick=()=>{if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
 const crowns=()=>SAVE.get('crowns',[]);
+const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, crocodile tail and claws of every predator. Twice the size of anything in the jungle.',power:13,speed:6,defense:13,color:'#d9a43a'};
 const secretUnlocked=()=>!!SAVE.get('secret',false);
 const LOCK_SVG='<svg viewBox="0 0 24 24" width="44%" fill="none" stroke="#e8b95b" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 function mysteryTile(){
@@ -572,8 +578,8 @@ function mysteryTile(){
  b.innerHTML=`<div class="mystery-art">${open?'<span>?</span>':LOCK_SVG}</div><strong>${open?'???':'LOCKED'}</strong>`;
  b.onclick=()=>{document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
   $('fighter-number').textContent='12';$('fighter-portrait').src='assets/ui/crown.webp';$('fighter-name').textContent='???';
-  $('fighter-style').textContent=open?'UNLOCKED · ARRIVING SOON':'SECRET CHALLENGER';
-  $('fighter-bio').textContent=open?'The beast of all beasts: one fighter forged from all 11. Joining the roster in a future update.':'Conquer the Tower to unlock a secret challenger.';
+  $('fighter-style').textContent='SECRET CHALLENGER';
+  $('fighter-bio').textContent='Something waits beyond the top of the Tower. Conquer it to find out.';
   ['power-stat','speed-stat','defense-stat'].forEach(id=>$(id).textContent='?');$('confirm-fighter').disabled=true};
  return b;
 }
@@ -581,9 +587,9 @@ document.querySelectorAll('.build-tag').forEach(e=>e.textContent=$('cover-build'
 let champRaf=0;
 function champion(f){
  const list=crowns(),firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}
- const newUnlock=!secretUnlocked();if(newUnlock)SAVE.set('secret',true);
+ const newUnlock=!secretUnlocked()&&!!tower.boss;if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}
  $('champ-name').textContent=f.name;
- $('champ-copy').textContent=`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`;
+ $('champ-copy').textContent=tower.boss?`${f.name} conquered all ${tower.ladder.length} challengers and slew MAJIC, the Jungle Titan, in his own lair.`:`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`;
  $('champ-crowns').textContent=`TOWER CROWNS: ${list.length} / ${roster.length}`+(firstCrown?' · NEW CROWN!':'');
  $('champ-unlock').classList.toggle('hidden',!newUnlock);
  const cr=$('champ-credits');cr.innerHTML=`<div class="roll"><h3>KING OF THE JUNGLE</h3><p class="big">Game made by J. Hardy</p>
@@ -598,7 +604,7 @@ function champion(f){
  im.onload=()=>{const w=im.width/n,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
   const d=g.getImageData(0,0,c.width,c.height).data;tops=[];
   for(let i=0;i<n;i++){let t=im.height*.15;outer:for(let y=0;y<im.height;y++)for(let x=Math.floor(i*w+w*.3);x<(i+1)*w-w*.3;x++)if(d[(y*c.width+x)*4+3]>128){t=y;break outer}tops.push(t)}};
- im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=3.4`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
+ im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=3.5`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
  const conf=[];for(let i=0;i<140;i++)conf.push({x:Math.random(),y:-Math.random()*1.2,v:.08+Math.random()*.12,r:Math.random()*6.28,s:.5+Math.random(),c:['#ffd36b','#e8b95b','#fff3c4','#b94738'][i%4]});
  const t0=performance.now();let lt=t0;cancelAnimationFrame(champRaf);
  (function draw(now){
@@ -643,6 +649,9 @@ document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagati
 // Standardized fighter frames (KOTJ_V2_Fighter_Animations): one strip per animation.
 // anims[name] = [frames, frame w, frame h (stored px), pivot x, pivot y (game units)]; stored at scale s.
 const SPRITES={
+ majic:{s:0.34,anims:{"idle":[9,135,151,208,446],"walk_forward":[8,172,150,230,437],"walk_back":[6,156,149,231,437],"run":[7,217,140,193,403],"block":[6,174,140,256,411],"attack_light":[7,194,144,233,426],"attack_heavy":[6,231,143,290,426],"bite":[6,233,135,264,392],"uppercut":[7,199,134,236,392],"jump":[7,184,136,286,390],"special_pounce":[6,220,131,327,376],"hit_light":[6,185,134,324,392],"hit_heavy":[8,202,138,296,392],"knockdown_getup":[14,225,129,337,370],"victory":[8,188,182,285,530],"defeat":[7,216,139,312,395]},
+  double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
+  fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
  badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,144,203],"crouch":[4,74,60,108,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,110,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,94,208],"pounce":[8,96,60,142,176],"special_earth_slam":[7,81,61,119,179],"shadow_rampage":[10,70,61,104,179],"hit_light":[6,84,78,130,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
   double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['hit_heavy',[0,1,2,3,4]],getup:['knockdown_getup',[4,5,6,7]],ko:['hit_heavy',4]},
@@ -677,11 +686,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=3.4';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=3.5';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=3.4';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=3.5';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -767,7 +776,7 @@ function drawBanner(){
 }
 function drawFighter(f,i,ghost){
  const x=f.x,y=400+f.y;c.save();c.translate(x,y);c.scale(f.dir,1);
- const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.82,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08}[f.data.id]||.84;
+ const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.82,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08,majic:1.4}[f.data.id]||.84;
  if(!ghost){c.globalAlpha=.3;c.fillStyle='#000';c.beginPath();c.ellipse(0,-f.y,58*sizeScale,10,0,0,7);c.fill();c.globalAlpha=1;}
  if(f.instinct&&!ghost){c.shadowColor='#5fe3ff';c.shadowBlur=26;}
  if(SPRITES[f.data.id]&&drawSprite(f)){}
@@ -826,6 +835,7 @@ function drawGeneric(f,i){
  if(f.hitFlash>0){c.globalAlpha=.4;c.fillStyle='#fff';c.beginPath();c.ellipse(0,-150,70,120,0,0,7);c.fill();c.globalAlpha=1;}
 }
 
+if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 render();show('menu');
-window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={player:picks[0],ladder:roster.filter(f=>f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={player:picks[0],ladder:roster.filter(f=>f.id!==a&&f.id!=='majic'),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();
