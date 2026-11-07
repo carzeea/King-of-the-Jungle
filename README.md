@@ -260,3 +260,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - He's drawn about 30% larger than the Elephant, reaches 30% further, keeps more space around him, and has POWER 13 / SPEED 6 / DEFENSE 13. The CPU plays him at max difficulty.
 - Beating Majic plays the champion ending and **unlocks him as a playable fighter** (saved in the browser), in VS CPU, Local 2 Player and Tower. Losing to him lets you retry the Majic fight directly.
 - His frames are cut from J. Hardy's Majic sprite sheet (`docs/sprite-sheets/majic/`, `docs/art-tools/cut_majic.py`), solid, with the same 16 animations as everyone else.
+
+## Web build 3.7: Cover art
+- **Splash screen:** the KOTJ cover art shows for about 3 seconds when the game opens (tap, click or any key skips it), then fades into the title screen. On upright phones it's shown whole over a blurred copy of itself.
+- **Link previews:** sharing the site link (texts, Facebook, Discord, X) now shows the cover art (`og-cover.jpg`, 1200×630) with the title and a short description.
+- **Icons:** the Lion's face from the cover is the browser tab icon and the home-screen icon. Saving the game to a phone's home screen opens it full-screen like an app (`manifest.webmanifest`).
+- Removed a leftover debug screenshot (`dbg.png`).

@@ -388,3 +388,11 @@ body.fighting.paused .controls{top:62%}
 .fighter-tile.mystery.unlocked .mystery-art{background:radial-gradient(circle at 50% 40%,#5a3d10,#120c04 70%)}
 .fighter-tile.mystery .mystery-art span{font:italic 900 clamp(40px,5vw,64px)/1 "Barlow Condensed",Impact,sans-serif;color:#ffd36b;text-shadow:0 0 18px #ffb84a}
 #confirm-fighter:disabled{opacity:.45;cursor:not-allowed}
+
+/* Cover-art splash (build 3.7) */
+#splash{position:fixed;inset:0;z-index:999;background:#050403;display:grid;place-items:center;cursor:pointer;animation:splashIn .6s ease-out both}
+#splash .splash-blur{position:absolute;inset:-40px;background:url(assets/ui/cover-blur.webp) center/cover;filter:brightness(.55)}
+#splash img{position:relative;max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.8);animation:splashZoom 3.4s ease-out both}
+#splash .splash-hint{position:absolute;bottom:3vh;left:0;right:0;text-align:center;color:#ffe3a0;font:800 13px/1 Inter,sans-serif;letter-spacing:.3em;text-shadow:0 2px 6px #000;animation:blink 1.2s .8s infinite}
+#splash.out{opacity:0;transition:opacity .6s}
+@keyframes splashIn{from{opacity:0}to{opacity:1}}@keyframes splashZoom{from{transform:scale(1.06)}to{transform:scale(1)}}
