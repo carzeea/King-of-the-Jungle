@@ -17,7 +17,7 @@
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 4.5</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 4.6</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 4.5</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 4.6</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="section-head"><p class="eyebrow">CHARACTER SELECT</p><h2>CHOOSE YOUR FIGHTER</h2><p id="select-instruction">Player 1: choose a fighter</p></div>
@@ -57,7 +57,7 @@
         <div class="pad-left"><button data-k="l" aria-label="Move left">◀</button><button data-k="j" aria-label="Jump">▲</button><button data-k="r" aria-label="Move right">▶</button><button data-k="bl" class="wide" aria-label="Block">BLOCK</button></div>
         <div class="pad-right"><button data-k="ins" class="ins" aria-label="Instinct">INS</button><button data-k="sp" class="sp" aria-label="Special">SPC</button><button data-k="at" class="at" aria-label="Attack">ATK</button></div>
       </div>
-      <div class="controls"><div><b>PLAYER 1</b><span>A/D MOVE · W JUMP · S BLOCK · F ATTACK · S+F HEAVY BITE · G SPECIAL · S+G SHADOW · H INSTINCT</span></div><div><b>PLAYER 2</b><span>←/→ MOVE · ↑ JUMP · ↓ BLOCK · K ATTACK · ↓+K HEAVY · L SPECIAL · ↓+L SHADOW · ; INSTINCT</span></div><div><b>CONTROLLER</b><span>STICK MOVE · A/✕ JUMP · X/□ ATTACK · Y/△ SPECIAL · B/○ or LT BLOCK · RB/R1 or RT INSTINCT · START PAUSE</span></div></div>
+      <div class="controls" id="controls"></div>
       <div class="meter-row"><div class="meter-panel"><span>P1 INSTINCT</span><div class="meter-track"><div id="p1-meter" class="meter-fill"></div></div></div><div class="breaker-hint">COMBO: ATTACK → ATTACK (auto-double) → SPECIAL (ender) · GETTING COMBOED? TAP ATTACK ON THE GOLD FLASH TO BREAK</div><div class="meter-panel right"><span>P2 INSTINCT</span><div class="meter-track"><div id="p2-meter" class="meter-fill"></div></div></div></div>
       <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button><button id="fullscreen" class="secondary">FULL SCREEN</button><button class="secondary blood-btn">BLOOD: OFF</button></div>
     </section>

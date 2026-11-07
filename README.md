@@ -295,3 +295,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 4.5: Eye-catching link preview
 - The share image (`og-cover.jpg`) shows the full cover art with a gold frame, plus "PLAY FREE NOW", "NO DOWNLOAD", "11 BEASTS. ONE CROWN.", a red PLAY button and "PHONE · PC · CONTROLLER". The link title is now "KOTJ: King of the Jungle · Play Free Now".
+
+## Web build 4.6: Control guide matches the device
+- The control guide on the pause screen shows only the controls for the device being used: touch buttons on phones and tablets, keys on a keyboard (both players' keys in Local 2 Player), Xbox letters (A, X, Y, B) with an Xbox controller, and PlayStation symbols (✕ □ △ ○) with a PlayStation controller. It updates when a controller is plugged in or unplugged, and it now lists the Heavy and Shadow combos for every device.

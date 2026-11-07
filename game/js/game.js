@@ -293,7 +293,7 @@ function start(){
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
- hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
+ updateGuide();hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
  const finalBoss=tower&&tower.kind==='tower'&&tower.index===tower.ladder.length-1;
  if(tower&&tower.boss){game.intro=2.9;banner('MAJIC','THE JUNGLE TITAN · ALL 11 IN ONE',2.8,'#ffcc33');game.shake=14}
  else if(finalBoss){game.intro=2.4;banner('FINAL BOSS',`${picks[1].name} AWAITS IN ${arena.name}`,2.3,'#ff5a3a')}
@@ -312,7 +312,25 @@ function start(){
  last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);
 }
 function banner(text,sub,life=1.1,color='#ffd36b'){game.banner={text,sub,t:0,life,color}}
-function togglePause(){if(!game||game.over)return;paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
+// Control guide that matches the device: touch, keyboard, Xbox or PlayStation.
+function padKind(g){const id=(g&&g.id||'').toLowerCase();if(/xbox|xinput|045e/.test(id))return 'xbox';return /054c|playstation|dualsense|dualshock|wireless controller|ps[345]/.test(id)?'ps':'xbox'}
+function updateGuide(){
+ const el=$('controls');if(!el)return;
+ const pads=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);
+ const row=(t,s)=>`<div><b>${t}</b><span>${s}</span></div>`;
+ const XB='STICK / D-PAD MOVE · A JUMP · X ATTACK · B + X HEAVY · Y SPECIAL · B + Y SHADOW · B / LB / LT BLOCK · RB / RT INSTINCT · MENU PAUSE';
+ const PS='STICK / D-PAD MOVE · ✕ JUMP · □ ATTACK · ○ + □ HEAVY · △ SPECIAL · ○ + △ SHADOW · ○ / L1 / L2 BLOCK · R1 / R2 INSTINCT · OPTIONS PAUSE';
+ const KB1='A / D MOVE · W JUMP · F ATTACK · S + F HEAVY · G SPECIAL · S + G SHADOW · S BLOCK · H INSTINCT · ESC PAUSE';
+ const KB2='← / → MOVE · ↑ JUMP · K ATTACK · ↓ + K HEAVY · L SPECIAL · ↓ + L SHADOW · ↓ BLOCK · ; INSTINCT';
+ const TOUCH='◀ ▶ MOVE · ▲ JUMP · ATK ATTACK · BLOCK + ATK HEAVY · SPC SPECIAL · BLOCK + SPC SHADOW · BLOCK · INS INSTINCT';
+ const rows=[];
+ pads.slice(0,2).forEach((g,i)=>rows.push(row(`PLAYER ${i+1} · ${padKind(g)==='ps'?'PLAYSTATION':'XBOX'}`,padKind(g)==='ps'?PS:XB)));
+ if(!pads.length&&isTouch())rows.push(row('TOUCH',TOUCH));
+ else{if(!pads[0])rows.push(row('PLAYER 1 · KEYBOARD',KB1));if(mode==='versus'&&!pads[1])rows.push(row('PLAYER 2 · KEYBOARD',KB2))}
+ el.innerHTML=rows.join('');
+}
+addEventListener('gamepadconnected',updateGuide);addEventListener('gamepaddisconnected',updateGuide);
+function togglePause(){if(!game||game.over)return;updateGuide();paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
 function loop(t){
  if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;frameDt=real;if(!paused&&rawDt<.5)resTick(rawDt);
  if(!paused){
@@ -884,6 +902,6 @@ function drawGeneric(f,i){
 
 if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
-render();show('menu');
+render();show('menu');updateGuide();
 window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>f.id!==a&&f.id!=='majic'),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();
