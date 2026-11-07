@@ -264,5 +264,5 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 3.7: Cover art
 - **Splash screen:** the KOTJ cover art shows for about 3 seconds when the game opens (tap, click or any key skips it), then fades into the title screen. On upright phones it's shown whole over a blurred copy of itself.
 - **Link previews:** sharing the site link (texts, Facebook, Discord, X) now shows the cover art (`og-cover.jpg`, 1200×630) with the title and a short description.
-- **Icons:** the Lion's face from the cover is the browser tab icon and the home-screen icon. Saving the game to a phone's home screen opens it full-screen like an app (`manifest.webmanifest`).
+- (Build 3.8) The splash, and the link preview, always show the entire cover; nothing is cropped. The cropped Lion-face icons were removed.
 - Removed a leftover debug screenshot (`dbg.png`).
