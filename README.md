@@ -227,3 +227,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - New BLOOD setting: OFF (default) / LIGHT / HEAVY. The button is on the title menu (under Local 2 Player) and on the pause screen, and it's remembered on each device.
 - Blood amount follows the hit: light on punches, more on claw slashes, bites, specials and enders, a burst on K.O. and Ultra hits. Drops fall to the floor and leave stains; LIGHT stains fade during the round, HEAVY stains stay faintly. Blocked hits never bleed.
 - Sharper fighters: high-detail art now loads on most screens (not just very large ones), and the camera zooms in less, so close-ups no longer turn blurry.
+
+## Web build 3.0: Solid fighters (no more see-through armor)
+- Fixed: 10 fighters (all except Badger) had see-through holes in their chests, arms and legs. The first cutout removed every dark pixel from the black sprite sheets, which also removed the dark-gray armor.
+- Every frame was re-cut from the original sheets in `docs/sprite-sheets/`. Only black that connects to the outside of the fighter (and real gaps, such as between an arm and the body) is removed now, so the bodies are fully solid.
+- Frame sizes and anchor points are unchanged, so no game code changed. Badger was already solid and is untouched.
+- The tool is `docs/art-tools/recut_solid.py` (`python3 docs/art-tools/recut_solid.py lion tiger ...`).
