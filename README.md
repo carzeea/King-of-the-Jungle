@@ -246,3 +246,11 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 3.3: Fully solid fighters
 - A stricter cutout for all 10 sheet-based fighters (everyone except Badger). Some sheets (Wolf especially) have a dark gray background instead of pure black, so dark fur and armor still showed the arena through them. Background is now judged against each sheet's own background level, narrow leaks are sealed, and everything inside a fighter's outline is solid. Only real gaps, such as between an arm and the body, stay clear.
 - Fighter images carry a version tag so browsers load the new art instead of old saved copies.
+
+## Web build 3.4: Tower champion ending
+- **Final boss intro:** the last Tower fight opens with a red "FINAL BOSS" banner ("ELEPHANT AWAITS IN MAJIC'S LAIR") and a longer intro, and the announcer calls "Final fight!".
+- **Champion ending:** beating the Tower plays an ending scene in Majic's Lair. Your fighter does their victory animation, a gold crown drops onto their head, confetti falls and gold rays spin. "KING OF THE JUNGLE" is announced, and credits roll ending with "Game made by J. Hardy". Continue goes to the results screen.
+- **Saved crowns:** each fighter who beats the Tower earns a gold crown on their select-screen tile, and the ending shows "TOWER CROWNS: x / 11". Crowns are saved in the player's browser.
+- **Secret unlock:** a 12th "LOCKED" tile is on the fighter select. Beating the Tower once unlocks it ("???", the beast forged from all 11 fighters). It isn't playable until that character's art is added.
+- The header build label now always matches the title screen. It had been stuck on "2.9".
+- Holden hasn't recorded "Final fight!" and "King of the Jungle!" yet, so those use the browser voice until his clips are added.
