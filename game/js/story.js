@@ -2,7 +2,8 @@
 /* KING OF THE JUNGLE · STORY TEXT
    Edit the text in quotes. Any line left empty ("") is skipped in the game, so
    half-finished text never shows. \n starts a new paragraph.
-   fighters.<id>: intro (before fight 1), clues "3"/"6"/"9" (after those fights), ending (champion screen).
+   fighters.<id>: intro (before fight 1), clues "3"/"6"/"9" (after those fights), ending (champion screen),
+   trueEnding (that fighter's own reveal after defeating the secret boss with them; may name him).
    forgotten: the secret tower. Only reveal, trueEnding and history may say the secret boss's name. */
 window.KOTJ_STORY={
  "fighters": {
@@ -13,7 +14,8 @@ window.KOTJ_STORY={
     "6": "Scratched inside the old armor's collar, worn almost smooth, are words in his father's hand: \"Eleven went up. If I do not come back down, do not follow.\"",
     "9": "Every night now, the same dream: a tower of black stone, taller than the trees, standing where no tower should be. Badger wakes up digging at the dirt, trying to get under it."
    },
-   "ending": "Badger stands at the top of the Tower with the crown in his claws, and feels nothing.\nThe drums have not stopped. They have only gotten louder, and now they are coming from somewhere higher still."
+   "ending": "Badger stands at the top of the Tower with the crown in his claws, and feels nothing.\nThe drums have not stopped. They have only gotten louder, and now they are coming from somewhere higher still.",
+   "trueEnding": "As MAJIC falls, the armor plates on his shoulders crack apart, and one of them clatters at Badger's feet. On it is the crowned-claw crest, the same one Badger has worn on his chest all his life.\nIt was his father's. His father wore it into the tower so his son would know where to look.\nBadger finally understands the drums. They were never telling him to fight. They were telling him to come get his father.\nHe buries the plate beside the black tower and does not ask why anymore. He knows."
   },
   "wolf": {
    "intro": "Wolf left the pack the night the moon turned red. He could not explain it to them. He could barely explain it to himself.\nHis mother left on a night just like this one, when he was a pup. The pack says she abandoned them. Wolf has never believed it.\nSomething is calling him toward the crown, and it sounds like her howl.",
@@ -22,7 +24,8 @@ window.KOTJ_STORY={
     "6": "In the ruins, Wolf finds a howl carved into stone, a pack mark only his mother ever used. Beside it are ten other marks he does not recognize, all pointing the same direction: up.",
     "9": "Wolf can smell her now, faint and old, on the wind coming from the north. It is mixed with something else. Something big. Something that should not smell like eleven different animals at once."
    },
-   "ending": "The crowd chants his name, but Wolf only hears the silence after it.\nHe won the crown his mother never came back with. He still does not know why he wanted it, only that she wanted it first."
+   "ending": "The crowd chants his name, but Wolf only hears the silence after it.\nHe won the crown his mother never came back with. He still does not know why he wanted it, only that she wanted it first.",
+   "trueEnding": "The wolf's head at MAJIC's belt falls loose, and for a moment its eyes are not empty. A gray wolf with a scar across one eye stands in the light, and howls the pack mark only she ever used.\nWolf howls back. The pack hears it, all the way across the jungle.\nShe never abandoned them. She went up to make the jungle safe for her pup. Wolf leads the pack home under a moon that is finally white again."
   },
   "hyena": {
    "intro": "Everyone thinks Hyena is laughing. Hyena is never laughing.\nThe sound comes out when he is afraid, and he has been afraid since the night his mother walked into the dark and the whole clan pretended she never existed.\nHe signed up for the tournament as a joke. That is what he tells himself.",
@@ -31,7 +34,8 @@ window.KOTJ_STORY={
     "6": "Hyena finds his mother's bone charm hanging from a dead branch at the edge of the old jungle. It was not lost. It was left, like a marker on a trail.",
     "9": "Every hyena knows to stay away from the black stone in the north. Hyena always thought it was a story to scare pups.\nThe charm is warm in his paw. It is pointing at the black stone."
    },
-   "ending": "Hyena wins the crown, and for the first time in years, he does not laugh.\nHe looks north, and something up there looks back."
+   "ending": "Hyena wins the crown, and for the first time in years, he does not laugh.\nHe looks north, and something up there looks back.",
+   "trueEnding": "When MAJIC's eleven voices leave him, one of them is laughing. It is not cruel. It is the warm, wild laugh Hyena has not heard since he was a pup.\nHis mother did not vanish into the dark. She climbed into it, on purpose, for the clan that refused to say her name.\nHyena walks home and says it in front of every elder, out loud.\nThen he laughs, and for the first time in his life he means it."
   },
   "leopard": {
    "intro": "Leopard is the fastest thing in the jungle, and she has spent her whole life running toward something she cannot see.\nHer mother vanished without a trace. Leopards leave no trace. That was the lesson. But a mother should leave something.\nNow the tournament has started, and her feet will not let her run anywhere else.",
@@ -40,7 +44,8 @@ window.KOTJ_STORY={
     "6": "Clawed into the bark of the tallest tree, at a height only a leopard could reach: her mother's mark, and an arrow. The arrow does not point across the jungle. It points at the sky.",
     "9": "From the treetops, on a clear night, Leopard sees it for the first time: a black tower on the horizon, half hidden in cloud. She has climbed that tree a thousand times. The tower was never there before."
    },
-   "ending": "The crown is hers. Leopard stands still for the first time in her life.\nIt does not feel like an ending. It feels like the starting line."
+   "ending": "The crown is hers. Leopard stands still for the first time in her life.\nIt does not feel like an ending. It feels like the starting line.",
+   "trueEnding": "MAJIC's spotted legs buckle and the spots fade, one by one, until a single golden mark is left glowing on the stone. It is the same mark her mother clawed into the tallest tree.\nThe arrow on that tree was never pointing at the sky. It was pointing here, at the end of the race.\nLeopard sits at the summit and watches the sun come up. For the first time in her life, she has nowhere she needs to run."
   },
   "jaguar": {
    "intro": "Jaguar does not believe in signs. She believes in strength.\nBut she has dreamed of a crown every night since her mother disappeared, and the dream always ends the same way: her mother climbing, and never reaching the top.\nJaguar has decided to finish the climb herself.",
@@ -49,7 +54,8 @@ window.KOTJ_STORY={
     "6": "The Crocodile does not want to talk, but Jaguar makes him. \"They called themselves the Pact. Eleven champions, one from every kind. They went to take the crown from whoever wears the real one.\"\nJaguar has never heard of a real one.",
     "9": "Jaguar finds an old trophy wall in a ruined temple: carvings of beasts with their heads bowed before something enormous. Its face has been scratched out by claws, over and over, as if someone could not stand to look at it."
    },
-   "ending": "Jaguar takes the crown and holds it up to the light. It is beautiful. It is also smaller than the one in the carving.\nThis is not the real crown. Somewhere, someone is still wearing that one."
+   "ending": "Jaguar takes the crown and holds it up to the light. It is beautiful. It is also smaller than the one in the carving.\nThis is not the real crown. Somewhere, someone is still wearing that one.",
+   "trueEnding": "The scratched-out face in the temple carving finally makes sense. It was MAJIC, and the claw marks were her mother's, made the night the Pact set out, so no one else would ever bow to him.\nJaguar lifts the real crown from MAJIC's head. It is heavy with eleven generations of stolen strength.\nShe does not put it on. She breaks it in half, and her mother's strength goes back into the jungle where it belongs."
   },
   "crocodile": {
    "intro": "Crocodile is older than most fighters in the tournament and slower than all of them. He does not care.\nHe has waited at the edge of the same river for years, waiting for his father to swim back. He is done waiting.\nHe does not know why the crown matters. He only knows that his father went looking for it.",
@@ -58,7 +64,8 @@ window.KOTJ_STORY={
     "6": "In the mud of the riverbed, Crocodile finds one of his father's scales, as big as a shield and scored with claw marks far too large to belong to anything he has ever seen.",
     "9": "The old ones of the swamp will not say what lives in the north. They only say this: \"Your father was the toughest of us. He bit it once. That is the only reason we still talk about him.\""
    },
-   "ending": "The crown sits on Crocodile's head, and the river is quiet for the first time in years.\nThen, far upstream, something heavy slides into the water."
+   "ending": "The crown sits on Crocodile's head, and the river is quiet for the first time in years.\nThen, far upstream, something heavy slides into the water.",
+   "trueEnding": "The crocodile tail stops thrashing. Crocodile walks to it slowly and finds the old bite mark on the scales, his father's bite, the one the swamp still talks about.\nHis father hurt the giant, and the wound never healed. That is why MAJIC needed a new generation. He was weakening.\nCrocodile carries his father's scale back to the river and drops it in the current.\nThe river is quiet again. This time, it is a good quiet."
   },
   "lion": {
    "intro": "Everyone already calls Lion a king. He has never felt like one.\nHis father ruled before him, until the night he walked out of the pride lands wearing his crown and never came back. The pride says he was a coward who ran.\nLion entered the tournament to prove the pride wrong. He tells himself that is the only reason.",
@@ -67,7 +74,8 @@ window.KOTJ_STORY={
     "6": "Lion finds his father's crown half buried at the foot of a cliff, bent and scratched. Kings do not drop their crowns.\nSomeone took it off him. Someone stronger.",
     "9": "Every lion in the pride has the same dream, the old lioness admits. A roar from the north that sounds almost like theirs, but wrong, mixed with a dozen other voices.\nLion heard it last night for the first time. It sounded like his father."
    },
-   "ending": "Lion wears the crown his father lost, and the pride finally bows.\nBut Lion is not looking at them. He is looking north, where the roar came from, and he is starting to understand why his father had to go."
+   "ending": "Lion wears the crown his father lost, and the pride finally bows.\nBut Lion is not looking at them. He is looking north, where the roar came from, and he is starting to understand why his father had to go.",
+   "trueEnding": "MAJIC's mane falls away like smoke, and inside it Lion sees the true shape of a lion: his father, crownless and smiling.\n\"I did not run,\" his father's voice says. \"I went up so that one day you would not have to.\"\nLion takes the crown off MAJIC's head. It is his father's crown, the one that was bent at the cliff, reforged into something monstrous.\nHe straightens it, places it back on the summit, and walks down to the pride lands. He does not need to wear a crown anymore. He is a king."
   },
   "tiger": {
    "intro": "Tiger does not fight to win. Tiger fights because when he stops moving, he remembers.\nHe remembers the stripes on his mother's back disappearing into the tall grass. He remembers being told she would come back. She did not.\nThe tournament is just somewhere to keep moving. At least, that is what he thought.",
@@ -76,7 +84,8 @@ window.KOTJ_STORY={
     "6": "In an abandoned camp, Tiger finds a circle of eleven sleeping spots, one shaped exactly like his mother. In the center are ashes, and a single word clawed into a stone: TOGETHER.",
     "9": "Hunters in the north have a story about a beast with stripes on its arms and spots on its legs, and a tail that does not belong to a cat.\nTiger tells himself it is just a story. His paws are shaking."
    },
-   "ending": "Tiger takes the crown, and for one moment he is perfectly still.\nThen he hears it, far away in the north: something moving that carries his mother's stripes."
+   "ending": "Tiger takes the crown, and for one moment he is perfectly still.\nThen he hears it, far away in the north: something moving that carries his mother's stripes.",
+   "trueEnding": "The stripes on MAJIC's arms fade into light. Tiger watches them go and finally lets himself stand still.\nHe remembers her now, all of it: not just the stripes disappearing into the grass, but her turning back once, before she left, to look at him.\nShe was not leaving him. She was leaving for him.\nTiger stays at the summit until sunset. He is not running anymore, and the memories do not hurt."
   },
   "grizzly": {
    "intro": "Grizzly is a mountain with fur on it. Nobody in the jungle can move him, and nobody has tried in years.\nBut every spring he wakes from his long sleep expecting to see his father at the mouth of the cave. Every spring the cave is empty.\nThis year Grizzly woke up early, angry, and pointed north.",
@@ -85,7 +94,8 @@ window.KOTJ_STORY={
     "6": "A traveling Hippo tells him: \"Your father was the strongest of the eleven. They put him in front, to take the first hit.\"\n\"The first hit from what?\" Grizzly asks. The Hippo goes quiet.",
     "9": "At the top of a ridge, Grizzly finds the place where the road ends. Beyond it, the clouds have a shape, the outline of something tall and black that the wind will not move.\nHe smells his father there, strongest of all."
    },
-   "ending": "Grizzly takes the crown and roars until the mountains answer.\nSomething else answers too. It is wearing his father's arms."
+   "ending": "Grizzly takes the crown and roars until the mountains answer.\nSomething else answers too. It is wearing his father's arms.",
+   "trueEnding": "MAJIC's massive arms fall still, and Grizzly knows them instantly. He knows the claw marks on the trees, the paws he measured himself against.\nHis father took the first hit for the Pact. He held MAJIC long enough for the others to strike, and MAJIC kept him for it.\nGrizzly carries the spirit of his father's strength down the mountain and back to the cave.\nWhen spring comes, he wakes up and the cave does not feel empty. It feels like home."
   },
   "hippo": {
    "intro": "Hippo is the most dangerous animal in the jungle, and also the most patient. She has waited a long time for her mother to come home.\nThe herd says she drowned. Hippos do not drown.\nWhen the tournament was announced, Hippo walked out of the water for the first time in years.",
@@ -94,7 +104,8 @@ window.KOTJ_STORY={
     "6": "In the dried mud where her mother used to rest, Hippo finds tracks leading out of the water. Huge ones, heavier than any hippo. They walk in, circle the spot, and walk back out, as if something came looking for her.",
     "9": "The water has been warm all season, the herd says, as if something enormous is breathing somewhere upstream.\nHippo dives down and listens. Far away, under the riverbed, something huge has a heartbeat."
    },
-   "ending": "Hippo stands on the top of the Tower, dripping and furious, holding the crown.\nShe will not wait any longer. She has a tower to climb, even if no one else can see it yet."
+   "ending": "Hippo stands on the top of the Tower, dripping and furious, holding the crown.\nShe will not wait any longer. She has a tower to climb, even if no one else can see it yet.",
+   "trueEnding": "The giant heartbeat Hippo heard under the riverbed was never MAJIC's. It was her mother's, still beating inside him, still fighting him from the inside all these years. That is why the water stayed warm.\nWhen MAJIC falls, the heartbeat slows, and then it is gone, gently, like someone falling asleep.\nHippo goes back to the river. The water is cool again. She floats in her mother's old resting spot, and she is not waiting for anyone anymore."
   },
   "elephant": {
    "intro": "Elephant never forgets. That is the problem. He remembers everything except the one thing that matters: where his father went.\nHe remembers the night his father touched his trunk to his forehead and said \"I will be back before the rains.\" The rains have come eleven times since then.\nThe crown means nothing to Elephant. Remembering means everything.",
@@ -103,7 +114,8 @@ window.KOTJ_STORY={
     "6": "The Hippo he defeats finally tells him: \"Your father led them. He was the one who found the tower. He said it had been waiting for someone to come.\"",
     "9": "Elephant dreams of tusks: his father's tusks, white and curved and unmistakable. In the dream they are not on his father. They are on something else, something with a lion's mane and wings.\nElephant wakes up screaming, and for the first time he wishes he could forget."
    },
-   "ending": "Elephant has the crown and the cheers of the whole jungle, and he gives both away.\nHe is the last one. All eleven have climbed now. All eleven have the same question. Somewhere, a door that was never there is opening."
+   "ending": "Elephant has the crown and the cheers of the whole jungle, and he gives both away.\nHe is the last one. All eleven have climbed now. All eleven have the same question. Somewhere, a door that was never there is opening.",
+   "trueEnding": "The tusks on MAJIC's face are white and curved and unmistakable.\nElephant touches them with his trunk, the way his father touched his forehead the night he left, and he remembers the promise: \"I will be back before the rains.\"\nHe carries his father's tusks down the mountain to the graveyard, to the one empty resting place, and lays them there as the first rain begins.\nHis father came back before the rains after all. And Elephant, who never forgets, will remember this most of all."
   }
  },
  "forgotten": {

@@ -660,7 +660,7 @@ function champion(f){
    cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-4*dpr*p.s,-2*dpr*p.s,8*dpr*p.s,4*dpr*p.s);cx.restore()}
   champRaf=requestAnimationFrame(draw)})(t0);
 }
-$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten')storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result'));else show('result')};
+$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten'){const p=tower.player;storyCard({face:p.id,eyebrow:'THE TRUTH, AT LAST',title:p.name,text:storyOf(p.id).trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result')))}else show('result')};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;

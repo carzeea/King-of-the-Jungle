@@ -276,3 +276,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 4.0: The story is written
 - All story text is in: an intro, three clues and an ending for each of the 11 fighters, plus the secret tower's entrance, three echo lines, the summit, the truth, the true ending and the tower's history. The game text is in `game/js/story.js`, and a readable copy is in `docs/STORY.md`.
 - The theme: every fighter feels a pull toward the crown ("the drums") they can't explain. Each one is missing a parent. One generation ago, the eleven parents formed the Pact and climbed a black tower that's on no map, and none came back. Only the truth, true ending and history name MAJIC.
+
+## Web build 4.1: Each fighter's true story
+- Defeating MAJIC now reveals the true story of the fighter you used: what became of their missing parent (the trophy MAJIC took from them) and why they felt the drums. It shows as a card after the true-ending screen, before the tower's history. There are 11 different reveals, one per fighter (`trueEnding` in `game/js/story.js`, also in `docs/STORY.md`).

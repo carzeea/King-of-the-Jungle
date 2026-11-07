@@ -342,6 +342,111 @@ Elephant has the crown and the cheers of the whole jungle, and he gives both awa
 
 He is the last one. All eleven have climbed now. All eleven have the same question. Somewhere, a door that was never there is opening.
 
+
+## Each fighter's true story (shown after defeating MAJIC with that fighter)
+
+### Badger
+
+As MAJIC falls, the armor plates on his shoulders crack apart, and one of them clatters at Badger's feet. On it is the crowned-claw crest, the same one Badger has worn on his chest all his life.
+
+It was his father's. His father wore it into the tower so his son would know where to look.
+
+Badger finally understands the drums. They were never telling him to fight. They were telling him to come get his father.
+
+He buries the plate beside the black tower and does not ask why anymore. He knows.
+
+### Wolf
+
+The wolf's head at MAJIC's belt falls loose, and for a moment its eyes are not empty. A gray wolf with a scar across one eye stands in the light, and howls the pack mark only she ever used.
+
+Wolf howls back. The pack hears it, all the way across the jungle.
+
+She never abandoned them. She went up to make the jungle safe for her pup. Wolf leads the pack home under a moon that is finally white again.
+
+### Hyena
+
+When MAJIC's eleven voices leave him, one of them is laughing. It is not cruel. It is the warm, wild laugh Hyena has not heard since he was a pup.
+
+His mother did not vanish into the dark. She climbed into it, on purpose, for the clan that refused to say her name.
+
+Hyena walks home and says it in front of every elder, out loud.
+
+Then he laughs, and for the first time in his life he means it.
+
+### Leopard
+
+MAJIC's spotted legs buckle and the spots fade, one by one, until a single golden mark is left glowing on the stone. It is the same mark her mother clawed into the tallest tree.
+
+The arrow on that tree was never pointing at the sky. It was pointing here, at the end of the race.
+
+Leopard sits at the summit and watches the sun come up. For the first time in her life, she has nowhere she needs to run.
+
+### Jaguar
+
+The scratched-out face in the temple carving finally makes sense. It was MAJIC, and the claw marks were her mother's, made the night the Pact set out, so no one else would ever bow to him.
+
+Jaguar lifts the real crown from MAJIC's head. It is heavy with eleven generations of stolen strength.
+
+She does not put it on. She breaks it in half, and her mother's strength goes back into the jungle where it belongs.
+
+### Crocodile
+
+The crocodile tail stops thrashing. Crocodile walks to it slowly and finds the old bite mark on the scales, his father's bite, the one the swamp still talks about.
+
+His father hurt the giant, and the wound never healed. That is why MAJIC needed a new generation. He was weakening.
+
+Crocodile carries his father's scale back to the river and drops it in the current.
+
+The river is quiet again. This time, it is a good quiet.
+
+### Lion
+
+MAJIC's mane falls away like smoke, and inside it Lion sees the true shape of a lion: his father, crownless and smiling.
+
+"I did not run," his father's voice says. "I went up so that one day you would not have to."
+
+Lion takes the crown off MAJIC's head. It is his father's crown, the one that was bent at the cliff, reforged into something monstrous.
+
+He straightens it, places it back on the summit, and walks down to the pride lands. He does not need to wear a crown anymore. He is a king.
+
+### Tiger
+
+The stripes on MAJIC's arms fade into light. Tiger watches them go and finally lets himself stand still.
+
+He remembers her now, all of it: not just the stripes disappearing into the grass, but her turning back once, before she left, to look at him.
+
+She was not leaving him. She was leaving for him.
+
+Tiger stays at the summit until sunset. He is not running anymore, and the memories do not hurt.
+
+### Grizzly
+
+MAJIC's massive arms fall still, and Grizzly knows them instantly. He knows the claw marks on the trees, the paws he measured himself against.
+
+His father took the first hit for the Pact. He held MAJIC long enough for the others to strike, and MAJIC kept him for it.
+
+Grizzly carries the spirit of his father's strength down the mountain and back to the cave.
+
+When spring comes, he wakes up and the cave does not feel empty. It feels like home.
+
+### Hippo
+
+The giant heartbeat Hippo heard under the riverbed was never MAJIC's. It was her mother's, still beating inside him, still fighting him from the inside all these years. That is why the water stayed warm.
+
+When MAJIC falls, the heartbeat slows, and then it is gone, gently, like someone falling asleep.
+
+Hippo goes back to the river. The water is cool again. She floats in her mother's old resting spot, and she is not waiting for anyone anymore.
+
+### Elephant
+
+The tusks on MAJIC's face are white and curved and unmistakable.
+
+Elephant touches them with his trunk, the way his father touched his forehead the night he left, and he remembers the promise: "I will be back before the rains."
+
+He carries his father's tusks down the mountain to the graveyard, to the one empty resting place, and lays them there as the first rain begins.
+
+His father came back before the rains after all. And Elephant, who never forgets, will remember this most of all.
+
 ## The Forgotten Tower (secret)
 
 **Entering**
