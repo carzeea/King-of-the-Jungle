@@ -272,3 +272,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - **Story cards:** each fighter's Tower can show an intro (before fight 1), clues after fights 3, 6 and 9, and an ending on the champion screen. The text lives in `game/js/story.js`; empty lines are skipped, so unfinished story never shows.
 - **The secret tower:** winning all 11 fighter Towers (11 crowns) shows "SOMETHING HAS AWAKENED", and an unnamed "? ? ?" option appears on the main menu. Inside, the chosen fighter faces 3 shadowy echoes ("FALLEN …", gray with a purple glow) in Shadow Swamp, Frozen Kingdom and Inferno Fortress. Then comes the summit, the reveal, and MAJIC in Majic's Lair.
 - **After defeating MAJIC:** "THE TRUE KING" ending (true-ending text), the tower's history card, and MAJIC joins the roster with his full profile and moves. Saved per device.
+
+## Web build 4.0: The story is written
+- All story text is in: an intro, three clues and an ending for each of the 11 fighters, plus the secret tower's entrance, three echo lines, the summit, the truth, the true ending and the tower's history. The game text is in `game/js/story.js`, and a readable copy is in `docs/STORY.md`.
+- The theme: every fighter feels a pull toward the crown ("the drums") they can't explain. Each one is missing a parent. One generation ago, the eleven parents formed the Pact and climbed a black tower that's on no map, and none came back. Only the truth, true ending and history name MAJIC.
