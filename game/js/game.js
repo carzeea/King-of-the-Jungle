@@ -183,7 +183,7 @@ function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id
 $('confirm-fighter').onclick=()=>{
  ac();picks[step-1]=chosen;
  if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>f.id!==chosen.id&&f.id!=='majic'),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();
-  return storyCard({face:chosen.id,eyebrow:'TOWER MODE',title:chosen.name,text:storyOf(chosen.id).intro},start)}
+  return start()}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
   const others=roster.filter(f=>f.id!==chosen.id&&f.id!=='majic').sort(()=>Math.random()-.5).slice(0,3).map(f=>({...f,name:'FALLEN '+f.name,echo:true}));
   tower={kind:'forgotten',player:chosen,ladder:others,index:0};picks=[chosen,others[0]];arena=towerArena();
@@ -575,8 +575,7 @@ $('tower-next').onclick=()=>{
   return storyCard({dark:1,title:'THE SUMMIT',text:STORY.forgotten.summit},()=>storyCard({dark:1,title:'THE TRUTH',text:STORY.forgotten.reveal},start))}
  picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
  if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
- const clue=(storyOf(tower.player.id).clues||{})[tower.index];
- storyCard({face:tower.player.id,eyebrow:`AFTER FIGHT ${tower.index}`,title:'A CLUE',text:clue},start)};
+ start()};
 $('rematch').onclick=()=>{if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
@@ -618,7 +617,7 @@ function champion(f){
  else{newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}$('champ-unlock').textContent='MAJIC HAS JOINED THE ROSTER'}
  forgottenMenu();
  $('champ-name').textContent=f.name;
- $('champ-copy').textContent=secret?(STORY.forgotten.trueEnding||`${f.name} reached the summit and defeated MAJIC.`):(storyOf(f.id).ending||`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
+ $('champ-copy').textContent=secret?(STORY.forgotten.trueEnding||`${f.name} reached the summit and defeated MAJIC.`):(`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
  $('champ-crowns').textContent=secret?'':`TOWER CROWNS: ${list.filter(id=>BASE_IDS.includes(id)).length} / ${BASE_IDS.length}`+(firstCrown?' · NEW CROWN!':'');
  $('champ-unlock').classList.toggle('hidden',!(newUnlock||awaken));
  document.querySelector('#champion .champ-text h2').textContent=secret?'THE TRUE KING':'KING OF THE JUNGLE';
@@ -660,7 +659,11 @@ function champion(f){
    cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-4*dpr*p.s,-2*dpr*p.s,8*dpr*p.s,4*dpr*p.s);cx.restore()}
   champRaf=requestAnimationFrame(draw)})(t0);
 }
-$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten'){const p=tower.player;storyCard({face:p.id,eyebrow:'THE TRUTH, AT LAST',title:p.name,text:storyOf(p.id).trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result')))}else show('result')};
+$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten'){const p=tower.player,S=storyOf(p.id),cl=S.clues||{},clues=[cl[3],cl[6],cl[9]].filter(Boolean).join('\n');
+  storyCard({face:p.id,eyebrow:`${p.name} · PART 1`,title:'WHY THEY CAME',text:S.intro},()=>
+  storyCard({face:p.id,eyebrow:`${p.name} · PART 2`,title:'THE CLUES',text:clues},()=>
+  storyCard({face:p.id,eyebrow:`${p.name} · PART 3`,title:'THE CROWN',text:S.ending},()=>
+  storyCard({face:p.id,eyebrow:`${p.name} · PART 4`,title:'THE TRUTH, AT LAST',text:S.trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result'))))))}else show('result')};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;

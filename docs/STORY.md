@@ -1,5 +1,7 @@
 # King of the Jungle: Story
 
+Every fighter's story stays hidden during their Tower. It is revealed all at once, as a big reveal, only after that fighter defeats MAJIC in the secret tower: Part 1 Why They Came (intro), Part 2 The Clues, Part 3 The Crown (ending), Part 4 The Truth, then the history of the tower.
+
 ## Badger
 
 **Intro**
@@ -10,17 +12,17 @@ So when the drums started in his chest, the ones only he could hear, he did not 
 
 He tells everyone he wants the crown. He does not know who taught him to want it.
 
-**Clue after fight 3**
+**Clue 1**
 
 The Wolf he just defeated stares at Badger's armor. "That crest on your shoulder. A crowned claw. I have seen it before."
 
 Badger has worn that armor his whole life. He never once looked at the crest.
 
-**Clue after fight 6**
+**Clue 2**
 
 Scratched inside the old armor's collar, worn almost smooth, are words in his father's hand: "Eleven went up. If I do not come back down, do not follow."
 
-**Clue after fight 9**
+**Clue 3**
 
 Every night now, the same dream: a tower of black stone, taller than the trees, standing where no tower should be. Badger wakes up digging at the dirt, trying to get under it.
 
@@ -40,15 +42,15 @@ His mother left on a night just like this one, when he was a pup. The pack says 
 
 Something is calling him toward the crown, and it sounds like her howl.
 
-**Clue after fight 3**
+**Clue 1**
 
 The beaten Hyena laughs through broken teeth. "Your mother? Gray coat, scar across one eye? She came through here years ago. Asked for the old road north. Nobody asks for the old road."
 
-**Clue after fight 6**
+**Clue 2**
 
 In the ruins, Wolf finds a howl carved into stone, a pack mark only his mother ever used. Beside it are ten other marks he does not recognize, all pointing the same direction: up.
 
-**Clue after fight 9**
+**Clue 3**
 
 Wolf can smell her now, faint and old, on the wind coming from the north. It is mixed with something else. Something big. Something that should not smell like eleven different animals at once.
 
@@ -68,17 +70,17 @@ The sound comes out when he is afraid, and he has been afraid since the night hi
 
 He signed up for the tournament as a joke. That is what he tells himself.
 
-**Clue after fight 3**
+**Clue 1**
 
 The clan elders refused to say her name, but the Leopard he just beat did not.
 
 "Your mother made a deal with the others. Eleven of them, the strongest of their kind. They swore to climb something together."
 
-**Clue after fight 6**
+**Clue 2**
 
 Hyena finds his mother's bone charm hanging from a dead branch at the edge of the old jungle. It was not lost. It was left, like a marker on a trail.
 
-**Clue after fight 9**
+**Clue 3**
 
 Every hyena knows to stay away from the black stone in the north. Hyena always thought it was a story to scare pups.
 
@@ -100,17 +102,17 @@ Her mother vanished without a trace. Leopards leave no trace. That was the lesso
 
 Now the tournament has started, and her feet will not let her run anywhere else.
 
-**Clue after fight 3**
+**Clue 1**
 
 The Jaguar circles her after the fight. "Your mother and mine left together. Same night, same moon. Did yours ever tell you where?"
 
 Leopard did not even know they had known each other.
 
-**Clue after fight 6**
+**Clue 2**
 
 Clawed into the bark of the tallest tree, at a height only a leopard could reach: her mother's mark, and an arrow. The arrow does not point across the jungle. It points at the sky.
 
-**Clue after fight 9**
+**Clue 3**
 
 From the treetops, on a clear night, Leopard sees it for the first time: a black tower on the horizon, half hidden in cloud. She has climbed that tree a thousand times. The tower was never there before.
 
@@ -130,19 +132,19 @@ But she has dreamed of a crown every night since her mother disappeared, and the
 
 Jaguar has decided to finish the climb herself.
 
-**Clue after fight 3**
+**Clue 1**
 
 Her mother's hunting grounds are untouched, as if she left in the middle of a hunt and never came back for the kill.
 
 In the mud, Jaguar finds tracks. Eleven sets, all different, all heading north together.
 
-**Clue after fight 6**
+**Clue 2**
 
 The Crocodile does not want to talk, but Jaguar makes him. "They called themselves the Pact. Eleven champions, one from every kind. They went to take the crown from whoever wears the real one."
 
 Jaguar has never heard of a real one.
 
-**Clue after fight 9**
+**Clue 3**
 
 Jaguar finds an old trophy wall in a ruined temple: carvings of beasts with their heads bowed before something enormous. Its face has been scratched out by claws, over and over, as if someone could not stand to look at it.
 
@@ -162,15 +164,15 @@ He has waited at the edge of the same river for years, waiting for his father to
 
 He does not know why the crown matters. He only knows that his father went looking for it.
 
-**Clue after fight 3**
+**Clue 1**
 
 The river talks to those who listen long enough. Tonight it says the same thing three times: eleven crossed here, going north, and none crossed back.
 
-**Clue after fight 6**
+**Clue 2**
 
 In the mud of the riverbed, Crocodile finds one of his father's scales, as big as a shield and scored with claw marks far too large to belong to anything he has ever seen.
 
-**Clue after fight 9**
+**Clue 3**
 
 The old ones of the swamp will not say what lives in the north. They only say this: "Your father was the toughest of us. He bit it once. That is the only reason we still talk about him."
 
@@ -190,19 +192,19 @@ His father ruled before him, until the night he walked out of the pride lands we
 
 Lion entered the tournament to prove the pride wrong. He tells himself that is the only reason.
 
-**Clue after fight 3**
+**Clue 1**
 
 An old lioness pulls Lion aside after the fight. "Your father did not run, cub. He went to challenge something. Ten others went with him. They wanted to end it."
 
 "End what?" Lion asks. She does not answer.
 
-**Clue after fight 6**
+**Clue 2**
 
 Lion finds his father's crown half buried at the foot of a cliff, bent and scratched. Kings do not drop their crowns.
 
 Someone took it off him. Someone stronger.
 
-**Clue after fight 9**
+**Clue 3**
 
 Every lion in the pride has the same dream, the old lioness admits. A roar from the north that sounds almost like theirs, but wrong, mixed with a dozen other voices.
 
@@ -224,17 +226,17 @@ He remembers the stripes on his mother's back disappearing into the tall grass. 
 
 The tournament is just somewhere to keep moving. At least, that is what he thought.
 
-**Clue after fight 3**
+**Clue 1**
 
 The Grizzly he defeated mutters as he falls: "Stripes like those. I have seen them before. Not on a tiger."
 
 Tiger asks what that means. The Grizzly does not get up to explain.
 
-**Clue after fight 6**
+**Clue 2**
 
 In an abandoned camp, Tiger finds a circle of eleven sleeping spots, one shaped exactly like his mother. In the center are ashes, and a single word clawed into a stone: TOGETHER.
 
-**Clue after fight 9**
+**Clue 3**
 
 Hunters in the north have a story about a beast with stripes on its arms and spots on its legs, and a tail that does not belong to a cat.
 
@@ -256,19 +258,19 @@ But every spring he wakes from his long sleep expecting to see his father at the
 
 This year Grizzly woke up early, angry, and pointed north.
 
-**Clue after fight 3**
+**Clue 1**
 
 His father's claw marks are on the trees along the old road, very high and very deep. Grizzly reaches up and puts his own paw beside them. He is bigger now than his father ever was.
 
 It does not make him feel any better.
 
-**Clue after fight 6**
+**Clue 2**
 
 A traveling Hippo tells him: "Your father was the strongest of the eleven. They put him in front, to take the first hit."
 
 "The first hit from what?" Grizzly asks. The Hippo goes quiet.
 
-**Clue after fight 9**
+**Clue 3**
 
 At the top of a ridge, Grizzly finds the place where the road ends. Beyond it, the clouds have a shape, the outline of something tall and black that the wind will not move.
 
@@ -290,15 +292,15 @@ The herd says she drowned. Hippos do not drown.
 
 When the tournament was announced, Hippo walked out of the water for the first time in years.
 
-**Clue after fight 3**
+**Clue 1**
 
 The Elephant she beats is an old friend of the family. He looks at her sadly. "Your mother made me promise not to tell you. She went with the others to the black tower. All eleven. I should have gone too."
 
-**Clue after fight 6**
+**Clue 2**
 
 In the dried mud where her mother used to rest, Hippo finds tracks leading out of the water. Huge ones, heavier than any hippo. They walk in, circle the spot, and walk back out, as if something came looking for her.
 
-**Clue after fight 9**
+**Clue 3**
 
 The water has been warm all season, the herd says, as if something enormous is breathing somewhere upstream.
 
@@ -320,17 +322,17 @@ He remembers the night his father touched his trunk to his forehead and said "I 
 
 The crown means nothing to Elephant. Remembering means everything.
 
-**Clue after fight 3**
+**Clue 1**
 
 In the elephant graveyard, every elder has a resting place. Every one except his father's.
 
 There is no body, no bones and no tusks. Elephant searches until sunrise and finds nothing.
 
-**Clue after fight 6**
+**Clue 2**
 
 The Hippo he defeats finally tells him: "Your father led them. He was the one who found the tower. He said it had been waiting for someone to come."
 
-**Clue after fight 9**
+**Clue 3**
 
 Elephant dreams of tusks: his father's tusks, white and curved and unmistakable. In the dream they are not on his father. They are on something else, something with a lion's mane and wings.
 

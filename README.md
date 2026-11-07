@@ -279,3 +279,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 4.1: Each fighter's true story
 - Defeating MAJIC now reveals the true story of the fighter you used: what became of their missing parent (the trophy MAJIC took from them) and why they felt the drums. It shows as a card after the true-ending screen, before the tower's history. There are 11 different reveals, one per fighter (`trueEnding` in `game/js/story.js`, also in `docs/STORY.md`).
+
+## Web build 4.2: The big reveal
+- Fighter stories are hidden during the Towers: no intro, clue or story ending cards. Each Tower just ends with the champion screen.
+- After defeating MAJIC in the secret tower, the fighter's whole story plays as one reveal: Part 1 Why They Came, Part 2 The Clues, Part 3 The Crown, Part 4 The Truth, then the history of the tower.
