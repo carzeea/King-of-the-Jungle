@@ -283,3 +283,8 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 4.2: The big reveal
 - Fighter stories are hidden during the Towers: no intro, clue or story ending cards. Each Tower just ends with the champion screen.
 - After defeating MAJIC in the secret tower, the fighter's whole story plays as one reveal: Part 1 Why They Came, Part 2 The Clues, Part 3 The Crown, Part 4 The Truth, then the history of the tower.
+
+## Web build 4.3: Title text and splash
+- Tagline is now **A LEGACY UNLEASHED** and the credit reads **Created and Developed by J. Hardy** (title screen, header, footer, ending credits).
+- The cover-art splash stays up until the player taps, clicks, presses a key or presses a controller button. It no longer skips ahead by itself.
+- The link-preview description no longer mentions a secret boss.
