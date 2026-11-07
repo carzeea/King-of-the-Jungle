@@ -33,7 +33,7 @@ function resTick(real){RES.t+=real;RES.acc+=real;RES.n++;
 }
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
- {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:'ROYAL COLOSSEUM'}];
+ {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:"MAJIC'S LAIR"}];
 const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp';arenaImg[a.id]=im});
 let arena=ARENAS[0],stagePick=0; // stagePick: 0-5 arena, 6 = random
 function renderStages(){setBackdrop(stagePick===6?'assets/arenas/cover-bg.webp':'assets/arenas/'+ARENAS[stagePick].id+'.webp');
@@ -47,7 +47,7 @@ function renderStages(){setBackdrop(stagePick===6?'assets/arenas/cover-bg.webp':
 function openStage(){renderStages();show('stage')}
 $('stage-go').onclick=()=>{ac();arena=stagePick===6?ARENAS[Math.floor(Math.random()*6)]:ARENAS[stagePick];start()};
 $('stage-back').onclick=()=>{step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
-// Tower: each floor moves to a new arena; the final boss is always in the Royal Colosseum.
+// Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
 function towerArena(){const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
 
 const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};

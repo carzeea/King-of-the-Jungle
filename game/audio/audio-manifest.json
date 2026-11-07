@@ -52,8 +52,8 @@
   },
   "music.royal-colosseum": {
    "file": "music/arena-6-royal-colosseum.mp3",
-   "label": "Arena 6 – Royal Colosseum (final boss)",
-   "used_for": "Fight music in the Royal Colosseum",
+   "label": "Arena 6 – Majic's Lair (final boss)",
+   "used_for": "Fight music in Majic's Lair",
    "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_f168bc02-2371-418c-8ae6-f4ecf5c564af.mp3",
    "volume": 0.42
   },

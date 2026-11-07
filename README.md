@@ -239,3 +239,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - Every frame was cut solid, at the same size and anchor points as before, so his moves and timing are unchanged.
 - The sheet's gold row lines were removed before cutting, so no line slivers sit above his head.
 - Three end frames (last pounce frame, last heavy-hit frame, last get-up frame) reuse the frame before them, because they had no match on the sheet.
+
+## Web build 3.2: Majic's Lair
+- The sixth arena (the final-boss arena, formerly Royal Colosseum) is now named **Majic's Lair** on the stage select, the round banner and under the fight. The art, music and file names are unchanged.
