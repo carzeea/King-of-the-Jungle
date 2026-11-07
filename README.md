@@ -298,3 +298,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 4.6: Control guide matches the device
 - The control guide on the pause screen shows only the controls for the device being used: touch buttons on phones and tablets, keys on a keyboard (both players' keys in Local 2 Player), Xbox letters (A, X, Y, B) with an Xbox controller, and PlayStation symbols (✕ □ △ ○) with a PlayStation controller. It updates when a controller is plugged in or unplugged, and it now lists the Heavy and Shadow combos for every device.
+
+## Web build 4.7: Full announcer (temporary voice)
+- All 33 announcer lines that Holden hasn't recorded yet are now voiced by a temporary deep, heavy arena voice. That covers Final fight!, King of the Jungle!, the MAJIC call, You win!/You lose., Combo breaker!, Lockout!, Danger!, Instinct!, Time!, Ultra combo!, all 10 combo ranks, and "[Fighter] wins!" for all 11 fighters plus MAJIC. The browser robot voice no longer plays when sound is on.
+- Holden's 8 recorded lines are unchanged. The temporary clips use Holden's file names (`game/audio/voice/holden-*.mp3`), so dropping in his real recordings replaces them with no code changes. Generator: `docs/art-tools/make_temp_announcer.py` (Piper TTS plus ffmpeg effects).

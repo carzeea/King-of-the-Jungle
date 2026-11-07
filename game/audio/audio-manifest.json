@@ -619,6 +619,13 @@
    "source": null,
    "volume": 1.0,
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.majic-wins": {
+   "file": "voice/holden-majic-wins.mp3",
+   "label": "Announcer – \"Majic wins!\"",
+   "used_for": "MAJIC wins a fight",
+   "source": null,
+   "volume": 1.0
   }
  }
 }
