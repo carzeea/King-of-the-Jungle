@@ -113,6 +113,9 @@ body.on-cover .topbar,body.on-cover footer{display:none}
 .t-big{font-size:clamp(78px,13.5vw,176px);position:relative}
 .t-big::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.75) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4.5s 1.2s ease-in-out infinite}
 .t-big::after{content:"JUNGLE"}
+/* italic letters lean past the text box; pad it so the gold gradient covers the final E fully */
+.title span{padding:0 .14em;margin:0 -.14em}
+.t-big::after{padding:0 .14em}
 @keyframes shine{0%{background-position:150% 0}45%,100%{background-position:-50% 0}}
 .v2{position:absolute;right:clamp(-10px,2vw,40px);top:clamp(40px,6vw,78px);font:italic 900 clamp(34px,5vw,64px)/1 "Barlow Condensed",Impact,sans-serif;color:#fff;padding:2px 14px 4px;
  background:linear-gradient(180deg,#ff6a4a,#c3160c 55%,#7a0804);border:3px solid #ffd27a;transform:skew(-10deg) rotate(-6deg);box-shadow:0 0 22px rgba(255,60,30,.6),0 8px 16px rgba(0,0,0,.6);text-shadow:0 2px 0 #4a0300}
