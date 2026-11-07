@@ -242,3 +242,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 3.2: Majic's Lair
 - The sixth arena (the final-boss arena, formerly Royal Colosseum) is now named **Majic's Lair** on the stage select, the round banner and under the fight. The art, music and file names are unchanged.
+
+## Web build 3.3: Fully solid fighters
+- A stricter cutout for all 10 sheet-based fighters (everyone except Badger). Some sheets (Wolf especially) have a dark gray background instead of pure black, so dark fur and armor still showed the arena through them. Background is now judged against each sheet's own background level, narrow leaks are sealed, and everything inside a fighter's outline is solid. Only real gaps, such as between an arm and the body, stay clear.
+- Fighter images carry a version tag so browsers load the new art instead of old saved copies.

@@ -31,7 +31,7 @@ POCKET_MIN = 150 # ...if at least this many sheet pixels (smaller = armor shadow
 
 
 def load_sheet(animal):
-    p = os.path.join(SHEETS, animal, animal + "-sheet.png")
+    p = os.environ.get("SHEET_" + animal.upper()) or os.path.join(SHEETS, animal, animal + "-sheet.png")
     return np.array(Image.open(p).convert("RGB"))
 
 
@@ -50,30 +50,40 @@ def match(sheet_bgr, frame, k):
     return mn, loc
 
 
-def figure_mask(crop, old_a):
-    """crop: sheet RGB crop; old_a: old alpha resampled to the crop (0..255)."""
+def disk(r):
+    y,x=np.ogrid[-r:r+1,-r:r+1];return x*x+y*y<=r*r
+def figure_mask(crop, old_a, close_r=3):
+    """Background = dark pixels joined to the outside of the box, judged
+    against the sheet's own background level. Narrow leaks are sealed and
+    everything inside the outline is made solid; only gaps that look
+    exactly like the background (between an arm and the body) stay clear."""
     mx = crop.max(-1).astype(np.int16)
-    dark = mx < BG_T
+    edge = np.r_[mx[0], mx[-1], mx[:, 0], mx[:, -1]]
+    lb = min(20, int(np.percentile(edge, 25)))
+    dark = mx < lb + 14
     lab, _ = nd.label(dark)
-    edge = np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])
-    bg = np.isin(lab, edge[edge > 0])
-    lab2, n2 = nd.label((mx < POCKET_T) & ~bg)
-    if n2:
-        sizes = nd.sum(np.ones_like(mx), lab2, range(1, n2 + 1))
-        bg |= np.isin(lab2, np.where(sizes >= POCKET_MIN)[0] + 1)
-    fig = ~bg
-    # only shapes that belong to this fighter (the old cut marks them), so
-    # neighbours, labels and row lines on the sheet are never pulled in
+    e = np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])
+    bg = np.isin(lab, e[e > 0])
     old = old_a > 60
     zone = nd.binary_fill_holes(nd.binary_closing(old, iterations=6))
     zone = nd.binary_dilation(zone, iterations=2)
-    fig &= zone
+    fig = ~bg & zone
     lab3, n3 = nd.label(fig)
     if n3:
         hit = nd.sum(old, lab3, range(1, n3 + 1))
         fig = np.isin(lab3, np.where(hit > 3)[0] + 1)
-    fig = nd.binary_closing(fig, iterations=1)
-    return fig
+    # seal narrow leaks, then make the inside of the outline solid
+    pad=close_r+2
+    f2=np.pad(fig,pad)
+    f2=nd.binary_closing(f2,structure=disk(close_r))
+    f2=nd.binary_fill_holes(f2)[pad:-pad,pad:-pad]
+    # real gaps (between an arm and the body) look exactly like the background
+    pocket = f2 & ~fig & (mx < lb + 7)
+    lab2, n2 = nd.label(pocket)
+    if n2:
+        sizes = nd.sum(pocket, lab2, range(1, n2 + 1))
+        f2 &= ~np.isin(lab2, np.where(sizes >= 120)[0] + 1)
+    return f2 & zone
 
 
 def best_scale(sheet_bgr, frame, lo=0.30, hi=1.30):
