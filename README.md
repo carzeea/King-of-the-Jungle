@@ -302,3 +302,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 4.7: Full announcer (temporary voice)
 - All 33 announcer lines that Holden hasn't recorded yet are now voiced by a temporary deep, heavy arena voice. That covers Final fight!, King of the Jungle!, the MAJIC call, You win!/You lose., Combo breaker!, Lockout!, Danger!, Instinct!, Time!, Ultra combo!, all 10 combo ranks, and "[Fighter] wins!" for all 11 fighters plus MAJIC. The browser robot voice no longer plays when sound is on.
 - Holden's 8 recorded lines are unchanged. The temporary clips use Holden's file names (`game/audio/voice/holden-*.mp3`), so dropping in his real recordings replaces them with no code changes. Generator: `docs/art-tools/make_temp_announcer.py` (Piper TTS plus ffmpeg effects).
+
+## Web build 4.8: Snake, Eagle and Stag
+- Three new fighters cut from J. Hardy's sheet (`docs/sprite-sheets/new-three/`, `docs/art-tools/cut_new_three.py`): **Snake, the Venomous King**; **Eagle, the Sky Reaper**; **Stag, the Iron Horn**. Each has idle, walk, run, crouch, jump, block, three attacks, two specials (Shadow uses the second special), an Ultra move, hit, knockdown/get up, and taunt + victory.
+- **Unlocks:** each Tower win unlocks one of the three at random, until all three are unlocked. The champion screen says which one. They're saved per device and then playable in every mode. They're not part of the 10-fight Tower ladder, so the Elephant stays the final boss and the 11 crowns still open the secret tower.
+- **Story:** each has the full four-part reveal after defeating MAJIC. Their parents climbed alone, a generation before the Pact, and MAJIC's serpents, wings and horns were their trophies. See `docs/STORY.md`.
+- The source sheet is small, so these three look softer than the others when scaled up to fight size. A higher-resolution sheet will sharpen them.

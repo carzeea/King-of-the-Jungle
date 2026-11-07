@@ -116,6 +116,36 @@ window.KOTJ_STORY={
    },
    "ending": "Elephant has the crown and the cheers of the whole jungle, and he gives both away.\nHe is the last one. All eleven have climbed now. All eleven have the same question. Somewhere, a door that was never there is opening.",
    "trueEnding": "The tusks on MAJIC's face are white and curved and unmistakable.\nElephant touches them with his trunk, the way his father touched his forehead the night he left, and he remembers the promise: \"I will be back before the rains.\"\nHe carries his father's tusks down the mountain to the graveyard, to the one empty resting place, and lays them there as the first rain begins.\nHis father came back before the rains after all. And Elephant, who never forgets, will remember this most of all."
+  },
+  "snake": {
+   "intro": "Snake does not hurry. Snakes never do.\nBut for three seasons now, he has felt something winding tighter in his chest, a pull toward the crown he cannot shake off like an old skin.\nHis mother shed her last skin on the night she left. He still keeps it. It is the only thing she left behind.",
+   "clues": {
+    "3": "An old tortoise who has watched the jungle for two hundred years stops Snake on the road.\n\"Your mother came this way long ago, before the others. She climbed alone. No one climbs alone.\"",
+    "6": "Coiled in the roots of a dead tree, Snake finds his mother's fangs, pressed into the bark in a warning only snakes can read: \"Too big. Too many. Do not follow.\"",
+    "9": "The crocodiles of the north tell a story about a giant with serpents around its shoulders, serpents that still move on their own and still hiss in a voice none of them recognize.\nSnake recognizes it. He has heard it in his dreams his whole life."
+   },
+   "ending": "Snake wraps the crown in his coils and holds it close.\nIt is warm, but not the right kind of warm. Somewhere far above, something is wearing his mother's skin.",
+   "trueEnding": "When MAJIC falls, the serpents around his shoulders go still, then slither free, then fade into the wind.\nOne of them turns back before it goes. Its eyes are gold, like his.\nSnake's mother was the first to climb, alone, long before the Pact. She made it to the summit. She bit MAJIC, and that is why the giant always moved so carefully around serpents.\nSnake sheds his skin at the top of the tower and leaves it there beside hers. Two skins, two generations, one finished climb."
+  },
+  "eagle": {
+   "intro": "Eagle can see a rabbit move from three miles up. So why can he never see where his father went?\nHe has flown over every inch of the jungle searching. And every time he flies north, his wings turn back on their own, as if something up there does not want to be seen.\nNow there is a tournament, and a crown, and a pull in his chest stronger than the wind.",
+   "clues": {
+    "3": "The old birds of the cliffs remember. \"Your father flew higher than any of us. He said he saw a tower above the clouds. He said it was waiting for him.\"",
+    "6": "High on a cliff ledge, Eagle finds one of his father's feathers, golden and huge, burned black at the tip as if it had been too close to lightning.",
+    "9": "For the first time, Eagle forces his wings north. Above the clouds he sees it: a black tower, and around its peak, something with wings that are not its own.\nThey are shaped exactly like his father's."
+   },
+   "ending": "Eagle holds the crown and looks up instead of down for once.\nHe has always been the one who sees everything. Now he finally knows where to look.",
+   "trueEnding": "MAJIC's wings tear free as he falls, and for one moment they spread wide on their own, catching the dawn wind.\nEagle knows that wingspan. He learned to fly underneath it.\nHis father flew to the summit alone, a generation before the Pact, to see what was hiding above the clouds. MAJIC took his wings so the jungle could never look down on him again.\nEagle carries the feathers to the highest cliff and lets the wind take them. His father can finally fly."
+  },
+  "stag": {
+   "intro": "Stag has never lost a head-to-head fight. His father taught him how, before the night he walked into the dark forest and did not come back.\nThe herd says a king of the forest should not chase crowns that belong to the jungle. Stag agrees.\nSo why can he not stop walking toward one?",
+   "clues": {
+    "3": "Antler marks on the old trees, far too high and far too wide for any deer alive. They are his father's. He would know them anywhere. They point north.",
+    "6": "The Grizzly he beats tells him, \"A stag came through the mountains long ago. Alone. He said he was going to put an end to the thing that eats kings.\"",
+    "9": "In the black stone at the foot of the mountain, Stag finds a broken antler tip, iron-hard and scored with claw marks.\nThe break is clean, as if something took the rest on purpose."
+   },
+   "ending": "Stag lowers his head and lets them place the crown between his antlers.\nIt fits. That is what frightens him. It fits like it was meant for someone his father knew.",
+   "trueEnding": "The great curved horns on MAJIC's head crack as he falls, and Stag finally sees them for what they are: his father's antlers, twisted and stolen.\nHis father went up alone, a generation before the Pact, to break the thing that eats kings. He broke one of MAJIC's fangs before he fell, and MAJIC took his crown of antlers in return.\nStag gathers what is left of them and carries it home to the forest.\nNext spring his own antlers grow back taller than ever, and they look just like his father's."
   }
  },
  "forgotten": {

@@ -449,6 +449,121 @@ He carries his father's tusks down the mountain to the graveyard, to the one emp
 
 His father came back before the rains after all. And Elephant, who never forgets, will remember this most of all.
 
+
+## The three unlockable fighters
+
+Snake, Eagle and Stag unlock one at a time (randomly) each time a Tower is won. Their parents climbed alone, a generation before the Pact; their trophies are MAJIC's serpents, wings and horns.
+
+### Snake
+
+**Part 1 · Why They Came**
+
+Snake does not hurry. Snakes never do.
+
+But for three seasons now, he has felt something winding tighter in his chest, a pull toward the crown he cannot shake off like an old skin.
+
+His mother shed her last skin on the night she left. He still keeps it. It is the only thing she left behind.
+
+**Part 2 · The Clues**
+
+An old tortoise who has watched the jungle for two hundred years stops Snake on the road.
+
+"Your mother came this way long ago, before the others. She climbed alone. No one climbs alone."
+
+Coiled in the roots of a dead tree, Snake finds his mother's fangs, pressed into the bark in a warning only snakes can read: "Too big. Too many. Do not follow."
+
+The crocodiles of the north tell a story about a giant with serpents around its shoulders, serpents that still move on their own and still hiss in a voice none of them recognize.
+
+Snake recognizes it. He has heard it in his dreams his whole life.
+
+**Part 3 · The Crown**
+
+Snake wraps the crown in his coils and holds it close.
+
+It is warm, but not the right kind of warm. Somewhere far above, something is wearing his mother's skin.
+
+**Part 4 · The Truth**
+
+When MAJIC falls, the serpents around his shoulders go still, then slither free, then fade into the wind.
+
+One of them turns back before it goes. Its eyes are gold, like his.
+
+Snake's mother was the first to climb, alone, long before the Pact. She made it to the summit. She bit MAJIC, and that is why the giant always moved so carefully around serpents.
+
+Snake sheds his skin at the top of the tower and leaves it there beside hers. Two skins, two generations, one finished climb.
+
+### Eagle
+
+**Part 1 · Why They Came**
+
+Eagle can see a rabbit move from three miles up. So why can he never see where his father went?
+
+He has flown over every inch of the jungle searching. And every time he flies north, his wings turn back on their own, as if something up there does not want to be seen.
+
+Now there is a tournament, and a crown, and a pull in his chest stronger than the wind.
+
+**Part 2 · The Clues**
+
+The old birds of the cliffs remember. "Your father flew higher than any of us. He said he saw a tower above the clouds. He said it was waiting for him."
+
+High on a cliff ledge, Eagle finds one of his father's feathers, golden and huge, burned black at the tip as if it had been too close to lightning.
+
+For the first time, Eagle forces his wings north. Above the clouds he sees it: a black tower, and around its peak, something with wings that are not its own.
+
+They are shaped exactly like his father's.
+
+**Part 3 · The Crown**
+
+Eagle holds the crown and looks up instead of down for once.
+
+He has always been the one who sees everything. Now he finally knows where to look.
+
+**Part 4 · The Truth**
+
+MAJIC's wings tear free as he falls, and for one moment they spread wide on their own, catching the dawn wind.
+
+Eagle knows that wingspan. He learned to fly underneath it.
+
+His father flew to the summit alone, a generation before the Pact, to see what was hiding above the clouds. MAJIC took his wings so the jungle could never look down on him again.
+
+Eagle carries the feathers to the highest cliff and lets the wind take them. His father can finally fly.
+
+### Stag
+
+**Part 1 · Why They Came**
+
+Stag has never lost a head-to-head fight. His father taught him how, before the night he walked into the dark forest and did not come back.
+
+The herd says a king of the forest should not chase crowns that belong to the jungle. Stag agrees.
+
+So why can he not stop walking toward one?
+
+**Part 2 · The Clues**
+
+Antler marks on the old trees, far too high and far too wide for any deer alive. They are his father's. He would know them anywhere. They point north.
+
+The Grizzly he beats tells him, "A stag came through the mountains long ago. Alone. He said he was going to put an end to the thing that eats kings."
+
+In the black stone at the foot of the mountain, Stag finds a broken antler tip, iron-hard and scored with claw marks.
+
+The break is clean, as if something took the rest on purpose.
+
+**Part 3 · The Crown**
+
+Stag lowers his head and lets them place the crown between his antlers.
+
+It fits. That is what frightens him. It fits like it was meant for someone his father knew.
+
+**Part 4 · The Truth**
+
+The great curved horns on MAJIC's head crack as he falls, and Stag finally sees them for what they are: his father's antlers, twisted and stolen.
+
+His father went up alone, a generation before the Pact, to break the thing that eats kings. He broke one of MAJIC's fangs before he fell, and MAJIC took his crown of antlers in return.
+
+Stag gathers what is left of them and carries it home to the forest.
+
+Next spring his own antlers grow back taller than ever, and they look just like his father's.
+
 ## The Forgotten Tower (secret)
 
 **Entering**
