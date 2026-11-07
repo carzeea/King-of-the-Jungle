@@ -15,13 +15,14 @@ Voice: **Holden** (voice ID `3c9d6053-6334-592c-8997-4e325286af3f`)
 | **Finish him!** | `holden-finish-him.mp3` | A fighter drops into DANGER (Ultra Combo now possible) |
 | **Flawless victory!** | `holden-flawless-victory.mp3` | Win without losing any health |
 
-## Optional extras (31)
+## Still to record (32)
 
 These already work without a recording: the general Holden call or the browser voice covers them. Recording them gives each moment its own line. Save as .mp3 with the exact name shown and send them over.
 
 | Line | Save as | Plays when | Covered now by |
 |---|---|---|---|
-| **Final fight!** | `holden-final-fight.mp3` | Tower Mode, the Elephant boss fight | Nothing (silent until recorded) |
+| **MAJIC! The Jungle Titan!** | `holden-majic.mp3` | Secret tower, start of the summit fight (keep this one private) | Browser voice |
+| **Final fight!** | `holden-final-fight.mp3` | Tower Mode, the Elephant boss fight | Browser voice |
 | **Danger!** | `holden-danger.mp3` | A fighter drops into the danger zone | Finish him! |
 | **Combo breaker!** | `holden-combo-breaker.mp3` | A combo is broken | Nothing (silent until recorded) |
 | **Lockout!** | `holden-lockout.mp3` | Mistimed combo breaker | Browser voice |
@@ -30,7 +31,7 @@ These already work without a recording: the general Holden call or the browser v
 | **Time!** | `holden-time.mp3` | Timer runs out | Browser voice |
 | **You win!** | `holden-you-win.mp3` | You beat the CPU | Nothing (silent until recorded) |
 | **You lose.** | `holden-you-lose.mp3` | The CPU beats you | Nothing (silent until recorded) |
-| **King of the Jungle!** | `holden-king-of-the-jungle.mp3` | Tower Mode completed | Nothing (silent until recorded) |
+| **King of the Jungle!** | `holden-king-of-the-jungle.mp3` | Tower Mode completed | Browser voice |
 | **Triple combo!** | `holden-triple-combo.mp3` | A combo of that rank ends | Combo! |
 | **Super combo!** | `holden-super-combo.mp3` | A combo of that rank ends | Combo! |
 | **Hyper combo!** | `holden-hyper-combo.mp3` | A combo of that rank ends | Combo! |

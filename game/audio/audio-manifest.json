@@ -611,6 +611,14 @@
    "line": "Flawless victory!",
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f",
    "recorded": true
+  },
+  "voice.majic": {
+   "file": "voice/holden-majic.mp3",
+   "label": "Announcer (Holden) – \"MAJIC! The Jungle Titan!\"",
+   "used_for": "Secret tower: start of the summit fight",
+   "source": null,
+   "volume": 1.0,
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
   }
  }
 }

@@ -303,7 +303,7 @@ function start(){
   const pre=tower&&tower.index===tower.ladder.length-1?'voice.final-fight':(tower?null:'voice.round-one');
   if(AU.loaded('voice.fight')){                         // Holden: "Round one!" / "Final fight!" then "Fight!"
    if(pre&&AU.loaded(pre)){AU.now(pre);setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1000)}
-   else if(tower&&tower.boss){speak('Majic! The jungle titan!');setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},2200)}
+   else if(tower&&tower.boss){if(AU.loaded('voice.majic'))AU.now('voice.majic');else speak('Majic! The jungle titan!');setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},2200)}
    else if(finalBoss){speak('Final fight!');setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1500)}
    else AU.now('voice.fight');
   }else if(AU.has('announcer.fight'))AU.announce(); else speak('Fight');
