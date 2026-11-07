@@ -606,11 +606,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=3.1';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=3.1';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
