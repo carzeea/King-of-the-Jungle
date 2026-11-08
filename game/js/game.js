@@ -4,7 +4,7 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online','recovery'];
 // Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
 const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
@@ -632,7 +632,9 @@ function finish(){
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
- if(tower&&tower.done)champion(tower.player);else show('result');
+ if(tower&&tower.done)champion(tower.player);
+ else if(mode==='cpu'&&!tower&&arena.id==='caes-corner'&&p1won&&!draw_)recovery(picks[0],()=>show('result'));
+ else show('result');
 }
 $('tower-next').onclick=()=>{
  if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=LAIR;
@@ -790,6 +792,42 @@ document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagati
  b.onclick=async()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement){await (document.exitFullscreen||document.webkitExitFullscreen).call(document)}
   else{await (el.requestFullscreen||el.webkitRequestFullscreen).call(el);try{await screen.orientation.lock('landscape')}catch(_){}}}catch(_){}label()};
  document.addEventListener('fullscreenchange',label);document.addEventListener('webkitfullscreenchange',label)})();$('back-menu').onclick=menu;$('result-menu').onclick=menu;
+
+/* ---------- Hidden: Cae's Corner recovery (win a VS CPU match in Cae's Corner) ---------- */
+const TRAINER=new Image();TRAINER.src='assets/ui/trainer.webp?v=7.6';
+function lyingPose(id,cb){
+ const meta=HD[id]&&HD[id].anims.defeat;if(!meta)return cb(null);const [n,fw,fh]=meta;const im=new Image();
+ im.onload=()=>{const c=document.createElement('canvas');c.width=fw;c.height=fh;const x=c.getContext('2d');x.drawImage(im,(n-1)*fw,0,fw,fh,0,0,fw,fh);
+  const d=x.getImageData(0,0,fw,fh).data;let x0=fw,y0=fh,x1=0,y1=0;
+  for(let y=0;y<fh;y++)for(let X=0;X<fw;X++)if(d[(y*fw+X)*4+3]>60){if(X<x0)x0=X;if(X>x1)x1=X;if(y<y0)y0=y;if(y>y1)y1=y}
+  if(x1<=x0)return cb(null);const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);cb(o)};
+ im.onerror=()=>cb(null);im.src=`assets/characters/${id}/frames-hd/defeat.webp?v=6.4`}
+function recovery(f,next){
+ let done=false,raf2=0;const cv=$('recovery-canvas'),c=cv.getContext('2d'),bg=arenaImg['caes-corner'];
+ $('recovery-name').textContent=f.name+' RECOVERS AT CAE\'S CORNER';
+ const end=()=>{if(done)return;done=true;cancelAnimationFrame(raf2);window.removeEventListener('keydown',key,true);cv.onclick=null;$('recovery').onclick=null;next()};
+ const key=e=>{e.preventDefault();e.stopPropagation();end()};
+ show('recovery');setTimeout(()=>{window.addEventListener('keydown',key,true);$('recovery').onclick=end},600);
+ lyingPose(f.id,body=>{const t0=performance.now();
+  const frame=t=>{if(done)return;const T=(t-t0)/1000;
+   const W=cv.clientWidth||1100,H=cv.clientHeight||620,dpr=Math.min(2,devicePixelRatio||1);if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+   c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+   if(bg&&bg.complete){const s=Math.max(W/bg.width,H/bg.height);c.drawImage(bg,(W-bg.width*s)/2,(H-bg.height*s)/2,bg.width*s,bg.height*s)}
+   c.fillStyle='rgba(8,4,2,.55)';c.fillRect(0,0,W,H);
+   const vg=c.createRadialGradient(W/2,H*.62,H*.1,W/2,H*.62,H*.9);vg.addColorStop(0,'rgba(255,190,110,.18)');vg.addColorStop(1,'rgba(0,0,0,.6)');c.fillStyle=vg;c.fillRect(0,0,W,H);
+   // trainer + table (cell 272x362; table top ~y214, x 60..265)
+   const sc=Math.min(H*.78/362,W*.62/272),cx=W/2-136*sc,cy=H*.98-362*sc;
+   const fi=T<.9?8:9+Math.floor((T-.9)*7)%7;
+   // soft floor shadow
+   c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(cx+150*sc,cy+352*sc,135*sc,14*sc,0,0,7);c.fill();
+   if(TRAINER.complete)c.drawImage(TRAINER,fi*272,0,272,362,cx,cy,272*sc,362*sc);
+   if(body){let bw=200*sc,bh=bw*body.height/body.width;const mh=118*sc;if(bh>mh){bh=mh;bw=bh*body.width/body.height}
+    const bx=cx+270*sc-bw,by=cy+(216+Math.sin(T*2.2)*.6)*sc-bh;c.drawImage(body,bx,by,bw,bh)}
+   if(fi>=11){const p=.55+.45*Math.sin(T*7),gx=cx+150*sc,gy=cy+188*sc,r=46*sc;c.save();c.globalCompositeOperation='lighter';
+    const g=c.createRadialGradient(gx,gy,0,gx,gy,r);g.addColorStop(0,`rgba(230,150,255,${.55*p})`);g.addColorStop(.5,`rgba(170,70,255,${.25*p})`);g.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=g;c.fillRect(gx-r,gy-r,r*2,r*2);c.restore()}
+   const fade=Math.min(1,T/.5,Math.max(0,(6.6-T)/.5));$('recovery').style.setProperty('--rf',fade);
+   if(T>7.1)return end();raf2=requestAnimationFrame(frame)};
+  raf2=requestAnimationFrame(frame)})}
 
 /* ---------- Online play: share a code, fight a friend ---------- */
 const NET=window.KOTJNet||{send(){},fast(){},leave(){},host(){},join(){return ''},on(){}};
