@@ -371,3 +371,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 6.5: MAJIC's speech; hardest fight in the game
 - After you defeat MAJIC, he gives a speech before the crowning: kneeling in the shadows, deep and slow, one line every 2.6 seconds (about 45 seconds), with the winner's name filled in, ending on "All hail… the King of the Jungle." Continue appears after the last line. Text: `forgotten.majicSpeech` in `game/js/story.js` (`[FIGHTER]` is replaced with the winner's name).
 - MAJIC is tougher: 3 health bars (50% more health), defense 14 (21% less damage taken), and in the surprise fight the CPU plays above the normal maximum difficulty.
+
+## Web build 6.6: Secret "Titan's Bane"
+- Hidden code during any fight against MAJIC: **BLOCK, BLOCK, JUMP, JUMP, ATTACK** within 2.5 seconds (works on keyboard, touch and controller). It knocks one health bar off MAJIC and the player's hits do 50% more damage to him for the rest of that fight. It's announced with a "TITAN'S BANE · MAJIC IS WEAKENED" banner and works once per fight.

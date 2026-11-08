@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.5';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.6';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -372,6 +372,14 @@ function update(dt){
  F.forEach((f,i)=>{
   const o=F[1-i],inp=f.ai?cpuInput(i):inputFor(i),frozen=!!game.ko;
   const rawAtk=inp.at&&!f.wasAttack&&!frozen,rawSp=inp.sp&&!f.wasSpecial&&!frozen,insEdge=inp.ins&&!f.wasIns&&!frozen;
+  // Secret "Titan's Bane": BLOCK, BLOCK, JUMP, JUMP, ATTACK within 2.5 s while fighting MAJIC.
+  if(!f.ai&&o.data.id==='majic'&&!game.bane){const ed=n=>inp[n]&&!(f.secPrev||{})[n];f.secT=(f.secT||0)+game.dt;
+   const push=c=>{if(!f.sec||f.secT>2.5){f.sec='';f.secT=0}f.sec+=c};
+   if(ed('bl'))push('B');if(ed('j'))push('J');if(rawAtk&&f.sec)push('A');
+   if(f.sec&&!'BBJJA'.startsWith(f.sec.slice(-5))&&!'BBJJA'.startsWith(f.sec))f.sec=f.sec.endsWith('B')?'B':'';
+   if(f.sec&&f.sec.endsWith('BBJJA')){game.bane=i+1;f.sec='';if(o.bars>1){o.bars--;o.potential=0}
+    banner("TITAN'S BANE",'MAJIC IS WEAKENED',1.6,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
+   f.secPrev={bl:inp.bl,j:inp.j}}
   f.wasAttack=inp.at;f.wasSpecial=inp.sp;f.wasIns=inp.ins;
   // Input buffer: a press up to 0.15 s early still comes out at the first legal moment.
   f.bufA=rawAtk?.15:Math.max(0,(f.bufA||0)-dt);f.bufS=rawSp?.15:Math.max(0,(f.bufS||0)-dt);
@@ -466,7 +474,7 @@ function resolveHit(i,mv){
  // Ultra Combo: an ender that lands while the opponent is in DANGER.
  const isEnder=mv.ender||(mv.shadow&&f.hitsDone===mv.hits.length&&comboing);
  if(isEnder&&inDanger(o)&&comboing){startUltra(i);return}
- const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(1-(o.data.defense-7)*.03);
+ const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(1-(o.data.defense-7)*.03)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
  f.combo=comboing?f.combo+1:1;
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
