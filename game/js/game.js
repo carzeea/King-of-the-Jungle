@@ -666,7 +666,7 @@ function storyFig(o){
 // One story card; skipped entirely when its text is empty.
 /* ---------- MAJIC's spoken farewell: one recorded clip per line, read out as each line appears ---------- */
 const VOX_IDS=['badger','wolf','hyena','leopard','jaguar','crocodile','lion','tiger','grizzly','hippo','elephant','snake','eagle','stag'];
-const majicVox=fid=>n=>'audio/voice/majic/line'+String(n).padStart(2,'0')+(n===7?'-'+(VOX_IDS.includes(fid)?fid:'lion'):'')+'.mp3?v=7.4';
+const majicVox=fid=>n=>'audio/voice/majic/farewell'+String(n).padStart(2,'0')+'.mp3?v=7.7';
 const voxBuf={};let voxSrc=null;
 function loadVox(url){if(voxBuf[url])return voxBuf[url];const a=ac();
  return voxBuf[url]=a?fetch(url).then(r=>r.ok?r.arrayBuffer():null).then(b=>b?new Promise(res=>a.decodeAudioData(b,res,()=>res(null))):null).catch(()=>null):Promise.resolve(null)}
@@ -808,6 +808,7 @@ function recovery(f,next){
  const end=()=>{if(done)return;done=true;cancelAnimationFrame(raf2);window.removeEventListener('keydown',key,true);cv.onclick=null;$('recovery').onclick=null;next()};
  const key=e=>{e.preventDefault();e.stopPropagation();end()};
  show('recovery');setTimeout(()=>{window.addEventListener('keydown',key,true);$('recovery').onclick=end},600);
+ const still=new Image();let useStill=false;still.onload=()=>{useStill=true};still.src=`assets/ui/recovery/${f.id}.webp?v=7.8`;
  lyingPose(f.id,body=>{const t0=performance.now();
   const frame=t=>{if(done)return;const T=(t-t0)/1000;
    const W=cv.clientWidth||1100,H=cv.clientHeight||620,dpr=Math.min(2,devicePixelRatio||1);if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
@@ -815,6 +816,15 @@ function recovery(f,next){
    if(bg&&bg.complete){const s=Math.max(W/bg.width,H/bg.height);c.drawImage(bg,(W-bg.width*s)/2,(H-bg.height*s)/2,bg.width*s,bg.height*s)}
    c.fillStyle='rgba(8,4,2,.55)';c.fillRect(0,0,W,H);
    const vg=c.createRadialGradient(W/2,H*.62,H*.1,W/2,H*.62,H*.9);vg.addColorStop(0,'rgba(255,190,110,.18)');vg.addColorStop(1,'rgba(0,0,0,.6)');c.fillStyle=vg;c.fillRect(0,0,W,H);
+   if(useStill){ // hand-drawn scene: fighter face-down under a towel, trainer working the shoulders
+    const z=1+Math.min(T,7)*.007,sw=Math.min(W*.86,H*.62*still.width/still.height,still.width*1.6)*z,sh=sw*still.height/still.width,sx=(W-sw)/2,sy=H*.97-sh;
+    c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(W/2,sy+sh*.99,sw*.46,sh*.05,0,0,7);c.fill();
+    const br=1+Math.sin(T*2.1)*.006;c.drawImage(still,sx,sy+sh*(1-br),sw,sh*br);
+    const p=.5+.5*Math.sin(T*5),gx=sx+sw*.66,gy=sy+sh*.36,r=sh*.26;c.save();c.globalCompositeOperation='lighter';
+    const g=c.createRadialGradient(gx,gy,0,gx,gy,r);g.addColorStop(0,`rgba(235,160,255,${.32*p+.1})`);g.addColorStop(.55,`rgba(160,70,255,${.12*p})`);g.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=g;c.fillRect(gx-r,gy-r,r*2,r*2);
+    for(let k=0;k<6;k++){const a=(T*.6+k/6)%1,px2=gx+Math.sin(k*2.3+T)*r*.6,py2=gy-a*r*1.3;c.fillStyle=`rgba(240,200,255,${(1-a)*.7})`;c.beginPath();c.arc(px2,py2,Math.max(1,sh*.012),0,7);c.fill()}
+    c.restore();
+   }else{
    // trainer + table (cell 272x362; table top ~y214, x 60..265)
    const sc=Math.min(H*.78/362,W*.62/272),cx=W/2-136*sc,cy=H*.98-362*sc;
    const fi=T<.9?8:9+Math.floor((T-.9)*7)%7;
@@ -825,6 +835,7 @@ function recovery(f,next){
     const bx=cx+270*sc-bw,by=cy+(216+Math.sin(T*2.2)*.6)*sc-bh;c.drawImage(body,bx,by,bw,bh)}
    if(fi>=11){const p=.55+.45*Math.sin(T*7),gx=cx+150*sc,gy=cy+188*sc,r=46*sc;c.save();c.globalCompositeOperation='lighter';
     const g=c.createRadialGradient(gx,gy,0,gx,gy,r);g.addColorStop(0,`rgba(230,150,255,${.55*p})`);g.addColorStop(.5,`rgba(170,70,255,${.25*p})`);g.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=g;c.fillRect(gx-r,gy-r,r*2,r*2);c.restore()}
+   }
    const fade=Math.min(1,T/.5,Math.max(0,(6.6-T)/.5));$('recovery').style.setProperty('--rf',fade);
    if(T>7.1)return end();raf2=requestAnimationFrame(frame)};
   raf2=requestAnimationFrame(frame)})}
