@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.2';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.4';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -612,7 +612,7 @@ function storyFig(o){
  if(!o){el.style.display='none';return}
  const A=(HD[o.id]||{}).anims||{},anim=A[o.anim]?o.anim:'idle',[n,fw,fh]=A[anim]||[1,1,1];
  el.style.display='block';el.style.aspectRatio=fw+'/'+fh;
- el.style.backgroundImage=`url(assets/characters/${o.id}/frames-hd/${anim}.webp?v=5.3)`;el.style.backgroundSize=`${n*100}% 100%`;
+ el.style.backgroundImage=`url(assets/characters/${o.id}/frames-hd/${anim}.webp?v=6.4)`;el.style.backgroundSize=`${n*100}% 100%`;
  const L=o.light;el.style.filter=L>=1?'drop-shadow(0 0 28px rgba(255,200,90,.85)) drop-shadow(0 0 4px rgba(255,230,160,.9))':
   `brightness(${.04+L*.9}) contrast(${1.3-L*.3}) drop-shadow(0 0 ${10+L*14}px rgba(${L>.5?'255,190,90':'160,120,255'},${.55+L*.3}))`;
  let i=0;const step=()=>{el.style.backgroundPosition=n>1?`${(i%n)*100/(n-1)}% 0`:'0 0';i=o.hold&&i>=n-1?n-1:i+1};step();figTimer=setInterval(step,o.hold?130:120);
@@ -649,7 +649,7 @@ function mysteryTile(){
 }
 document.querySelectorAll('.build-tag').forEach(e=>e.textContent=$('cover-build').textContent); // one build number everywhere
 const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:[.6,.18,.17],jaguar:[.68,.1,.2],crocodile:[.62,.1,.2],
- lion:[.63,.1,.21],tiger:[.69,.1,.2],grizzly:[.6,.11,.2],hippo:[.62,.12,.2],elephant:[.5,.11,.21],snake:[.44,.16,.17],eagle:[.72,.24,.16],stag:[.5,.29,.16],majic:[.55,.16,.16]};
+ lion:[.63,.1,.21],tiger:[.69,.1,.2],grizzly:[.6,.11,.2],hippo:[.62,.12,.2],elephant:[.5,.11,.21],snake:[.44,.16,.17],eagle:[.72,.24,.16],stag:[.5,.29,.16],majic:[.55,.13,.13]};
 let champRaf=0;
 function champion(f){
  const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
@@ -683,7 +683,7 @@ $('champ-crowns').textContent=tower.kind==='forgotten'?'':`TOWER CROWNS: ${list.
    for(let y=Math.max(0,Math.floor((P[1]-.2)*H_));y<H_;y++){let sx=0,k=0;for(let x=x0;x<x1;x++)if(d[(y*c2.width+x)*4+3]>140){sx+=x;k++}
     if(k>=3)return{y,x:sx/k-i*w}}return{y:P[1]*H_,x:P[0]*w}};
   const h0=head(0);tops=[];for(let i=0;i<n;i++){const h=head(i);tops.push({hx:P[0]*w+(h.x-h0.x)*.7,t:P[1]*H_+(h.y-h0.y),hw:P[2]*H_})}};
- im.src=`assets/characters/${f.id}/frames-hd/idle.webp?v=6.0`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
+ im.src=`assets/characters/${f.id}/frames-hd/idle.webp?v=6.4`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
  const conf=[];for(let i=0;i<140;i++)conf.push({x:Math.random(),y:-Math.random()*1.2,v:.08+Math.random()*.12,r:Math.random()*6.28,s:.5+Math.random(),c:['#ffd36b','#e8b95b','#fff3c4','#b94738'][i%4]});
  const t0=performance.now();let lt=t0;cancelAnimationFrame(champRaf);
  (function draw(now){
@@ -743,9 +743,9 @@ const SPRITES={
  stag:{s:0.34,anims:{"idle":[5,110,106,117,300],"walk_forward":[5,137,106,191,300],"walk_back":[5,137,106,191,300],"run":[4,184,106,237,300],"crouch":[4,146,98,177,279],"jump":[5,147,98,155,279],"block":[4,154,101,226,286],"attack_light":[6,199,101,272,276],"bite":[5,227,101,399,276],"attack_heavy":[4,275,89,378,254],"uppercut":[5,218,91,353,258],"special_pounce":[4,278,83,353,235],"special_b":[5,231,84,339,237],"ultra_move":[7,388,120,487,329],"hit_light":[4,121,84,88,226],"hit_heavy":[6,161,82,177,223],"knockdown_getup":[9,175,87,219,237],"victory":[12,191,147,283,406],"defeat":[6,161,82,177,223],"special_c":[5,162,82,138,230],"special_d":[5,214,79,226,223]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[4, 5, 6, 7, 8]],ko:['hit_heavy',5]},
- majic:{s:0.34,anims:{"idle":[10,359,167,422,449],"walk_forward":[7,229,139,313,375],"walk_back":[6,191,142,262,375],"run":[8,281,146,279,381],"dash":[4,259,144,456,380],"crouch":[5,177,137,293,375],"jump":[6,240,137,255,380],"block":[5,232,144,327,368],"attack_light":[5,269,156,347,381],"attack_heavy":[5,230,158,286,388],"bite":[5,252,134,300,340],"uppercut":[5,257,134,368,340],"special_pounce":[4,285,139,272,368],"special_b":[6,212,158,259,395],"special_c":[5,217,151,402,402],"special_d":[5,272,158,415,402],"ultra_move":[10,350,177,470,463],"hit_light":[5,202,137,245,354],"hit_heavy":[6,246,140,354,354],"knockdown_getup":[12,244,163,334,402],"victory":[9,334,195,456,538],"defeat":[6,246,140,354,354]},
+ majic:{s:0.34,anims:{"idle":[4,254,144,433,399],"walk_forward":[4,277,144,449,396],"walk_back":[4,277,144,449,396],"run":[4,277,144,449,396],"dash":[3,298,134,424,371],"crouch":[3,254,160,424,447],"jump":[5,295,134,424,371],"block":[3,122,122,278,335],"attack_light":[4,269,131,303,374],"attack_heavy":[4,229,160,350,451],"bite":[4,269,131,303,374],"uppercut":[4,227,160,350,451],"special_pounce":[4,298,134,424,371],"special_b":[6,354,99,542,271],"special_c":[5,247,91,364,257],"special_d":[4,187,97,287,257],"ultra_move":[8,257,161,374,451],"hit_light":[4,192,92,273,260],"hit_heavy":[6,247,94,355,257],"knockdown_getup":[10,247,119,355,330],"victory":[7,273,159,421,444],"defeat":[5,247,94,355,257]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_c','special_d','attack_heavy'],
-  fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6,7,8,9,10,11]],ko:['hit_heavy',5]},
+  fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6, 7, 8, 9]],ko:['hit_heavy',5]},
  badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,144,203],"crouch":[4,74,60,108,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,110,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,94,208],"pounce":[8,96,60,142,176],"special_earth_slam":[7,81,61,119,179],"shadow_rampage":[10,70,61,104,179],"hit_light":[6,84,78,130,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
   double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['hit_heavy',[0,1,2,3,4]],getup:['knockdown_getup',[4,5,6,7]],ko:['hit_heavy',4]},
@@ -780,11 +780,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=5.3';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=6.4';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=5.3';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=6.4';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;

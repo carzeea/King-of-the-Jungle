@@ -37,10 +37,14 @@ SPEC = {
   "win": (787, 870, [490, 590, 700, 810, 910, 1015, 1140, 1270, 1395])})}
 
 
+WIDE = {}
+
+
 def cut(a, mx, lines, thr, top, bot, cs, i, fog=False):
     c = cs[i]; gap_l = (c - cs[i - 1]) if i else (cs[1] - c if len(cs) > 1 else 60)
     gap_r = (cs[i + 1] - c) if i + 1 < len(cs) else gap_l
-    L, R = int(c - gap_l / 2), int(c + gap_r / 2)
+    wf = WIDE.get('f', .5)
+    L, R = max(0, int(c - gap_l * wf)), min(a.shape[1], int(c + gap_r * wf))
     crop = a[top:bot, L:R]; m0 = (mx[top:bot, L:R] > thr) & ~lines[top:bot, L:R]
     h, w = m0.shape
     m0[:6] = False; m0[-3:] = False                      # row borders
@@ -61,6 +65,12 @@ def cut(a, mx, lines, thr, top, bot, cs, i, fog=False):
     lab2, n2 = nd.label(m)
     if n2 > 1:
         sz2 = nd.sum(m, lab2, range(1, n2 + 1)); m = np.isin(lab2, np.where(sz2 >= max(25, sz2.max() * .02))[0] + 1)
+    if WIDE.get('trim'):   # drop pieces that belong to the neighbouring frames
+        lab3, n3 = nd.label(m); midl, midr = c - L - gap_l / 2, c - L + gap_r / 2
+        for j, sl in enumerate(nd.find_objects(lab3), 1):
+            xs_ = np.where(lab3[sl] == j)[1] + sl[1].start
+            if xs_.mean() < midl or xs_.mean() > midr: m[lab3 == j] = False
+        m[:, :max(0, int(midl - gap_l * WIDE['trim']))] = False; m[:, int(midr + gap_r * WIDE['trim']):] = False
     m = nd.binary_fill_holes(nd.binary_closing(np.pad(m, 5), iterations=4))[5:-5, 5:-5]
     alpha = np.clip((mx[top:bot, L:R] - thr * .7) / 40, 0, 1) * 255
     alpha[nd.binary_erosion(m, iterations=2)] = 255; alpha[~m] = 0

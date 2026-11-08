@@ -362,3 +362,8 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 6.2: New MAJIC select card
 - MAJIC's select card is now J. Hardy's hybrid card art (lion crown and mane, elephant tusks, serpents, wings, snow-leopard fur, tiger stripes, gold lion buckle), framed head to buckle in the gold frame over the jungle like the rest of the roster, with a little space above the crown. Source: `docs/sprite-sheets/majic/majic-select-card.png`.
+
+## Web build 6.4: MAJIC revamped
+- MAJIC is rebuilt from J. Hardy's two new sheets (`docs/sprite-sheets/majic/majic-v4-sheet.png` and `majic-v4-frost.png`), now matching his select card: wings, serpents, lion crown, snow-leopard fur, red sash. Frames are about 3x sharper than before.
+- Moves: Heavy Claw (quick attack), Titan Slam (heavy), Pounce (special), **Frost Strike** (Shadow, ending in the ice wave), and an Ultra chaining Frost Aura, Titan Roar and Titan Slam into Ice Blast and Ice Pillars. Hit, knockdown and recovery come from his frost sheet, and victory is the Titan Roar. Block and jump are built from his own frames. Tool: `docs/art-tools/make_majic_v4.py` (+ `majic_v4_cleanup.py`).
+- Height set to 385 units (about 1.5x the Lion, taller than the Elephant), so his crown stays under the health bars; reach, power and stats are unchanged.
