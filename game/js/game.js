@@ -836,8 +836,11 @@ function recovery(f,next){
    if(fi>=11){const p=.55+.45*Math.sin(T*7),gx=cx+150*sc,gy=cy+188*sc,r=46*sc;c.save();c.globalCompositeOperation='lighter';
     const g=c.createRadialGradient(gx,gy,0,gx,gy,r);g.addColorStop(0,`rgba(230,150,255,${.55*p})`);g.addColorStop(.5,`rgba(170,70,255,${.25*p})`);g.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=g;c.fillRect(gx-r,gy-r,r*2,r*2);c.restore()}
    }
-   const fade=Math.min(1,T/.5,Math.max(0,(6.6-T)/.5));$('recovery').style.setProperty('--rf',fade);
-   if(T>7.1)return end();raf2=requestAnimationFrame(frame)};
+   const fade=Math.min(1,T/.5);$('recovery').style.setProperty('--rf',fade);
+   // stays up until the player taps, clicks, presses a key or a controller button
+   if(T>.6){const pads=navigator.getGamepads?[...navigator.getGamepads()].filter(Boolean):[];const any=pads.some(p=>p.buttons.some(b=>b.pressed));
+    if(any&&!frame.held)return end();frame.held=any}else{frame.held=true}
+   raf2=requestAnimationFrame(frame)};
   raf2=requestAnimationFrame(frame)})}
 
 /* ---------- Online play: share a code, fight a friend ---------- */
