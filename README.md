@@ -332,3 +332,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 ## Web build 5.3: Snow Leopard select art and fresh updates
 - The Snow Leopard's select-screen card is now a chest-up shot from her full-body art, matching the other fighters' cards.
 - **Why players still saw the old Leopard:** browsers kept the old portrait (cached for a week) and the old code. Every portrait, script and stylesheet now carries a version tag, and `netlify.toml` tells browsers to always check for newer code and portraits. New art now shows up right after each update, with no hard refresh needed.
+
+## Web build 5.4: Snow Leopard card matches the roster
+- Her select card now matches the other fighters' cards: she's cut out onto the same dark background with the gold frame behind her, centred and chest-up with her full head at the top, with the same warm, punchy color. Tool: `docs/art-tools/make_portrait_snow_leopard.py`.
