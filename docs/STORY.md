@@ -72,7 +72,7 @@ He signed up for the tournament as a joke. That is what he tells himself.
 
 **Clue 1**
 
-The clan elders refused to say her name, but the Leopard he just beat did not.
+The clan elders refused to say her name, but the Snow Leopard he just beat did not.
 
 "Your mother made a deal with the others. Eleven of them, the strongest of their kind. They swore to climb something together."
 
@@ -92,35 +92,36 @@ Hyena wins the crown, and for the first time in years, he does not laugh.
 
 He looks north, and something up there looks back.
 
-## Leopard
+## Snow Leopard
 
 **Intro**
 
-Leopard is the fastest thing in the jungle, and she has spent her whole life running toward something she cannot see.
+Snow Leopard is the fastest thing on four legs or two, and she has never once outrun the cold in her chest.
 
-Her mother vanished without a trace. Leopards leave no trace. That was the lesson. But a mother should leave something.
+She came down from the mountains the winter her mother vanished, a white streak against white snow that no one ever saw arrive. Her mother taught her to move without a sound and to strike before the snow settled.
 
-Now the tournament has started, and her feet will not let her run anywhere else.
+Now a crown is calling her down from the peaks, and she runs toward it faster than she has ever run toward anything.
 
 **Clue 1**
 
-The Jaguar circles her after the fight. "Your mother and mine left together. Same night, same moon. Did yours ever tell you where?"
-
-Leopard did not even know they had known each other.
+The Jaguar she beats stares at her white fur. "I've seen that coat before, on a mountain cat who came down the old road with ten others. She was the only one who left no tracks."
 
 **Clue 2**
 
-Clawed into the bark of the tallest tree, at a height only a leopard could reach: her mother's mark, and an arrow. The arrow does not point across the jungle. It points at the sky.
+High on a frozen ledge, Snow Leopard finds frost that never melts, even in summer. Pressed into it is her mother's paw print, pointing at a black shape far above the clouds.
 
 **Clue 3**
 
-From the treetops, on a clear night, Leopard sees it for the first time: a black tower on the horizon, half hidden in cloud. She has climbed that tree a thousand times. The tower was never there before.
+Travelers from the north speak of a giant whose breath turns the air to ice, and whose shoulders are covered in white, spotted fur that does not belong to it.
+
+Snow Leopard knows exactly whose fur that is.
 
 **Ending**
 
-The crown is hers. Leopard stands still for the first time in her life.
+Snow Leopard holds the crown, and for the first time it is she who is standing still.
 
-It does not feel like an ending. It feels like the starting line.
+The frost on her claws has started to glow. Somewhere above the clouds, something is using her mother's cold.
+
 
 ## Jaguar
 
@@ -375,13 +376,15 @@ Hyena walks home and says it in front of every elder, out loud.
 
 Then he laughs, and for the first time in his life he means it.
 
-### Leopard
+### Snow Leopard
 
-MAJIC's spotted legs buckle and the spots fade, one by one, until a single golden mark is left glowing on the stone. It is the same mark her mother clawed into the tallest tree.
+When MAJIC falls, the frost around his claws cracks and lifts away like breath on a winter morning. The white, spotted fur on his shoulders fades to light, and a mountain cat steps out of it.
 
-The arrow on that tree was never pointing at the sky. It was pointing here, at the end of the race.
+It is her mother, silver-eyed and silent, the fastest of the Pact. She reached MAJIC first. She was the one who almost won. MAJIC took her speed and her frost, and that is where his ice came from.
 
-Leopard sits at the summit and watches the sun come up. For the first time in her life, she has nowhere she needs to run.
+She touches her nose to her daughter's, the way she did when Snow Leopard was a cub, and then she is gone into the snow.
+
+Snow Leopard climbs back to the high peaks. Behind her the frost melts for the first time in a generation, and spring comes to the mountain.
 
 ### Jaguar
 
@@ -602,11 +605,11 @@ You recognize every one of them. They belonged to the ones who climbed before.
 
 Something huge rises from the shadow of the throne.
 
-It has a lion's mane and a crown. It has an elephant's tusks, a tiger's stripes and a leopard's spots. A crocodile's tail drags behind it. A wolf's head hangs at its belt. On its back are wings, and around its shoulders coil serpents.
+It has a lion's mane and a crown. It has an elephant's tusks, a tiger's stripes, and the white, spotted fur of a snow leopard, with frost curling off its claws. A crocodile's tail drags behind it. A wolf's head hangs at its belt. On its back are wings, and around its shoulders coil serpents.
 
 "I am MAJIC," it says, with a voice made of eleven voices. "Your parents came here as the Pact. Eleven champions, the best of their kind, sworn to take my crown."
 
-"They fought well. They lost. And I keep what I win."
+"They fought well. The mountain cat was fastest; she nearly reached my heart before I froze her with her own cold. They lost. And I keep what I win."
 
 It spreads its arms, and every trophy on its body is someone you have been searching for.
 
@@ -626,6 +629,6 @@ He was once a single beast who learned that every challenger he defeated left so
 
 He built the tower from the black stone of the old mountain and hid it from every map. He created the tournament so the strongest of each generation would rise, climb, and come to him.
 
-One generation ago, eleven champions saw through the lie. They formed the Pact and climbed together. They nearly won. MAJIC took their trophies and called the drums again for their children.
+One generation ago, eleven champions saw through the lie. They formed the Pact and climbed together. They nearly won; the snow leopard of the high peaks struck first and fastest. MAJIC took their trophies, and her frost became his own and called the drums again for their children.
 
 This time, the children came. And this time, the Forgotten Tower lost.
