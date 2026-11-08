@@ -374,3 +374,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 6.6: Secret "Titan's Bane"
 - Hidden code during any fight against MAJIC: **BLOCK, BLOCK, JUMP, JUMP, ATTACK** within 2.5 seconds (works on keyboard, touch and controller). It knocks one health bar off MAJIC and the player's hits do 50% more damage to him for the rest of that fight. It's announced with a "TITAN'S BANE · MAJIC IS WEAKENED" banner and works once per fight.
+
+## Web build 6.7: MAJIC towers over the select screen
+- MAJIC's select tile shows him cut out and larger than the other fighters, waist-up like the rest, with his crown breaking out over the top of the card and a gold glow around the tile. He's trimmed on the left so he doesn't cover the neighbouring card. Art: `assets/characters/portraits/majic-popout.webp`.

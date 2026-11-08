@@ -432,3 +432,10 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 .story-screen.slow #story-text p{margin:0 0 .25em;font-size:clamp(14px,1.7vw,18px);line-height:1.6}
 .story-screen.slow #story-text p.gap{height:.7em;margin:0}
 .story-screen.slow .story-card{max-height:88vh;scroll-behavior:smooth}
+
+/* MAJIC's tile: he bursts out of his card, bigger than everyone */
+.fighter-tile.titan{overflow:visible!important;z-index:3;border-color:#e8b95b!important;box-shadow:0 0 22px rgba(255,190,80,.55),0 8px 18px rgba(0,0,0,.55)!important}
+.fighter-tile.titan>img:first-child{filter:brightness(.55) saturate(.9)!important;border-radius:4px}
+.fighter-tile.titan .titan-pop{position:absolute!important;left:-37.5%!important;bottom:-33%!important;width:175%!important;height:auto!important;max-width:none!important;object-fit:contain!important;filter:drop-shadow(0 6px 10px rgba(0,0,0,.8)) drop-shadow(0 0 10px rgba(255,190,90,.45))!important;pointer-events:none;z-index:1;clip-path:inset(0 17% 22.7% 21.4%)}
+.fighter-tile.titan strong{z-index:2}
+.fighter-tile.titan.selected .titan-pop,.fighter-tile.titan:hover .titan-pop{transform:scale(1.04);transform-origin:bottom center;transition:transform .15s}

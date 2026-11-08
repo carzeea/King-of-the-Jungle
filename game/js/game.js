@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.6';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.7';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -174,8 +174,8 @@ function render(){
   $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
  $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
  $('roster').innerHTML='';
- roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');
-  b.innerHTML=`<img src="${portrait(f.id)}" alt="${f.name}"><strong>${f.name}</strong>`+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
+ roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');if(f.id==='majic')b.classList.add('titan');
+  b.innerHTML=`<img src="${portrait(f.id)}" alt="${f.name}"><strong>${f.name}</strong>`+(f.id==='majic'?`<img class="titan-pop" src="assets/characters/portraits/majic-popout.webp?v=6.7" alt="">`:'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
  card(chosen,roster.indexOf(chosen));
