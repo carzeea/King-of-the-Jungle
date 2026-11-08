@@ -654,6 +654,16 @@ function storyFig(o){
  let i=0;const step=()=>{el.style.backgroundPosition=n>1?`${(i%n)*100/(n-1)}% 0`:'0 0';i=o.hold&&i>=n-1?n-1:i+1};step();figTimer=setInterval(step,o.hold?130:120);
 }
 // One story card; skipped entirely when its text is empty.
+/* ---------- MAJIC's spoken farewell: one recorded clip per line, read out as each line appears ---------- */
+const VOX_IDS=['badger','wolf','hyena','leopard','jaguar','crocodile','lion','tiger','grizzly','hippo','elephant','snake','eagle','stag'];
+const majicVox=fid=>n=>'audio/voice/majic/line'+String(n).padStart(2,'0')+(n===7?'-'+(VOX_IDS.includes(fid)?fid:'lion'):'')+'.mp3?v=7.4';
+const voxBuf={};let voxSrc=null;
+function loadVox(url){if(voxBuf[url])return voxBuf[url];const a=ac();
+ return voxBuf[url]=a?fetch(url).then(r=>r.ok?r.arrayBuffer():null).then(b=>b?new Promise(res=>a.decodeAudioData(b,res,()=>res(null))):null).catch(()=>null):Promise.resolve(null)}
+function playVox(url,done){if(!soundOn)return done(false);const a=ac();
+ loadVox(url).then(b=>{if(!b||!a)return done(false);const s=a.createBufferSource(),g=a.createGain();g.gain.value=1.15;s.buffer=b;s.connect(g).connect(a.destination);
+  s.onended=()=>{if(voxSrc===s){voxSrc=null;done(true)}};voxSrc=s;s.start()})}
+function stopVox(){const s=voxSrc;voxSrc=null;if(s)try{s.stop()}catch(_){}}
 function storyCard(o,next){
  const t=(o.text||'').trim();if(!t)return next();
  const sc=$('story');sc.classList.toggle('dark',!!o.dark);
@@ -662,9 +672,13 @@ function storyCard(o,next){
  $('story-text').innerHTML=(o.slow?t.split(/\n/):t.split(/\n+/)).map(x=>x.trim()===''?'<p class="gap"></p>':'<p>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>').join('');
  $('story').classList.toggle('slow',!!o.slow);clearTimeout(window.__slowT);
  if(o.slow){const ps=[...$('story-text').children];ps.forEach(p=>p.classList.add('wait'));let k=0;const nb=$('story-next');nb.classList.add('wait');
-  const card=document.querySelector('.story-card');const step=()=>{if(k<ps.length){const p=ps[k++];p.classList.remove('wait');card.scrollTo({top:card.scrollHeight,behavior:'smooth'});window.__slowT=setTimeout(step,p.classList.contains('gap')?400:o.slow)}else nb.classList.remove('wait')};window.__slowT=setTimeout(step,900)}
+  const card=document.querySelector('.story-card');let li=0;const tok=window.__slowTok={};
+  if(o.voice){for(let n=0;n<ps.filter(p=>!p.classList.contains('gap')).length;n++)loadVox(o.voice(n));AU&&AU.duckMusic(.2)}
+  const step=()=>{if(window.__slowTok!==tok)return;if(k<ps.length){const p=ps[k++],gap=p.classList.contains('gap');p.classList.remove('wait');card.scrollTo({top:card.scrollHeight,behavior:'smooth'});
+    if(!gap&&o.voice)playVox(o.voice(li++),ok=>{if(window.__slowTok===tok)window.__slowT=setTimeout(step,ok?380:o.slow)});
+    else window.__slowT=setTimeout(step,gap?400:o.slow)}else nb.classList.remove('wait')};window.__slowT=setTimeout(step,900)}
  storyFig(o.fig);
- $('story-next').onclick=()=>{ac();storyFig(null);next()};show('story');setTimeout(()=>$('story-next').focus({preventScroll:true}),50);
+ $('story-next').onclick=()=>{ac();window.__slowTok=null;clearTimeout(window.__slowT);if(voxSrc){stopVox();AU&&AU.duckMusic(1)}else if(o.voice)AU&&AU.duckMusic(1);storyFig(null);next()};show('story');setTimeout(()=>$('story-next').focus({preventScroll:true}),50);
 }
 const NEW_FIGHTERS=[
  {id:'snake',name:'SNAKE',icon:'🐍',style:'THE VENOMOUS KING',bio:'Patient, cold and deadly. Strikes from range with venom, crushes up close with a coil trap.',power:8,speed:8,defense:6,color:'#a88a2a'},
@@ -692,7 +706,7 @@ const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:
 let champRaf=0;
 function champion(f){
  if(tower&&tower.boss&&!tower.speechDone){tower.speechDone=true;const txt=(STORY.forgotten.majicSpeech||'').split('[FIGHTER]').join(f.name);
-  return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt},()=>champion(f))}
+  return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt,voice:majicVox(f.id)},()=>champion(f))}
  const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
  if(tower.kind!=='forgotten'){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}}
 if(tower.kind!=='forgotten'){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().includes(n.id));
