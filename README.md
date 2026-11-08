@@ -359,3 +359,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 6.1: New select cards for Snow Leopard, Snake, Stag and Eagle
 - Cut from J. Hardy's new card sheet (`docs/sprite-sheets/select-cards/`): each fighter roars at the camera, framed head to waist in the glowing gold frame over the jungle, like the original roster. Belt-band and cloth colors are shifted to match each fighter's sprite sheet: red for Snake and Stag, blue for Eagle. The Snow Leopard's purple already matched. Tool: `docs/art-tools/recolor_select_cards.py`.
+
+## Web build 6.2: New MAJIC select card
+- MAJIC's select card is now J. Hardy's hybrid card art (lion crown and mane, elephant tusks, serpents, wings, snow-leopard fur, tiger stripes, gold lion buckle), framed head to buckle in the gold frame over the jungle like the rest of the roster, with a little space above the crown. Source: `docs/sprite-sheets/majic/majic-select-card.png`.
