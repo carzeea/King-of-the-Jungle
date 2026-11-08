@@ -421,3 +421,14 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 #splash img{bottom:0!important;height:100%!important}
 #splash .splash-hint{bottom:max(8px,env(safe-area-inset-bottom))!important;font-size:10px!important;opacity:.7}
 @media (pointer:coarse){#splash .splash-hint{display:none}}
+
+/* Slow, line-by-line story cards (MAJIC's speech) */
+.story-screen.slow #story-text p{transition:opacity 1.6s ease,transform 1.6s ease,filter 1.6s ease;font-size:clamp(15px,1.9vw,19px);letter-spacing:.02em;line-height:1.8}
+.story-screen.slow #story-text p.wait{opacity:0;transform:translateY(6px);filter:blur(3px)}
+.story-screen.slow #story-text b{color:#ffd36b;letter-spacing:.08em}
+.story-screen.slow #story-title{letter-spacing:.25em}
+#story-next.wait{opacity:0;pointer-events:none}#story-next{transition:opacity .8s}
+
+.story-screen.slow #story-text p{margin:0 0 .25em;font-size:clamp(14px,1.7vw,18px);line-height:1.6}
+.story-screen.slow #story-text p.gap{height:.7em;margin:0}
+.story-screen.slow .story-card{max-height:88vh;scroll-behavior:smooth}

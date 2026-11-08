@@ -367,3 +367,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - MAJIC is rebuilt from J. Hardy's two new sheets (`docs/sprite-sheets/majic/majic-v4-sheet.png` and `majic-v4-frost.png`), now matching his select card: wings, serpents, lion crown, snow-leopard fur, red sash. Frames are about 3x sharper than before.
 - Moves: Heavy Claw (quick attack), Titan Slam (heavy), Pounce (special), **Frost Strike** (Shadow, ending in the ice wave), and an Ultra chaining Frost Aura, Titan Roar and Titan Slam into Ice Blast and Ice Pillars. Hit, knockdown and recovery come from his frost sheet, and victory is the Titan Roar. Block and jump are built from his own frames. Tool: `docs/art-tools/make_majic_v4.py` (+ `majic_v4_cleanup.py`).
 - Height set to 385 units (about 1.5x the Lion, taller than the Elephant), so his crown stays under the health bars; reach, power and stats are unchanged.
+
+## Web build 6.5: MAJIC's speech; hardest fight in the game
+- After you defeat MAJIC, he gives a speech before the crowning: kneeling in the shadows, deep and slow, one line every 2.6 seconds (about 45 seconds), with the winner's name filled in, ending on "All hail… the King of the Jungle." Continue appears after the last line. Text: `forgotten.majicSpeech` in `game/js/story.js` (`[FIGHTER]` is replaced with the winner's name).
+- MAJIC is tougher: 3 health bars (50% more health), defense 14 (21% less damage taken), and in the surprise fight the CPU plays above the normal maximum difficulty.
