@@ -356,3 +356,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - **Beating MAJIC** plays "THE TRUE KING" ending: your Tower crown is saved, one of Snake, Eagle or Stag unlocks (until all three are out), and MAJIC joins the roster. Then your fighter's own four-part backstory plays, followed by the epilogue and the tower's history.
 - The old "? ? ?" secret tower (which needed all 11 crowns) is retired from the menu, since MAJIC is now part of every climb. Playing the Tower as MAJIC still ends at the Elephant.
 - **Crowning:** on the champion screen, your fighter stands in their fighting stance and the crown floats down and settles on their head, following it as they breathe. Each fighter's head position is set in `CROWN_AT` in `game.js` (all 15 checked).
+
+## Web build 6.1: New select cards for Snow Leopard, Snake, Stag and Eagle
+- Cut from J. Hardy's new card sheet (`docs/sprite-sheets/select-cards/`): each fighter roars at the camera, framed head to waist in the glowing gold frame over the jungle, like the original roster. Belt-band and cloth colors are shifted to match each fighter's sprite sheet: red for Snake and Stag, blue for Eagle. The Snow Leopard's purple already matched. Tool: `docs/art-tools/recolor_select_cards.py`.

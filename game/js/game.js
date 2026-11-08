@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.0';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.1';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
