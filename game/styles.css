@@ -485,3 +485,27 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 #select .fighter-tile.titan .tf img{object-position:50% 0;transform:scale(1.12);transform-origin:50% 0}
 @media(min-width:900px){body:has(#select:not(.hidden)) .topbar{padding-left:clamp(70px,9vw,130px);padding-right:clamp(70px,9vw,130px)}}
 @media(min-width:900px){body:has(#select:not(.hidden)) footer{padding-left:clamp(70px,9vw,130px);padding-right:clamp(70px,9vw,130px)}}
+/* ---------- Build 7.1: Play Online ---------- */
+#online{background:url(assets/ui/select-bg.webp) center/cover fixed,#120a12;position:relative;display:flex;flex-direction:column;align-items:center}
+.online-box{width:min(460px,100%);margin:6px auto 0;padding:26px 24px 20px;background:linear-gradient(180deg,rgba(28,18,10,.92),rgba(12,8,6,.94));border:2px solid #d9a441;border-radius:18px;box-shadow:0 0 0 1px #6b4a17 inset,0 0 40px rgba(255,170,50,.25),0 20px 50px #000a;text-align:center;display:flex;flex-direction:column;gap:14px}
+.online-box button{border-radius:10px}
+.ol-big{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;padding:18px!important}
+.ol-big b{font:900 26px "Barlow Condensed",Impact,sans-serif;letter-spacing:.12em}.ol-big small{font:600 12px Inter,sans-serif;letter-spacing:.03em;opacity:.8;text-transform:none}
+.ol-or{display:flex;align-items:center;gap:12px;color:#c9a35a;font:800 12px Inter;letter-spacing:.3em;margin:6px 0}.ol-or:before,.ol-or:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#d9a44188,transparent)}
+.ol-label{font:800 11px Inter;letter-spacing:.24em;color:#e8b95b;margin:0}
+.ol-join-row{display:flex;gap:10px;margin-top:8px}
+#ol-code{flex:1;min-width:0;font:900 24px "Barlow Condensed",Impact,sans-serif;letter-spacing:.16em;text-align:center;text-transform:uppercase;color:#fff3cf;background:#0b0705;border:2px solid #8a6424;border-radius:10px;padding:10px 12px;outline:none}
+#ol-code:focus{border-color:#ffd36b;box-shadow:0 0 16px rgba(255,200,90,.35)}
+#ol-code::placeholder{color:#6b5634}
+#ol-join{padding:0 24px;font-size:16px}
+.ol-code{font:900 clamp(44px,12vw,64px)/1 "Barlow Condensed",Impact,sans-serif;letter-spacing:.1em;background:linear-gradient(180deg,#fff6c8,#ffcf5a 45%,#c47a12);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,190,70,.45));padding:6px 0;user-select:all}
+.ol-wait{color:#d8c79e;font:600 13px Inter;margin:0;display:flex;align-items:center;justify-content:center;gap:10px}
+.ol-wait i{width:14px;height:14px;border-radius:50%;border:2px solid #e8b95b;border-top-color:transparent;animation:olspin 0.9s linear infinite}
+@keyframes olspin{to{transform:rotate(360deg)}}
+.ol-status{min-height:18px;margin:0;color:#f3dfae;font:700 12px Inter;letter-spacing:.08em;line-height:1.5}.ol-status.err{color:#ff8a72}
+.ol-back{align-self:center;min-width:160px}
+#ol-cancel{align-self:center;min-width:140px;padding:10px 18px}
+.cover-menu .online-btn{border-color:rgba(140,200,255,.7)!important;box-shadow:0 0 18px rgba(90,170,255,.25)}
+.cover-menu .online-btn b{color:#bfe3ff}
+.cover-menu button:nth-child(4){animation-delay:.24s}.cover-menu button:nth-child(5){animation-delay:.32s}
+#ol-host{display:flex;flex-direction:column;gap:16px;align-items:center}#ol-host .ol-big{margin-top:4px}

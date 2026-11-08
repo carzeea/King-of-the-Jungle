@@ -4,7 +4,9 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online'];
+// Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
+const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
@@ -44,9 +46,9 @@ function renderStages(){setBackdrop(stagePick===6?'assets/arenas/cover-bg.webp':
  const r=document.createElement('button');r.className='stage-tile random'+(stagePick===6?' selected':'');r.innerHTML='?<strong>RANDOM</strong>';
  r.onclick=()=>{stagePick=6;renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
 }
-function openStage(){renderStages();show('stage')}
-$('stage-go').onclick=()=>{ac();arena=stagePick===6?ARENAS[Math.floor(Math.random()*6)]:ARENAS[stagePick];start()};
-$('stage-back').onclick=()=>{step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
+function openStage(){renderStages();$('stage-back').classList.toggle('hidden',mode==='online');show('stage')}
+$('stage-go').onclick=()=>{ac();arena=stagePick===6?ARENAS[Math.floor(Math.random()*6)]:ARENAS[stagePick];if(mode==='online')NET.send({t:'start',a:picks[0].id,b:picks[1].id,arena:arena.id});start()};
+$('stage-back').onclick=()=>{if(mode==='online')return;step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
 // Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
 function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||ARENAS[5];const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
 
@@ -123,6 +125,7 @@ const MOVES={ // t = total duration, hits = times (s) when the move strikes, stu
 let soundOn=true,actx=null;
 function ac(){if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(_){}}if(actx&&actx.state==='suspended')actx.resume();return actx}
 function sfx(type){
+ if(recOn())ON.ev.push(['x',type]);
  if(!soundOn)return;const a=ac();if(!a)return;const t=a.currentTime;
  const noise=(dur,freq,gain)=>{const b=a.createBuffer(1,a.sampleRate*dur,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
   const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=freq;const g=a.createGain();g.gain.value=gain;s.connect(f).connect(g).connect(a.destination);s.start(t)};
@@ -138,6 +141,9 @@ function sfx(type){
  else if(type==='boom'){noise(.6,900,.9);tone(80,25,.7,.9)}
 }
 const AU=window.KOTJAudio;
+// Online: the host records every sound the fight makes so the guest hears the same hits and voice lines.
+const recOn=()=>mode==='online'&&ON.side===0&&!!game&&game.intro<=0&&!game.over;
+if(AU)[['now','n'],['ultra','u'],['duckMusic','d']].forEach(([fn,tag])=>{const o=AU[fn];if(typeof o!=='function')return;AU[fn]=function(...a){if(recOn())ON.ev.push([tag,...a]);return o.apply(AU,a)}});
 // Play a labeled clip from the sound library; if it isn't loaded yet, use the built-in synth sound.
 function snd(key,fallback,vol=1,rate=1){if(!soundOn)return;if(!(AU&&AU.now(key,vol,rate))&&fallback)sfx(fallback)}
 const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
@@ -167,8 +173,9 @@ function speak(text){
 $('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='SOUND: '+(soundOn?'ON':'OFF');if(!soundOn&&window.speechSynthesis)speechSynthesis.cancel();AU&&AU.setEnabled(soundOn)};
 
 /* ---------- Menus ---------- */
-document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();openSelect(b.dataset.mode)});
-function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];render();show('select')}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();b.dataset.mode==='online'?openOnline():openSelect(b.dataset.mode)});
+function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];if(m==='online'){ON.mine=null;ON.theirs=null}render();show('select')}
+function selectBack(){if(mode==='online')menu();else show('menu')}
 function render(){
  const who=mode==='versus'?`PLAYER ${step}`:'PLAYER 1';
   $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
@@ -178,7 +185,7 @@ function render(){
   b.innerHTML=`<span class="tf"><img src="${portrait(f.id)}" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
- card(chosen,roster.indexOf(chosen));
+ card(chosen,roster.indexOf(chosen));selectWait();
  const sel=document.querySelector('.fighter-tile.selected');if(sel&&document.getElementById('select').contains(sel)&&!$('select').classList.contains('hidden'))sel.scrollIntoView({block:'nearest',behavior:'smooth'});
  selectHints();
 }
@@ -187,10 +194,10 @@ function randomPick(){const pool=roster.filter(f=>f.id!==chosen.id&&!(mode==='fo
 function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const kind=pads[0]?padKind(pads[0]):isTouch()?'touch':'kb';
  const B={xbox:['✚','A','B','Y','☰'],ps:['✚','✕','○','△','☰'],kb:['← →','ENTER','ESC','R','P'],touch:['👆','✔','↩','🎲','']}[kind];
  el.innerHTML=[['SELECT FIGHTER',B[0],'dpad'],['CONFIRM',B[1],'ka'],['BACK',B[2],'kb'],['RANDOM',B[3],'ky']].map(([t,k,c])=>`<span class="hint"><b class="${c}">${k}</b>${t}</span>`).join('');
- if(kind==='touch'){el.querySelectorAll('.hint')[0].lastChild.textContent='TAP A FIGHTER';el.querySelectorAll('.hint')[1].onclick=()=>$('confirm-fighter').click()}el.querySelectorAll('.hint')[2].onclick=()=>show('menu');el.querySelectorAll('.hint')[3].onclick=()=>randomPick()}
-function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
+ if(kind==='touch'){el.querySelectorAll('.hint')[0].lastChild.textContent='TAP A FIGHTER';el.querySelectorAll('.hint')[1].onclick=()=>$('confirm-fighter').click()}el.querySelectorAll('.hint')[2].onclick=()=>selectBack();el.querySelectorAll('.hint')[3].onclick=()=>randomPick()}
+function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
- ac();picks[step-1]=chosen;
+ ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
  if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();
   return start()}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
@@ -206,7 +213,7 @@ const kb={},tap={},touch={l:0,r:0,j:0,bl:0,at:0,sp:0,ins:0},touchTap={};
 const norm=e=>e.key.length===1?e.key.toLowerCase():e.key;
 window.addEventListener('keydown',e=>{if(!game&&!$('select').classList.contains('hidden')){const i=roster.indexOf(chosen),cols=gridCols();let n=i;const k=e.key;
   if(k==='ArrowRight')n=(i+1)%roster.length;else if(k==='ArrowLeft')n=(i+roster.length-1)%roster.length;else if(k==='ArrowDown')n=Math.min(roster.length-1,i+cols);else if(k==='ArrowUp')n=Math.max(0,i-cols);
-  else if(k==='Enter'){e.preventDefault();$('confirm-fighter').click();return}else if(k==='Escape'){show('menu');return}else if(k==='r'||k==='R'){randomPick();return}else return;
+  else if(k==='Enter'){e.preventDefault();$('confirm-fighter').click();return}else if(k==='Escape'){selectBack();return}else if(k==='r'||k==='R'){randomPick();return}else return;
   e.preventDefault();if(n!==i){chosen=roster[n];render()}return}
  if(!game)return;const k=norm(e);if(KEYS.some(m=>Object.values(m).includes(k))){e.preventDefault();if(!kb[k])tap[k]=true;kb[k]=true}if(k==='Escape'||k==='p')togglePause()});
 window.addEventListener('keyup',e=>{kb[norm(e)]=false});
@@ -242,8 +249,9 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
    if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))(document.activeElement&&bs.includes(document.activeElement)?document.activeElement:bs[0]).click()}}
  if(vis==='select'){const i=roster.indexOf(chosen),cols=gridCols();let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
   if(g.dn&&!p.dn)n=Math.min(roster.length-1,i+cols);if(g.up&&!p.up)n=Math.max(0,i-cols);
-  if(n!==i){chosen=roster[n];render()}if((g.a&&!p.a)||(g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.back&&!p.back)show('menu');if(g.sp&&!p.sp)randomPick()}
+  if(n!==i){chosen=roster[n];render()}if((g.a&&!p.a)||(g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.back&&!p.back)selectBack();if(g.sp&&!p.sp)randomPick()}
  if(vis==='stage'){let n=stagePick;if(g.r&&!p.r)n=(n+1)%7;if(g.l&&!p.l)n=(n+6)%7;if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
+ if(vis==='online'&&g.back&&!p.back)$('ol-back').click();
  if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
  if(vis==='champion'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('champ-continue').click();
  if(vis==='result'&&g.j&&!p.j)(!$('tower-next').classList.contains('hidden')?$('tower-next'):$('rematch')).click();
@@ -295,14 +303,14 @@ function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='m
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
  show('fight');document.body.classList.add('fighting');setBackdrop('assets/arenas/'+arena.id+'.webp');$('arena-title').textContent=arena.name;
- const cpu2=mode!=='versus';
+ const cpu2=mode!=='versus'&&mode!=='online';
  $('p1-name').textContent=picks[0].name;$('p2-name').textContent=picks[1].name;
  $('p1-face').src=portrait(picks[0].id);$('p2-face').src=portrait(picks[1].id);
- $('p1-tag').textContent='PLAYER 1';$('p2-tag').textContent=cpu2?'CPU':'PLAYER 2';
- $('mode-label').textContent=mode==='forgotten'?'? ? ?':mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':'VERSUS';
+ $('p1-tag').textContent=mode==='online'?(ON.side===0?'YOU':'FRIEND'):'PLAYER 1';$('p2-tag').textContent=mode==='online'?(ON.side===1?'YOU':'FRIEND'):cpu2?'CPU':'PLAYER 2';
+ $('mode-label').textContent=mode==='forgotten'?'? ? ?':mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':mode==='online'?'ONLINE':'VERSUS';
  $('round-label').textContent=tower?(tower.boss?'THE SUMMIT':tower.kind==='forgotten'?`ECHO ${tower.index+1} / 3`:`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
  $('p2-face').classList.toggle('echo-face',!!picks[1].echo);
- time=99;paused=false;cam.z=1;cam.snap=true;resStart();
+ time=99;paused=false;Object.assign(ON,{inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1});$('pause').classList.toggle('hidden',mode==='online');cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(tower&&tower.boss?1.35:tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
@@ -344,9 +352,10 @@ function updateGuide(){
  el.innerHTML=rows.join('');
 }
 addEventListener('gamepadconnected',updateGuide);addEventListener('gamepaddisconnected',updateGuide);
-function togglePause(){if(!game||game.over)return;updateGuide();paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
+function togglePause(){if(!game||game.over||mode==='online')return;updateGuide();paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
 function loop(t){
  if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;frameDt=real;if(!paused&&rawDt<.5)resTick(rawDt);
+ if(mode==='online'&&ON.side===1){guestFrame(real);if(!game)return;draw();raf=requestAnimationFrame(loop);return}
  if(!paused){
   if(game.slowT>0){game.slowT-=real;if(game.slowT<=0)game.slow=1}
   const dt=real*game.slow;game.dt=dt;
@@ -362,6 +371,7 @@ function loop(t){
    if(!game.ko&&time===0){game.ko=2;banner('TIME','',1.6);say('Time');}
   }
   game.zoom=1;
+  if(mode==='online')hostSend();
   if(game.ko){game.ko-=real;if(game.ko<=0){finish();return}}
  }
  draw();raf=requestAnimationFrame(loop);
@@ -383,7 +393,7 @@ function inDanger(f){return f.bars===1&&f.hp<=DANGER}
 function update(dt){
  const F=game.fighters,[a,b]=F;
  F.forEach((f,i)=>{
-  const o=F[1-i],inp=f.ai?cpuInput(i):inputFor(i),frozen=!!game.ko;
+  const o=F[1-i],inp=f.ai?cpuInput(i):mode==='online'?netInput(i):inputFor(i),frozen=!!game.ko;
   const rawAtk=inp.at&&!f.wasAttack&&!frozen,rawSp=inp.sp&&!f.wasSpecial&&!frozen,insEdge=inp.ins&&!f.wasIns&&!frozen;
   // Secret "Titan's Bane": BLOCK, BLOCK, JUMP, JUMP, ATTACK within 2.5 s while fighting MAJIC.
   if(!f.ai&&o.data.id==='majic'&&!game.bane){const ed=n=>inp[n]&&!(f.secPrev||{})[n];f.secT=(f.secT||0)+game.dt;
@@ -586,9 +596,9 @@ function fxUpdate(dt){
 
 /* ---------- Results ---------- */
 function finish(){
- if(game.over)return;game.over=true;AU&&soundOn&&AU.music('music.menu');
- const [p,q]=game.fighters,tp=total(p),tq=total(q),draw_=Math.abs(tp-tq)<.01,p1won=tp>tq,cpu2=mode!=='versus';
- let title=draw_?'DRAW':p1won?(cpu2?'YOU WIN':'PLAYER 1 WINS'):(cpu2?'CPU WINS':'PLAYER 2 WINS');
+ if(game.over)return;if(mode==='online'&&ON.side===0)NET.send({t:'end',s:makeSnap()});game.over=true;AU&&soundOn&&AU.music('music.menu');
+ const [p,q]=game.fighters,tp=total(p),tq=total(q),draw_=Math.abs(tp-tq)<.01,p1won=tp>tq,cpu2=mode!=='versus'&&mode!=='online',net=mode==='online',iWon=(p1won?0:1)===(net?ON.side:0);
+ let title=draw_?'DRAW':net?(iWon?'YOU WIN':'YOU LOSE'):p1won?(cpu2?'YOU WIN':'PLAYER 1 WINS'):(cpu2?'CPU WINS':'PLAYER 2 WINS');
  let copy=draw_?'Neither fighter claimed the crown.':(p1won?picks[0].name:picks[1].name)+' claims the arena.';
  const winnerF=draw_?null:(p1won?p:q),flawless=!!winnerF&&total(winnerF)>=2*BAR-.01;
  if(flawless)copy='FLAWLESS VICTORY · '+copy;
@@ -604,11 +614,11 @@ function finish(){
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
-  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':cpu2&&!draw_?(p1won?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
+  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
- $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
+ $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
  if(tower&&tower.done)champion(tower.player);else show('result');
 }
@@ -618,7 +628,7 @@ $('tower-next').onclick=()=>{
  picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
  if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
  start()};
-$('rematch').onclick=()=>{if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
 const crowns=()=>SAVE.get('crowns',[]);
@@ -744,7 +754,7 @@ $('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.
   storyCard({fig:{id:p.id,anim:'victory',light:1,hold:1},eyebrow:`${p.name} · PART 4`,title:'THE TRUTH, AT LAST',text:S.trueEnding},()=>
   storyCard({dark:1,eyebrow:'EPILOGUE',title:'',text:STORY.forgotten.trueEnding},()=>storyCard({dark:1,eyebrow:'THE HISTORY OF THE TOWER',title:'',text:STORY.forgotten.history},()=>show('result')))))))}else show('result')};
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
-function menu(){clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
+function menu(){if(mode==='online'&&window.KOTJNet){NET.send({t:'leave'});NET.leave();mode='versus'}clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;
 document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();setBlood((blood+1)%3)});setBlood(blood);
 // Full screen (and sideways lock on phones that allow it)
@@ -754,6 +764,88 @@ document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagati
  b.onclick=async()=>{try{if(document.fullscreenElement||document.webkitFullscreenElement){await (document.exitFullscreen||document.webkitExitFullscreen).call(document)}
   else{await (el.requestFullscreen||el.webkitRequestFullscreen).call(el);try{await screen.orientation.lock('landscape')}catch(_){}}}catch(_){}label()};
  document.addEventListener('fullscreenchange',label);document.addEventListener('webkitfullscreenchange',label)})();$('back-menu').onclick=menu;$('result-menu').onclick=menu;
+
+/* ---------- Online play: share a code, fight a friend ---------- */
+const NET=window.KOTJNet||{send(){},fast(){},leave(){},host(){},join(){return ''},on(){}};
+const BTN=['l','r','j','bl','at','sp','ins'];
+const fighterById=id=>KOTJ_ROSTER.find(f=>f.id===id)||NEW_FIGHTERS.find(f=>f.id===id)||(id==='majic'?MAJIC:null)||KOTJ_ROSTER[0];
+function olStatus(t,err){const s=$('ol-status');s.textContent=t||'';s.classList.toggle('err',!!err)}
+function olView(v){$('ol-home').classList.toggle('hidden',v!=='home');$('ol-host').classList.toggle('hidden',v!=='host')}
+function openOnline(code){NET.leave();clean();tower=null;mode='online';olView('home');olStatus('');$('ol-join').disabled=false;$('ol-create').disabled=false;
+ if(code)$('ol-code').value=NET.cleanCode?NET.cleanCode(code):code;show('online');setBackdrop('assets/ui/select-bg.webp');AU&&soundOn&&AU.music('music.menu');if(code)$('ol-join').click()}
+$('ol-create').onclick=()=>{ac();$('ol-create').disabled=true;olStatus('CREATING YOUR MATCH…');NET.host()};
+$('ol-join').onclick=()=>{ac();const c=NET.join($('ol-code').value);if(c){$('ol-code').value=c;$('ol-join').disabled=true;$('ol-create').disabled=true;olStatus('CONNECTING TO '+c+'…')}};
+$('ol-code').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')$('ol-join').click()});
+$('ol-back').onclick=()=>{NET.leave();mode='versus';menu()};
+$('ol-cancel').onclick=()=>{NET.leave();olView('home');olStatus('');$('ol-create').disabled=false;$('ol-join').disabled=false};
+$('ol-share').onclick=async()=>{const url=location.origin+location.pathname+'?join='+ON.code,text=`Fight me in King of the Jungle! Match code: ${ON.code}`;
+ if(navigator.share){try{await navigator.share({title:'King of the Jungle',text,url})}catch(_){}return}
+ try{await navigator.clipboard.writeText(text+'\n'+url);olStatus('CODE AND LINK COPIED · SEND IT TO YOUR FRIEND')}catch(_){olStatus('SEND YOUR FRIEND THIS CODE: '+ON.code)}};
+NET.on('hosting',code=>{ON.code=code;$('ol-mycode').textContent=code;olView('host');olStatus('')});
+NET.on('joining',()=>olStatus('OPPONENT FOUND · CONNECTING…'));
+NET.on('connected',role=>{ON.side=role==='host'?0:1;olStatus('');openSelect('online')});
+NET.on('error',why=>{if(mode!=='online')return;
+ const T={nomatch:'NO MATCH FOUND WITH THAT CODE. CHECK IT AND TRY AGAIN.',timeout:'COULD NOT CONNECT. CHECK THE CODE, OR TRY AGAIN ON WI-FI.',connect:'COULD NOT CONNECT. TRY AGAIN, OR TRY AGAIN ON WI-FI.',server:'ONLINE PLAY IS UNAVAILABLE RIGHT NOW. TRY AGAIN IN A MOMENT.',badcode:'ENTER THE CODE YOUR FRIEND SENT YOU, LIKE TIGER-427.'};
+ if($('online').classList.contains('hidden'))openOnline();olView('home');$('ol-join').disabled=false;$('ol-create').disabled=false;olStatus(T[why]||T.connect,true)});
+function opponentGone(msg){if(mode!=='online')return;NET.leave();openOnline();olStatus(msg,true)}
+NET.on('lost',()=>opponentGone('YOUR OPPONENT DISCONNECTED.'));
+NET.on('msg',m=>{if(mode!=='online')return;
+ if(m.t==='pick'){ON.theirs=m.id;selectWait()}
+ else if(m.t==='start'&&ON.side===1){picks=[fighterById(m.a),fighterById(m.b)];arena=ARENAS.find(a=>a.id===m.arena)||ARENAS[0];start()}
+ else if(m.t==='fx'&&ON.side===1&&game){
+  for(const p of m.fx||[]){if(!blood&&(p.kind==='blood'||p.kind==='mist'))continue;game.fx.push(p)}
+  if(soundOn)for(const e of m.snd||[]){const [k,a,b,c2]=e;if(k==='x')sfx(a);else if(AU){if(k==='n')AU.now(a,b,c2);else if(k==='u')AU.ultra(a);else if(k==='d')AU.duckMusic(a)}}}
+ else if(m.t==='end'&&ON.side===1){if(game&&!game.over){if(m.s)applySnap(m.s);finish()}}
+ else if(m.t==='again'){if(!$('select').classList.contains('hidden'))return;clean();openSelect('online')}
+ else if(m.t==='leave')opponentGone('YOUR OPPONENT LEFT THE MATCH.');
+});
+NET.on('fast',m=>{if(mode!=='online')return;
+ if(m.t==='i'&&ON.side===0)ON.inp=m;
+ else if(m.t==='s'&&ON.side===1&&m.q>ON.lastSeq){ON.lastSeq=m.q;ON.snap=m}});
+function selectWait(){if(mode!=='online'||$('select').classList.contains('hidden'))return;
+ const ins=$('select-instruction'),cf=$('confirm-fighter');
+ if(ON.mine&&ON.theirs){
+  if(ON.side===0){picks=[fighterById(ON.mine),fighterById(ON.theirs)];stagePick=6;$('stage-vs').textContent=`${picks[0].name} VS ${picks[1].name}`;openStage();return}
+  ins.textContent='BOTH LOCKED IN · YOUR FRIEND IS PICKING THE ARENA…';cf.textContent='LOCKED IN';cf.disabled=true;return}
+ ins.textContent=ON.mine?'LOCKED IN · WAITING FOR YOUR FRIEND…':ON.theirs?'YOUR FRIEND IS READY · CHOOSE YOUR FIGHTER':'ONLINE MATCH · CHOOSE YOUR FIGHTER';
+ cf.textContent=ON.mine?'LOCKED IN':'LOCK IN';cf.disabled=!!ON.mine}
+// Both keyboards layouts work online (WASD or arrows), plus touch and the first controller.
+function localOnline(){const a=inputFor(0),b=inputFor(1),k={};for(const n of BTN)k[n]=!!(a[n]||b[n]);return k}
+function netInput(i){
+ if(i===ON.side)return localOnline();
+ const h=ON.inp.h||{},c=ON.inp.c||{},k={};
+ for(const n of BTN){let v=!!h[n];const cn=c[n]||0;
+  if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
+  k[n]=v;ON.prevOut[n]=v}
+ return k}
+const FK=['x','y','vx','vy','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
+const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
+function makeSnap(){
+ const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
+ const cb=i=>$('p'+i+'-combo');
+ return{t:'s',q:++ON.seq,f:F,tm:r2(time),b:game.banner,fl:r2(game.flash),sh:r2(game.shake),ko:r2(game.ko),it:r2(game.intro),u:game.ultra?{i:game.ultra.i}:null,sl:game.slow,
+  c:[cb(1).textContent,cb(1).classList.contains('active'),cb(2).textContent,cb(2).classList.contains('active'),$('combat-callout').textContent]}}
+function applySnap(s){
+ s.f.forEach((d,i)=>Object.assign(game.fighters[i],d));time=s.tm;$('timer').textContent=Math.ceil(time);
+ game.banner=s.b;game.flash=s.fl;game.shake=s.sh;game.ko=s.ko;game.intro=s.it;game.ultra=s.u;game.slow=s.sl;
+ const [a,aa,b,bb,cc]=s.c;$('p1-combo').textContent=a;$('p1-combo').classList.toggle('active',aa);$('p2-combo').textContent=b;$('p2-combo').classList.toggle('active',bb);$('combat-callout').textContent=cc;
+ hud()}
+function hostSend(){
+ if(ON.side!==0||!game)return;
+ NET.fast(makeSnap());
+ const fresh=[];for(const p of game.fx)if(!p._s){p._s=1;const q={};for(const k in p)if(k!=='_s')q[k]=r2(p[k]);fresh.push(q)}
+ if(fresh.length||ON.ev.length){NET.send({t:'fx',fx:fresh,snd:ON.ev});ON.ev=[]}}
+function guestFrame(real){
+ const k=localOnline(),h={};
+ for(const n of BTN){if(k[n]&&!ON.lp[n])ON.cnt[n]=(ON.cnt[n]||0)+1;ON.lp[n]=k[n];if(k[n])h[n]=1}
+ NET.fast({t:'i',h,c:ON.cnt});
+ if(ON.snap){applySnap(ON.snap);ON.snap=null}
+ fxUpdate(real);if(game.banner){game.banner.t+=real;if(game.banner.t>game.banner.life)game.banner=null}
+ game.zoom=1}
+// Invite links: kingofthejunglegame.netlify.app/?join=TIGER-427 jumps straight into that match.
+const JOIN=new URLSearchParams(location.search).get('join');
+if(JOIN){try{history.replaceState(null,'',location.pathname)}catch(_){}
+ const go=()=>{if(!$('menu').classList.contains('started'))return setTimeout(go,250);openOnline(JOIN)};setTimeout(go,250)}
 
 /* ---------- Rendering ---------- */
 
