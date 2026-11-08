@@ -377,3 +377,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 6.7: MAJIC towers over the select screen
 - MAJIC's select tile shows him cut out and larger than the other fighters, waist-up like the rest, with his crown breaking out over the top of the card and a gold glow around the tile. He's trimmed on the left so he doesn't cover the neighbouring card. Art: `assets/characters/portraits/majic-popout.webp`.
+
+## Web build 6.8: Roaring Elephant card
+- The Elephant's select card now shows him trumpeting with his mouth open like the rest of the roster, recolored to his original black-and-gold armor and warmed to match the other cards. Source: `docs/sprite-sheets/select-cards/elephant-roar.png`.
