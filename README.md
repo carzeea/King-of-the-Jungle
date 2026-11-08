@@ -347,3 +347,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.8: Waist-up cards for Snake, Eagle and Stag
 - The three unlockable fighters' select cards now match the roster: cut out from their character art, framed head to belt buckle in front of the glowing gold square frame, over a blurred view of their home (jungle, stormy sky, forest). Their art's title lettering is painted out, so the Eagle's wing stays whole. Tool: `docs/art-tools/make_portraits_new_three.py`.
+
+## Web build 5.9: Snake card shows both arms
+- The Snake's shaded right arm, which the cut-out had dropped as background, is restored and lightened to match his body, so his card shows both arms like the other fighters.
