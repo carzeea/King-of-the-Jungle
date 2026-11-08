@@ -341,3 +341,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.6: Snow Leopard card shows her down to the waist
 - Her select card is zoomed out to show her down to the snowflake belt buckle, matching the waist-up framing of the other fighters' cards.
+
+## Web build 5.7: Holden only
+- Removed the 33 temporary deep-voice announcer clips from build 4.7, and turned off the browser's computer voice. The only announcer now is Holden's 8 recorded lines: Round one!, Fight!, Combo!, Shadow attack!, Ultra!, Finish him!, Knockout! and Flawless victory! Every other call (Final fight!, King of the Jungle!, You win!, fighter wins, combo ranks and so on) is silent until Holden records it; dropping `holden-<line>.mp3` into `game/audio/voice/` turns it on. The generator stays in `docs/art-tools/make_temp_announcer.py` in case it's wanted later.
