@@ -8,7 +8,7 @@ Open `game/index.html` in a modern browser, or serve the `game` directory with a
 
 ## Current V2 foundation
 - New dark cinematic jungle presentation and responsive menus.
-- Original eleven-animal roster preserved: Badger, Wolf, Hyena, Leopard, Jaguar, Crocodile, Lion, Tiger, Grizzly, Hippo, Elephant.
+- Original eleven-animal roster preserved: Badger, Wolf, Hyena, Snow Leopard (replaced Leopard in build 5.0), Jaguar, Crocodile, Lion, Tiger, Grizzly, Hippo, Elephant.
 - Two-player local character selection and versus prototype.
 - Canvas arena, health bars, timer, movement, jump, block, attack, special attack, pause, rematch, and winner screen.
 - Approved lion master and turnaround reference images included.
@@ -319,3 +319,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - **MAJIC re-cut from his upgraded sheet** (`docs/sprite-sheets/majic/majic-sheet-v2.png`), now with the snow leopard's white fur and frost. Moves: Pounce (special), Frost Strike (Shadow), and Titan Fury (Ultra), with Jungle Rage and Ground Slam in the chain. Same height (429 units), reach, spacing and power as before. New portrait and reveal art.
 - **Story:** the Snow Leopard's mother was the fastest of the Pact; she reached MAJIC first, and he took her speed and frost. Her full four-part story, MAJIC's speech at the summit and the tower's history are all updated (`docs/STORY.md`).
 - Tools: `docs/art-tools/cut_by_centers.py` and `finish_strips.py`. Glitch test: all strips load at the right sizes, and both fighters ran move sequences against six opponents plus CPU-vs-CPU fights, with no errors and valid positions.
+
+## Web build 5.1: Old Leopard fully removed
+- The old Leopard sprite sheet is deleted. Its frames had already been replaced in 5.0, and no old Leopard frame, portrait or text is left in the game. The announcer now says "Snow Leopard wins!", and her Shadow and Ultra sound cues are relabelled.

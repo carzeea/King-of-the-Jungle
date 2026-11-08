@@ -45,7 +45,7 @@ These already work without a recording: the general Holden call or the browser v
 | **Badger wins!** | `holden-badger-wins.mp3` | Badger wins a fight | Nothing (silent until recorded) |
 | **Wolf wins!** | `holden-wolf-wins.mp3` | Wolf wins a fight | Nothing (silent until recorded) |
 | **Hyena wins!** | `holden-hyena-wins.mp3` | Hyena wins a fight | Nothing (silent until recorded) |
-| **Leopard wins!** | `holden-leopard-wins.mp3` | Leopard wins a fight | Nothing (silent until recorded) |
+| **Snow Leopard wins!** | `holden-leopard-wins.mp3` | Snow Leopard wins a fight | Nothing (silent until recorded) |
 | **Jaguar wins!** | `holden-jaguar-wins.mp3` | Jaguar wins a fight | Nothing (silent until recorded) |
 | **Crocodile wins!** | `holden-crocodile-wins.mp3` | Crocodile wins a fight | Nothing (silent until recorded) |
 | **Lion wins!** | `holden-lion-wins.mp3` | Lion wins a fight | Nothing (silent until recorded) |

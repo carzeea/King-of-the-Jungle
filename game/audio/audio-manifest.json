@@ -143,15 +143,15 @@
   },
   "shadow.leopard": {
    "file": "shadow/shadow-leopard.mp3",
-   "label": "Leopard – Shadow move",
-   "used_for": "Leopard uses a Shadow move (BLOCK + SPECIAL)",
+   "label": "Snow Leopard – Shadow move",
+   "used_for": "Snow Leopard uses a Shadow move (BLOCK + SPECIAL)",
    "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223324_0ef5fbf3-0f9a-4753-a0ff-d9a3d1331ed1.mp3",
    "volume": 1.0
   },
   "ultra.leopard": {
    "file": "ultra/ultra-leopard.mp3",
-   "label": "Leopard – Ultra Combo",
-   "used_for": "Leopard lands an Ultra Combo",
+   "label": "Snow Leopard – Ultra Combo",
+   "used_for": "Snow Leopard lands an Ultra Combo",
    "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_223425_ee416244-112a-49e3-a4c3-4f5a017e31c6.mp3",
    "volume": 1.0
   },
@@ -492,11 +492,11 @@
   },
   "voice.leopard-wins": {
    "file": "voice/holden-leopard-wins.mp3",
-   "label": "Announcer (Holden) – \"Leopard wins!\"",
-   "used_for": "Leopard wins a fight",
+   "label": "Announcer (Holden) – \"Snow Leopard wins!\"",
+   "used_for": "Snow Leopard wins a fight",
    "source": null,
    "volume": 1.0,
-   "line": "Leopard wins!",
+   "line": "Snow Leopard wins!",
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
   },
   "voice.jaguar-wins": {

@@ -4,7 +4,8 @@ LINES={'final-fight':'Final... fight!','danger':'Danger!','combo-breaker':'Combo
 'triple-combo':'Triple combo!','super-combo':'Super combo!','hyper-combo':'Hyper combo!','brutal-combo':'Brutal combo!','savage-combo':'Savage combo!',
 'feral-combo':'Feral combo!','primal-combo':'Primal combo!','monster-combo':'Monster combo!','apex-combo':'Apex combo!','king-combo':'King combo!',
 'majic':'Magic! The jungle titan!','majic-wins':'Magic wins!'}
-for f in ['badger','wolf','hyena','leopard','jaguar','crocodile','lion','tiger','grizzly','hippo','elephant']:LINES[f+'-wins']=f.capitalize()+' wins!'
+LINES['leopard-wins']='Snow leopard wins!'
+for f in ['badger','wolf','hyena','leopard','jaguar','crocodile','lion','tiger','grizzly','hippo','elephant']:LINES.setdefault(f+'-wins',f.capitalize()+' wins!')
 only=sys.argv[1:] or list(LINES)
 for k in only:
   t=LINES[k];raw=f'out/{k}.wav'
