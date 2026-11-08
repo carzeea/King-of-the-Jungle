@@ -24,14 +24,14 @@ glow=fr.filter(ImageFilter.GaussianBlur(14));glow2=fr.filter(ImageFilter.Gaussia
 core=Image.new('RGBA',(W,H),(0,0,0,0));ImageDraw.Draw(core).rectangle(box,outline=(255,225,140,255),width=4)
 bg.alpha_composite(fr);bg.alpha_composite(core)
 # place her: head near top, chest-up, centred
-s=1.45;fig=rgb.resize((int(crop.width*s),int(crop.height*s)),Image.LANCZOS)
+s=1.08;fig=rgb.resize((int(crop.width*s),int(crop.height*s)),Image.LANCZOS)
 headx,heady=int((470-90)*s),int(95*s)       # her face in crop coords
-bg.alpha_composite(fig,(W//2-headx-10,165-heady))
+bg.alpha_composite(fig,(W//2-headx-10,112-heady))
 v=Image.new('L',(W,H),0);ImageDraw.Draw(v).rectangle((0,0,W,H),fill=0);vg=Image.radial_gradient('L').resize((W,H))
 dark=Image.new('RGBA',(W,H),(0,0,0,0));dark.putalpha(vg.point(lambda p:int(max(0,p-120)*0.9)))
 bg.alpha_composite(dark)
 out=bg.convert('RGB').resize((250,300),Image.LANCZOS)
-out.save('/home/claude/king-of-the-jungle/game/assets/characters/portraits/leopard.jpg',quality=92)
+out.save("game/assets/characters/portraits/leopard.jpg",quality=92)
 o2=Image.new('RGB',(1000,300))
 for i,c in enumerate(['jaguar','hyena','tiger','leopard']):o2.paste(Image.open(f'/home/claude/king-of-the-jungle/game/assets/characters/portraits/{c}.jpg'),(i*250,0))
 o2.save('/tmp/nc/por.png')

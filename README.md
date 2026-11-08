@@ -338,3 +338,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.5: Snow Leopard card frame and background
 - Her card now has the same glowing gold square frame as the other fighters, behind her and open at the bottom, over a blurred, darkened view of her homeland (snowy mountains and waterfall from her art).
+
+## Web build 5.6: Snow Leopard card shows her down to the waist
+- Her select card is zoomed out to show her down to the snowflake belt buckle, matching the waist-up framing of the other fighters' cards.
