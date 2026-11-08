@@ -344,3 +344,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.7: Holden only
 - Removed the 33 temporary deep-voice announcer clips from build 4.7, and turned off the browser's computer voice. The only announcer now is Holden's 8 recorded lines: Round one!, Fight!, Combo!, Shadow attack!, Ultra!, Finish him!, Knockout! and Flawless victory! Every other call (Final fight!, King of the Jungle!, You win!, fighter wins, combo ranks and so on) is silent until Holden records it; dropping `holden-<line>.mp3` into `game/audio/voice/` turns it on. The generator stays in `docs/art-tools/make_temp_announcer.py` in case it's wanted later.
+
+## Web build 5.8: Waist-up cards for Snake, Eagle and Stag
+- The three unlockable fighters' select cards now match the roster: cut out from their character art, framed head to belt buckle in front of the glowing gold square frame, over a blurred view of their home (jungle, stormy sky, forest). Their art's title lettering is painted out, so the Eagle's wing stays whole. Tool: `docs/art-tools/make_portraits_new_three.py`.
