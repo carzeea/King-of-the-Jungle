@@ -347,7 +347,7 @@ function loop(t){
    update(dt);
    if(!game.ko&&time===0){game.ko=2;banner('TIME','',1.6);say('Time');}
   }
-  game.zoom+=((game.ultra?1.18:1)-game.zoom)*Math.min(1,real*6);
+  game.zoom=1;
   if(game.ko){game.ko-=real;if(game.ko<=0){finish();return}}
  }
  draw();raf=requestAnimationFrame(loop);
@@ -784,7 +784,7 @@ function draw(){
  // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
  const aspect=pw/ph,F=game.fighters,gap=Math.abs(F[0].x-F[1].x);
  let vh=Math.min(570,1210/aspect);                                    // largest view that stays inside the arena art
- const want=Math.max(1,Math.min(1.12,(vh*aspect*.9)/(gap+360)))*(game.zoom||1);
+ const want=1;   // steady camera on every device: it pans with the fighters but never zooms
  const kz=1-Math.pow(.92,frameDt*60),kp=1-Math.pow(.88,frameDt*60);cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
  const air=Math.min(F[0].y,F[1].y);                                   // keep jumping fighters in shot
  let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*.5;
@@ -921,5 +921,6 @@ function drawGeneric(f,i){
 addUnlocked();if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
 render();show('menu');updateGuide();
+addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
 window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();

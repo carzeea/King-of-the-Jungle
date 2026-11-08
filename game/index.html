@@ -1,23 +1,23 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#10150f"><title>King of the Jungle</title>
   <meta name="description" content="King of the Jungle: the ultimate animal fighting game. 11 armored beasts, Tower Mode and Ultra combos. Play free in your browser on phone, PC or controller. Created and Developed by J. Hardy.">
   <meta property="og:type" content="website"><meta property="og:url" content="https://kingofthejunglegame.netlify.app/"><meta property="og:site_name" content="King of the Jungle">
   <meta property="og:title" content="KOTJ: King of the Jungle · Play Free Now">
   <meta property="og:description" content="11 armored beasts. One crown. Can you climb the Tower? Free in your browser on phone, PC or controller. No download.">
-  <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=2"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=2">
+  <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp" alt="King of the Jungle cover art"><div class="splash-hint">TAP OR PRESS ANY BUTTON TO CONTINUE</div></div>
+  <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
   <script>(function(){var s=document.getElementById('splash'),done=0;function go(e){if(done)return;done=1;if(e){e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation()}s.classList.add('out');setTimeout(function(){s.remove()},700)}
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 5.1</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 5.2</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 5.1</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 5.2</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="section-head"><p class="eyebrow">CHARACTER SELECT</p><h2>CHOOSE YOUR FIGHTER</h2><p id="select-instruction">Player 1: choose a fighter</p></div>
@@ -67,4 +67,12 @@
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
   <script src="js/roster.js"></script><script src="js/story.js"></script><script src="js/sprites-hd.js"></script><script src="js/audio.js"></script><script src="js/game.js"></script>
+<script>(function(){var last=0;
+document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
+document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault()},{passive:false});
+document.addEventListener('touchend',function(e){var n=Date.now();if(n-last<350&&!(e.target.closest&&e.target.closest('input,textarea,select')))e.preventDefault();last=n},{passive:false});
+document.addEventListener('wheel',function(e){if(e.ctrlKey)e.preventDefault()},{passive:false});
+document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&/^(=|\+|-|_|0)$/.test(e.key))e.preventDefault()});
+document.addEventListener('contextmenu',function(e){if(document.body.classList.contains('fighting'))e.preventDefault()});})();</script>
 </body></html>

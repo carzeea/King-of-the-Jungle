@@ -328,7 +328,7 @@ body.fighting.touch .fight-actions{top:auto;bottom:clamp(8px,2vh,16px)}
  body.fighting .pad-right .ins{width:40px!important;height:40px!important}
 }
 /* upright phones: full-width arena on top, controls underneath */
-@media (orientation:portrait) and (max-width:760px){
+@media (orientation:portrait) and (max-width:1100px){
  body.fighting .arena{inset:auto 0 auto 0!important;top:clamp(58px,9vh,80px)!important;height:62vw!important}
  body.fighting .fight-hud{background:linear-gradient(180deg,#000,rgba(0,0,0,.85))}
  body.fighting .rotate-hint{display:block;position:absolute;left:0;right:0;bottom:-34px;text-align:center;font:700 11px Inter;letter-spacing:.12em;color:#f4d58c}
@@ -338,7 +338,7 @@ body.fighting.touch .fight-actions{top:auto;bottom:clamp(8px,2vh,16px)}
  body.fighting #fight{background:radial-gradient(ellipse at 50% 30%,#2a1a0c,#050407 70%)}
 }
 
-@media (orientation:portrait) and (max-width:760px){
+@media (orientation:portrait) and (max-width:1100px){
  body.fighting .arena{top:clamp(62px,9vh,80px)!important;height:82vw!important}
  body.fighting .rotate-hint{bottom:-30px}
  body.fighting.touch .meter-row,body.fighting .meter-row{top:calc(clamp(62px,9vh,80px) + 82vw + 40px)!important;bottom:auto!important;background:none!important;padding-top:0!important}
@@ -355,7 +355,7 @@ body.fighting.paused .controls{top:62%}
  body.fighting.paused .fight-actions{top:22%!important}
  body.fighting.paused .controls{display:none!important}
 }
-@media (orientation:portrait) and (max-width:760px){
+@media (orientation:portrait) and (max-width:1100px){
  body.fighting.paused .fight-actions{top:calc(clamp(62px,9vh,80px) + 82vw + 74px)!important}
  body.fighting.paused .controls{display:none!important}
 }
@@ -413,3 +413,11 @@ body.fighting.paused .controls{top:62%}
 .story-fig{display:none;position:absolute;left:4vw;bottom:4vh;height:82vh;max-width:44vw;background-repeat:no-repeat;transition:filter 1.2s ease;pointer-events:none}
 .story-screen.has-fig .story-card{margin-left:min(36vw,520px);width:min(560px,56vw)}
 @media(max-width:800px),(orientation:portrait){.story-fig{left:50%;transform:translateX(-50%);height:60vh;max-width:90vw;opacity:.45}.story-screen.has-fig .story-card{margin-left:0;width:min(560px,92vw)}}
+
+/* Build 5.2: same look on every device, no accidental zoom or scroll */
+html,body{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;touch-action:manipulation}
+body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#game-canvas{touch-action:none}
+#splash img{bottom:0!important;height:100%!important}
+#splash .splash-hint{bottom:max(8px,env(safe-area-inset-bottom))!important;font-size:10px!important;opacity:.7}
+@media (pointer:coarse){#splash .splash-hint{display:none}}

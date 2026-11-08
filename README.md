@@ -322,3 +322,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.1: Old Leopard fully removed
 - The old Leopard sprite sheet is deleted. Its frames had already been replaced in 5.0, and no old Leopard frame, portrait or text is left in the game. The announcer now says "Snow Leopard wins!", and her Shadow and Ultra sound cues are relabelled.
+
+## Web build 5.2: New cover art; steady on every device
+- New cover art (Lion vs Snow Leopard) on the splash screen and the link preview. The splash always shows the whole picture, fitted to the screen, on phones, tablets and PCs, in portrait or landscape. A tap, click, key or controller button continues.
+- No zooming: pinch-zoom, double-tap zoom, Ctrl + scroll and Ctrl +/- are blocked, the page can't scroll or bounce during play, and the fight camera no longer zooms in and out. It pans with the fighters at a fixed size.
+- Upright tablets now get the same tidy layout as upright phones (arena on top, controls underneath), and the camera re-centers when the screen is rotated or resized.
+- Tested on PC (1366×768, 1920×1080), iPhone (portrait and landscape), iPad (portrait and landscape) and Android landscape. Touch buttons appear only on touch screens, keyboard and touch attacks register, and there's no page scroll and no errors.
