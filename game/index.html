@@ -9,15 +9,15 @@
   <meta property="og:description" content="11 armored beasts. One crown. Can you climb the Tower? Free in your browser on phone, PC or controller. No download.">
   <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3">
-  <link rel="stylesheet" href="styles.css?v=5.9">
+  <link rel="stylesheet" href="styles.css?v=6.0">
 </head>
 <body>
-  <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp?v=5.9" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
+  <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp?v=6.0" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
   <script>(function(){var s=document.getElementById('splash'),done=0;function go(e){if(done)return;done=1;if(e){e.preventDefault&&e.preventDefault();e.stopPropagation&&e.stopPropagation()}s.classList.add('out');setTimeout(function(){s.remove()},700)}
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 5.9</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 6.0</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 5.9</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 6.0</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="section-head"><p class="eyebrow">CHARACTER SELECT</p><h2>CHOOSE YOUR FIGHTER</h2><p id="select-instruction">Player 1: choose a fighter</p></div>
@@ -66,7 +66,7 @@
     <section id="champion" class="screen champion-screen hidden"><canvas id="champ-canvas"></canvas><div class="champ-text"><p class="eyebrow">TOWER CONQUERED</p><h2>KING OF THE JUNGLE</h2><p class="champ-name" id="champ-name"></p><p id="champ-copy"></p><p id="champ-crowns" class="champ-crowns"></p><p id="champ-unlock" class="champ-unlock hidden">NEW FIGHTER UNLOCKED · MAJIC IS NOW PLAYABLE</p></div><div id="champ-credits" class="champ-credits"></div><button id="champ-continue" class="primary champ-continue">CONTINUE</button></section>
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js?v=5.9"></script><script src="js/story.js?v=5.9"></script><script src="js/sprites-hd.js?v=5.9"></script><script src="js/audio.js?v=5.9"></script><script src="js/game.js?v=5.9"></script>
+  <script src="js/roster.js?v=6.0"></script><script src="js/story.js?v=6.0"></script><script src="js/sprites-hd.js?v=6.0"></script><script src="js/audio.js?v=6.0"></script><script src="js/game.js?v=6.0"></script>
 <script>(function(){var last=0;
 document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
 document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});

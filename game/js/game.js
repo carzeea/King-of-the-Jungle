@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=5.9';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.0';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -574,17 +574,18 @@ function finish(){
  if(tower){
   if(p1won&&tower.boss){title='THE TRUE KING';copy=`${tower.player.name} defeated MAJIC at the summit.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
   else if(p1won){tower.index++;
-   if(tower.index>=tower.ladder.length&&tower.kind==='forgotten'){tower.reveal=true;title='THE SUMMIT';copy='';$('tower-next').textContent='ASCEND';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT'}
+   if(tower.index>=tower.ladder.length&&tower.player.id!=='majic'){tower.reveal=true;title=tower.kind==='forgotten'?'THE SUMMIT':'A NEW CHALLENGER';copy=tower.kind==='forgotten'?'':'The ground shakes beneath the Lair. Something has been watching your climb.';$('tower-next').textContent=tower.kind==='forgotten'?'ASCEND':'FACE IT';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT'}
    else if(tower.index>=tower.ladder.length){title='KING OF THE JUNGLE';copy=`${tower.player.name} conquered all ${tower.ladder.length} challengers and takes the crown.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
    else{title='VICTORY';copy=tower.kind==='forgotten'?'':`Next up: ${tower.ladder[tower.index].name}.`;$('tower-next').textContent='NEXT FIGHT';$('tower-next').classList.remove('hidden');$('rematch').textContent='RETRY LAST FIGHT';}
   }else{title='DEFEATED';copy=tower.boss?'MAJIC crushes your challenge. The Jungle Titan still rules.':tower.kind==='forgotten'?`${picks[1].name} drags you back into the dark.`:`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
-  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt=""${f.echo?' class="echo-face"':''}>${f.name}</div>`).join('')+(tower.kind==='forgotten'?(tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:`<div class="${tower.reveal?'next':''}"><span class="q">?</span>???</div>`):'');
+  $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt=""${f.echo?' class="echo-face"':''}>${f.name}</div>`).join('')+((tower.kind==='forgotten'||tower.reveal||tower.boss)?(tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:`<div class="${tower.reveal?'next':''}"><span class="q">?</span>???</div>`):'');
  }
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':cpu2&&!draw_?(p1won?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
+ $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',cpu2&&!p1won&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
  if(tower&&tower.done)champion(tower.player);else show('result');
@@ -603,7 +604,7 @@ const STORY=window.KOTJ_STORY||{fighters:{},forgotten:{echoes:[]}};STORY.forgott
 const storyOf=id=>(STORY.fighters||{})[id]||{};
 const BASE_IDS=KOTJ_ROSTER.filter(f=>f.id!=='majic').map(f=>f.id);
 const forgottenOpen=()=>!!SAVE.get('forgotten',false);
-function forgottenMenu(){const b=document.querySelector('.forgotten-btn');if(b)b.classList.toggle('hidden',!forgottenOpen())}
+function forgottenMenu(){const b=document.querySelector('.forgotten-btn');if(b)b.classList.add('hidden')}
 // The fighter shown beside a story card: a silhouette in the shadows that is lit a little more each part.
 let figTimer=0;
 function storyFig(o){
@@ -647,19 +648,21 @@ function mysteryTile(){
  return b;
 }
 document.querySelectorAll('.build-tag').forEach(e=>e.textContent=$('cover-build').textContent); // one build number everywhere
+const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:[.6,.18,.17],jaguar:[.68,.1,.2],crocodile:[.62,.1,.2],
+ lion:[.63,.1,.21],tiger:[.69,.1,.2],grizzly:[.6,.11,.2],hippo:[.62,.12,.2],elephant:[.5,.11,.21],snake:[.44,.16,.17],eagle:[.72,.24,.16],stag:[.5,.29,.16],majic:[.55,.16,.16]};
 let champRaf=0;
 function champion(f){
- const secret=tower.kind==='forgotten',list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;
- if(!secret){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}
-  if(BASE_IDS.every(id=>list.includes(id))&&!forgottenOpen()){SAVE.set('forgotten',true);awaken=true;$('champ-unlock').textContent='SOMETHING HAS AWAKENED · RETURN TO THE MAIN MENU'}}
- if(!secret){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().includes(n.id));
+ const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
+ if(tower.kind!=='forgotten'){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}}
+if(tower.kind!=='forgotten'){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().includes(n.id));
   if(left.length){const nf=left[Math.floor(Math.random()*left.length)];SAVE.set('unlocked',[...unlockedNew(),nf.id]);addUnlocked();newFighter=nf;
-   $('champ-unlock').textContent=`NEW FIGHTER UNLOCKED · ${nf.name}, ${nf.style}`+(awaken?' · SOMETHING HAS AWAKENED':'')}}
- else{newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC)}$('champ-unlock').textContent='MAJIC HAS JOINED THE ROSTER'}
+   notes.push(`NEW FIGHTER UNLOCKED · ${nf.name}`)}}
+ if(secret){newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC);notes.push('MAJIC HAS JOINED THE ROSTER')}}
+ $('champ-unlock').textContent=notes.join(' · ');
  forgottenMenu();
  $('champ-name').textContent=f.name;
  $('champ-copy').textContent=secret?(((storyOf(f.id).trueEnding||'').split(/(?<=[.!?])\s/)[0])||`${f.name} reached the summit and defeated MAJIC.`):(`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
- $('champ-crowns').textContent=secret?'':`TOWER CROWNS: ${list.filter(id=>BASE_IDS.includes(id)).length} / ${BASE_IDS.length}`+(firstCrown?' · NEW CROWN!':'');
+$('champ-crowns').textContent=tower.kind==='forgotten'?'':`TOWER CROWNS: ${list.filter(id=>BASE_IDS.includes(id)).length} / ${BASE_IDS.length}`+(firstCrown?' · NEW CROWN!':'');
  $('champ-unlock').classList.toggle('hidden',!(newUnlock||awaken||newFighter));
  document.querySelector('#champion .champ-text h2').textContent=secret?'THE TRUE KING':'KING OF THE JUNGLE';
  const cr=$('champ-credits');cr.innerHTML=`<div class="roll"><h3>KING OF THE JUNGLE</h3><p class="big">Created and Developed by J. Hardy</p>
@@ -669,12 +672,18 @@ function champion(f){
  cr.classList.remove('go');void cr.offsetWidth;cr.classList.add('go');
  show('champion');setBackdrop('assets/arenas/royal-colosseum.webp');
  if(soundOn){if(AU&&AU.loaded('voice.king-of-the-jungle'))setTimeout(()=>AU.now('voice.king-of-the-jungle'),900);else setTimeout(()=>speak('King of the jungle!'),900)}
- const cv=$('champ-canvas'),cx=cv.getContext('2d'),A=(HD[f.id]||{}).anims||{},n=(A.victory||[8])[0];
+ const cv=$('champ-canvas'),cx=cv.getContext('2d'),A=(HD[f.id]||{}).anims||{},meta=A.idle||[8,1,1,0,0],n=meta[0];
  const im=new Image(),bg=new Image(),crown=new Image();let tops=null;
  im.onload=()=>{const w=im.width/n,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
-  const d=g.getImageData(0,0,c.width,c.height).data;tops=[];
-  for(let i=0;i<n;i++){let t=im.height*.15;outer:for(let y=0;y<im.height;y++)for(let x=Math.floor(i*w+w*.3);x<(i+1)*w-w*.3;x++)if(d[(y*c.width+x)*4+3]>128){t=y;break outer}tops.push(t)}};
- im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=5.3`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
+  // where each fighter's head is in their standing frame: [x across the frame, crown bottom, crown width] as fractions
+  const P=CROWN_AT[f.id]||[.55,.09,.18],c2=document.createElement('canvas');c2.width=im.width;c2.height=im.height;const g2=c2.getContext('2d');g2.drawImage(im,0,0);
+  const d=g2.getImageData(0,0,c2.width,c2.height).data,H_=im.height;
+  // the head moves a little from frame to frame: measure the top of the head near the crown spot in every frame and follow it
+  const head=i=>{const x0=Math.max(0,Math.floor(i*w+(P[0]-.22)*w)),x1=Math.min(Math.floor((i+1)*w),Math.floor(i*w+(P[0]+.22)*w));
+   for(let y=Math.max(0,Math.floor((P[1]-.2)*H_));y<H_;y++){let sx=0,k=0;for(let x=x0;x<x1;x++)if(d[(y*c2.width+x)*4+3]>140){sx+=x;k++}
+    if(k>=3)return{y,x:sx/k-i*w}}return{y:P[1]*H_,x:P[0]*w}};
+  const h0=head(0);tops=[];for(let i=0;i<n;i++){const h=head(i);tops.push({hx:P[0]*w+(h.x-h0.x)*.7,t:P[1]*H_+(h.y-h0.y),hw:P[2]*H_})}};
+ im.src=`assets/characters/${f.id}/frames-hd/idle.webp?v=6.0`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
  const conf=[];for(let i=0;i<140;i++)conf.push({x:Math.random(),y:-Math.random()*1.2,v:.08+Math.random()*.12,r:Math.random()*6.28,s:.5+Math.random(),c:['#ffd36b','#e8b95b','#fff3c4','#b94738'][i%4]});
  const t0=performance.now();let lt=t0;cancelAnimationFrame(champRaf);
  (function draw(now){
@@ -689,18 +698,19 @@ function champion(f){
   for(let i=0;i<14;i++){cx.rotate(Math.PI/7);const gr=cx.createLinearGradient(0,0,H,0);gr.addColorStop(0,'rgba(255,205,110,.22)');gr.addColorStop(1,'rgba(255,205,110,0)');cx.fillStyle=gr;cx.beginPath();cx.moveTo(0,0);cx.lineTo(H*1.2,-H*.07);cx.lineTo(H*1.2,H*.07);cx.fill()}
   cx.restore();
   if(im.complete&&im.naturalWidth){
-   const fw=im.width/n,i=Math.min(n-1,Math.floor(Math.max(0,t-.3)*8)),sc=H*.5/im.height,bob=i===n-1?Math.sin(t*2.4)*H*.006:0;
-   const dw=fw*sc,dh=im.height*sc,x=fx-dw/2,y=fy-dh+bob;
+   const fw=im.width/n,i=Math.floor(t*7)%n,sc=H*.5/im.height,bob=0;
+   const dw=fw*sc,dh=im.height*sc,x=fx-meta[3]*(HD[f.id].s||.8)*sc,y=fy-dh+bob;
    cx.save();cx.shadowColor='rgba(255,200,90,.55)';cx.shadowBlur=30*dpr;cx.drawImage(im,i*fw,0,fw,im.height,x,y,dw,dh);cx.restore();
    if(tops&&crown.complete&&crown.naturalWidth){
-    const ct=Math.min(1,Math.max(0,(t-1.4)/.7)),e=1-Math.pow(1-ct,3),cw=dw*.42,ch=cw*crown.height/crown.width;
-    const hy=y+tops[i]*sc-ch*.72,cy=-ch+(hy+ch)*e+(ct>=1?Math.sin(t*2.4)*H*.006:0);
-    cx.save();cx.globalAlpha=Math.min(1,ct*3);cx.shadowColor='rgba(255,220,120,.9)';cx.shadowBlur=24*dpr;cx.drawImage(crown,fx-cw/2,cy,cw,ch);cx.restore()}}
+    // the crown floats down and settles on the fighter's head, then stays there as they breathe
+    const T=tops[i],ct=Math.min(1,Math.max(0,(t-1.4)/.9)),e=1-Math.pow(1-ct,3),cw=T.hw*sc,ch=cw*crown.height/crown.width;
+    const hx=x+T.hx*sc,hy=y+(T.t+im.height*.02)*sc-ch,cy=-ch+(hy+ch)*e;
+    cx.save();cx.globalAlpha=Math.min(1,ct*3);cx.shadowColor='rgba(255,220,120,.9)';cx.shadowBlur=24*dpr;cx.drawImage(crown,hx-cw/2,cy,cw,ch);cx.restore()}}
   if(t>1.9)for(const p of conf){p.y+=p.v*dt;p.r+=dt*4;if(p.y>1.05){p.y=-.05;p.x=Math.random()}
    cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-4*dpr*p.s,-2*dpr*p.s,8*dpr*p.s,4*dpr*p.s);cx.restore()}
   champRaf=requestAnimationFrame(draw)})(t0);
 }
-$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.kind==='forgotten'){const p=tower.player,S=storyOf(p.id),cl=S.clues||{},clues=[cl[3],cl[6],cl[9]].filter(Boolean).join('\n');
+$('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.boss){const p=tower.player,S=storyOf(p.id),cl=S.clues||{},clues=[cl[3],cl[6],cl[9]].filter(Boolean).join('\n');
   storyCard({dark:1,fig:{id:p.id,anim:'idle',light:.12},eyebrow:`${p.name} · PART 1`,title:'WHY THEY CAME',text:S.intro},()=>
   storyCard({dark:1,fig:{id:p.id,anim:'walk_forward',light:.35},eyebrow:`${p.name} · PART 2`,title:'THE CLUES',text:clues},()=>
   storyCard({fig:{id:p.id,anim:'idle',light:.65},eyebrow:`${p.name} · PART 3`,title:'THE CROWN',text:S.ending},()=>

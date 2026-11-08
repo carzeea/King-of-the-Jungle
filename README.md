@@ -350,3 +350,9 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.9: Snake card shows both arms
 - The Snake's shaded right arm, which the cut-out had dropped as background, is restored and lightened to match his body, so his card shows both arms like the other fighters.
+
+## Web build 6.0: Every Tower climb ends with the surprise MAJIC fight; the crown goes on the fighter's head
+- **MAJIC is now the surprise final fight of every Tower climb.** After you beat the Elephant (still billed as the "FINAL BOSS"), the results screen says "A NEW CHALLENGER" (the Elephant shown in shadow) with a **FACE IT** button. That plays The Summit and The Truth, then the MAJIC fight in Majic's Lair. Lose, and TRY AGAIN restarts straight at MAJIC.
+- **Beating MAJIC** plays "THE TRUE KING" ending: your Tower crown is saved, one of Snake, Eagle or Stag unlocks (until all three are out), and MAJIC joins the roster. Then your fighter's own four-part backstory plays, followed by the epilogue and the tower's history.
+- The old "? ? ?" secret tower (which needed all 11 crowns) is retired from the menu, since MAJIC is now part of every climb. Playing the Tower as MAJIC still ends at the Elephant.
+- **Crowning:** on the champion screen, your fighter stands in their fighting stance and the crown floats down and settles on their head, following it as they breathe. Each fighter's head position is set in `CROWN_AT` in `game.js` (all 15 checked).
