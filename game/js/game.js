@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=5.3';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -75,7 +75,7 @@ setBackdrop('assets/arenas/cover-bg.webp');
 })();
 /* ---------- Cover / title screen ---------- */
 (function cover(){
- const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src='assets/characters/portraits/'+f.id+'.jpg';im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
+ const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src=portrait(f.id);im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
  const startCover=()=>{const m=$('menu');if(m.classList.contains('started'))return;m.classList.add('started');try{ac()}catch(_){}
   if(window.KOTJAudio){KOTJAudio.unlock();KOTJAudio.music('music.menu');KOTJAudio.preload(['sfx.punch','sfx.heavyImpact','sfx.claw','sfx.bite','sfx.block','sfx.groundSlam']);KOTJAudio.ready.then(()=>KOTJAudio.preload(Object.keys(KOTJAudio.clips).filter(k=>k.startsWith('voice.'))))}
   setTimeout(()=>{const b=document.querySelector('.cover-menu button');if(b)b.focus({preventScroll:true})},60)};
@@ -610,7 +610,7 @@ function storyFig(o){
  if(!o){el.style.display='none';return}
  const A=(HD[o.id]||{}).anims||{},anim=A[o.anim]?o.anim:'idle',[n,fw,fh]=A[anim]||[1,1,1];
  el.style.display='block';el.style.aspectRatio=fw+'/'+fh;
- el.style.backgroundImage=`url(assets/characters/${o.id}/frames-hd/${anim}.webp?v=5.0)`;el.style.backgroundSize=`${n*100}% 100%`;
+ el.style.backgroundImage=`url(assets/characters/${o.id}/frames-hd/${anim}.webp?v=5.3)`;el.style.backgroundSize=`${n*100}% 100%`;
  const L=o.light;el.style.filter=L>=1?'drop-shadow(0 0 28px rgba(255,200,90,.85)) drop-shadow(0 0 4px rgba(255,230,160,.9))':
   `brightness(${.04+L*.9}) contrast(${1.3-L*.3}) drop-shadow(0 0 ${10+L*14}px rgba(${L>.5?'255,190,90':'160,120,255'},${.55+L*.3}))`;
  let i=0;const step=()=>{el.style.backgroundPosition=n>1?`${(i%n)*100/(n-1)}% 0`:'0 0';i=o.hold&&i>=n-1?n-1:i+1};step();figTimer=setInterval(step,o.hold?130:120);
@@ -673,7 +673,7 @@ function champion(f){
  im.onload=()=>{const w=im.width/n,c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
   const d=g.getImageData(0,0,c.width,c.height).data;tops=[];
   for(let i=0;i<n;i++){let t=im.height*.15;outer:for(let y=0;y<im.height;y++)for(let x=Math.floor(i*w+w*.3);x<(i+1)*w-w*.3;x++)if(d[(y*c.width+x)*4+3]>128){t=y;break outer}tops.push(t)}};
- im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=5.0`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
+ im.src=`assets/characters/${f.id}/frames-hd/victory.webp?v=5.3`;bg.src='assets/arenas/royal-colosseum.webp';crown.src='assets/ui/crown.webp';
  const conf=[];for(let i=0;i<140;i++)conf.push({x:Math.random(),y:-Math.random()*1.2,v:.08+Math.random()*.12,r:Math.random()*6.28,s:.5+Math.random(),c:['#ffd36b','#e8b95b','#fff3c4','#b94738'][i%4]});
  const t0=performance.now();let lt=t0;cancelAnimationFrame(champRaf);
  (function draw(now){
@@ -769,11 +769,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=5.0';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=5.3';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=5.0';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=5.3';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;

@@ -328,3 +328,7 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 - No zooming: pinch-zoom, double-tap zoom, Ctrl + scroll and Ctrl +/- are blocked, the page can't scroll or bounce during play, and the fight camera no longer zooms in and out. It pans with the fighters at a fixed size.
 - Upright tablets now get the same tidy layout as upright phones (arena on top, controls underneath), and the camera re-centers when the screen is rotated or resized.
 - Tested on PC (1366×768, 1920×1080), iPhone (portrait and landscape), iPad (portrait and landscape) and Android landscape. Touch buttons appear only on touch screens, keyboard and touch attacks register, and there's no page scroll and no errors.
+
+## Web build 5.3: Snow Leopard select art and fresh updates
+- The Snow Leopard's select-screen card is now a chest-up shot from her full-body art, matching the other fighters' cards.
+- **Why players still saw the old Leopard:** browsers kept the old portrait (cached for a week) and the old code. Every portrait, script and stylesheet now carries a version tag, and `netlify.toml` tells browsers to always check for newer code and portraits. New art now shows up right after each update, with no hard refresh needed.

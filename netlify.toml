@@ -13,3 +13,25 @@
   for = "/audio/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# Always check for a newer page and code, so updates (new fighters, art) show right away.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "no-cache"
+[[headers]]
+  for = "/assets/characters/portraits/*"
+  [headers.values]
+    Cache-Control = "no-cache"

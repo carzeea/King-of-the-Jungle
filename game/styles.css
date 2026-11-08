@@ -391,7 +391,7 @@ body.fighting.paused .controls{top:62%}
 
 /* Cover-art splash (build 3.7) */
 #splash{position:fixed;inset:0;z-index:999;background:#050403;display:grid;place-items:center;cursor:pointer;animation:splashIn .6s ease-out both}
-#splash .splash-blur{position:absolute;inset:-40px;background:url(assets/ui/cover-blur.webp) center/cover;filter:brightness(.55)}
+#splash .splash-blur{position:absolute;inset:-40px;background:url(assets/ui/cover-blur.webp?v=5.3) center/cover;filter:brightness(.55)}
 #splash img{position:absolute;top:0;left:0;right:0;bottom:34px;width:100%;height:calc(100% - 34px);object-fit:contain;animation:splashFade .8s ease-out both}
 #splash .splash-hint{position:absolute;bottom:11px;left:0;right:0;text-align:center;color:#ffe3a0;font:800 13px/1 Inter,sans-serif;letter-spacing:.3em;text-shadow:0 2px 6px #000;animation:blink 1.2s .8s infinite}
 #splash.out{opacity:0;transition:opacity .6s}
