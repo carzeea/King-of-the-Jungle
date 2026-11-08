@@ -11,14 +11,18 @@ cut=crop.copy();cut.putalpha(mask)
 rgb=ImageEnhance.Contrast(cut.convert('RGB')).enhance(1.2);rgb=ImageEnhance.Color(rgb).enhance(1.15)
 r,g,b=rgb.split();r=r.point(lambda v:min(255,int(v*1.05)));b=b.point(lambda v:int(v*.95));rgb=Image.merge('RGB',(r,g,b));rgb.putalpha(mask)
 W,H=500,600
-bg=Image.new('RGB',(W,H),(20,13,8));d=ImageDraw.Draw(bg)
-gl=Image.new('L',(W,H),0);ImageDraw.Draw(gl).ellipse((40,60,460,560),fill=110);gl=gl.filter(ImageFilter.GaussianBlur(70))
-bg=Image.composite(Image.new('RGB',(W,H),(90,55,20)),bg,gl)
-# gold back-frame like the other cards
+# blended homeland background: her snowy mountains and waterfall, blurred and darkened
+scene=src.crop((0,180,560,852)).resize((W,H),Image.LANCZOS).filter(ImageFilter.GaussianBlur(7))
+scene=ImageEnhance.Brightness(scene).enhance(.42);scene=ImageEnhance.Color(scene).enhance(.8)
+bg=scene.convert('RGBA')
+# glowing gold square frame, like the other cards (open at the bottom, fighter in front)
 fr=Image.new('RGBA',(W,H),(0,0,0,0));fd=ImageDraw.Draw(fr)
-fd.rounded_rectangle((40,40,W-40,H+40),24,outline=(232,185,91,255),width=3)
-fd.rounded_rectangle((50,50,W-50,H+40),18,outline=(90,60,25,200),width=2)
-glow=fr.filter(ImageFilter.GaussianBlur(8));bg=bg.convert('RGBA');bg.alpha_composite(glow);bg.alpha_composite(fr)
+box=(14,50,W-14,H+30)
+fd.rectangle(box,outline=(255,160,40,255),width=10)
+glow=fr.filter(ImageFilter.GaussianBlur(14));glow2=fr.filter(ImageFilter.GaussianBlur(5))
+[bg.alpha_composite(glow) for _ in range(4)];bg.alpha_composite(glow2);bg.alpha_composite(glow2)
+core=Image.new('RGBA',(W,H),(0,0,0,0));ImageDraw.Draw(core).rectangle(box,outline=(255,225,140,255),width=4)
+bg.alpha_composite(fr);bg.alpha_composite(core)
 # place her: head near top, chest-up, centred
 s=1.45;fig=rgb.resize((int(crop.width*s),int(crop.height*s)),Image.LANCZOS)
 headx,heady=int((470-90)*s),int(95*s)       # her face in crop coords

@@ -335,3 +335,6 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 5.4: Snow Leopard card matches the roster
 - Her select card now matches the other fighters' cards: she's cut out onto the same dark background with the gold frame behind her, centred and chest-up with her full head at the top, with the same warm, punchy color. Tool: `docs/art-tools/make_portrait_snow_leopard.py`.
+
+## Web build 5.5: Snow Leopard card frame and background
+- Her card now has the same glowing gold square frame as the other fighters, behind her and open at the bottom, over a blurred, darkened view of her homeland (snowy mountains and waterfall from her art).
