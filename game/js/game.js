@@ -396,12 +396,16 @@ function update(dt){
   const o=F[1-i],inp=f.ai?cpuInput(i):mode==='online'?netInput(i):inputFor(i),frozen=!!game.ko;
   const rawAtk=inp.at&&!f.wasAttack&&!frozen,rawSp=inp.sp&&!f.wasSpecial&&!frozen,insEdge=inp.ins&&!f.wasIns&&!frozen;
   // Secret "Titan's Bane": BLOCK, BLOCK, JUMP, JUMP, ATTACK within 2.5 s while fighting MAJIC.
-  if(!f.ai&&o.data.id==='majic'&&!game.bane){const ed=n=>inp[n]&&!(f.secPrev||{})[n];f.secT=(f.secT||0)+game.dt;
+  if(!f.ai&&o.data.id==='majic'&&(game.baneN||0)<2&&!game.ko&&o.hp>0){const ed=n=>inp[n]&&!(f.secPrev||{})[n];f.secT=(f.secT||0)+game.dt;
    const push=c=>{if(!f.sec||f.secT>2.5){f.sec='';f.secT=0}f.sec+=c};
    if(ed('bl'))push('B');if(ed('j'))push('J');if(rawAtk&&f.sec)push('A');
    if(f.sec&&!'BBJJA'.startsWith(f.sec.slice(-5))&&!'BBJJA'.startsWith(f.sec))f.sec=f.sec.endsWith('B')?'B':'';
-   if(f.sec&&f.sec.endsWith('BBJJA')){game.bane=i+1;f.sec='';if(o.bars>1){o.bars--;o.potential=0}
-    banner("TITAN'S BANE",'MAJIC IS WEAKENED',1.6,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
+   // 1st correct entry: MAJIC loses a whole life bar. 2nd correct entry: he falls for good.
+   if(f.sec&&f.sec.endsWith('BBJJA')){game.bane=i+1;game.baneN=(game.baneN||0)+1;f.sec='';f.secT=0;
+    if(game.baneN===1){if(o.bars>1){o.bars--;o.hp=BAR;o.potential=0}
+     banner("TITAN'S BANE",'MAJIC IS WEAKENED · ENTER IT AGAIN TO FINISH HIM',2,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
+    else{o.bars=1;o.hp=0;o.potential=0;o.stun=0;o.attack=0;o.vx=f.dir*480;o.vy=-420;o.ground=false;game.shake=.7;game.flash=1;
+     spark(o.x,o.y-150,'#7fe8ff',40);floatText(o.x,o.y-340,"TITAN'S BANE",'#7fe8ff');hud();koFinish(o,f)}}
    f.secPrev={bl:inp.bl,j:inp.j}}
   f.wasAttack=inp.at;f.wasSpecial=inp.sp;f.wasIns=inp.ins;
   // Input buffer: a press up to 0.15 s early still comes out at the first legal moment.
