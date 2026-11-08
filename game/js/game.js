@@ -5,7 +5,7 @@
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
 const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story'];
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=6.8';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -175,11 +175,19 @@ function render(){
  $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
  $('roster').innerHTML='';
  roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');if(f.id==='majic')b.classList.add('titan');
-  b.innerHTML=`<img src="${portrait(f.id)}" alt="${f.name}"><strong>${f.name}</strong>`+(f.id==='majic'?`<img class="titan-pop" src="assets/characters/portraits/majic-popout.webp?v=6.7" alt="">`:'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
+  b.innerHTML=`<span class="tf"><img src="${portrait(f.id)}" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
  card(chosen,roster.indexOf(chosen));
+ const sel=document.querySelector('.fighter-tile.selected');if(sel&&document.getElementById('select').contains(sel)&&!$('select').classList.contains('hidden'))sel.scrollIntoView({block:'nearest',behavior:'smooth'});
+ selectHints();
 }
+function gridCols(){const t=[...document.querySelectorAll('#roster .fighter-tile')];if(t.length<2)return 1;const y=t[0].offsetTop;return Math.max(1,t.filter(e=>e.offsetTop===y).length)}
+function randomPick(){const pool=roster.filter(f=>f.id!==chosen.id&&!(mode==='forgotten'&&f.id==='majic'));chosen=pool[Math.floor(Math.random()*pool.length)];render()}
+function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const kind=pads[0]?padKind(pads[0]):isTouch()?'touch':'kb';
+ const B={xbox:['✚','A','B','Y','☰'],ps:['✚','✕','○','△','☰'],kb:['← →','ENTER','ESC','R','P'],touch:['👆','✔','↩','🎲','']}[kind];
+ el.innerHTML=[['SELECT FIGHTER',B[0],'dpad'],['CONFIRM',B[1],'ka'],['BACK',B[2],'kb'],['RANDOM',B[3],'ky']].map(([t,k,c])=>`<span class="hint"><b class="${c}">${k}</b>${t}</span>`).join('');
+ if(kind==='touch'){el.querySelectorAll('.hint')[0].lastChild.textContent='TAP A FIGHTER';el.querySelectorAll('.hint')[1].onclick=()=>$('confirm-fighter').click()}el.querySelectorAll('.hint')[2].onclick=()=>show('menu');el.querySelectorAll('.hint')[3].onclick=()=>randomPick()}
 function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense}
 $('confirm-fighter').onclick=()=>{
  ac();picks[step-1]=chosen;
@@ -196,7 +204,11 @@ $('confirm-fighter').onclick=()=>{
 const KEYS=[{l:'a',r:'d',j:'w',bl:'s',at:'f',sp:'g',ins:'h'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp',bl:'ArrowDown',at:'k',sp:'l',ins:';'}];
 const kb={},tap={},touch={l:0,r:0,j:0,bl:0,at:0,sp:0,ins:0},touchTap={};
 const norm=e=>e.key.length===1?e.key.toLowerCase():e.key;
-window.addEventListener('keydown',e=>{if(!game)return;const k=norm(e);if(KEYS.some(m=>Object.values(m).includes(k))){e.preventDefault();if(!kb[k])tap[k]=true;kb[k]=true}if(k==='Escape'||k==='p')togglePause()});
+window.addEventListener('keydown',e=>{if(!game&&!$('select').classList.contains('hidden')){const i=roster.indexOf(chosen),cols=gridCols();let n=i;const k=e.key;
+  if(k==='ArrowRight')n=(i+1)%roster.length;else if(k==='ArrowLeft')n=(i+roster.length-1)%roster.length;else if(k==='ArrowDown')n=Math.min(roster.length-1,i+cols);else if(k==='ArrowUp')n=Math.max(0,i-cols);
+  else if(k==='Enter'){e.preventDefault();$('confirm-fighter').click();return}else if(k==='Escape'){show('menu');return}else if(k==='r'||k==='R'){randomPick();return}else return;
+  e.preventDefault();if(n!==i){chosen=roster[n];render()}return}
+ if(!game)return;const k=norm(e);if(KEYS.some(m=>Object.values(m).includes(k))){e.preventDefault();if(!kb[k])tap[k]=true;kb[k]=true}if(k==='Escape'||k==='p')togglePause()});
 window.addEventListener('keyup',e=>{kb[norm(e)]=false});
 window.addEventListener('blur',()=>{for(const k in kb)kb[k]=false});
 const pad=$('touch-pad');
@@ -211,7 +223,7 @@ let padPrev=[{},{}];
 function readPad(n){
  const list=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const g=list[n];if(!g)return null;
  const B=i=>!!(g.buttons[i]&&g.buttons[i].pressed),ax=g.axes[0]||0,ay=g.axes[1]||0;
- return{up:B(12)||ay<-.6,dn:B(13)||ay>.6,l:B(14)||ax<-.45,r:B(15)||ax>.45,j:B(0)||B(12)||ay<-.7,bl:B(1)||B(6)||B(4)||B(13)||ay>.7,at:B(2),sp:B(3),ins:B(5)||B(7),start:B(9)};
+ return{up:B(12)||ay<-.6,dn:B(13)||ay>.6,l:B(14)||ax<-.45,r:B(15)||ax>.45,j:B(0)||B(12)||ay<-.7,bl:B(1)||B(6)||B(4)||B(13)||ay>.7,at:B(2),sp:B(3),ins:B(5)||B(7),start:B(9),back:B(1),a:B(0)};
 }
 function inputFor(i){
  const m=KEYS[i],k={};
@@ -228,8 +240,9 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
    if((g.l&&!p.l)||(g.up&&!p.up))bs[(i-1+bs.length)%bs.length].focus();
    if((g.r&&!p.r)||(g.dn&&!p.dn))bs[(i+1)%bs.length].focus();
    if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))(document.activeElement&&bs.includes(document.activeElement)?document.activeElement:bs[0]).click()}}
- if(vis==='select'){const i=roster.indexOf(chosen);let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
-  if(n!==i){chosen=roster[n];render()}if((g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.bl&&!p.bl)show('menu')}
+ if(vis==='select'){const i=roster.indexOf(chosen),cols=gridCols();let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
+  if(g.dn&&!p.dn)n=Math.min(roster.length-1,i+cols);if(g.up&&!p.up)n=Math.max(0,i-cols);
+  if(n!==i){chosen=roster[n];render()}if((g.a&&!p.a)||(g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.back&&!p.back)show('menu');if(g.sp&&!p.sp)randomPick()}
  if(vis==='stage'){let n=stagePick;if(g.r&&!p.r)n=(n+1)%7;if(g.l&&!p.l)n=(n+6)%7;if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
  if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
  if(vis==='champion'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('champ-continue').click();

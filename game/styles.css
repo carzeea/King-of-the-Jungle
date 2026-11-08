@@ -439,3 +439,49 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 .fighter-tile.titan .titan-pop{position:absolute!important;left:-37.5%!important;bottom:-33%!important;width:175%!important;height:auto!important;max-width:none!important;object-fit:contain!important;filter:drop-shadow(0 6px 10px rgba(0,0,0,.8)) drop-shadow(0 0 10px rgba(255,190,90,.45))!important;pointer-events:none;z-index:1;clip-path:inset(0 17% 22.7% 21.4%)}
 .fighter-tile.titan strong{z-index:2}
 .fighter-tile.titan.selected .titan-pop,.fighter-tile.titan:hover .titan-pop{transform:scale(1.04);transform-origin:bottom center;transition:transform .15s}
+
+/* ===== Build 7.0: Fighter Select redesign ===== */
+#select{background:url(assets/ui/select-bg.webp) center/cover fixed,#120a12;position:relative}
+#select::before,#select::after{content:"";position:fixed;top:0;bottom:0;width:clamp(60px,8vw,120px);background:url(assets/ui/select-side-left.webp) center/cover;pointer-events:none;z-index:0;opacity:.95}
+#select::before{left:0}#select::after{right:0;background-image:url(assets/ui/select-side-right.webp)}
+@media(max-width:900px){#select::before,#select::after{display:none}}
+#select>*{position:relative;z-index:1}
+.select-title{text-align:center;margin:0 auto 14px;position:relative}
+.select-title .st-crown{width:70px;display:block;margin:0 auto -14px;filter:drop-shadow(0 0 12px rgba(255,200,90,.8))}
+.select-title .st-main{margin:0;font:italic 900 clamp(34px,6vw,72px)/1 "Barlow Condensed",Impact,sans-serif;letter-spacing:.02em;background:linear-gradient(180deg,#fff8d8 0%,#ffd36b 38%,#d98a1e 55%,#ffe39a 72%,#b5650d 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.5px #5a2a00;filter:drop-shadow(0 3px 0 #3a1a00) drop-shadow(0 0 18px rgba(255,160,40,.55));padding:0 .12em}
+.select-title .st-main small{font-size:.5em;vertical-align:.35em}
+.select-title .st-sub{margin:4px auto 0;display:inline-block;padding:4px 26px;font:italic 900 clamp(16px,2.4vw,28px)/1.2 "Barlow Condensed",Impact,sans-serif;letter-spacing:.14em;color:#fff1c8;border:2px solid #e8b95b;border-radius:6px;background:linear-gradient(180deg,rgba(60,20,8,.85),rgba(20,8,4,.85));box-shadow:0 0 16px rgba(255,170,60,.5),inset 0 0 12px rgba(255,170,60,.25)}
+#select-instruction{margin-top:10px!important}
+/* tiles: octagon gold frames that glow */
+.roster-grid{gap:clamp(8px,1.4vw,16px)!important}
+.fighter-tile{all:unset;cursor:pointer;position:relative;display:block;aspect-ratio:5/6;filter:drop-shadow(0 0 6px rgba(255,170,50,.55)) drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .15s,filter .15s;-webkit-tap-highlight-color:transparent}
+.fighter-tile .tf{position:absolute;inset:0;padding:4px;background:linear-gradient(135deg,#fff3b8 0%,#e8a93a 18%,#7a4308 34%,#ffd56e 50%,#9b5a0e 66%,#ffe7a0 82%,#a8650f 100%);clip-path:polygon(12% 0,88% 0,100% 10%,100% 90%,88% 100%,12% 100%,0 90%,0 10%)}
+.fighter-tile .tf img{width:100%;height:100%;object-fit:cover;display:block;clip-path:polygon(11.5% 0,88.5% 0,100% 9.6%,100% 90.4%,88.5% 100%,11.5% 100%,0 90.4%,0 9.6%);filter:saturate(.95) brightness(.88)!important;transition:filter .15s}
+.fighter-tile .tf strong{position:absolute!important;left:9%;right:9%;bottom:4.5%;padding:4px 2px!important;text-align:center;font:italic 900 clamp(10px,1.35vw,17px)/1 "Barlow Condensed",Impact,sans-serif!important;letter-spacing:.06em;color:#fff6dc!important;background:linear-gradient(180deg,#2a1406,#0d0603)!important;border:2px solid #e8b95b;border-radius:3px;clip-path:polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%);text-shadow:0 2px 3px #000}
+.fighter-tile:hover{transform:translateY(-2px)}
+.fighter-tile.selected{filter:drop-shadow(0 0 4px #fff3c4) drop-shadow(0 0 14px rgba(255,190,70,1)) drop-shadow(0 0 26px rgba(255,150,30,.8))!important;transform:scale(1.04);z-index:2}
+.fighter-tile.selected .tf img,.fighter-tile:hover .tf img{filter:none!important}
+.fighter-tile .tile-crown{position:absolute;top:2%;right:6%;width:26%;z-index:3}
+/* MAJIC: purple storm tile */
+.fighter-tile.titan{filter:drop-shadow(0 0 8px rgba(190,90,255,.9)) drop-shadow(0 0 22px rgba(150,60,255,.7))!important;z-index:3}
+.fighter-tile.titan .tf{background:linear-gradient(135deg,#f1d8ff 0%,#a855f7 22%,#4c1d95 40%,#e9b8ff 55%,#6d28d9 75%,#f5e1ff 100%)}
+.fighter-tile.titan .tf strong{border-color:#c084fc;color:#ffe9a8!important;font-size:clamp(12px,1.7vw,21px)!important}
+.fighter-tile.titan.selected{filter:drop-shadow(0 0 6px #f5e1ff) drop-shadow(0 0 20px rgba(190,90,255,1)) drop-shadow(0 0 36px rgba(140,50,255,.85))!important}
+.fighter-tile .bolt{position:absolute;inset:-10%;background:center/100% 100% no-repeat;pointer-events:none;opacity:0;animation:bolt 2.4s infinite;z-index:4}
+.fighter-tile .b0{background-image:url(assets/ui/bolt0.webp)}.fighter-tile .b1{background-image:url(assets/ui/bolt1.webp);animation-delay:.8s}.fighter-tile .b2{background-image:url(assets/ui/bolt2.webp);animation-delay:1.6s}
+@keyframes bolt{0%,100%{opacity:0}4%{opacity:1}8%{opacity:.2}11%{opacity:.9}20%{opacity:0}}
+/* control hints bar */
+.select-hints{display:flex;justify-content:center;flex-wrap:wrap;gap:clamp(10px,2.5vw,34px);margin:18px auto 6px;padding:10px 20px;max-width:900px;border:2px solid #e8b95b;border-radius:10px;background:linear-gradient(180deg,rgba(40,16,6,.9),rgba(12,5,3,.92));box-shadow:0 0 18px rgba(255,170,60,.45);clip-path:polygon(2% 0,98% 0,100% 50%,98% 100%,2% 100%,0 50%)}
+.select-hints .hint{display:flex;align-items:center;gap:8px;font:italic 900 clamp(11px,1.3vw,16px)/1 "Barlow Condensed",Impact,sans-serif;letter-spacing:.06em;color:#fff1cf;cursor:default}
+.select-hints .hint:nth-child(3),.select-hints .hint:nth-child(4){cursor:pointer}
+.select-hints b{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 5px;border-radius:12px;font:900 12px/1 Inter,sans-serif;color:#fff;background:#333;border:2px solid #777}
+.select-hints .ka{background:#16a34a;border-color:#86efac}.select-hints .kb{background:#dc2626;border-color:#fca5a5}.select-hints .ky{background:#ca8a04;border-color:#fde047}.select-hints .dpad{background:#1f1f1f;border-color:#a3a3a3}
+@media(max-width:700px){.select-hints{gap:10px;padding:8px 14px}.select-hints .hint:first-child{display:none}}
+#select .fighter-tile,#select .fighter-tile.selected,#select .fighter-tile:hover{border:none!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;padding:0!important;outline:none!important}
+#select .fighter-tile .tf strong{white-space:nowrap;overflow:hidden;text-overflow:clip}
+#select .fighter-tile .tf strong.long{font-size:clamp(8px,1.05vw,14px)!important;letter-spacing:.02em}
+#select .fighter-tile.titan{transform:scale(1.12);transform-origin:center 60%}
+#select .fighter-tile.titan.selected{transform:scale(1.16)}
+#select .fighter-tile.titan .tf img{object-position:50% 0;transform:scale(1.12);transform-origin:50% 0}
+@media(min-width:900px){body:has(#select:not(.hidden)) .topbar{padding-left:clamp(70px,9vw,130px);padding-right:clamp(70px,9vw,130px)}}
+@media(min-width:900px){body:has(#select:not(.hidden)) footer{padding-left:clamp(70px,9vw,130px);padding-right:clamp(70px,9vw,130px)}}
