@@ -25,6 +25,7 @@ CH = R.CH
 HDJS = os.path.join(ROOT, "game", "js", "sprites-hd.js")
 GJS = os.path.join(ROOT, "game", "js", "game.js")
 LO_S, HD_S = 0.34, 0.8
+CAPS = False   # drawn-in head tops looked like hats; heads cut by the sheet need new art
 
 
 def load_hd():
@@ -45,16 +46,22 @@ def clipped(f):
 
 def tidy(cell):
     """Drop small stray bits at the cell border (pieces of a neighbouring frame on the sheet)."""
-    a = cell[..., 3] > 60
-    lab, n = nd.label(a)
+    a = cell[..., 3] > 150
+    lab, n = nd.label(a, structure=np.ones((3, 3)))
     if n < 2:
         return cell
     sizes = nd.sum(a, lab, range(1, n + 1))
     big = sizes.max()
-    border = np.unique(np.r_[lab[0], lab[-1], lab[:, 0], lab[:, -1]])
-    for i in range(1, n + 1):
-        if sizes[i - 1] < 0.06 * big and i in border:
-            cell[lab == i] = 0
+    H, W = a.shape
+    m = 3
+    border = set(np.unique(np.r_[lab[:m].ravel(), lab[-m:].ravel(), lab[:, :m].ravel(), lab[:, -m:].ravel()])) - {0}
+    drop = np.zeros_like(a)
+    for i in border:
+        if sizes[i - 1] < 0.10 * big:
+            drop |= lab == i
+    if drop.any():
+        drop = nd.binary_dilation(drop, iterations=3) & ~nd.binary_dilation(a & ~drop, iterations=1)
+        cell[drop] = 0
     return cell
 
 
@@ -212,7 +219,7 @@ def run_animal(animal):
             cells.append(tidy(cell))
         # heads still cut flat (the sheet itself had no more): give them a rounded top
         runs = [cap_runs(c) for c in cells]
-        extra = max([cap_height(r) for r in runs] or [0])
+        extra = max([cap_height(r) for r in runs] or [0]) if CAPS else 0
         if extra:
             extra += 2
             cells = [add_cap(np.vstack([np.zeros((extra, NW, 4), np.uint8), c]), r, extra) for c, r in zip(cells, runs)]

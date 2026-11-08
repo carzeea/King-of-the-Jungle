@@ -9,7 +9,7 @@
   <meta property="og:description" content="11 armored beasts. One crown. Can you climb the Tower? Free in your browser on phone, PC or controller. No download.">
   <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3">
-  <link rel="stylesheet" href="styles.css?v=7.3">
+  <link rel="stylesheet" href="styles.css?v=7.5">
 </head>
 <body>
   <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp?v=7.1" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
@@ -17,7 +17,7 @@
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 7.4</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 7.5</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 7.4</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 7.5</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">KING <small>OF THE</small> JUNGLE</h2><p class="st-sub">FIGHTER SELECT</p><p id="select-instruction">Player 1: choose a fighter</p></div>
@@ -47,9 +47,9 @@
       <div id="select-hints" class="select-hints"></div>
     </section>
     <section id="stage" class="screen hidden">
-      <div class="section-head"><p class="eyebrow">STAGE SELECT</p><h2>CHOOSE YOUR ARENA</h2><p id="stage-vs">LION VS WOLF</p></div>
+      <div class="select-title stage-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main st-small">KING <small>OF THE</small> JUNGLE</h2><p class="st-eyebrow">STAGE SELECT</p><h3 class="st-big">CHOOSE YOUR ARENA</h3><p id="stage-vs">LION VS WOLF</p></div>
       <div id="stage-grid" class="stage-grid"></div>
-      <div class="stage-actions"><button id="stage-back" class="secondary">BACK</button><button id="stage-go" class="primary">FIGHT!</button></div>
+      <div class="stage-actions"><button id="stage-back" class="secondary hexbtn">BACK</button><button id="stage-go" class="primary hexbtn go">FIGHT!</button></div>
     </section>
     <section id="fight" class="screen hidden">
       <div class="fight-hud"><div class="player-hud"><div class="player-label"><img id="p1-face" class="hud-face" alt=""><span id="p1-tag">PLAYER 1</span> <strong id="p1-name">LION</strong></div><div class="health-track"><div id="p1-pot" class="health-pot"></div><div id="p1-health" class="health-fill"></div></div><div class="bar-pips" id="p1-pips"><i></i><i></i></div></div><div class="round-info"><span id="mode-label">VERSUS</span><strong id="timer">99</strong><small id="round-label">ROUND 1</small></div><div class="player-hud right"><div class="player-label"><span id="p2-tag">PLAYER 2</span> <strong id="p2-name">TIGER</strong><img id="p2-face" class="hud-face" alt=""></div><div class="health-track"><div id="p2-pot" class="health-pot"></div><div id="p2-health" class="health-fill"></div></div><div class="bar-pips" id="p2-pips"><i></i><i></i></div></div></div>
@@ -88,7 +88,7 @@
     </section>
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.1"></script><script src="js/sprites-hd.js?v=7.1"></script><script src="js/audio.js?v=7.1"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=7.4"></script>
+  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.1"></script><script src="js/sprites-hd.js?v=7.1"></script><script src="js/audio.js?v=7.1"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=7.5"></script>
 <script>(function(){var last=0;
 document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
 document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});

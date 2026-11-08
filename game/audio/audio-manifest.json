@@ -626,6 +626,13 @@
    "used_for": "MAJIC wins a fight",
    "source": null,
    "volume": 1.0
+  },
+  "music.caes-corner": {
+   "file": "music/arena-2-inferno-fortress.mp3",
+   "label": "Arena 7 – Cae's Corner (uses the Inferno Fortress track for now)",
+   "used_for": "Fight music in Cae's Corner",
+   "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_219e389f-ac9b-4601-a28f-b20073431c4f.mp3",
+   "volume": 0.42
   }
  }
 }

@@ -35,22 +35,26 @@ function resTick(real){RES.t+=real;RES.acc+=real;RES.n++;
 }
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
- {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'royal-colosseum',name:"MAJIC'S LAIR"}];
+ {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
+const LAIR=ARENAS.find(a=>a.lair),FIGHT_ARENAS=ARENAS.filter(a=>!a.lair);
 const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp';arenaImg[a.id]=im});
-let arena=ARENAS[0],stagePick=0; // stagePick: 0-5 arena, 6 = random
-function renderStages(){setBackdrop(stagePick===6?'assets/arenas/cover-bg.webp':'assets/arenas/'+ARENAS[stagePick].id+'.webp');
+let arena=ARENAS[0],stagePick=0; // stagePick: index into ARENAS, ARENAS.length = random
+const RND=()=>ARENAS.length;
+function renderStages(){setBackdrop('assets/ui/select-bg.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
- ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(stagePick===i?' selected':'');
-  b.innerHTML=`<span class="num">${i+1}</span><img src="assets/arenas/${a.id}-thumb.webp" alt="${a.name}"><strong>${a.name}</strong>`;
-  b.onclick=()=>{stagePick=i;renderStages()};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
- const r=document.createElement('button');r.className='stage-tile random'+(stagePick===6?' selected':'');r.innerHTML='?<strong>RANDOM</strong>';
- r.onclick=()=>{stagePick=6;renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
+ ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(a.lair?' lair':'')+(stagePick===i?' selected':'');
+  b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=7.5" alt=""><strong>${a.name}</strong></span>`;
+  b.onclick=()=>{ac();stagePick=i;renderStages()};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
+ const r=document.createElement('button');r.className='stage-tile random'+(stagePick===RND()?' selected':'');
+ r.innerHTML='<span class="sf"><img class="laurel" src="assets/ui/stage-random.webp?v=7.5" alt=""><strong>RANDOM</strong></span>';
+ r.onclick=()=>{ac();stagePick=RND();renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
+ const sel=$('stage-grid').querySelector('.selected');sel&&sel.scrollIntoView({block:'nearest'});
 }
 function openStage(){renderStages();$('stage-back').classList.toggle('hidden',mode==='online');show('stage')}
-$('stage-go').onclick=()=>{ac();arena=stagePick===6?ARENAS[Math.floor(Math.random()*6)]:ARENAS[stagePick];if(mode==='online')NET.send({t:'start',a:picks[0].id,b:picks[1].id,arena:arena.id});start()};
+$('stage-go').onclick=()=>{ac();arena=stagePick>=RND()?ARENAS[Math.floor(Math.random()*ARENAS.length)]:ARENAS[stagePick];if(mode==='online')NET.send({t:'start',a:picks[0].id,b:picks[1].id,arena:arena.id});start()};
 $('stage-back').onclick=()=>{if(mode==='online')return;step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
 // Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
-function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||ARENAS[5];const n=tower.ladder.length;return tower.index===n-1?ARENAS[5]:ARENAS[tower.index%5]}
+function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||LAIR;const n=tower.ladder.length;return tower.index===n-1?LAIR:FIGHT_ARENAS[tower.index%FIGHT_ARENAS.length]}
 
 const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
 /* ---------- Atmospheric backdrop behind every non-title screen ---------- */
@@ -211,6 +215,10 @@ $('confirm-fighter').onclick=()=>{
 const KEYS=[{l:'a',r:'d',j:'w',bl:'s',at:'f',sp:'g',ins:'h'},{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp',bl:'ArrowDown',at:'k',sp:'l',ins:';'}];
 const kb={},tap={},touch={l:0,r:0,j:0,bl:0,at:0,sp:0,ins:0},touchTap={};
 const norm=e=>e.key.length===1?e.key.toLowerCase():e.key;
+window.addEventListener('keydown',e=>{if(!game&&!$('stage').classList.contains('hidden')){const N=RND()+1;let n=stagePick;const k=e.key;
+ if(k==='ArrowRight')n=(n+1)%N;else if(k==='ArrowLeft')n=(n+N-1)%N;else if(k==='ArrowDown')n=Math.min(N-1,n+3);else if(k==='ArrowUp')n=Math.max(0,n-3);
+ else if(k==='Enter'){e.preventDefault();$('stage-go').click();return}else if(k==='Escape'){$('stage-back').click();return}else return;
+ e.preventDefault();stagePick=n;renderStages()}});
 window.addEventListener('keydown',e=>{if(!game&&!$('select').classList.contains('hidden')){const i=roster.indexOf(chosen),cols=gridCols();let n=i;const k=e.key;
   if(k==='ArrowRight')n=(i+1)%roster.length;else if(k==='ArrowLeft')n=(i+roster.length-1)%roster.length;else if(k==='ArrowDown')n=Math.min(roster.length-1,i+cols);else if(k==='ArrowUp')n=Math.max(0,i-cols);
   else if(k==='Enter'){e.preventDefault();$('confirm-fighter').click();return}else if(k==='Escape'){selectBack();return}else if(k==='r'||k==='R'){randomPick();return}else return;
@@ -250,7 +258,7 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
  if(vis==='select'){const i=roster.indexOf(chosen),cols=gridCols();let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
   if(g.dn&&!p.dn)n=Math.min(roster.length-1,i+cols);if(g.up&&!p.up)n=Math.max(0,i-cols);
   if(n!==i){chosen=roster[n];render()}if((g.a&&!p.a)||(g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.back&&!p.back)selectBack();if(g.sp&&!p.sp)randomPick()}
- if(vis==='stage'){let n=stagePick;if(g.r&&!p.r)n=(n+1)%7;if(g.l&&!p.l)n=(n+6)%7;if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
+ if(vis==='stage'){let n=stagePick;const N=RND()+1;if(g.r&&!p.r)n=(n+1)%N;if(g.l&&!p.l)n=(n+N-1)%N;if(g.dn&&!p.dn)n=Math.min(N-1,n+3);if(g.up&&!p.up)n=Math.max(0,n-3);if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
  if(vis==='online'&&g.back&&!p.back)$('ol-back').click();
  if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
  if(vis==='champion'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('champ-continue').click();
@@ -627,12 +635,12 @@ function finish(){
  if(tower&&tower.done)champion(tower.player);else show('result');
 }
 $('tower-next').onclick=()=>{
- if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=ARENAS[5];
+ if(tower.reveal){tower.reveal=false;tower.boss=true;picks=[tower.player,MAJIC];arena=LAIR;
   return storyCard({dark:1,title:'THE SUMMIT',text:STORY.forgotten.summit},()=>storyCard({dark:1,title:'THE TRUTH',text:STORY.forgotten.reveal},start))}
  picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
  if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
  start()};
-$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=ARENAS[5];return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=LAIR;return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
 const crowns=()=>SAVE.get('crowns',[]);
@@ -823,7 +831,7 @@ NET.on('fast',m=>{if(mode!=='online')return;
 function selectWait(){if(mode!=='online'||$('select').classList.contains('hidden'))return;
  const ins=$('select-instruction'),cf=$('confirm-fighter');
  if(ON.mine&&ON.theirs){
-  if(ON.side===0){picks=[fighterById(ON.mine),fighterById(ON.theirs)];stagePick=6;$('stage-vs').textContent=`${picks[0].name} VS ${picks[1].name}`;openStage();return}
+  if(ON.side===0){picks=[fighterById(ON.mine),fighterById(ON.theirs)];stagePick=RND();$('stage-vs').textContent=`${picks[0].name} VS ${picks[1].name}`;openStage();return}
   ins.textContent='BOTH LOCKED IN · YOUR FRIEND IS PICKING THE ARENA…';cf.textContent='LOCKED IN';cf.disabled=true;return}
  ins.textContent=ON.mine?'LOCKED IN · WAITING FOR YOUR FRIEND…':ON.theirs?'YOUR FRIEND IS READY · CHOOSE YOUR FIGHTER':'ONLINE MATCH · CHOOSE YOUR FIGHTER';
  cf.textContent=ON.mine?'LOCKED IN':'LOCK IN';cf.disabled=!!ON.mine}
@@ -886,34 +894,34 @@ const SPRITES={
  badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,144,203],"crouch":[4,74,60,108,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,110,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,94,208],"pounce":[8,96,60,142,176],"special_earth_slam":[7,81,61,119,179],"shadow_rampage":[10,70,61,104,179],"hit_light":[6,84,78,130,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
   double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['hit_heavy',[0,1,2,3,4]],getup:['knockdown_getup',[4,5,6,7]],ko:['hit_heavy',4]},
- crocodile:{s:0.34,anims:{"idle":[9,95,87,140,256],"walk_forward":[7,131,85,164,251],"walk_back":[6,120,85,137,251],"run":[7,149,79,157,233],"block":[6,92,80,134,236],"attack_light":[7,117,86,144,254],"attack_heavy":[6,157,85,207,251],"bite":[6,145,77,170,227],"uppercut":[7,122,79,136,233],"jump":[7,118,74,174,218],"special_pounce":[6,175,76,258,224],"hit_light":[6,106,77,187,227],"hit_heavy":[8,118,76,174,224],"knockdown_getup":[14,133,68,196,200],"victory":[8,86,103,128,304],"defeat":[7,128,68,188,201]},
+ crocodile:{s:0.34,anims:{"idle":[9,95,87,140,256],"walk_forward":[7,131,85,164,251],"walk_back":[6,120,85,137,251],"run":[7,149,79,157,233],"block":[6,92,80,134,236],"attack_light":[7,117,86,144,254],"attack_heavy":[6,157,85,207,251],"bite":[6,145,77,170,227],"uppercut":[7,124,79,136,233],"jump":[7,118,74,174,218],"special_pounce":[6,175,76,258,224],"hit_light":[6,106,77,187,227],"hit_heavy":[8,118,76,174,224],"knockdown_getup":[14,133,68,196,200],"victory":[8,86,103,128,304],"defeat":[7,128,68,188,201]},
   double:['bite','attack_heavy'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- elephant:{s:0.34,anims:{"idle":[9,92,112,138,330],"walk_forward":[7,136,108,162,318],"walk_back":[6,124,107,140,314],"run":[7,170,102,172,299],"block":[6,109,101,159,296],"attack_light":[7,131,109,178,321],"attack_heavy":[6,194,107,258,314],"bite":[6,221,97,247,285],"uppercut":[7,150,99,186,292],"jump":[7,138,94,202,277],"special_pounce":[6,228,98,336,288],"hit_light":[6,133,98,236,288],"hit_heavy":[8,150,98,221,288],"knockdown_getup":[14,165,87,242,256],"victory":[8,113,132,168,387],"defeat":[7,158,89,232,263]},
+ elephant:{s:0.34,anims:{"idle":[9,92,112,138,330],"walk_forward":[7,184,114,233,337],"walk_back":[6,166,107,205,314],"run":[7,230,102,261,299],"block":[6,109,101,159,296],"attack_light":[7,178,109,247,321],"attack_heavy":[6,194,107,258,314],"bite":[6,221,97,247,285],"uppercut":[7,204,99,265,292],"jump":[7,187,94,274,277],"special_pounce":[6,261,98,367,288],"hit_light":[6,133,98,236,288],"hit_heavy":[8,150,98,221,288],"knockdown_getup":[14,198,87,252,256],"victory":[8,113,132,168,387],"defeat":[7,186,89,314,263]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- grizzly:{s:0.34,anims:{"idle":[9,86,104,127,307],"walk_forward":[8,118,98,157,287],"walk_back":[6,102,98,142,287],"run":[7,141,92,146,271],"block":[6,107,94,156,277],"attack_light":[7,132,98,160,287],"attack_heavy":[6,145,97,198,284],"bite":[6,160,86,172,254],"uppercut":[7,128,87,158,257],"jump":[7,116,84,171,248],"special_pounce":[6,163,85,239,251],"hit_light":[6,127,90,220,264],"hit_heavy":[8,137,91,202,267],"knockdown_getup":[14,156,79,230,231],"victory":[8,112,120,173,353],"defeat":[7,145,84,213,248]},
+ grizzly:{s:0.34,anims:{"idle":[9,86,104,127,307],"walk_forward":[8,118,98,157,287],"walk_back":[6,104,98,148,287],"run":[7,141,92,146,271],"block":[6,145,94,212,277],"attack_light":[7,132,98,160,287],"attack_heavy":[6,177,96,263,284],"bite":[6,160,86,172,254],"uppercut":[7,144,88,158,257],"jump":[7,116,84,171,248],"special_pounce":[6,173,85,250,251],"hit_light":[6,170,90,286,264],"hit_heavy":[8,161,91,273,267],"knockdown_getup":[14,176,79,230,231],"victory":[8,112,120,173,353],"defeat":[7,179,84,238,248]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- hippo:{s:0.34,anims:{"idle":[9,97,107,142,316],"walk_forward":[8,112,103,154,304],"walk_back":[6,108,104,137,307],"run":[7,153,96,143,283],"block":[6,105,97,154,286],"attack_light":[7,131,99,164,290],"attack_heavy":[6,167,100,216,293],"bite":[6,181,88,182,259],"uppercut":[7,133,90,150,266],"jump":[7,125,87,184,255],"special_pounce":[6,163,90,240,266],"hit_light":[6,137,95,244,279],"hit_heavy":[8,150,94,221,276],"knockdown_getup":[14,155,80,228,235],"victory":[8,120,124,184,366],"defeat":[7,133,73,195,214]},
+ hippo:{s:0.34,anims:{"idle":[9,97,107,142,316],"walk_forward":[8,116,103,159,304],"walk_back":[6,147,110,193,322],"run":[7,156,96,143,283],"block":[6,142,97,209,286],"attack_light":[7,131,99,164,290],"attack_heavy":[6,167,100,216,293],"bite":[6,181,88,182,259],"uppercut":[7,156,91,150,266],"jump":[7,125,87,184,255],"special_pounce":[6,176,91,240,266],"hit_light":[6,185,95,315,279],"hit_heavy":[8,153,94,221,276],"knockdown_getup":[14,184,80,233,235],"victory":[8,120,124,184,366],"defeat":[7,133,73,195,214]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- hyena:{s:0.34,anims:{"idle":[9,69,82,102,240],"walk_forward":[8,93,81,121,239],"walk_back":[6,77,89,88,262],"run":[7,136,81,111,237],"block":[6,86,81,126,239],"attack_light":[7,104,84,130,248],"attack_heavy":[6,154,84,198,248],"bite":[6,131,80,166,234],"uppercut":[7,118,79,129,231],"jump":[7,109,70,161,205],"special_pounce":[6,146,72,215,211],"hit_light":[6,98,78,173,228],"hit_heavy":[8,112,78,164,228],"knockdown_getup":[14,122,68,180,200],"victory":[8,89,104,138,305],"defeat":[7,115,74,170,219]},
+ hyena:{s:0.34,anims:{"idle":[9,69,82,102,240],"walk_forward":[8,97,81,126,239],"walk_back":[6,77,89,88,262],"run":[7,162,81,116,237],"block":[6,90,81,131,239],"attack_light":[7,108,84,135,248],"attack_heavy":[6,154,84,198,248],"bite":[6,140,79,171,234],"uppercut":[7,118,79,129,231],"jump":[7,109,70,161,205],"special_pounce":[6,146,72,215,211],"hit_light":[6,101,77,180,228],"hit_heavy":[8,112,78,164,228],"knockdown_getup":[14,122,68,180,200],"victory":[8,89,104,138,305],"defeat":[7,115,74,170,219]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- jaguar:{s:0.34,anims:{"idle":[9,82,84,128,246],"walk_forward":[8,107,83,162,244],"walk_back":[6,81,84,104,246],"run":[7,120,80,122,235],"block":[6,86,81,127,238],"attack_light":[7,112,84,132,246],"attack_heavy":[6,137,84,174,246],"bite":[6,144,77,148,226],"uppercut":[7,114,79,128,232],"jump":[7,102,73,150,215],"special_pounce":[6,160,71,235,209],"hit_light":[6,103,78,174,229],"hit_heavy":[8,113,77,166,226],"knockdown_getup":[14,125,67,184,197],"victory":[8,93,102,143,299],"defeat":[7,120,74,177,218]},
+ jaguar:{s:0.34,anims:{"idle":[9,82,84,128,246],"walk_forward":[8,107,83,162,244],"walk_back":[6,81,84,104,246],"run":[7,163,80,184,235],"block":[6,86,81,127,238],"attack_light":[7,115,84,137,246],"attack_heavy":[6,137,84,174,246],"bite":[6,144,77,148,226],"uppercut":[7,114,79,128,232],"jump":[7,138,89,204,261],"special_pounce":[6,160,71,235,209],"hit_light":[6,105,78,180,229],"hit_heavy":[8,113,77,166,226],"knockdown_getup":[14,130,67,195,197],"victory":[8,95,104,148,305],"defeat":[7,120,74,177,218]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
  leopard:{s:0.34,anims:{"idle":[5,95,98,118,275],"walk_forward":[5,86,98,118,275],"walk_back":[5,93,98,137,275],"run":[6,140,82,201,214],"dash":[4,169,78,179,214],"crouch":[3,104,81,150,220],"jump":[6,108,81,128,220],"block":[3,76,81,67,220],"attack_light":[6,109,78,153,208],"attack_heavy":[5,118,76,208,204],"bite":[5,133,73,201,195],"uppercut":[5,119,75,184,201],"special_pounce":[5,184,73,281,195],"special_b":[6,114,88,179,230],"special_c":[5,163,77,265,198],"special_d":[14,133,76,201,201],"ultra_move":[5,185,90,270,230],"hit_light":[3,109,87,128,224],"hit_heavy":[9,175,94,259,233],"knockdown_getup":[11,176,107,259,272],"victory":[5,140,191,224,527],"defeat":[9,175,94,259,233]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_d','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6,7,8,9,10]],ko:['hit_heavy',8]},
- lion:{s:0.34,anims:{"idle":[9,82,89,136,263],"walk_forward":[8,101,86,151,254],"walk_back":[6,85,86,110,254],"run":[7,118,81,132,239],"block":[6,83,83,122,245],"attack_light":[7,119,87,142,257],"attack_heavy":[6,147,87,182,257],"bite":[6,144,79,168,233],"uppercut":[7,117,80,123,236],"jump":[7,101,76,149,224],"special_pounce":[6,178,77,262,227],"hit_light":[6,101,81,178,239],"hit_heavy":[8,116,80,171,236],"knockdown_getup":[14,134,67,197,198],"victory":[8,88,109,130,322],"defeat":[7,118,76,174,224]},
+ lion:{s:0.34,anims:{"idle":[9,82,89,136,263],"walk_forward":[8,105,86,156,254],"walk_back":[6,89,86,115,254],"run":[7,118,81,132,239],"block":[6,98,83,166,245],"attack_light":[7,119,87,142,257],"attack_heavy":[6,147,87,182,257],"bite":[6,165,79,168,233],"uppercut":[7,140,80,130,236],"jump":[7,101,76,149,224],"special_pounce":[6,199,77,262,227],"hit_light":[6,101,81,178,239],"hit_heavy":[8,116,80,171,236],"knockdown_getup":[14,134,67,197,198],"victory":[8,88,109,130,322],"defeat":[7,149,76,236,224]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- tiger:{s:0.34,anims:{"idle":[9,83,89,126,263],"walk_forward":[8,109,86,154,254],"walk_back":[6,85,86,114,254],"run":[7,133,79,128,233],"block":[6,84,83,122,245],"attack_light":[7,104,86,131,254],"attack_heavy":[6,150,86,199,254],"bite":[6,147,78,153,230],"uppercut":[7,117,78,133,230],"jump":[7,109,74,161,218],"special_pounce":[6,154,76,227,224],"hit_light":[6,108,78,188,230],"hit_heavy":[8,122,78,180,230],"knockdown_getup":[14,131,70,192,206],"victory":[8,98,105,155,310],"defeat":[7,120,75,177,221]},
+ tiger:{s:0.34,anims:{"idle":[9,108,91,157,269],"walk_forward":[8,116,86,154,254],"walk_back":[6,101,86,140,254],"run":[7,137,79,128,233],"block":[6,84,83,122,245],"attack_light":[7,142,86,186,254],"attack_heavy":[6,177,86,199,254],"bite":[6,147,78,153,230],"uppercut":[7,145,78,194,230],"jump":[7,109,74,161,218],"special_pounce":[6,165,76,234,224],"hit_light":[6,110,78,188,230],"hit_heavy":[8,122,78,180,230],"knockdown_getup":[14,131,70,192,206],"victory":[8,133,108,206,318],"defeat":[7,120,75,177,221]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_light','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- wolf:{s:0.34,anims:{"idle":[10,73,85,107,249],"walk_forward":[9,83,77,114,227],"walk_back":[7,75,78,101,230],"run":[8,160,79,171,233],"block":[6,83,83,122,245],"attack_light":[7,116,83,130,245],"attack_heavy":[6,148,83,190,245],"bite":[6,138,78,166,229],"uppercut":[7,112,81,130,239],"jump":[7,110,77,162,227],"special_pounce":[6,184,74,270,218],"hit_light":[6,99,84,165,248],"hit_heavy":[8,114,84,167,248],"knockdown_getup":[14,123,75,182,221],"victory":[8,92,112,135,330],"defeat":[7,129,81,189,239]},
+ wolf:{s:0.34,anims:{"idle":[10,73,85,107,249],"walk_forward":[9,85,77,114,227],"walk_back":[7,78,78,101,230],"run":[8,160,79,171,233],"block":[6,89,83,127,245],"attack_light":[7,120,83,135,245],"attack_heavy":[6,150,83,196,245],"bite":[6,138,78,166,229],"uppercut":[7,134,81,189,239],"jump":[7,110,77,162,227],"special_pounce":[6,224,76,294,223],"hit_light":[6,99,84,165,248],"hit_heavy":[8,114,84,167,248],"knockdown_getup":[14,128,75,190,221],"victory":[8,124,112,182,330],"defeat":[7,129,81,189,239]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };
