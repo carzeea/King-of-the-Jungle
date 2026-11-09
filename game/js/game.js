@@ -1085,7 +1085,19 @@ function drawBanner(){
 function drawFighter(f,i,ghost){
  const x=f.x,y=400+f.y;c.save();c.translate(x,y);c.scale(f.dir,1);
  const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.86,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08,majic:1.4,snake:.86,eagle:.9,stag:.92}[f.data.id]||.84;
- if(!ghost){c.globalAlpha=.3;c.fillStyle='#000';c.beginPath();c.ellipse(0,-f.y,58*sizeScale,10,0,0,7);c.fill();c.globalAlpha=1;}
+ if(!ghost){
+  // Contact shadow stays on the arena floor while the fighter rises, widening
+  // and softening with height to give jumps a stronger 2.5D sense of space.
+  const lift=Math.max(0,Math.min(1,-f.y/230));
+  c.save();c.globalAlpha=.34*(1-lift*.76);c.fillStyle='#050806';
+  c.shadowColor='#000';c.shadowBlur=5+lift*15;c.beginPath();
+  c.ellipse(0,-f.y,(58+lift*19)*sizeScale,Math.max(3,10-lift*5),0,0,Math.PI*2);c.fill();c.shadowBlur=0;
+  if(f.ground&&(Math.abs(f.move||0)>35||f.attack>0)){
+   c.globalAlpha=.10;const glow=c.createRadialGradient(0,-f.y,4,0,-f.y,72*sizeScale);
+   glow.addColorStop(0,'rgba(236,190,104,.34)');glow.addColorStop(1,'rgba(236,190,104,0)');
+   c.fillStyle=glow;c.beginPath();c.ellipse(0,-f.y,72*sizeScale,15,0,0,Math.PI*2);c.fill();
+  }c.restore();
+ }
  if(f.instinct&&!ghost){c.shadowColor='#5fe3ff';c.shadowBlur=26;}
  if(SPRITES[f.data.id]&&drawSprite(f)){}
  else{c.scale(sizeScale,sizeScale);drawGeneric(f,i);}
