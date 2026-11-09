@@ -450,6 +450,7 @@ function update(dt){
   const wolfFrenzy=f.data.id==='wolf'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   const jaguarBite=f.data.id==='jaguar'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const hyenaFeint=f.data.id==='hyena'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
+  const badgerBreaker=f.data.id==='badger'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const tigerPounce=f.data.id==='tiger'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
@@ -541,7 +542,7 @@ function update(dt){
    else if(spEdge&&lionRoar){f.block=false;doMove(f,'lionRoar')}
    else if(spEdge&&crocodileRoll){f.block=false;doMove(f,'crocodileRoll')}
    else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(f.data.id==='hippo'&&f.hippoCounterT>0){f.hippoCounterT=0;doMove(f,'riverCounter')}else if(f.data.id==='grizzly'&&f.grizzlyCounterT>0){f.grizzlyCounterT=0;doMove(f,'bearCounter')}else if(f.data.id==='lion'&&f.lionCounterT>0){f.lionCounterT=0;doMove(f,'lionCounter')}
-    else if(f.data.id==='tiger'&&f.tigerCounterT>0){f.tigerCounterT=0;doMove(f,'tigerSlip')}else if(f.data.id==='crocodile'&&f.crocodileCounterT>0){f.crocodileCounterT=0;doMove(f,'tailCounter')}else if(f.data.id==='wolf'&&f.wolfCounterT>0){f.wolfCounterT=0;doMove(f,'wolfCounter')}else if(f.data.id==='hyena'&&f.hyenaCounterT>0){f.hyenaCounterT=0;doMove(f,'hyenaSlip')}else if(hyenaFeint&&!(o.stun>0&&f.combo>0))doMove(f,'hyenaFeint');else if(jaguarBite&&!(o.stun>0&&f.combo>0))doMove(f,'jaguarBite');else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else if(grizzlyPaw&&!(o.stun>0&&f.combo>0))doMove(f,'grizzlyPaw');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
+    else if(f.data.id==='tiger'&&f.tigerCounterT>0){f.tigerCounterT=0;doMove(f,'tigerSlip')}else if(f.data.id==='crocodile'&&f.crocodileCounterT>0){f.crocodileCounterT=0;doMove(f,'tailCounter')}else if(f.data.id==='wolf'&&f.wolfCounterT>0){f.wolfCounterT=0;doMove(f,'wolfCounter')}else if(f.data.id==='hyena'&&f.hyenaCounterT>0){f.hyenaCounterT=0;doMove(f,'hyenaSlip')}else if(hyenaFeint&&!(o.stun>0&&f.combo>0))doMove(f,'hyenaFeint');else if(badgerBreaker&&!(o.stun>0&&f.combo>0))doMove(f,'badgerBreaker');else if(jaguarBite&&!(o.stun>0&&f.combo>0))doMove(f,'jaguarBite');else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else if(grizzlyPaw&&!(o.stun>0&&f.combo>0))doMove(f,'grizzlyPaw');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
   // from vx, which is reserved for hit knockback and physics impulses.
@@ -593,7 +594,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
+ const mv=name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -607,10 +608,11 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
- setAction(f,name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ setAction(f,name==='badgerBreaker'?'earthslam':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='tigerSlip'){f.tigerEvadeT=.19;f.vx=f.dir*390;floatText(f.x,f.y-315,'STRIPED SLIP','#f0a34e');game.shake=Math.max(game.shake,.18);sfx('whiff')}
  if(name==='crocodileRoll'){f.vx=f.dir*585;floatText(f.x,f.y-300,'DEATH ROLL','#79d6bd');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='tailCounter'){f.vx=f.dir*260;floatText(f.x,f.y-300,'TAIL COUNTER','#75d8c4');game.shake=Math.max(game.shake,.22);sfx('heavy')}
+ if(name==='badgerBreaker'){f.vx=f.dir*75;f.vy=0;floatText(f.x,f.y-300,'EARTHBREAKER','#d7a85b');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='wolfCounter'){f.vx=f.dir*245;floatText(f.x,f.y-300,'PACK COUNTER','#c5d9ed');game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='hyenaSlip'){f.hyenaEvadeT=.17;f.vx=f.dir*405;floatText(f.x,f.y-315,'MAD SLIP','#d7b46a');game.shake=Math.max(game.shake,.16);sfx('whiff')}
  if(name==='jaguarAmbush'){f.vx=f.dir*610;f.vy=-145;f.ground=false;floatText(f.x,f.y-290,'JAGUAR AMBUSH','#e9bd54');game.shake=Math.max(game.shake,.16);sfx('heavy')}
@@ -637,7 +639,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.badgerBreaker)return'special_earth_slam';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -686,6 +688,14 @@ function resolveHit(i,mv){
   for(let k=0;k<4;k++)game.fx.push({x:tx+f.dir*(k-1.5)*13,y:ty+(k%2)*9,t:0,life:.42+k*.035,color:k%2?'#ffd18a':'#e99a45',kind:'ring'});
   spark(cx,cy,'#f0a34e',26);floatText(cx,cy-92,'STRIPE FURY','#f0a34e');
   game.shake=Math.max(game.shake,.22);
+ }
+ // Badger's Earthbreaker drives force into the ground and erupts beneath the opponent.
+ if(mv.badgerBreaker){
+  game.fx.push({x:cx,y:f.y-8,t:0,life:.62,color:'#d7a85b',kind:'ring'});
+  game.fx.push({x:cx-f.dir*34,y:f.y-5,t:0,life:.48,color:'#a88a5c',kind:'ring'});
+  spark(cx,f.y-28,'#d7a85b',24);spark(cx-f.dir*38,f.y-18,'#b99a69',14);
+  floatText(cx,cy-88,'EARTHBREAKER','#d7a85b');
+  game.shake=Math.max(game.shake,.32);game.flash=Math.max(game.flash||0,.045);sfx('heavy');
  }
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
@@ -1795,6 +1805,35 @@ function drawFighter(f,i,ghost){
     const a=t*.95+mote*2.399,rad=78+14*Math.sin(t*2+mote);
     c.globalAlpha=(.18+.2*(.5+.5*Math.sin(t*3.7+mote)))*settle;c.fillStyle=mote%3?'#b8d9ef':'#f0fbff';c.shadowBlur=12;
     c.beginPath();c.arc(Math.cos(a)*rad,-125+Math.sin(a)*rad*.72,2+1.3*Math.sin(t*3.4+mote),0,Math.PI*2);c.fill();
+   }
+   c.restore();
+  }
+  // Hyena's Mad Champion victory signature: jagged amber arcs and a restless laugh-like energy pulse.
+  if(f.data.id==='hyena'){
+   const t=f.winT||0,settle=Math.min(1,t/.46),pulse=.5+.5*Math.sin(t*5.1);
+   c.save();c.globalCompositeOperation='lighter';
+   // Uneven amber aura gives Hyena a wild, unpredictable champion silhouette.
+   c.globalAlpha=(.18+.15*pulse)*settle;c.strokeStyle='#f3bd63';c.shadowColor='#df812d';c.shadowBlur=20;c.lineWidth=3;
+   c.beginPath();c.ellipse(0,-142,94+10*Math.sin(t*2.8),119+7*Math.cos(t*2.1),Math.sin(t*1.2)*.035,0,Math.PI*2);c.stroke();
+   // Jagged bite-and-claw crescents flare asymmetrically from either shoulder.
+   for(let side of [-1,1]){
+    c.globalAlpha=(.25+.16*pulse)*settle;c.lineWidth=3;
+    c.beginPath();c.moveTo(side*42,-91);c.lineTo(side*72,-126);c.lineTo(side*61,-145);c.lineTo(side*91,-174);c.lineTo(side*77,-196);c.stroke();
+    c.globalAlpha=(.17+.11*pulse)*settle;c.lineWidth=1.8;
+    c.beginPath();c.moveTo(side*53,-99);c.quadraticCurveTo(side*112,-143,side*83,-210);c.stroke();
+   }
+   // Broken ground pulses ripple outward with Hyena's restless energy.
+   for(let ring=0;ring<3;ring++){
+    const phase=(t*1.55+ring*.61)%2.15,rad=43+phase*40;
+    c.globalAlpha=(.25*(1-phase/2.15))*settle;c.strokeStyle='#e8a34e';c.lineWidth=2.2;c.shadowBlur=12;
+    c.beginPath();c.ellipse((ring-1)*17,-7,rad,rad*.19,Math.sin(t*2+ring)*.025,0,Math.PI*2);c.stroke();
+   }
+   // Amber sparks zig-zag upward rather than following a smooth orbit.
+   for(let mote=0;mote<14;mote++){
+    const phase=(t*1.18+mote*.53)%2.45,side=mote%2?1:-1;
+    const mx=side*(36+24*Math.sin(t*3.1+mote*1.7)),my=-28-phase*69+5*Math.sin(t*5+mote);
+    c.globalAlpha=(.31*(1-phase/2.45))*settle;c.fillStyle=mote%3?'#e9a34f':'#ffe0a0';c.shadowBlur=13;
+    c.beginPath();c.arc(mx,my,1.7+1.2*Math.sin(t*4.6+mote),0,Math.PI*2);c.fill();
    }
    c.restore();
   }
