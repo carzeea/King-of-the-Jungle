@@ -154,7 +154,7 @@ const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
 // Relative body mass for hit reactions. Knockback only; no damage or unlock changes.
 const FIGHTER_MASS={badger:1.08,hyena:.94,wolf:.9,leopard:.72,jaguar:.86,
  crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.28,hippo:1.38,elephant:1.5,
- eagle:.76,snake:.7,majic:1.04};
+ eagle:.76,snake:.7,stag:.88,majic:1.04};
 const impactScale=f=>Math.max(.68,Math.min(1.28,1/(FIGHTER_MASS[f.data.id]||1)));
 // Each fighter carries a restrained signature impact color, so attacks read
 // as belonging to that animal without changing damage, timing, or hitboxes.
@@ -525,14 +525,17 @@ function doMove(f,name){
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  f.move_=mv;f.attack=mv.t;f.hitsDone=0;f.elapsed=0;
- // a strike that is just short steps in so it travels into the opponent instead of swinging at air
- if(f.ground&&!(o.stun>0&&f.combo>0)&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;if(need>0&&need<70)f.vx=f.dir*Math.min(380,need*6)}
+ f.chain=(f.chain||0)+1;
+ // Match approach distance to the exact animation selected for this attack, including alternating double strikes.
+ // Linked combo strikes get a shorter, softer chase step so knockback does not leave them visibly swinging short.
+ const comboLink=o.stun>0&&f.combo>0;
+ f.comboLinked=comboLink;
+ if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
  setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,mv.t);
- f.chain=(f.chain||0)+1;
- if(name==='double'){f.breakWindow=.26;f.vx=f.dir*120;sfx('whiff')}   // the gold flash: break NOW
- if(name==='claw'||name==='bite'){f.vx=f.dir*(name==='bite'?110:60);sfx('whiff')}
- if(name==='special'){f.vx=f.dir*(f.data.id==='badger'?260:420);f.vy=f.data.id==='badger'?-120:-230;f.ground=false}
+ if(name==='double'){f.breakWindow=.26;f.vx=f.dir*Math.max(f.dir*f.vx,120);sfx('whiff')}   // the gold flash: break NOW
+ if(name==='claw'||name==='bite'){f.vx=f.dir*Math.max(f.dir*f.vx,name==='bite'?110:60);sfx('whiff')}
+ if(name==='special'){const frostPounce=f.data.id==='leopard';f.vx=f.dir*(f.data.id==='badger'?260:frostPounce?500:420);f.vy=f.data.id==='badger'?-120:frostPounce?-245:-230;f.ground=false}
  if(name==='ender'){f.vx=f.dir*200;f.vy=-140;f.ground=false;floatText(f.x,f.y-300,'ENDER','#ffd36b')}
  if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;soundOn&&AU&&AU.now('voice.shadow-attack');if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
 }
@@ -540,7 +543,7 @@ function doMove(f,name){
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};
- if(mv===MOVES.claw)return'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
+ if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if(mv===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
  if(mv===MOVES.shadow)return S.shadow||(S.double||['attack_heavy'])[0];return'attack_light'}
@@ -982,7 +985,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
@@ -1037,7 +1040,7 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_c','special_d','attack_heavy'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6, 7, 8, 9]],ko:['hit_heavy',5]},
  badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,191,203],"crouch":[4,74,60,101,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,120,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,79,208],"pounce":[8,96,60,124,176],"special_earth_slam":[7,81,61,110,179],"shadow_rampage":[10,70,61,98,179],"hit_light":[6,84,78,111,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
-  double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
+  claw:'claw_swipe',double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['hit_heavy',[0,1,2,3,4]],getup:['knockdown_getup',[4,5,6,7]],ko:['hit_heavy',4]},
  crocodile:{s:0.34,anims:{"idle":[9,95,87,128,256],"walk_forward":[7,131,85,181,251],"walk_back":[6,120,85,169,251],"run":[7,149,79,175,233],"block":[6,92,80,134,236],"attack_light":[7,117,86,158,254],"attack_heavy":[6,157,85,207,251],"bite":[6,145,77,181,227],"uppercut":[7,124,79,148,233],"jump":[7,118,74,145,218],"special_pounce":[6,175,76,209,224],"hit_light":[6,106,77,161,227],"hit_heavy":[8,118,76,174,224],"knockdown_getup":[14,133,68,196,200],"victory":[8,86,103,136,304],"defeat":[7,128,68,188,201]},
   double:['bite','attack_heavy'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','bite','uppercut'],
@@ -1258,7 +1261,7 @@ function drawSprite(f){
  switch(f.action){
   case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2);break}
   case'block':anim='block';fr=Math.min(3,Math.floor(f.blockTime*20));break;
-  case'claw':anim='attack_light';fr=Math.floor(ap*A.attack_light[0]);break;
+  case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.floor(ap*A[anim][0]);break;
   case'double':anim=S.double[f.chain%2];fr=1+Math.floor(ap*(A[anim][0]-1));break;
   case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
@@ -1295,9 +1298,11 @@ function drawSprite(f){
  // sprite sequence read as one connected action rather than a frame swap.
  const attackAction=['claw','double','bite','earthslam','pounce','ender','shadow'].includes(f.action);
  if(attackAction){
-  const anticipation=1-clamp(p/.22,0,1);
-  const drive=clamp((p-.16)/.42,0,1);
-  const recovery=clamp((p-.68)/.32,0,1);
+  // Linked strikes shorten the visual wind-up and delay recovery slightly,
+  // preserving the move's real hit timing while making the chain read continuously.
+  const anticipation=1-clamp(p/(f.comboLinked?.14:.22),0,1);
+  const drive=clamp((p-(f.comboLinked?.11:.16))/(f.comboLinked?.40:.42),0,1);
+  const recovery=clamp((p-(f.comboLinked?.78:.68))/(f.comboLinked?.22:.32),0,1);
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105);
   const lean=-.035*anticipation+forward*drive-.035*recovery;
   const stretch=1+.055*drive-.025*anticipation-.025*recovery;
