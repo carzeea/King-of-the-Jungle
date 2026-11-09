@@ -168,7 +168,7 @@ function hitSound(f,mv){
  const r=.94+Math.random()*.12;
  if(mv===MOVES.bite)return snd('sfx.bite','heavy',1,r);
  if(mv===MOVES.special)return snd(HEAVY_SPECIAL.includes(f.data.id)?'sfx.groundSlam':'sfx.heavyImpact','heavy',1,r);
- if(mv===MOVES.double&&f.chain%2)return snd('sfx.claw','hit',.9,r);
+ if((mv.base||mv)===MOVES.double&&f.chain%2)return snd('sfx.claw','hit',.9,r);
  if(mv.shadow)return snd(f.hitsDone%2?'sfx.claw':'sfx.punch','hit',.85,r);
  return snd('sfx.punch','hit',.9,r);
 }
@@ -458,7 +458,7 @@ function update(dt){
    const mv=f.move_;
    while(mv&&f.hitsDone<mv.hits.length&&f.elapsed>=mv.hits[f.hitsDone]){f.hitsDone++;resolveHit(i,mv);}
    // Linking: with the opponent still reeling, ATTACK = auto-double, SPECIAL = ender.
-   const linkable=o.stun>0&&f.combo>0&&f.attack<.17;
+   const linkable=o.stun>0&&f.combo>0&&f.attack<.17&&(!mv||!mv.base||f.hitsDone>=mv.hits.length); // let every claw of the leopard's flurry land before the next link
    if(linkable&&atkEdge&&f.combo<14)doMove(f,'double');
    else if(linkable&&spEdge)doMove(f,inp.bl&&f.meter>=50?'shadow':'ender');
    if(f.attack<=0){f.attack=0;f.move_=null}
@@ -526,7 +526,10 @@ function doMove(f,name){
  const mv=MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
- f.move_=mv;f.attack=mv.t;f.hitsDone=0;f.elapsed=0;
+ // The snow leopard turns her linked double into a rapid three-hit claw flurry.
+ // Each strike is lighter so the combined damage stays close to the standard double.
+ const moveData=f.data.id==='leopard'&&name==='double'?{...mv,base:MOVES.double,t:.36,hits:[.055,.155,.255],dmg:p=>(2.6+p*.35)*2/3}:mv;
+ f.move_=moveData;f.attack=moveData.t;f.hitsDone=0;f.elapsed=0;
  f.chain=(f.chain||0)+1;
  // Match approach distance to the exact animation selected for this attack, including alternating double strikes.
  // Linked combo strikes get a shorter, softer chase step so knockback does not leave them visibly swinging short.
@@ -534,7 +537,7 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
- setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,mv.t);
+ setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='double'){f.breakWindow=.26;f.vx=f.dir*Math.max(f.dir*f.vx,120);sfx('whiff')}   // the gold flash: break NOW
  if(name==='claw'||name==='bite'){f.vx=f.dir*Math.max(f.dir*f.vx,name==='bite'?110:60);sfx('whiff')}
  if(name==='special'){const frostPounce=f.data.id==='leopard';f.vx=f.dir*(f.data.id==='badger'?260:frostPounce?500:420);f.vy=f.data.id==='badger'?-120:frostPounce?-245:-230;f.ground=false}
@@ -546,7 +549,7 @@ const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
- if(mv===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
+ if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
  if(mv===MOVES.shadow)return S.shadow||(S.double||['attack_heavy'])[0];return'attack_light'}
 function reachOf(f,anim){const r=HB[f.data.id]&&HB[f.data.id].reach[anim];return Math.max(bodyFront(f)+60,r?r[0]:180)}
@@ -582,7 +585,7 @@ function resolveHit(i,mv){
  }else{
   o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.hitHeavy=mv.push>=100||mv.dmg(0)>=9;o.hitAnimTime=0;o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
   f.vx=f.dir*Math.max(20,impactPush*.4);
-  hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
+  hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,(mv.base||mv)===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
   // Scale camera emphasis to attack force, keeping light taps restrained.
   const cameraImpact=clamp((mv.push-35)/520,0,.24);
   if(cameraImpact>0)game.shake=Math.max(game.shake,cameraImpact);
@@ -593,9 +596,9 @@ function resolveHit(i,mv){
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
  f.meter=Math.min(100,f.meter+(f.instinct?0:4));o.meter=Math.min(100,o.meter+(o.instinct?0:2.5));
  const signature=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
- const impactCount=mv.shadow?14:mv===MOVES.special?16:mv===MOVES.bite?12:mv===MOVES.double?8:10;
+ const impactCount=mv.shadow?14:mv===MOVES.special?16:mv===MOVES.bite?12:(mv.base||mv)===MOVES.double?8:10;
  spark(cx,cy-Math.random()*16,mv.shadow?'#c68bff':signature,impactCount);
- bleed(cx,cy+8-Math.random()*20,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:(mv===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
+ bleed(cx,cy+8-Math.random()*20,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:((mv.base||mv)===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
  const p='p'+(i+1);if(f.combo>=2){$(p+'-combo').textContent=f.combo+' HITS';$(p+'-combo').classList.toggle('active',f.combo>=3)}
  hud();
 }
@@ -1313,9 +1316,10 @@ function drawSprite(f){
  if(attackAction){
   // Linked strikes shorten the visual wind-up and delay recovery slightly,
   // preserving the move's real hit timing while making the chain read continuously.
-  const anticipation=1-clamp(p/(f.comboLinked?.14:.22),0,1);
-  const drive=clamp((p-(f.comboLinked?.11:.16))/(f.comboLinked?.40:.42),0,1);
-  const recovery=clamp((p-(f.comboLinked?.78:.68))/(f.comboLinked?.22:.32),0,1);
+  const leopardLink=f.data.id==='leopard'&&f.comboLinked;
+  const anticipation=1-clamp(p/(leopardLink?.10:f.comboLinked?.14:.22),0,1);
+  const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
+  const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
   const lean=-.035*anticipation+forward*drive-.035*recovery;

@@ -17,7 +17,7 @@
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 8.28</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 8.30</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -40,7 +40,7 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 8.28</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 8.30</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">KING <small>OF THE</small> JUNGLE</h2><p class="st-sub">FIGHTER SELECT</p><p id="select-instruction">Player 1: choose a fighter</p></div>
@@ -91,7 +91,7 @@
     </section>
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=7.1"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=8.28"></script>
+  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=7.1"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=8.30"></script>
 <script>(function(){var last=0;
 document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
 document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
