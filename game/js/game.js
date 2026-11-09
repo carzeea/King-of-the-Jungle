@@ -1191,6 +1191,33 @@ function draw(){
  drawStains();
  game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter=p.frost?'brightness(1.35) saturate(.75) hue-rotate(155deg)':'hue-rotate(220deg) saturate(3)';if(p.frost){c.shadowColor='rgba(105,225,255,.95)';c.shadowBlur=22;}drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
  game.fighters.forEach((f,i)=>drawFighter(f,i));
+ // Frost Fatality cinematic: briefly encase the defeated fighter in an icy silhouette,
+ // then break the shell into outward-flying crystal shards.
+ if(game.koBurst?.frost&&game.ko>0){
+  const elapsed=2.2-game.ko;
+  const victimIndex=game.fighters.findIndex(f=>f.hp<=0);
+  if(victimIndex>=0){
+   const victim=game.fighters[victimIndex];
+   if(elapsed<.66){
+    const freeze=1-clamp(elapsed/.66,0,1);
+    c.save();c.globalAlpha=.68*freeze;c.filter='brightness(1.8) saturate(.55) hue-rotate(145deg)';
+    drawFighter({...victim,hitFlash:0,trail:[]},victimIndex,true);c.restore();
+   }
+   const shatter=clamp((elapsed-.42)/.72,0,1);
+   if(shatter>0){
+    c.save();c.globalCompositeOperation='lighter';
+    for(let shard=0;shard<12;shard++){
+     const a=shard*Math.PI/6+elapsed*1.8;
+     const travel=shatter*(28+(shard%4)*17);
+     const sx=victim.x+Math.cos(a)*travel,sy=400+victim.y-145+Math.sin(a)*travel*.72;
+     c.globalAlpha=(1-shatter)*.85;c.strokeStyle=shard%2?'#baf6ff':'#62dcff';
+     c.shadowColor='#79eaff';c.shadowBlur=12;c.lineWidth=2.5;
+     c.beginPath();c.moveTo(sx-Math.cos(a)*8,sy-Math.sin(a)*8);c.lineTo(sx+Math.cos(a)*8,sy+Math.sin(a)*8);c.stroke();
+    }
+    c.restore();
+   }
+  }
+ }
  drawFx();
  if(game.koBurst&&game.ko>0){
   const elapsed=2.2-game.ko;
