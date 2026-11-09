@@ -464,6 +464,7 @@ function update(dt){
    physics(f,dt);return;
   }
   f.leopardCounter=Math.max(0,(f.leopardCounter||0)-dt);
+  f.lionCounterT=Math.max(0,(f.lionCounterT||0)-dt);
   f.leopardDashT=Math.max(0,(f.leopardDashT||0)-dt);
   f.leopardAirFollowT=Math.max(0,(f.leopardAirFollowT||0)-dt);
   f.leopardFrostDiveT=Math.max(0,(f.leopardFrostDiveT||0)-dt);
@@ -502,6 +503,7 @@ function update(dt){
    else if(f.data.id==='elephant'&&f.elephantCounterT>0&&atkEdge){f.elephantCounterT=0;doMove(f,'tuskCounter');}
    else if(f.data.id==='hippo'&&f.hippoCounterT>0&&atkEdge){f.hippoCounterT=0;doMove(f,'riverCounter')}
    else if(f.data.id==='grizzly'&&f.grizzlyCounterT>0&&atkEdge){f.grizzlyCounterT=0;doMove(f,'bearCounter')}
+   else if(f.data.id==='lion'&&f.lionCounterT>0&&atkEdge){f.lionCounterT=0;doMove(f,'lionCounter')}
    else if(o.stun>0&&f.combo>0&&atkEdge)doMove(f,'double');
    else if(o.stun>0&&f.combo>0&&spEdge)doMove(f,'ender');
    else if(atkEdge)doMove(f,'claw');
@@ -516,7 +518,7 @@ function update(dt){
    else if(spEdge&&elephantStomp){f.block=false;doMove(f,'stomp')}
    else if(spEdge&&hippoRush){f.block=false;doMove(f,'hippoRush')}
    else if(spEdge&&lionRoar){f.block=false;doMove(f,'lionRoar')}
-   else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(f.data.id==='hippo'&&f.hippoCounterT>0){f.hippoCounterT=0;doMove(f,'riverCounter')}else if(f.data.id==='grizzly'&&f.grizzlyCounterT>0){f.grizzlyCounterT=0;doMove(f,'bearCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else if(grizzlyPaw&&!(o.stun>0&&f.combo>0))doMove(f,'grizzlyPaw');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
+   else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(f.data.id==='hippo'&&f.hippoCounterT>0){f.hippoCounterT=0;doMove(f,'riverCounter')}else if(f.data.id==='grizzly'&&f.grizzlyCounterT>0){f.grizzlyCounterT=0;doMove(f,'bearCounter')}else if(f.data.id==='lion'&&f.lionCounterT>0){f.lionCounterT=0;doMove(f,'lionCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else if(grizzlyPaw&&!(o.stun>0&&f.combo>0))doMove(f,'grizzlyPaw');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
   // from vx, which is reserved for hit knockback and physics impulses.
@@ -550,6 +552,7 @@ function physics(f,dt){
  f.frostImpact=Math.max(0,(f.frostImpact||0)-dt*2.4);
  f.elephantImpact=Math.max(0,(f.elephantImpact||0)-dt*2.0);
  f.leopardFinisher=Math.max(0,(f.leopardFinisher||0)-dt*2.2);
+ f.lionManeFinisher=Math.max(0,(f.lionManeFinisher||0)-dt*2.0);
  const wasAirborne=!f.ground;
  f.y+=f.vy*dt;f.vy+=1500*dt;
  if(f.y>0){
@@ -566,12 +569,12 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
+ const mv=name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
  // Each strike is lighter so the combined damage stays close to the standard double.
- const moveData=f.data.id==='leopard'&&name==='double'?{...mv,base:MOVES.double,t:.36,hits:[.055,.155,.255],dmg:p=>(2.6+p*.35)*2/3}:mv;
+ const moveData=f.data.id==='leopard'&&name==='double'?{...mv,base:MOVES.double,t:.36,hits:[.055,.155,.255],dmg:p=>(2.6+p*.35)*2/3}:f.data.id==='lion'&&name==='double'?{...mv,base:MOVES.double,t:.39,hits:[.055,.17,.285],dmg:p=>(2.6+p*.35)*2/3}:mv;
  f.move_=moveData;f.attack=moveData.t;f.hitsDone=0;f.elapsed=0;
  f.chain=(f.chain||0)+1;
  // Match approach distance to the exact animation selected for this attack, including alternating double strikes.
@@ -580,7 +583,8 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
- setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ if(name==='lionCounter'){f.vx=f.dir*210;floatText(f.x,f.y-315,'ROAR COUNTER','#f3c45d');game.shake=Math.max(game.shake,.22);sfx('roar')}
  if(name==='lionRoar'){f.vx=f.dir*35;floatText(f.x,f.y-315,"KING'S ROAR",'#f3c45d');banner("KING'S ROAR",'THE KING COMMANDS THE JUNGLE',.85,'#f3c45d');game.shake=Math.max(game.shake,.16);sfx('roar')}
  if(name==='bearCounter'){f.vx=f.dir*235;floatText(f.x,f.y-300,'BEAR CLAW COUNTER','#d6ad83');game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='grizzlyMaul'){f.vx=f.dir*560;floatText(f.x,f.y-300,'BEAR MAUL','#c99a70');game.shake=Math.max(game.shake,.16);sfx('heavy')}
@@ -600,7 +604,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -624,10 +628,25 @@ function resolveHit(i,mv){
   f.leopardFinisher=.58;
   spark(f.x+f.dir*78,f.y-178,'#9cefff',18);
  }
+ // The lion's linked double becomes a three-strike mane-powered claw flurry.
+ if(f.data.id==='lion'&&mv.hits.length===3&&f.hitsDone===3){
+  f.lionManeFinisher=.62;
+  spark(f.x+f.dir*86,f.y-190,'#f3c45d',22);
+  game.fx.push({x:f.x+f.dir*74,y:f.y-174,t:0,life:.52,color:'#ffe29a',kind:'ring'});
+  floatText(f.x+f.dir*65,f.y-285,'MANE CLAW','#ffd36b');
+  game.shake=Math.max(game.shake,.18);
+ }
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
-  o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='elephant')o.elephantCounterT=.62;if(o.data.id==='hippo')o.hippoCounterT=.68;if(o.data.id==='grizzly')o.grizzlyCounterT=.62;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+  o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='elephant')o.elephantCounterT=.62;if(o.data.id==='hippo')o.hippoCounterT=.68;if(o.data.id==='grizzly')o.grizzlyCounterT=.62;if(o.data.id==='lion')o.lionCounterT=.68;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+ }
+ // Lion's defensive roar counter answers a blocked attack with a focused golden burst.
+ if(mv.lionCounter){
+  game.fx.push({x:cx,y:cy,t:0,life:.52,color:'#f3c45d',kind:'ring'});
+  game.fx.push({x:f.x+f.dir*105,y:f.y-145,t:0,life:.42,color:'#ffe6a0',kind:'ring'});
+  spark(cx,cy,'#f3c45d',24);floatText(cx,cy-88,'ROAR COUNTER','#f3c45d');
+  game.shake=Math.max(game.shake,.3);game.flash=Math.max(game.flash||0,.07);sfx('roar');
  }
  // Lion's King's Roar sends a broad golden shockwave through the arena on contact.
  if(mv.lionRoar){
@@ -1151,7 +1170,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','lionManeFinisher','lionCounterT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1438,6 +1457,17 @@ function drawFighter(f,i,ghost){
    c.beginPath();c.ellipse(0,-f.y,radius*sizeScale,radius*.22*sizeScale,0,0,Math.PI*2);c.stroke();
    c.restore();
   }
+  // Three golden mane arcs mark the lion's linked triple-claw finisher.
+  if(f.data.id==='lion'&&(f.lionManeFinisher||0)>.025){
+   const fin=f.lionManeFinisher/.62;
+   c.save();c.globalAlpha=fin*.9;c.strokeStyle='#ffd36b';c.shadowColor='#f3a82e';c.shadowBlur=18;
+   c.lineWidth=3+fin*2;
+   for(let slash=0;slash<3;slash++){
+    const yy=-f.y-118-slash*25,reach=(62+slash*12)*sizeScale;
+    c.beginPath();c.moveTo(-f.dir*reach*.3,yy+15);c.quadraticCurveTo(f.dir*reach*.12,yy-30,f.dir*reach,yy-5);c.stroke();
+   }
+   c.restore();
+  }
   // A three-stroke icy arc marks the finish of the snow leopard's triple claw.
   if(f.data.id==='leopard'&&(f.leopardFinisher||0)>.025){
    const fin=f.leopardFinisher/.58;
@@ -1596,6 +1626,36 @@ function drawFighter(f,i,ghost){
     const a=t*.9+mote*2.399,rad=86+12*Math.sin(t*2+mote);
     c.globalAlpha=(.16+.2*(.5+.5*Math.sin(t*3.8+mote)))*settle;c.fillStyle=mote%2?'#e6c39b':'#b77a45';c.shadowBlur=12;
     c.beginPath();c.arc(Math.cos(a)*rad,-132+Math.sin(a)*rad*.72,2+1.4*Math.sin(t*3+mote),0,Math.PI*2);c.fill();
+   }
+   c.restore();
+  }
+  // Lion's King's Champion victory signature: a radiant mane halo and rising golden embers.
+  if(f.data.id==='lion'){
+   const t=f.winT||0,settle=Math.min(1,t/.5),pulse=.5+.5*Math.sin(t*3.8);
+   c.save();c.globalCompositeOperation='lighter';
+   // Broad sunburst behind the mane, pulsing without obscuring the fighter.
+   c.globalAlpha=(.16+.12*pulse)*settle;c.strokeStyle='#ffd36b';c.shadowColor='#ff9f2e';c.shadowBlur=22;c.lineWidth=3;
+   c.beginPath();c.ellipse(0,-158,104+8*Math.sin(t*1.7),119+9*Math.cos(t*1.4),0,0,Math.PI*2);c.stroke();
+   for(let ray=0;ray<12;ray++){
+    const a=t*.18+ray*Math.PI/6,inner=103+4*Math.sin(t*2+ray),outer=inner+19+5*Math.sin(t*2.5+ray);
+    c.globalAlpha=(.2+.12*pulse)*settle;c.lineWidth=2;
+    c.beginPath();c.moveTo(Math.cos(a)*inner,-158+Math.sin(a)*inner);
+    c.lineTo(Math.cos(a)*outer,-158+Math.sin(a)*outer);c.stroke();
+   }
+   // Golden mane flares rise from both shoulders like a crown of fire.
+   for(let side of [-1,1]){
+    for(let flare=0;flare<3;flare++){
+     const x=side*(34+flare*15),lift=flare*7;
+     c.globalAlpha=(.25+.16*pulse)*settle;c.lineWidth=2.6;c.beginPath();
+     c.moveTo(x,-112-lift);c.quadraticCurveTo(x+side*(24+flare*3),-151-lift,x+side*(13+flare*5),-190-lift-5*Math.sin(t*3+flare));c.stroke();
+    }
+   }
+   // Embers orbit and rise around the champion.
+   for(let ember=0;ember<12;ember++){
+    const phase=(t*1.05+ember*.71)%2.6,side=ember%2?1:-1;
+    const ex=side*(48+18*Math.sin(t*1.8+ember)),ey=-42-phase*66;
+    c.globalAlpha=(.32*(1-phase/2.6))*settle;c.fillStyle=ember%3?'#ffd36b':'#fff0b0';c.shadowBlur=13;
+    c.beginPath();c.arc(ex,ey,1.8+1.3*Math.sin(t*4+ember),0,Math.PI*2);c.fill();
    }
    c.restore();
   }
