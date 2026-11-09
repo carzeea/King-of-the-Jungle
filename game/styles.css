@@ -575,3 +575,23 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 .cover-menu .rise-btn b{color:#e2c6ff}
 #rise-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:block}
 .rise-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;font:italic 900 34px "Barlow Condensed",Impact,sans-serif!important;letter-spacing:.1em;padding:16px 40px!important;border-radius:12px;background:linear-gradient(180deg,#fff0a8,#ffc94a 45%,#d98a12)!important;color:#5a0d06!important;border:none!important}
+
+/* MAJIC's dedicated three-phase summit health display. */
+.majic-boss-hud{max-width:620px;margin:-3px auto 12px;padding:9px 14px 8px;background:linear-gradient(110deg,#160f24eF,#251735ed,#120f20ef);border:1px solid #9874bd;box-shadow:0 5px 22px #0008,0 0 18px #8d5bc733;position:relative}
+.majic-boss-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;font:800 9px 'Barlow Condensed';letter-spacing:.15em;color:#c7b0e9}
+.majic-boss-heading strong{font-size:13px;letter-spacing:.1em;color:#f3dca4;text-align:center}
+.majic-boss-track{height:10px;background:#090711;border:1px solid #72578e;overflow:hidden;transform:skew(-5deg)}
+.majic-boss-health{height:100%;width:100%;background:linear-gradient(90deg,#7650a8,#c49cff 55%,#f1d48d);box-shadow:0 0 12px #c19affaa;transition:width .14s}
+.majic-phase-track{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:7px}
+.majic-phase-segment{position:relative;overflow:hidden;min-height:17px;padding:3px 4px;background:#090711;border:1px solid #57436c;color:#80758f;text-align:center;font:800 8px 'Barlow Condensed';letter-spacing:.08em}
+.majic-phase-segment i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#694a91,#c59aff);opacity:.65;transition:width .18s}
+.majic-phase-segment b{position:relative;z-index:1;font-weight:800}
+.majic-phase-segment.current{border-color:#d7b6ff;color:#fff1c9;box-shadow:inset 0 0 12px #a779d544}
+.majic-phase-segment.complete{border-color:#8dba9e;color:#c6f0d3}
+.majic-phase-segment.complete i{background:linear-gradient(90deg,#326a54,#80c69b);opacity:.8}
+.majic-phase-segment.locked{opacity:.55}
+@media(max-width:600px){.majic-boss-hud{margin:0 auto 8px;padding:7px 8px}.majic-boss-heading{font-size:8px}.majic-boss-heading strong{font-size:11px}.majic-phase-segment{font-size:7px;padding:3px 1px}}
+/* Build 9.05 merge: in the full-screen fight layout, float the boss HUD just under the top health bars. */
+body.fighting .majic-boss-hud{position:absolute;top:clamp(106px,15.5vh,140px);left:50%;transform:translateX(-50%);width:min(560px,64vw);margin:0;z-index:6;pointer-events:none;opacity:.94}
+body.fighting .majic-boss-hud.hidden{display:none}
+@media(max-width:700px),(max-height:500px){body.fighting .majic-boss-hud{top:clamp(64px,15vh,96px);width:min(420px,78vw);padding:5px 8px}}

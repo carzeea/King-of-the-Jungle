@@ -287,7 +287,7 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
 function cpuBrain(level){return{level,think:0,hold:{},wantBlock:0,doubles:0,pressed:{},breakTry:0}}
 function cpuInput(i){
  const f=game.fighters[i],o=game.fighters[1-i],ai=f.ai,lvl=ai.level,dt=game.dt;
- const k={l:false,r:false,j:false,bl:false,at:false,sp:false,ins:false};
+ const k={l:false,r:false,j:false,dn:false,bl:false,at:false,sp:false,ins:false};
  const press=n=>{if(!ai.pressed[n]){k[n]=true;ai.pressed[n]=true}};
  for(const n in ai.pressed)if(ai.pressed[n]&&Math.random()<.5)ai.pressed[n]=false; // release so the next press is a new edge
  ai.think-=dt;ai.wantBlock=Math.max(0,ai.wantBlock-dt);ai.breakTry=Math.max(0,ai.breakTry-dt);
@@ -299,7 +299,7 @@ function cpuInput(i){
   return k;
  }
  // MAJIC's own moves: Titan Fury while powered up, True Titan Form (jump+block+special) when hurt, Jungle Rage (jump+special), Frost Strike (block+special) up close.
- if(f.data.id==='majic'&&f.ground&&f.attack<=0&&!game.ko){
+ if(f.data.id==='majic'&&!(tower&&tower.boss)&&f.ground&&f.attack<=0&&!game.ko){
   const powered=(f.jungleRageT||0)>0||(f.ascendantT||0)>0;
   if(powered&&d<400&&Math.random()<dt*(.5+lvl*.8)){k[toward]=true;press('sp');return k}
   if(!powered&&!((f.ascendantCooldownT||0)>0)&&f.hp<BAR*.55&&Math.random()<dt*(.1+lvl*.25)){k.j=true;k.bl=true;press('sp');return k}
@@ -316,15 +316,18 @@ function cpuInput(i){
  if(ai.wantBlock&&f.ground){k.bl=true;return k}
  if(ai.think<=0){
   ai.think=.5-lvl*.33+Math.random()*.2;ai.hold={};ai.doubles=1+Math.floor(Math.random()*(1+lvl*3));ai.dropping=Math.random()>.45+lvl*.5;
-  const r=Math.random(),aggro=.2+lvl*.55;
+  const bossMajic=f.data.id==='majic'&&tower&&tower.boss,phase=bossMajic?(f.bossPhase||1):0;
+  if(bossMajic){ai.majicPatternCd=Math.max(0,(ai.majicPatternCd||0)-.55);if(ai.majicPatternCd<=0&&f.attack<=0&&f.ground&&d<(phase===1?430:phase===2?395:360)&&Math.random()<(.48+lvl*.22)){if(phase===1){ai.hold.dn=1;ai.hold.sp=1;ai.majicPatternCd=2.35;ai.patternNow=1}else if(phase===2){ai.hold[toward]=1;ai.hold.sp=1;ai.majicPatternCd=1.95;ai.patternNow=1}else{ai.hold.dn=1;ai.hold.at=1;ai.majicPatternCd=1.65;ai.patternNow=1}}}
+  const r=Math.random(),aggro=Math.min(.9,.2+lvl*.55+(phase===2?.1:phase===3?.2:0));
   const near=hitDist(f,o,'attack_light')-25,spR=hitDist(f,o,moveAnim(f,MOVES.special));
-  if(d>near){ai.hold[toward]=1;if(r<.06+lvl*.05)ai.hold.j=1;else if(r<.12+lvl*.1&&d<spR)ai.hold.sp=1;else if(f.meter>=50&&r<.2)ai.hold.shadow=1}
+  if(ai.patternNow){ai.patternNow=0}
+  else if(d>near){ai.hold[toward]=1;if(r<.06+lvl*.05)ai.hold.j=1;else if(r<.12+lvl*.1&&d<spR)ai.hold.sp=1;else if(f.meter>=50&&r<.2)ai.hold.shadow=1}
   else if(r<aggro){ai.hold.at=1;if(Math.random()<.25)ai.hold.heavy=1}
   else if(r<aggro+.12)ai.hold.sp=1;
   else if(r<aggro+.28)ai.hold[away]=1;
   else ai.hold.bl=1;
  }
- const h=ai.hold;k.l=!!h.l;k.r=!!h.r;k.j=!!h.j;k.bl=!!h.bl||!!h.heavy||!!h.shadow;
+ const h=ai.hold;k.l=!!h.l;k.r=!!h.r;k.j=!!h.j;k.dn=!!h.dn;k.bl=!!h.bl||!!h.heavy||!!h.shadow;
  if(h.at){press('at');h.at=0}
  if(h.sp){press('sp');h.sp=0}
  if(h.shadow){press('sp');h.shadow=0}
@@ -333,7 +336,7 @@ function cpuInput(i){
 
 /* ---------- Match flow ---------- */
 function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='majic'?3:2,potential:0,data,ground:true,block:false,blockTime:0,attack:0,stun:0,walk:0,move:0,moveVel:0,
- action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,
+ action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,bossPhase:data.id==='majic'?1:0,
  combo:0,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
@@ -438,6 +441,8 @@ function hud(){
    pp.querySelectorAll('i').forEach((e,n)=>{e.classList.toggle('gone',n>=f.bars);e.style.display=n<Math.max(2,f.maxBars)?'':'none'})}
   $(p+'-meter').style.width=f.meter+'%';$(p+'-meter').classList.toggle('full',f.meter>=100||f.instinct>0);
  });
+ const bossHud=$('majic-boss-hud'),boss=tower&&tower.boss?game.fighters.find(f=>f.data.id==='majic'):null;
+ if(bossHud){bossHud.classList.toggle('hidden',!boss);if(boss){const phase=Math.max(1,Math.min(3,boss.bossPhase||1));$('majic-boss-phase-name').textContent=phase===1?'PHASE I · THE JUNGLE TITAN':phase===2?'PHASE II · JUNGLE RAGE':'PHASE III · TRUE TITAN';$('majic-boss-status').textContent=phase===3?'FINAL FORM AWAKENED':phase===2?'THE ELEVEN BEASTS AWAKEN':'THE SUMMIT';$('majic-boss-health').style.width=Math.max(0,Math.min(100,boss.hp))+'%';bossHud.dataset.phase=String(phase);bossHud.querySelectorAll('.majic-phase-segment').forEach((seg,n)=>{const index=n+1;seg.classList.toggle('complete',index<phase);seg.classList.toggle('current',index===phase);seg.classList.toggle('locked',index>phase);seg.querySelector('i').style.width=index<phase?'100%':index===phase?Math.max(0,Math.min(100,boss.hp))+'%':'0%'})}}
 }
 function inDanger(f){return f.bars===1&&f.hp<=DANGER}
 
@@ -455,7 +460,7 @@ function update(dt){
    if(f.sec&&!'BBJJA'.startsWith(f.sec.slice(-5))&&!'BBJJA'.startsWith(f.sec))f.sec=f.sec.endsWith('B')?'B':'';
    // 1st correct entry: MAJIC loses a whole life bar. 2nd correct entry: he falls for good.
    if(f.sec&&f.sec.endsWith('BBJJA')){game.bane=i+1;game.baneN=(game.baneN||0)+1;f.sec='';f.secT=0;
-    if(game.baneN===1){if(o.bars>1){o.bars--;o.hp=BAR;o.potential=0}
+    if(game.baneN===1){if(o.bars>1){o.bars--;o.hp=BAR;o.potential=0;majicBossPhase(o)}
      banner("TITAN'S BANE",'MAJIC IS WEAKENED · ENTER IT AGAIN TO FINISH HIM',2,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
     else{o.bars=1;o.hp=0;o.potential=0;o.stun=0;o.attack=0;o.vx=f.dir*480;o.vy=-420;o.ground=false;game.shake=.7;game.flash=1;
      spark(o.x,o.y-150,'#7fe8ff',40);floatText(o.x,o.y-340,"TITAN'S BANE",'#7fe8ff');hud();koFinish(o,f)}}
@@ -482,13 +487,14 @@ function update(dt){
   const snakeCoil=f.data.id==='snake'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const stagAntler=f.data.id==='stag'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   const majicFrost=f.data.id==='majic'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
+  const majicEclipse=f.data.id==='majic'&&(f.bossPhase||1)>=3&&inp.dn&&atkEdge&&f.ground;
   const majicAscend=f.data.id==='majic'&&inp.j&&(inp.dn||inp.bl)&&spEdge&&f.ground&&(f.ascendantCooldownT||0)<=0;
   const majicRage=f.data.id==='majic'&&inp.j&&!(inp.dn||inp.bl)&&spEdge&&f.ground&&(f.jungleRageCooldownT||0)<=0;
   const majicFury=f.data.id==='majic'&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1))&&spEdge&&f.ground&&((f.jungleRageT||0)>0||(f.ascendantT||0)>0);
   const tigerPounce=f.data.id==='tiger'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
-  const spd=(f.instinct?1.2:1)*(f.data.id==='majic'&&((f.jungleRageT||0)>0||(f.ascendantT||0)>0)?1.12:1);
+  const spd=(f.instinct?1.2:1)*(f.data.id==='majic'&&(((f.jungleRageT||0)>0||(f.ascendantT||0)>0)||(f.bossPhase||1)>=2)?1.12:1);
   if(f.hp<=0&&f.bars<=1){f.action='knockdown';f.koTime+=dt;physics(f,dt);return}
   if(game.ko&&o.hp<=0&&o.bars<=1&&f.ground&&f.attack<=0&&f.stun<=0&&f.down<=0){f.winT=(f.winT||0)+dt;if(f.winT>.18){f.action='victory';physics(f,dt);return}}
   // ----- Knocked down (after an ender) -----
@@ -525,6 +531,8 @@ function update(dt){
   if((f.jungleRageCooldownT||0)>0)f.jungleRageCooldownT=Math.max(0,f.jungleRageCooldownT-dt);
   if((f.ascendantT||0)>0)f.ascendantT=Math.max(0,f.ascendantT-dt);
   if((f.ascendantCooldownT||0)>0)f.ascendantCooldownT=Math.max(0,f.ascendantCooldownT-dt);
+  if((f.majicVoidGuardT||0)>0)f.majicVoidGuardT=Math.max(0,f.majicVoidGuardT-dt);
+  if((f.majicDefenseCooldownT||0)>0)f.majicDefenseCooldownT=Math.max(0,f.majicDefenseCooldownT-dt);
   f.eagleEvadeT=Math.max(0,(f.eagleEvadeT||0)-dt);
   f.badgerCounterT=Math.max(0,(f.badgerCounterT||0)-dt);
   f.hyenaEvadeT=Math.max(0,(f.hyenaEvadeT||0)-dt);
@@ -571,6 +579,7 @@ function update(dt){
    else if(f.data.id==='wolf'&&f.wolfCounterT>0&&atkEdge){f.wolfCounterT=0;doMove(f,'wolfCounter')}
    else if(f.data.id==='hyena'&&f.hyenaCounterT>0&&atkEdge){f.hyenaCounterT=0;doMove(f,'hyenaSlip')}
    else if(f.data.id==='eagle'&&f.eagleCounterT>0&&atkEdge){f.eagleCounterT=0;doMove(f,'eagleWingCounter')}
+   else if(majicEclipse)doMove(f,'majicEclipse');
    else if(o.stun>0&&f.combo>0&&atkEdge)doMove(f,'double');
    else if(o.stun>0&&f.combo>0&&spEdge)doMove(f,'ender');
    else if(atkEdge)doMove(f,'claw');
@@ -581,6 +590,7 @@ function update(dt){
    else if(stagAntler)doMove(f,'stagAntler');
    else if(majicRage)doMove(f,'jungleRage');
    else if(majicFury)doMove(f,'titanFury');
+   else if(majicFrost&&inp.dn)doMove(f,'frostStrike');
    else if(jaguarAmbush)doMove(f,'jaguarAmbush');
    else if(wolfFrenzy)doMove(f,'wolfFrenzy');
    else if(spEdge)doMove(f,'special');
@@ -649,7 +659,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='titanFury'&&f.data.id==='majic'?{t:1.08,hits:[.16,.36,.57,.81],dmg:p=>4.2+p*.28,range:405,stun:.72,push:285,majicFury:true}:name==='ascendantForm'&&f.data.id==='majic'?{t:.82,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicAscendant:true}:name==='frostStrike'&&f.data.id==='majic'?{t:.78,hits:[.42],dmg:p=>14+p*.82,range:405,stun:.86,push:300,majicFrost:true}:name==='jungleRage'&&f.data.id==='majic'?{t:.72,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicRage:true}:name==='stagAntler'&&f.data.id==='stag'?{t:.72,hits:[.42],dmg:p=>13+p*.74,range:375,stun:.82,push:355,stagAntler:true}:name==='stagCounter'&&f.data.id==='stag'?{t:.54,hits:[.19],dmg:p=>12+p*.72,range:315,stun:.78,push:325,stagCounter:true}:name==='snakeCoil'&&f.data.id==='snake'?{t:.72,hits:[.34],dmg:p=>10.5+p*.62,range:265,stun:.92,push:72,snakeCoil:true}:name==='snakeVenom'&&f.data.id==='snake'?{t:.66,hits:[.29],dmg:p=>11+p*.68,range:285,stun:.72,push:205,snakeVenom:true}:name==='eagleWingCounter'&&f.data.id==='eagle'?{t:.62,hits:[.36],dmg:p=>12+p*.72,range:340,stun:.78,push:325,eagleWingCounter:true}:name==='eagleSkyfall'&&f.data.id==='eagle'?{t:.68,hits:[.48],dmg:p=>13+p*.76,range:365,stun:.76,push:335,eagleSkyfall:true}:name==='ironCounter'&&f.data.id==='badger'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:295,stun:.76,push:305,ironCounter:true}:name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
+ const mv=name==='majicEclipse'&&f.data.id==='majic'?{t:1.38,hits:[.34,.72,1.10],dmg:p=>6.2+p*.38,range:390,stun:.78,push:315,majicEclipse:true}:name==='titanFury'&&f.data.id==='majic'?{t:1.08,hits:[.16,.36,.57,.81],dmg:p=>4.2+p*.28,range:405,stun:.72,push:285,majicFury:true}:name==='ascendantForm'&&f.data.id==='majic'?{t:.82,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicAscendant:true}:name==='frostStrike'&&f.data.id==='majic'?{t:.78,hits:[.42],dmg:p=>14+p*.82,range:405,stun:.86,push:300,majicFrost:true}:name==='jungleRage'&&f.data.id==='majic'?{t:.72,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicRage:true}:name==='stagAntler'&&f.data.id==='stag'?{t:.72,hits:[.42],dmg:p=>13+p*.74,range:375,stun:.82,push:355,stagAntler:true}:name==='stagCounter'&&f.data.id==='stag'?{t:.54,hits:[.19],dmg:p=>12+p*.72,range:315,stun:.78,push:325,stagCounter:true}:name==='snakeCoil'&&f.data.id==='snake'?{t:.72,hits:[.34],dmg:p=>10.5+p*.62,range:265,stun:.92,push:72,snakeCoil:true}:name==='snakeVenom'&&f.data.id==='snake'?{t:.66,hits:[.29],dmg:p=>11+p*.68,range:285,stun:.72,push:205,snakeVenom:true}:name==='eagleWingCounter'&&f.data.id==='eagle'?{t:.62,hits:[.36],dmg:p=>12+p*.72,range:340,stun:.78,push:325,eagleWingCounter:true}:name==='eagleSkyfall'&&f.data.id==='eagle'?{t:.68,hits:[.48],dmg:p=>13+p*.76,range:365,stun:.76,push:335,eagleSkyfall:true}:name==='ironCounter'&&f.data.id==='badger'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:295,stun:.76,push:305,ironCounter:true}:name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -662,8 +672,8 @@ function doMove(f,name){
  const comboLink=o.stun>0&&f.combo>0;
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
- const special=name==='special'||name==='titanFury'||name==='frostStrike'||name==='ender'||name==='shadow'||name==='stagAntler'||name==='snakeVenom'||name==='eagleSkyfall'||name==='eagleWingCounter'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
- setAction(f,name==='frostStrike'?'special_c':name==='jungleRage'||name==='ascendantForm'?'special_d':name==='titanFury'?'ultra_move':name==='badgerBreaker'?'earthslam':name==='stagCounter'?'attack_heavy':name==='snakeCoil'?'special_b':name==='snakeVenom'?'bite':name==='ironCounter'?'attack_heavy':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ const special=name==='special'||name==='titanFury'||name==='majicEclipse'||name==='frostStrike'||name==='ender'||name==='shadow'||name==='stagAntler'||name==='snakeVenom'||name==='eagleSkyfall'||name==='eagleWingCounter'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
+ setAction(f,name==='frostStrike'?'special_c':name==='jungleRage'||name==='ascendantForm'?'special_d':name==='titanFury'||name==='majicEclipse'?'ultra_move':name==='badgerBreaker'?'earthslam':name==='stagCounter'?'attack_heavy':name==='snakeCoil'?'special_b':name==='snakeVenom'?'bite':name==='ironCounter'?'attack_heavy':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='tigerSlip'){f.tigerEvadeT=.19;f.vx=f.dir*390;floatText(f.x,f.y-315,'STRIPED SLIP','#f0a34e');game.shake=Math.max(game.shake,.18);sfx('whiff')}
  if(name==='crocodileRoll'){f.vx=f.dir*585;floatText(f.x,f.y-300,'DEATH ROLL','#79d6bd');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='tailCounter'){f.vx=f.dir*260;floatText(f.x,f.y-300,'TAIL COUNTER','#75d8c4');game.shake=Math.max(game.shake,.22);sfx('heavy')}
@@ -671,7 +681,8 @@ function doMove(f,name){
  if(name==='frostStrike'){f.vx=f.dir*105;floatText(f.x,f.y-315,'FROST STRIKE','#7fe8ff');banner('FROST STRIKE','THE TITAN COMMANDS THE COLD',.9,'#7fe8ff');spark(f.x+f.dir*30,f.y-155,'#baf6ff',20);game.flash=Math.max(game.flash||0,.09);game.shake=Math.max(game.shake,.18);sfx('frost')}
  if(name==='jungleRage'){f.jungleRageT=7.5;f.jungleRageCooldownT=18;f.vx=f.dir*35;floatText(f.x,f.y-330,'JUNGLE RAGE','#d8b5ff');banner('JUNGLE RAGE','ALL BEASTS ANSWER THE TITAN',1.05,'#c49aff');for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:f.x,y:f.y-155,t:0,life:.72,color,kind:'ring'});spark(f.x+(Math.random()-.5)*100,f.y-145+(Math.random()-.5)*100,color,5)}game.flash=Math.max(game.flash||0,.12);game.shake=Math.max(game.shake,.2);sfx('instinct')}
  if(name==='ascendantForm'){f.ascendantT=8.5;f.ascendantCooldownT=24;f.jungleRageT=0;f.vx=f.dir*35;floatText(f.x,f.y-350,'TRUE TITAN FORM','#e7c8ff');banner('TRUE TITAN FORM','THE JUNGLE BOWS TO MAJIC',1.25,'#d7b5ff');for(let k=0;k<12;k++){const color=['#e8c56b','#b8a0ff','#8de0d0'][k%3],a=k*Math.PI/6;game.fx.push({x:f.x+Math.cos(a)*72,y:f.y-155+Math.sin(a)*78,t:0,life:.9,color,kind:'ring'});spark(f.x+Math.cos(a)*95,f.y-155+Math.sin(a)*95,color,4)}game.flash=Math.max(game.flash||0,.24);game.shake=Math.max(game.shake,.34);game.hitstop=Math.max(game.hitstop||0,.08);sfx('instinct')}
- if(name==='titanFury'){f.vx=f.dir*185;f.jungleRageT=0;f.ascendantT=0;floatText(f.x,f.y-330,'TITAN FURY','#e8c8ff');banner('TITAN FURY','ALL BEASTS · ONE SUPREME POWER',1.25,'#d7b5ff');for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:f.x-f.dir*24,y:f.y-150,t:0,life:.72,color,kind:'ring'});spark(f.x+(Math.random()-.5)*90,f.y-150+(Math.random()-.5)*80,color,7)}game.flash=Math.max(game.flash||0,.18);game.shake=Math.max(game.shake,.28);sfx('instinct')}
+ if(name==='titanFury'){f.vx=f.dir*185;if((f.bossPhase||1)<2)f.jungleRageT=0;if((f.bossPhase||1)<3)f.ascendantT=0;floatText(f.x,f.y-330,'TITAN FURY','#e8c8ff');banner('TITAN FURY','ALL BEASTS · ONE SUPREME POWER',1.25,'#d7b5ff');for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:f.x-f.dir*24,y:f.y-150,t:0,life:.72,color,kind:'ring'});spark(f.x+(Math.random()-.5)*90,f.y-150+(Math.random()-.5)*80,color,7)}game.flash=Math.max(game.flash||0,.18);game.shake=Math.max(game.shake,.28);sfx('instinct')}
+ if(name==='majicEclipse'){f.vx=f.dir*105;floatText(f.x,f.y-330,'VOID ECLIPSE','#c5a8ff');banner('VOID ECLIPSE','WATCH THE THREE SHADOW PULSES · BLOCK TO COUNTER',1.15,'#b99cff');for(let k=0;k<3;k++){game.fx.push({x:f.x+f.dir*(70+k*42),y:f.y-145,t:0,life:.72+k*.12,color:['#b99cff','#e5c36e','#8de0d0'][k],kind:'ring'})}spark(f.x+f.dir*82,f.y-155,'#d9c7ff',18);game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.12);sfx('instinct')}
  if(name==='stagAntler'){f.vx=f.dir*210;f.stagChargeStarted=0;floatText(f.x,f.y-310,'ANTLER CHARGE','#b6d98b');banner('ANTLER CHARGE','THE FOREST BREAKER',.78,'#b6d98b');spark(f.x-f.dir*24,f.y-115,'#b6d98b',12);game.shake=Math.max(game.shake,.14);sfx('heavy')}
  if(name==='stagCounter'){f.vx=f.dir*285;floatText(f.x,f.y-310,'ANTLER COUNTER','#c7e6a0');banner('ANTLER COUNTER','THE FOREST STRIKES BACK',.7,'#b6d98b');spark(f.x+f.dir*24,f.y-135,'#dcebb9',16);game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='snakeVenom'){f.vx=f.dir*185;floatText(f.x,f.y-300,'VENOM FANG','#a8d66d');banner('VENOM FANG','A POISONED STRIKE',.72,'#a8d66d');game.shake=Math.max(game.shake,.13);sfx('heavy')}
@@ -705,7 +716,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury||mv.majicEclipse)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double){const D=S.double||['attack_heavy','attack_light'];return D[mv.eagleWingCombo?Math.min(D.length-1,Math.max(0,f.hitsDone-1)):f.chain%D.length]}
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -794,7 +805,12 @@ function resolveHit(i,mv){
  }
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
-  if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
+  const majicBoss=o.data.id==='majic'&&o.ai&&tower&&tower.boss,phase=majicBoss?(o.bossPhase||1):0;
+  if(mv===MOVES.special||mv.shadow){const chip=phase===1?0:(mv.shadow?1:2);if(chip)o.hp=Math.max(1,o.hp-chip)}
+  if(f.data.id==='majic'&&f.ai&&tower&&tower.boss&&(f.bossPhase||1)>=3&&mv.majicEclipse){f.hp=Math.max(1,f.hp-7);f.stun=Math.max(f.stun,.72);f.attack=0;f.move_=null;f.vx=-f.dir*205;o.meter=Math.min(100,o.meter+14);game.fx.push({x:f.x,y:f.y-150,t:0,life:.72,color:'#e8d8ff',kind:'ring'});spark(f.x,f.y-150,'#e8d8ff',28);floatText(o.x,o.y-285,'VOID REBOUND','#baf6ff');banner('VOID REBOUND','THE TITAN’S ECLIPSE IS TURNED AGAINST HIM',.95,'#baf6ff');game.shake=Math.max(game.shake,.38);game.flash=Math.max(game.flash||0,.16);sfx('frostCrack');hud();return}
+  if(majicBoss&&phase===1){game.fx.push({x:o.x,y:o.y-145,t:0,life:.42,color:'#8feaff',kind:'ring'});spark(o.x,o.y-150,'#c8f8ff',7);floatText(o.x,o.y-270,'FROST GUARD','#a9efff')}
+  if(majicBoss&&phase===2&&(o.majicDefenseCooldownT||0)<=0){o.majicDefenseCooldownT=1.15;f.hp=Math.max(1,f.hp-2.5);f.hitFlash=.12;f.stun=Math.max(f.stun,.16);game.fx.push({x:f.x,y:f.y-145,t:0,life:.48,color:'#c7a5ff',kind:'ring'});spark(f.x,f.y-145,'#d8c4ff',12);floatText(f.x,f.y-265,'ELEMENTAL PARRY','#c7a5ff');game.shake=Math.max(game.shake,.18);if(f.hp<=0)resolveBars(f,o)}
+  if(majicBoss&&phase>=3&&(o.majicDefenseCooldownT||0)<=0){o.majicDefenseCooldownT=2.35;o.majicVoidGuardT=.9;game.fx.push({x:o.x,y:o.y-150,t:0,life:.7,color:'#b99cff',kind:'ring'});game.fx.push({x:o.x,y:o.y-150,t:0,life:.86,color:'#8de0d0',kind:'ring'});spark(o.x,o.y-155,'#d9c7ff',18);floatText(o.x,o.y-280,'VOID GUARD','#d9c7ff');game.flash=Math.max(game.flash||0,.07);game.shake=Math.max(game.shake,.22)}
   o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='eagle')o.eagleCounterT=.68;if(o.data.id==='elephant')o.elephantCounterT=.62;if(o.data.id==='hippo')o.hippoCounterT=.68;if(o.data.id==='grizzly')o.grizzlyCounterT=.62;if(o.data.id==='lion')o.lionCounterT=.68;if(o.data.id==='wolf')o.wolfCounterT=.64;if(o.data.id==='tiger')o.tigerCounterT=.62;if(o.data.id==='hyena')o.hyenaCounterT=.64;if(o.data.id==='crocodile')o.crocodileCounterT=.66;if(o.data.id==='badger')o.badgerCounterT=.62;if(o.data.id==='stag')o.stagCounterT=.68;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
  }
  // Hyena's Mad Slip briefly phases through a follow-up before snapping back.
@@ -979,6 +995,14 @@ function resolveHit(i,mv){
   floatText(cx,cy-105,'FROZEN BY THE TITAN','#baf6ff');banner('FROST STRIKE','MAJIC FREEZES THE BATTLEFIELD',.72,'#7fe8ff');
   o.stun=Math.max(o.stun,.98);game.flash=Math.max(game.flash||0,.13);game.shake=Math.max(game.shake,.3);sfx('frostCrack');
  }
+ if(mv.majicEclipse){
+  const strike=f.hitsDone||1,colors=['#a98aff','#e5c36e','#8de0d0'];
+  const color=colors[Math.min(2,strike-1)];
+  game.fx.push({x:cx,y:cy,t:0,life:.52+strike*.06,color,kind:'ring'});
+  spark(cx,cy,color,strike===3?34:20);spark(cx+f.dir*24,cy-28,'#eee2ff',12);
+  if(strike===1)banner('VOID ECLIPSE','THE TITAN BENDS THE LIGHT',.72,'#b99cff');
+  if(strike===3){for(let k=0;k<4;k++)game.fx.push({x:cx+(k-1.5)*25,y:cy+(k%2)*10,t:0,life:.72,color:['#b99cff','#f0d58c','#8de0d0','#eee2ff'][k],kind:'ring'});spark(cx,cy-18,'#f1ddff',42);floatText(cx,cy-116,'VOID ECLIPSE','#e5d5ff');banner('VOID ECLIPSE','THREE REALMS · ONE TITAN',.92,'#c5a8ff');o.stun=Math.max(o.stun,.96);game.flash=Math.max(game.flash||0,.22);game.shake=Math.max(game.shake,.44);game.hitstop=Math.max(game.hitstop||0,.14);sfx('frostCrack')}
+ }
  // Stag's Antler Charge drives a forest-green horn strike through a grounded rush.
  if(mv.stagCounter){
   game.fx.push({x:cx,y:cy,t:0,life:.48,color:'#b6d98b',kind:'ring'});
@@ -997,7 +1021,7 @@ function resolveHit(i,mv){
  if(mv.snakeCoil){o.coilT=1.05;o.coilBy=i;o.vx=f.dir*58;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*16,y:cy+(k%2)*9,t:0,life:.72+k*.06,color:k===1?'#c8ed82':'#83bd50',kind:'ring'});spark(cx,cy,'#a8d66d',22);floatText(cx,cy-100,'CONSTRICTED','#a8d66d');banner('CONSTRICTED','MOVEMENT REDUCED',.72,'#a8d66d');game.shake=Math.max(game.shake,.22)}
  if(mv.snakeVenom){o.venomT=2.4;o.venomTick=.78;o.venomBy=i;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*20,y:cy+(k%2)*12,t:0,life:.52+k*.06,color:k===1?'#b8e986':'#78b84f',kind:'ring'});spark(cx,cy,'#a8d66d',24);floatText(cx,cy-94,'VENOMED','#a8d66d');game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.045)}
  const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
- const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(f.data.id==='majic'&&(f.jungleRageT||0)>0?1.18:1)*(f.data.id==='majic'&&(f.ascendantT||0)>0?1.2:1)*(1-(o.data.defense-7)*.03)*(o.data.id==='majic'&&((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
+ const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
  f.combo=comboing?f.combo+1:1;
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
@@ -1029,9 +1053,29 @@ function resolveHit(i,mv){
  const p='p'+(i+1);if(f.combo>=2){$(p+'-combo').textContent=f.combo+' HITS';$(p+'-combo').classList.toggle('active',f.combo>=3)}
  hud();
 }
+function majicBossPhase(o){
+ if(!o||o.data.id!=='majic'||!o.ai||!tower||!tower.boss)return;
+ const phase=o.bars<=1?3:o.bars<=2?2:1;
+ if(phase<=(o.bossPhase||1))return;
+ o.bossPhase=phase;
+ if(phase===2){
+  o.jungleRageT=999;o.jungleRageCooldownT=999;
+  banner('PHASE II · JUNGLE RAGE','THE ELEVEN BEASTS AWAKEN',1.8,'#c49aff');
+  floatText(o.x,o.y-350,'JUNGLE RAGE','#d8b5ff');
+  for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:o.x,y:o.y-155,t:0,life:1.05,color,kind:'ring'});spark(o.x+(Math.random()-.5)*130,o.y-150+(Math.random()-.5)*90,color,7)}
+  game.flash=Math.max(game.flash||0,.22);game.shake=Math.max(game.shake,.38);game.hitstop=Math.max(game.hitstop||0,.1);sfx('instinct');
+ }else{
+  o.jungleRageT=0;o.ascendantT=999;o.ascendantCooldownT=999;
+  banner('PHASE III · TRUE TITAN','THE FINAL FORM HAS AWAKENED',2,'#e1c6ff');
+  floatText(o.x,o.y-365,'TRUE TITAN FORM','#e7c8ff');
+  for(let k=0;k<18;k++){const color=['#e8c56b','#b8a0ff','#8de0d0'][k%3],a=k*Math.PI/9;game.fx.push({x:o.x+Math.cos(a)*82,y:o.y-155+Math.sin(a)*78,t:0,life:1.15,color,kind:'ring'});spark(o.x+Math.cos(a)*112,o.y-155+Math.sin(a)*95,color,5)}
+  game.flash=Math.max(game.flash||0,.34);game.shake=Math.max(game.shake,.52);game.hitstop=Math.max(game.hitstop||0,.14);sfx('instinct');
+ }
+ hud();
+}
 function resolveBars(o,f){
  if(o.hp>0)return;
- if(o.bars>1){o.bars--;o.hp+=BAR;o.potential=Math.min(o.potential,BAR-o.hp);floatText(o.x,o.y-320,'BAR BROKEN','#ff9a4a');game.shake=.3;snd('sfx.heavyImpact','boom',1,.85);}
+ if(o.bars>1){o.bars--;o.hp+=BAR;o.potential=Math.min(o.potential,BAR-o.hp);floatText(o.x,o.y-320,'BAR BROKEN','#ff9a4a');game.shake=.3;snd('sfx.heavyImpact','boom',1,.85);majicBossPhase(o);}
  else{o.hp=0;o.potential=0;koFinish(o,f,false)}
 }
 function endCombo(i,ended){
@@ -1435,7 +1479,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','ascendantT','ascendantCooldownT','jungleRageT','jungleRageCooldownT','stagCounterT','venomT','venomTick','venomBy','coilT','eagleCounterT','eagleEvadeT','badgerCounterT','wolfCounterT','hyenaCounterT','hyenaEvadeT','hyenaFrenzyFinisher','crocodileCounterT','tigerCounterT','tigerEvadeT','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','lionManeFinisher','lionCounterT','tigerPounceT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','bossPhase','majicVoidGuardT','majicDefenseCooldownT','ascendantT','ascendantCooldownT','jungleRageT','jungleRageCooldownT','stagCounterT','venomT','venomTick','venomBy','coilT','eagleCounterT','eagleEvadeT','badgerCounterT','wolfCounterT','hyenaCounterT','hyenaEvadeT','hyenaFrenzyFinisher','crocodileCounterT','tigerCounterT','tigerEvadeT','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','lionManeFinisher','lionCounterT','tigerPounceT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1605,6 +1649,44 @@ function draw(){
   haze.addColorStop(1,'rgba(210,220,205,.055)');
   c.fillStyle=haze;c.fillRect(-60,260,w+120,160);
  }
+ // MAJIC's Lair evolves with the final boss: the arena itself reacts to each awakening.
+ if(arena.lair&&tower&&tower.boss){
+  const boss=game.fighters.find(f=>f.data.id==='majic');
+  const phase=boss?Math.max(1,boss.bossPhase||1):1;
+  if(phase>=2){
+   c.save();c.globalCompositeOperation='screen';
+   const pulse=.5+.5*Math.sin(t*2.1);
+   c.globalAlpha=phase===2?.075:.12+.035*pulse;
+   const wash=c.createLinearGradient(0,0,0,520);
+   wash.addColorStop(0,phase===2?'rgba(120,55,180,.12)':'rgba(92,35,155,.30)');
+   wash.addColorStop(.68,'rgba(20,10,55,.02)');
+   wash.addColorStop(1,phase===2?'rgba(130,75,210,.15)':'rgba(100,45,190,.28)');
+   c.fillStyle=wash;c.fillRect(-60,-30,1220,560);
+   // Elemental fractures spread across the floor in phase II.
+   c.globalAlpha=phase===2?.38:.55;
+   for(let n=0;n<9;n++){
+    const x=95+n*118+Math.sin(t*.7+n)*7;
+    c.strokeStyle=phase===2?['#b58cff','#f2bd69','#8de0d0'][n%3]:'#bd9cff';
+    c.shadowColor=c.strokeStyle;c.shadowBlur=phase===2?9:15;c.lineWidth=phase===2?1.8:2.6;
+    c.beginPath();c.moveTo(x,398);c.lineTo(x+Math.sin(n*4)*18,424);c.lineTo(x-13,447);c.lineTo(x+Math.cos(n)*22,478);c.stroke();
+   }
+   // True Titan tears open an eclipsed sky and suspends spectral stones above the arena.
+   if(phase>=3){
+    c.globalAlpha=.42+.08*pulse;c.fillStyle='#10051f';c.beginPath();c.arc(550,92,78+Math.sin(t*1.4)*3,0,Math.PI*2);c.fill();
+    c.globalAlpha=.7;c.strokeStyle='#b99aff';c.shadowColor='#a77aff';c.shadowBlur=24;c.lineWidth=3;
+    c.beginPath();c.arc(550,92,96+Math.sin(t*1.8)*5,0,Math.PI*2);c.stroke();
+    c.globalAlpha=.5;c.strokeStyle='#8de0d0';c.lineWidth=1.5;c.beginPath();c.arc(550,92,112+Math.sin(t*1.1)*4,0,Math.PI*2);c.stroke();
+    for(let n=0;n<7;n++){
+     const x=105+n*148+Math.sin(t*1.25+n*1.7)*12;
+     const y=145+Math.sin(t*1.7+n)*20;
+     c.save();c.translate(x,y);c.rotate(t*.45+n);
+     c.globalAlpha=.38+.2*pulse;c.fillStyle=n%2?'#a98aff':'#72dcca';c.shadowColor=c.fillStyle;c.shadowBlur=18;
+     c.beginPath();c.moveTo(0,-12);c.lineTo(9,-3);c.lineTo(6,12);c.lineTo(-7,8);c.lineTo(-10,-4);c.closePath();c.fill();c.restore();
+    }
+   }
+   c.restore();
+  }
+ }
  // Ultra / Instinct darken the stage so the fighters pop.
  const dim=game.ultra?.55:game.fighters.some(f=>f.instinct)?.18:0;if(dim){c.fillStyle=`rgba(10,0,20,${dim})`;c.fillRect(-60,-60,w+120,h+120)}
  drawStains();
@@ -1700,7 +1782,7 @@ function drawFighter(f,i,ghost){
  const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.86,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08,majic:1.4,snake:.86,eagle:.9,stag:.92}[f.data.id]||.84;
  if(!ghost){
   // MAJIC's True Titan Form creates a distinct supernatural silhouette, not just a stronger aura.
-  if(f.data.id==='majic'&&(f.ascendantT||0)>.025){
+  if(f.data.id==='majic'&&((f.ascendantT||0)>.025||(f.bossPhase||1)>=3)){
    const t=f.ascendantT,pulse=.78+Math.sin((8.5-t)*13)*.18,fade=clamp(Math.min(t,1.1)*1.4,0,1);
    c.save();c.globalAlpha=fade*pulse;
    const halo=c.createRadialGradient(0,-160,18,0,-160,205*sizeScale);
@@ -1715,6 +1797,14 @@ function drawFighter(f,i,ghost){
    const sigils=['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff'];
    sigils.forEach((color,n)=>{const a=(8.5-t)*1.15+n*Math.PI/3,px=Math.cos(a)*112*sizeScale,py=-158+Math.sin(a)*136*sizeScale;c.globalAlpha=fade*pulse*.9;c.fillStyle=color;c.shadowColor=color;c.shadowBlur=13;c.beginPath();c.arc(px,py,4.5+Math.sin(a*2)*1.4,0,Math.PI*2);c.fill()});
    c.restore();
+  }
+  // Phase III's Void Guard wraps MAJIC in a brief layered shield after a successful parry.
+  if(f.data.id==='majic'&&(f.majicVoidGuardT||0)>.025){
+   const q=f.majicVoidGuardT/.9,pulse=.78+Math.sin((.9-f.majicVoidGuardT)*24)*.16;
+   c.save();c.globalAlpha=clamp(q*1.25,0,.88)*pulse;c.lineWidth=4*sizeScale;c.shadowBlur=18;c.shadowColor='#b99cff';
+   c.strokeStyle='#b99cff';c.beginPath();c.ellipse(0,-155,112*sizeScale,166*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.strokeStyle='#8de0d0';c.lineWidth=2.5*sizeScale;c.beginPath();c.ellipse(0,-155,126*sizeScale,178*sizeScale,0,Math.PI,Math.PI*2);c.stroke();
+   c.shadowBlur=0;c.restore();
   }
   // MAJIC's Jungle Rage gathers visual energy from the roster's elemental colors.
   if(f.data.id==='majic'&&(f.jungleRageT||0)>.025){
