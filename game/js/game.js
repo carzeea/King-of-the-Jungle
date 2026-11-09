@@ -286,12 +286,13 @@ function cpuInput(i){
   return k;
  }
  if(f.meter>=100&&!f.instinct&&Math.random()<.02)press('ins');
- if(o.actionTime>0&&o.attack>0&&d<230&&!ai.wantBlock&&Math.random()<(.01+lvl*.05)*60*dt)ai.wantBlock=.3+lvl*.3;
+ if(o.actionTime>0&&o.attack>0&&d<hitDist(o,f,'attack_heavy')+20&&!ai.wantBlock&&Math.random()<(.01+lvl*.05)*60*dt)ai.wantBlock=.3+lvl*.3;
  if(ai.wantBlock&&f.ground){k.bl=true;return k}
  if(ai.think<=0){
   ai.think=.5-lvl*.33+Math.random()*.2;ai.hold={};ai.doubles=1+Math.floor(Math.random()*(1+lvl*3));ai.dropping=Math.random()>.45+lvl*.5;
   const r=Math.random(),aggro=.2+lvl*.55;
-  if(d>175){ai.hold[toward]=1;if(r<.06+lvl*.05)ai.hold.j=1;else if(r<.12+lvl*.1&&d<260)ai.hold.sp=1;else if(f.meter>=50&&r<.2)ai.hold.shadow=1}
+  const near=hitDist(f,o,'attack_light')-25,spR=hitDist(f,o,moveAnim(f,MOVES.special));
+  if(d>near){ai.hold[toward]=1;if(r<.06+lvl*.05)ai.hold.j=1;else if(r<.12+lvl*.1&&d<spR)ai.hold.sp=1;else if(f.meter>=50&&r<.2)ai.hold.shadow=1}
   else if(r<aggro){ai.hold.at=1;if(Math.random()<.25)ai.hold.heavy=1}
   else if(r<aggro+.12)ai.hold.sp=1;
   else if(r<aggro+.28)ai.hold[away]=1;
@@ -470,7 +471,7 @@ function update(dt){
   if(f.attack<=0)f.action=f.block?'block':(!f.ground?'jump':Math.abs(move)>35?'walk':(Math.floor(performance.now()/1800)%3===0?'breathing':'idle'));
   f.walk+=Math.abs(move)*dt*.025;
  });
- const gap=Math.abs(a.x-b.x),minGap=122+((a.data.id==='majic'||b.data.id==='majic')?45:0);
+ const gap=Math.abs(a.x-b.x),minGap=Math.max(130,(bodyFront(a)+bodyFront(b))*.95);
  if(gap<minGap&&Math.abs(a.y-b.y)<120){const push=(minGap-gap)/2,s=a.x<b.x?-1:1;a.x=clampX(a.x+push*s);b.x=clampX(b.x-push*s);}
  if(a.hp>0&&b.hp>0&&!a.attack&&!a.stun)a.dir=b.x>=a.x?1:-1;
  if(a.hp>0&&b.hp>0&&!b.attack&&!b.stun)b.dir=a.x>=b.x?1:-1;
@@ -486,6 +487,8 @@ function doMove(f,name){
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  f.move_=mv;f.attack=mv.t;f.hitsDone=0;f.elapsed=0;
+ // a strike that is just short steps in so it travels into the opponent instead of swinging at air
+ if(f.ground&&!(o.stun>0&&f.combo>0)&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;if(need>0&&need<70)f.vx=f.dir*Math.min(380,need*6)}
  const special=name==='special'||name==='ender'||name==='shadow';
  setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,mv.t);
  f.chain=(f.chain||0)+1;
@@ -495,11 +498,25 @@ function doMove(f,name){
  if(name==='ender'){f.vx=f.dir*200;f.vy=-140;f.ground=false;floatText(f.x,f.y-300,'ENDER','#ffd36b')}
  if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;soundOn&&AU&&AU.now('voice.shadow-attack');if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
 }
+/* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
+const HB=window.KOTJ_HIT||{};
+const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};
+ if(mv===MOVES.claw)return'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
+ if(mv===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
+ if(mv===MOVES.special)return S.special||'special_pounce';
+ if(mv===MOVES.shadow)return S.shadow||(S.double||['attack_heavy'])[0];return'attack_light'}
+function reachOf(f,anim){const r=HB[f.data.id]&&HB[f.data.id].reach[anim];return Math.max(bodyFront(f)+60,r?r[0]:180)}
+// distance between the two fighters' centres at which this strike touches the opponent's body
+const hitDist=(f,o,anim,extra)=>reachOf(f,anim)+18+bodyFront(o)*.85+(extra||0);
 function resolveHit(i,mv){
  const f=game.fighters[i],o=game.fighters[1-i];
  if(o.down>0||(o.hp<=0&&o.bars<=1))return;
  const d=Math.abs(f.x-o.x),facing=(o.x-f.x)*f.dir>=-15;
- if(!(d<mv.range*(f.data.id==='majic'?1.3:1)&&Math.abs(f.y-o.y)<130&&facing))return;
+ const anim=moveAnim(f,mv),reach=HB[f.data.id]&&HB[f.data.id].reach[anim];
+ if(!(d<=hitDist(f,o,anim,mv.shadow?40:0)&&Math.abs(f.y-o.y)<130&&facing))return;
+ // where the strike lands: the defender's front edge, at the height of the fist/claw/jaws
+ const cx=o.x-f.dir*bodyFront(o)*.75,cy=o.y-Math.max(70,Math.min(240,reach?reach[1]:160));
  const comboing=o.stun>0&&f.combo>0;
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
@@ -515,18 +532,18 @@ function resolveHit(i,mv){
  else{o.hp-=dmg;}
  if(isEnder){ // cash in everything: potential becomes real, bonus for long combos
   o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*mv.push;o.vy=-330;o.ground=false;
-  snd('sfx.heavyImpact','heavy');game.shake=.25;game.hitstop=.09;spark(o.x,o.y-160,'#ffd36b',18);
+  snd('sfx.heavyImpact','heavy');game.shake=.25;game.hitstop=.11;spark(cx,cy,'#ffd36b',18);
   resolveBars(o,f);endCombo(i,true);
  }else{
   o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.vx=f.dir*mv.push;if(!o.ground)o.vy=-160;
   f.vx=f.dir*Math.max(20,mv.push*.4);
-  hitSound(f,mv);game.hitstop=mv===MOVES.double?.035:.06;
+  hitSound(f,mv);game.hitstop=mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07;if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.12);
   if(!mv.potential)resolveBars(o,f);
  }
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
  f.meter=Math.min(100,f.meter+(f.instinct?0:4));o.meter=Math.min(100,o.meter+(o.instinct?0:2.5));
- spark(o.x-o.dir*10,o.y-160-Math.random()*40,mv.shadow?'#c68bff':'#fff0b0',10);
- bleed(o.x-o.dir*12,o.y-150-Math.random()*50,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:(mv===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
+ spark(cx,cy-Math.random()*16,mv.shadow?'#c68bff':'#fff0b0',10);
+ bleed(cx,cy+8-Math.random()*20,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:(mv===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
  const p='p'+(i+1);if(f.combo>=2){$(p+'-combo').textContent=f.combo+' HITS';$(p+'-combo').classList.toggle('active',f.combo>=3)}
  hud();
 }
@@ -931,49 +948,49 @@ if(JOIN){try{history.replaceState(null,'',location.pathname)}catch(_){}
 // Standardized fighter frames (KOTJ_V2_Fighter_Animations): one strip per animation.
 // anims[name] = [frames, frame w, frame h (stored px), pivot x, pivot y (game units)]; stored at scale s.
 const SPRITES={
- snake:{s:0.34,anims:{"idle":[5,132,100,197,279],"walk_forward":[6,99,98,97,276],"walk_back":[6,99,98,97,276],"run":[4,155,102,201,286],"crouch":[4,121,91,122,252],"jump":[5,171,91,252,252],"block":[4,157,96,255,265],"attack_light":[7,191,100,265,282],"bite":[5,162,98,225,279],"attack_heavy":[4,218,88,313,238],"uppercut":[5,180,86,238,233],"special_pounce":[4,155,84,213,235],"special_b":[6,147,82,187,231],"ultra_move":[7,357,117,456,320],"hit_light":[5,105,86,174,235],"hit_heavy":[6,186,86,272,235],"knockdown_getup":[8,186,85,272,231],"victory":[11,203,126,367,354],"defeat":[6,186,86,272,235],"special_c":[5,203,80,276,208],"special_d":[4,212,82,248,211]},
+ snake:{s:0.34,anims:{"idle":[5,132,100,143,279],"walk_forward":[6,99,98,156,276],"walk_back":[6,99,98,156,276],"run":[4,155,102,282,286],"crouch":[4,121,91,170,252],"jump":[5,171,91,275,252],"block":[4,157,96,233,265],"attack_light":[7,191,100,227,282],"bite":[5,162,98,170,279],"attack_heavy":[4,218,88,326,238],"uppercut":[5,180,86,309,233],"special_pounce":[4,155,84,195,235],"special_b":[6,147,82,187,231],"ultra_move":[7,357,117,366,320],"hit_light":[5,105,86,136,235],"hit_heavy":[6,186,86,272,235],"knockdown_getup":[8,186,85,272,231],"victory":[11,203,126,321,354],"defeat":[6,186,86,272,235],"special_c":[5,203,80,244,208],"special_d":[4,212,82,273,211]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[4, 5, 6, 7]],ko:['hit_heavy',5]},
- eagle:{s:0.34,anims:{"idle":[5,114,112,195,315],"walk_forward":[5,131,108,227,304],"walk_back":[5,131,108,227,304],"run":[4,146,112,110,315],"crouch":[4,134,106,198,282],"jump":[5,148,106,154,282],"block":[4,159,107,227,283],"attack_light":[6,195,120,255,322],"bite":[5,232,112,304,301],"attack_heavy":[4,176,116,304,294],"uppercut":[5,211,119,289,301],"special_pounce":[6,179,127,248,343],"special_b":[4,259,120,372,326],"ultra_move":[7,378,125,361,340],"hit_light":[5,133,109,195,280],"hit_heavy":[6,168,107,211,273],"knockdown_getup":[9,168,111,211,287],"victory":[12,180,132,262,372],"defeat":[6,168,107,211,273]},
+ eagle:{s:0.34,anims:{"idle":[5,114,112,159,315],"walk_forward":[5,131,108,179,304],"walk_back":[5,131,108,179,304],"run":[4,146,112,209,315],"crouch":[4,134,106,212,282],"jump":[5,148,106,178,282],"block":[4,159,107,227,283],"attack_light":[6,195,120,261,322],"bite":[5,232,112,320,301],"attack_heavy":[4,176,116,270,294],"uppercut":[5,211,119,330,301],"special_pounce":[6,179,127,201,343],"special_b":[4,259,120,416,326],"ultra_move":[7,378,125,413,340],"hit_light":[5,133,109,145,280],"hit_heavy":[6,168,107,211,273],"knockdown_getup":[9,168,111,211,287],"victory":[12,180,132,262,372],"defeat":[6,168,107,211,273]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[4, 5, 6, 7, 8]],ko:['hit_heavy',5]},
- stag:{s:0.34,anims:{"idle":[5,110,106,117,300],"walk_forward":[5,137,106,191,300],"walk_back":[5,137,106,191,300],"run":[4,184,106,237,300],"crouch":[4,146,98,177,279],"jump":[5,147,98,155,279],"block":[4,154,101,226,286],"attack_light":[6,199,101,272,276],"bite":[5,227,101,399,276],"attack_heavy":[4,275,89,378,254],"uppercut":[5,218,91,353,258],"special_pounce":[4,278,83,353,235],"special_b":[5,231,84,339,237],"ultra_move":[7,388,120,487,329],"hit_light":[4,121,84,88,226],"hit_heavy":[6,161,82,177,223],"knockdown_getup":[9,175,87,219,237],"victory":[12,191,147,283,406],"defeat":[6,161,82,177,223],"special_c":[5,162,82,138,230],"special_d":[5,214,79,226,223]},
+ stag:{s:0.34,anims:{"idle":[5,110,106,157,300],"walk_forward":[5,137,106,241,300],"walk_back":[5,137,106,241,300],"run":[4,184,106,287,300],"crouch":[4,146,98,183,279],"jump":[5,147,98,195,279],"block":[4,154,101,166,286],"attack_light":[6,199,101,325,276],"bite":[5,227,101,299,276],"attack_heavy":[4,275,89,296,254],"uppercut":[5,218,91,369,258],"special_pounce":[4,278,83,466,235],"special_b":[5,231,84,321,237],"ultra_move":[7,388,120,511,329],"hit_light":[4,121,84,143,226],"hit_heavy":[6,161,82,177,223],"knockdown_getup":[9,175,87,219,237],"victory":[12,191,147,229,406],"defeat":[6,161,82,177,223],"special_c":[5,162,82,214,230],"special_d":[5,214,79,300,223]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[4, 5, 6, 7, 8]],ko:['hit_heavy',5]},
- majic:{s:0.34,anims:{"idle":[4,254,144,433,399],"walk_forward":[4,277,144,449,396],"walk_back":[4,277,144,449,396],"run":[4,277,144,449,396],"dash":[3,298,134,424,371],"crouch":[3,254,160,424,447],"jump":[5,295,134,424,371],"block":[3,122,122,278,335],"attack_light":[4,269,131,303,374],"attack_heavy":[4,229,160,350,451],"bite":[4,269,131,303,374],"uppercut":[4,227,160,350,451],"special_pounce":[4,298,134,424,371],"special_b":[6,354,99,542,271],"special_c":[5,247,91,364,257],"special_d":[4,187,97,287,257],"ultra_move":[8,257,161,374,451],"hit_light":[4,192,92,273,260],"hit_heavy":[6,247,94,355,257],"knockdown_getup":[10,247,119,355,330],"victory":[7,273,159,421,444],"defeat":[5,247,94,355,257]},
+ majic:{s:0.34,anims:{"idle":[4,254,144,384,399],"walk_forward":[4,277,144,449,396],"walk_back":[4,277,144,449,396],"run":[4,277,144,449,396],"dash":[3,298,134,528,371],"crouch":[3,254,160,411,447],"jump":[5,295,134,528,371],"block":[3,122,122,135,335],"attack_light":[4,269,131,380,374],"attack_heavy":[4,229,160,322,451],"bite":[4,269,131,297,374],"uppercut":[4,227,160,316,451],"special_pounce":[4,298,134,479,371],"special_b":[6,354,99,555,271],"special_c":[5,247,91,286,257],"special_d":[4,187,97,299,257],"ultra_move":[8,257,161,374,451],"hit_light":[4,192,92,301,260],"hit_heavy":[6,247,94,355,257],"knockdown_getup":[10,247,119,355,330],"victory":[7,273,159,465,444],"defeat":[5,247,94,355,257]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_c','special_d','attack_heavy'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6, 7, 8, 9]],ko:['hit_heavy',5]},
- badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,144,203],"crouch":[4,74,60,108,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,110,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,94,208],"pounce":[8,96,60,142,176],"special_earth_slam":[7,81,61,119,179],"shadow_rampage":[10,70,61,104,179],"hit_light":[6,84,78,130,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
+ badger:{s:0.34,anims:{"idle":[9,68,73,99,215],"walk_forward":[8,73,71,88,208],"walk_back":[6,52,72,72,211],"run":[7,115,69,191,203],"crouch":[4,74,60,101,176],"block":[6,61,70,88,206],"attack_light":[7,88,70,122,206],"attack_heavy":[8,86,76,98,223],"claw_swipe":[6,99,70,122,207],"bite":[5,102,72,120,211],"uppercut":[8,75,79,94,233],"jump":[7,64,71,79,208],"pounce":[8,96,60,124,176],"special_earth_slam":[7,81,61,110,179],"shadow_rampage":[10,70,61,98,179],"hit_light":[6,84,78,111,228],"hit_heavy":[7,87,76,128,223],"knockdown_getup":[8,95,76,140,225],"victory":[7,87,83,120,245],"defeat":[6,82,67,120,196]},
   double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['hit_heavy',[0,1,2,3,4]],getup:['knockdown_getup',[4,5,6,7]],ko:['hit_heavy',4]},
- crocodile:{s:0.34,anims:{"idle":[9,95,87,140,256],"walk_forward":[7,131,85,164,251],"walk_back":[6,120,85,137,251],"run":[7,149,79,157,233],"block":[6,92,80,134,236],"attack_light":[7,117,86,144,254],"attack_heavy":[6,157,85,207,251],"bite":[6,145,77,170,227],"uppercut":[7,124,79,136,233],"jump":[7,118,74,174,218],"special_pounce":[6,175,76,258,224],"hit_light":[6,106,77,187,227],"hit_heavy":[8,118,76,174,224],"knockdown_getup":[14,133,68,196,200],"victory":[8,86,103,128,304],"defeat":[7,128,68,188,201]},
+ crocodile:{s:0.34,anims:{"idle":[9,95,87,128,256],"walk_forward":[7,131,85,181,251],"walk_back":[6,120,85,169,251],"run":[7,149,79,175,233],"block":[6,92,80,134,236],"attack_light":[7,117,86,158,254],"attack_heavy":[6,157,85,207,251],"bite":[6,145,77,181,227],"uppercut":[7,124,79,148,233],"jump":[7,118,74,145,218],"special_pounce":[6,175,76,209,224],"hit_light":[6,106,77,161,227],"hit_heavy":[8,118,76,174,224],"knockdown_getup":[14,133,68,196,200],"victory":[8,86,103,136,304],"defeat":[7,128,68,188,201]},
   double:['bite','attack_heavy'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- elephant:{s:0.34,anims:{"idle":[9,92,112,138,330],"walk_forward":[7,184,114,233,337],"walk_back":[6,166,107,205,314],"run":[7,230,102,261,299],"block":[6,109,101,159,296],"attack_light":[7,178,109,247,321],"attack_heavy":[6,194,107,258,314],"bite":[6,221,97,247,285],"uppercut":[7,204,99,265,292],"jump":[7,187,94,274,277],"special_pounce":[6,261,98,367,288],"hit_light":[6,133,98,236,288],"hit_heavy":[8,150,98,221,288],"knockdown_getup":[14,198,87,252,256],"victory":[8,113,132,168,387],"defeat":[7,186,89,314,263]},
+ elephant:{s:0.34,anims:{"idle":[9,92,112,128,330],"walk_forward":[7,184,114,233,337],"walk_back":[6,166,107,205,314],"run":[7,230,102,306,299],"block":[6,109,101,159,296],"attack_light":[7,178,109,247,321],"attack_heavy":[6,194,107,258,314],"bite":[6,221,97,247,285],"uppercut":[7,204,99,265,292],"jump":[7,187,94,248,277],"special_pounce":[6,261,98,316,288],"hit_light":[6,133,98,206,288],"hit_heavy":[8,150,98,221,288],"knockdown_getup":[14,198,87,252,256],"victory":[8,113,132,168,387],"defeat":[7,186,89,314,263]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- grizzly:{s:0.34,anims:{"idle":[9,86,104,127,307],"walk_forward":[8,118,98,157,287],"walk_back":[6,104,98,148,287],"run":[7,141,92,146,271],"block":[6,145,94,212,277],"attack_light":[7,132,98,160,287],"attack_heavy":[6,177,96,263,284],"bite":[6,160,86,172,254],"uppercut":[7,144,88,158,257],"jump":[7,116,84,171,248],"special_pounce":[6,173,85,250,251],"hit_light":[6,170,90,286,264],"hit_heavy":[8,161,91,273,267],"knockdown_getup":[14,176,79,230,231],"victory":[8,112,120,173,353],"defeat":[7,179,84,238,248]},
+ grizzly:{s:0.34,anims:{"idle":[9,86,104,127,307],"walk_forward":[8,118,98,157,287],"walk_back":[6,104,98,148,287],"run":[7,141,92,164,271],"block":[6,145,94,205,277],"attack_light":[7,132,98,169,287],"attack_heavy":[6,177,96,271,284],"bite":[6,160,86,191,254],"uppercut":[7,144,88,170,257],"jump":[7,116,84,151,248],"special_pounce":[6,173,85,205,251],"hit_light":[6,170,90,260,264],"hit_heavy":[8,161,91,273,267],"knockdown_getup":[14,176,79,230,231],"victory":[8,112,120,173,353],"defeat":[7,179,84,238,248]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_heavy','bite','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- hippo:{s:0.34,anims:{"idle":[9,97,107,142,316],"walk_forward":[8,116,103,159,304],"walk_back":[6,147,110,193,322],"run":[7,156,96,143,283],"block":[6,142,97,209,286],"attack_light":[7,131,99,164,290],"attack_heavy":[6,167,100,216,293],"bite":[6,181,88,182,259],"uppercut":[7,156,91,150,266],"jump":[7,125,87,184,255],"special_pounce":[6,176,91,240,266],"hit_light":[6,185,95,315,279],"hit_heavy":[8,153,94,221,276],"knockdown_getup":[14,184,80,233,235],"victory":[8,120,124,184,366],"defeat":[7,133,73,195,214]},
+ hippo:{s:0.34,anims:{"idle":[9,97,107,142,316],"walk_forward":[8,116,103,159,304],"walk_back":[6,147,110,184,322],"run":[7,156,96,180,283],"block":[6,142,97,209,286],"attack_light":[7,131,99,164,290],"attack_heavy":[6,167,100,226,293],"bite":[6,181,88,203,259],"uppercut":[7,156,91,161,266],"jump":[7,125,87,162,255],"special_pounce":[6,176,91,201,266],"hit_light":[6,185,95,281,279],"hit_heavy":[8,153,94,221,276],"knockdown_getup":[14,184,80,233,235],"victory":[8,120,124,184,366],"defeat":[7,133,73,195,214]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- hyena:{s:0.34,anims:{"idle":[9,69,82,102,240],"walk_forward":[8,97,81,126,239],"walk_back":[6,77,89,88,262],"run":[7,162,81,116,237],"block":[6,90,81,131,239],"attack_light":[7,108,84,135,248],"attack_heavy":[6,154,84,198,248],"bite":[6,140,79,171,234],"uppercut":[7,118,79,129,231],"jump":[7,109,70,161,205],"special_pounce":[6,146,72,215,211],"hit_light":[6,101,77,180,228],"hit_heavy":[8,112,78,164,228],"knockdown_getup":[14,122,68,180,200],"victory":[8,89,104,138,305],"defeat":[7,115,74,170,219]},
+ hyena:{s:0.34,anims:{"idle":[9,69,82,102,240],"walk_forward":[8,97,81,126,239],"walk_back":[6,77,89,99,262],"run":[7,162,81,142,237],"block":[6,90,81,131,239],"attack_light":[7,108,84,144,248],"attack_heavy":[6,154,84,188,248],"bite":[6,140,79,184,234],"uppercut":[7,118,79,139,231],"jump":[7,109,70,155,205],"special_pounce":[6,146,72,190,211],"hit_light":[6,101,77,156,228],"hit_heavy":[8,112,78,164,228],"knockdown_getup":[14,122,68,180,200],"victory":[8,89,104,138,305],"defeat":[7,115,74,170,219]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- jaguar:{s:0.34,anims:{"idle":[9,82,84,128,246],"walk_forward":[8,107,83,162,244],"walk_back":[6,81,84,104,246],"run":[7,163,80,184,235],"block":[6,86,81,127,238],"attack_light":[7,115,84,137,246],"attack_heavy":[6,137,84,174,246],"bite":[6,144,77,148,226],"uppercut":[7,114,79,128,232],"jump":[7,138,89,204,261],"special_pounce":[6,160,71,235,209],"hit_light":[6,105,78,180,229],"hit_heavy":[8,113,77,166,226],"knockdown_getup":[14,130,67,195,197],"victory":[8,95,104,148,305],"defeat":[7,120,74,177,218]},
+ jaguar:{s:0.34,anims:{"idle":[9,82,84,128,246],"walk_forward":[8,107,83,150,244],"walk_back":[6,81,84,104,246],"run":[7,163,80,184,235],"block":[6,86,81,127,238],"attack_light":[7,115,84,150,246],"attack_heavy":[6,137,84,174,246],"bite":[6,144,77,148,226],"uppercut":[7,114,79,139,232],"jump":[7,138,89,180,261],"special_pounce":[6,160,71,187,209],"hit_light":[6,105,78,155,229],"hit_heavy":[8,113,77,166,226],"knockdown_getup":[14,130,67,195,197],"victory":[8,95,104,156,305],"defeat":[7,120,74,177,218]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- leopard:{s:0.34,anims:{"idle":[5,95,98,118,275],"walk_forward":[5,86,98,118,275],"walk_back":[5,93,98,137,275],"run":[6,140,82,201,214],"dash":[4,169,78,179,214],"crouch":[3,104,81,150,220],"jump":[6,108,81,128,220],"block":[3,76,81,67,220],"attack_light":[6,109,78,153,208],"attack_heavy":[5,118,76,208,204],"bite":[5,133,73,201,195],"uppercut":[5,119,75,184,201],"special_pounce":[5,184,73,281,195],"special_b":[6,114,88,179,230],"special_c":[5,163,77,265,198],"special_d":[14,133,76,201,201],"ultra_move":[5,185,90,270,230],"hit_light":[3,109,87,128,224],"hit_heavy":[9,175,94,259,233],"knockdown_getup":[11,176,107,259,272],"victory":[5,140,191,224,527],"defeat":[9,175,94,259,233]},
+ leopard:{s:0.34,anims:{"idle":[5,95,98,145,275],"walk_forward":[5,86,98,106,275],"walk_back":[5,93,98,137,275],"run":[6,140,82,251,214],"dash":[4,169,78,229,214],"crouch":[3,104,81,150,220],"jump":[6,108,81,144,220],"block":[3,76,81,123,220],"attack_light":[6,109,78,106,208],"attack_heavy":[5,118,76,148,204],"bite":[5,133,73,195,195],"uppercut":[5,119,75,178,201],"special_pounce":[5,184,73,281,195],"special_b":[6,114,88,137,230],"special_c":[5,163,77,271,198],"special_d":[14,133,76,154,201],"ultra_move":[5,185,90,270,230],"hit_light":[3,109,87,189,224],"hit_heavy":[9,175,94,259,233],"knockdown_getup":[11,176,107,259,272],"victory":[5,140,191,196,527],"defeat":[9,175,94,259,233]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_d','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[6,7,8,9,10]],ko:['hit_heavy',8]},
- lion:{s:0.34,anims:{"idle":[9,82,89,136,263],"walk_forward":[8,105,86,156,254],"walk_back":[6,89,86,115,254],"run":[7,118,81,132,239],"block":[6,98,83,166,245],"attack_light":[7,119,87,142,257],"attack_heavy":[6,147,87,182,257],"bite":[6,165,79,168,233],"uppercut":[7,140,80,130,236],"jump":[7,101,76,149,224],"special_pounce":[6,199,77,262,227],"hit_light":[6,101,81,178,239],"hit_heavy":[8,116,80,171,236],"knockdown_getup":[14,134,67,197,198],"victory":[8,88,109,130,322],"defeat":[7,149,76,236,224]},
+ lion:{s:0.34,anims:{"idle":[9,82,89,124,263],"walk_forward":[8,105,86,141,254],"walk_back":[6,89,86,115,254],"run":[7,118,81,150,239],"block":[6,98,83,159,245],"attack_light":[7,119,87,148,257],"attack_heavy":[6,147,87,182,257],"bite":[6,165,79,181,233],"uppercut":[7,140,80,140,236],"jump":[7,101,76,134,224],"special_pounce":[6,199,77,224,227],"hit_light":[6,101,81,146,239],"hit_heavy":[8,116,80,171,236],"knockdown_getup":[14,134,67,197,198],"victory":[8,88,109,137,322],"defeat":[7,149,76,236,224]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- tiger:{s:0.34,anims:{"idle":[9,108,91,157,269],"walk_forward":[8,116,86,154,254],"walk_back":[6,101,86,140,254],"run":[7,137,79,128,233],"block":[6,84,83,122,245],"attack_light":[7,142,86,186,254],"attack_heavy":[6,177,86,199,254],"bite":[6,147,78,153,230],"uppercut":[7,145,78,194,230],"jump":[7,109,74,161,218],"special_pounce":[6,165,76,234,224],"hit_light":[6,110,78,188,230],"hit_heavy":[8,122,78,180,230],"knockdown_getup":[14,131,70,192,206],"victory":[8,133,108,206,318],"defeat":[7,120,75,177,221]},
+ tiger:{s:0.34,anims:{"idle":[9,108,91,157,269],"walk_forward":[8,116,86,139,254],"walk_back":[6,101,86,140,254],"run":[7,137,79,168,233],"block":[6,84,83,122,245],"attack_light":[7,142,86,196,254],"attack_heavy":[6,177,86,199,254],"bite":[6,147,78,176,230],"uppercut":[7,145,78,206,230],"jump":[7,109,74,151,218],"special_pounce":[6,165,76,225,224],"hit_light":[6,110,78,161,230],"hit_heavy":[8,122,78,180,230],"knockdown_getup":[14,131,70,192,206],"victory":[8,133,108,216,318],"defeat":[7,120,75,177,221]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_light','attack_heavy','uppercut'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]},
- wolf:{s:0.34,anims:{"idle":[10,73,85,107,249],"walk_forward":[9,85,77,114,227],"walk_back":[7,78,78,101,230],"run":[8,160,79,171,233],"block":[6,89,83,127,245],"attack_light":[7,120,83,135,245],"attack_heavy":[6,150,83,196,245],"bite":[6,138,78,166,229],"uppercut":[7,134,81,189,239],"jump":[7,110,77,162,227],"special_pounce":[6,224,76,294,223],"hit_light":[6,99,84,165,248],"hit_heavy":[8,114,84,167,248],"knockdown_getup":[14,128,75,190,221],"victory":[8,124,112,182,330],"defeat":[7,129,81,189,239]},
+ wolf:{s:0.34,anims:{"idle":[10,73,85,107,249],"walk_forward":[9,85,77,114,227],"walk_back":[7,78,78,109,230],"run":[8,160,79,171,233],"block":[6,89,83,127,245],"attack_light":[7,120,83,154,245],"attack_heavy":[6,150,83,196,245],"bite":[6,138,78,174,229],"uppercut":[7,134,81,210,239],"jump":[7,110,77,148,227],"special_pounce":[6,224,76,259,223],"hit_light":[6,99,84,140,248],"hit_heavy":[8,114,84,167,248],"knockdown_getup":[14,128,75,190,221],"victory":[8,124,112,182,330],"defeat":[7,129,81,189,239]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['hit_heavy',[0,1,2,3,4,5]],getup:['knockdown_getup',[2,3,4,5,6]],ko:['hit_heavy',6]}
 };

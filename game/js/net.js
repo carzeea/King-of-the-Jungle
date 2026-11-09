@@ -8,6 +8,14 @@ window.KOTJNet=(()=>{
  const over=new URLSearchParams(location.search).get('peer');            // testing: ?peer=localhost:9000
  if(over){const [h,p]=over.split(':');CFG.host=h;CFG.port=+p||9000;CFG.secure=false}
  const ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']},{urls:'stun:global.stun.twilio.com:3478'}];
+ /* Relay (TURN) for networks where the two devices can't reach each other directly
+    (same Wi-Fi without router "hairpin" support, phone carriers, school/work Wi-Fi).
+    Free Metered Open Relay account: put the app name and API key here. */
+ const TURN={app:'',key:''};
+ let relay=null;
+ function loadRelay(){if(relay||!TURN.app||!TURN.key)return Promise.resolve(relay||[]);
+  return fetch(`https://${TURN.app}.metered.live/api/v1/turn/credentials?apiKey=${TURN.key}`).then(r=>r.ok?r.json():[]).then(j=>relay=Array.isArray(j)?j:[]).catch(()=>[])}
+ loadRelay();
  const PREFIX='kotj-jh-';
  const WORDS=['LION','TIGER','WOLF','BEAR','HIPPO','JAGUAR','HYENA','CROC','BADGER','RHINO','COBRA','EAGLE'];
  let ws=null,hb=0,pc=null,ctl=null,rt=null,peerId=null,role=null,ready=false,pend=[],timer=0,closed=true;
@@ -36,7 +44,7 @@ window.KOTJNet=(()=>{
  }
  function flush(){const p=pend;pend=[];p.forEach(c=>pc.addIceCandidate(c).catch(()=>{}))}
  function makePC(){
-  pc=new RTCPeerConnection({iceServers:ICE});
+  pc=new RTCPeerConnection({iceServers:ICE.concat(relay||[])});
   pc.onicecandidate=e=>{if(e.candidate)sig('CANDIDATE',{candidate:e.candidate})};
   pc.onconnectionstatechange=()=>{const s=pc&&pc.connectionState;if(s==='failed'){ready?lost():fail('connect')}};
   pc.ondatachannel=e=>wire(e.channel);
@@ -50,7 +58,7 @@ window.KOTJNet=(()=>{
  function check(){if(!ready&&ctl&&rt&&ctl.readyState==='open'&&rt.readyState==='open'){ready=true;clearTimeout(timer);emit('connected',role)}}
  async function onOffer(m){
   if(role!=='host'||peerId&&peerId!==m.src)return;                       // one opponent per match
-  peerId=m.src;makePC();
+  peerId=m.src;await loadRelay();makePC();
   try{await pc.setRemoteDescription(m.payload.sdp);flush();const a=await pc.createAnswer();await pc.setLocalDescription(a);sig('ANSWER',{sdp:pc.localDescription});emit('joining')}
   catch(_){fail('connect')}
  }
@@ -66,12 +74,12 @@ window.KOTJNet=(()=>{
   const code=cleanCode(raw);if(!code){emit('error','badcode','guest');return false}
   leave();reset();role='guest';
   connectSignal(PREFIX+'g-'+Math.random().toString(36).slice(2,10),async()=>{
-   peerId=PREFIX+code;makePC();
+   await loadRelay();peerId=PREFIX+code;makePC();
    wire(pc.createDataChannel('ctl',{ordered:true}));
    wire(pc.createDataChannel('rt',{ordered:false,maxRetransmits:0}));
    try{const o=await pc.createOffer();await pc.setLocalDescription(o);sig('OFFER',{sdp:pc.localDescription})}catch(_){fail('connect')}
   });
-  timer=setTimeout(()=>{if(!ready)fail('timeout')},20000);
+  timer=setTimeout(()=>{if(!ready)fail('timeout')},30000);
   return code;
  }
  function send(m){if(ctl&&ctl.readyState==='open')ctl.send(JSON.stringify(m))}
