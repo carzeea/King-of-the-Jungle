@@ -176,7 +176,7 @@ function snd(key,fallback,vol=1,rate=1){if(!soundOn)return;if(!(AU&&AU.now(key,v
 const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
 // Relative body mass for hit reactions. Knockback only; no damage or unlock changes.
 const FIGHTER_MASS={badger:1.08,hyena:.94,wolf:.9,leopard:.72,jaguar:.86,
- crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.28,hippo:1.38,elephant:1.5,
+ crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.42,hippo:1.38,elephant:1.5,
  eagle:.76,snake:.7,stag:.88,majic:1.04};
 const impactScale=f=>Math.max(.68,Math.min(1.28,1/(FIGHTER_MASS[f.data.id]||1)));
 // Each fighter carries a restrained signature impact color, so attacks read
@@ -649,12 +649,18 @@ function update(dt){
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
   // from vx, which is reserved for hit knockback and physics impulses.
   // Character-specific handling: agile fighters react quickly to direction
-  // changes; heavier bodies build and shed momentum more deliberately.
+  // changes; Hyena snaps into deceptive reversals, while heavier bodies build
+  // and shed momentum more deliberately.
   const bodyMass=FIGHTER_MASS[f.data.id]||1;
   const agility=clamp((f.data.speed||7)/7,.72,1.42);
-  const handling=clamp(12.5*agility/Math.sqrt(bodyMass)+(f.data.id==='leopard'?5.2:0),8.5,22);
+  const handling=clamp(12.5*agility/Math.sqrt(bodyMass)+(f.data.id==='leopard'?5.2:0)+(f.data.id==='hyena'?4.4:0),7.8,26);
   const moveResponse=1-Math.exp(-dt*handling);
   if(f.data.id==='leopard'&&f.leopardDashT>0)f.moveVel=Math.sign(f.moveVel||move)*720;
+  else if(f.data.id==='hyena'&&move!==0&&Math.sign(move)!==Math.sign(f.moveVel||move)&&Math.abs(f.moveVel)>95){f.moveVel+=(move-f.moveVel)*Math.min(1,moveResponse*1.32)}
+  else if(f.data.id==='grizzly'&&move===0){f.moveVel*=Math.exp(-dt*4.8)}
+  else if(f.data.id==='grizzly'&&move!==0){f.moveVel+=(move-f.moveVel)*moveResponse*.82}
+  else if(f.data.id==='hippo'&&move===0){f.moveVel*=Math.exp(-dt*3.25)}
+  else if(f.data.id==='hippo'&&move!==0){f.moveVel+=(move-f.moveVel)*moveResponse*.72}
   else f.moveVel+=(move-f.moveVel)*moveResponse;
   if(Math.abs(f.moveVel)<2&&move===0)f.moveVel=0;
   f.move=f.moveVel;f.x+=f.moveVel*dt;
@@ -2598,7 +2604,7 @@ function drawSprite(f){
   const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
-  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger';
+  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger',elephantTitan=f.data.id==='elephant';
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
   // Lion: load the heavy forequarters, drive through the shoulders, then settle.
   const lionLoad=lionKing?anticipation*.045:0;
@@ -2609,11 +2615,16 @@ function drawSprite(f){
   const tigerCrouch=tigerKing?anticipation*.065:0;
   const tigerSnap=tigerKing?drive*(f.action==='bite'?.145:f.action==='ender'?.16:.125):0;
   const tigerRecover=tigerKing?recovery*.045:0;
-  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0);
-  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0);
+  // Elephant: load the immense forequarters, drive with a slow trunk-and-tusk-led
+  // surge, then absorb the landing through the whole body.
+  const elephantLoad=elephantTitan?anticipation*.075:0;
+  const elephantDrive=elephantTitan?drive*(f.action==='ender'?.17:f.action==='bite'?.145:.115):0;
+  const elephantSettle=elephantTitan?recovery*.065:0;
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0);
+  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0);
   c.save();
-  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0),-145+drive*(tigerKing?9:4)-anticipation*(tigerKing?5:2));
+  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0),-145+drive*(tigerKing?9:elephantTitan?6:4)-anticipation*(tigerKing?5:elephantTitan?8:2));
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
@@ -2627,7 +2638,7 @@ function drawSprite(f){
    badger:[.010,.010,.010,1.7], wolf:[.014,.014,.018,2.2], hyena:[.018,.016,.024,2.8],
    leopard:[.012,.009,.018,3.0], jaguar:[.011,.010,.014,2.5], crocodile:[.006,.006,.008,1.0],
    lion:[.014,.010,.012,1.45], tiger:[.012,.009,.016,2.7], grizzly:[.018,.012,.009,1.15],
-   hippo:[.016,.008,.006,.95], elephant:[.012,.006,.005,.8], eagle:[.009,.012,.025,2.1],
+   hippo:[.021,.013,.005,.78], elephant:[.012,.006,.005,.8], eagle:[.009,.012,.025,2.1],
    snake:[.009,.014,.010,1.35], stag:[.010,.009,.016,1.8], majic:[.012,.014,.020,1.7]
   }[f.data.id]||[.01,.01,.01,1.5];
   const [breath,sway,tilt,rate]=idleProfile,cycle=now*rate+(Math.max(0,game.fighters.indexOf(f))*.83),wave=Math.sin(cycle),slow=Math.sin(cycle*.47+.8);
@@ -2646,6 +2657,12 @@ function drawSprite(f){
   const hit=clamp((f.hitAnimTime||0)/.24,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(9+10*pulse),-145-pulse*3);c.rotate(-f.dir*(.06+.075*pulse));
   c.scale(1-.04*pulse,1+.025*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'&&f.data.id==='elephant'){
+  // Heavy elephant recoil: the head and forequarters dip, then the body settles.
+  const hit=clamp((f.hitAnimTime||0)/.34,0,1),pulse=Math.sin(hit*Math.PI);
+  c.save();c.translate(-f.dir*(3+5*pulse),-145-pulse*7);c.rotate(-f.dir*(.018+.035*pulse));
+  c.scale(1-.018*pulse,1+.032*pulse);c.translate(0,145);
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else{
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
