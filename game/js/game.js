@@ -557,6 +557,8 @@ function update(dt){
   f.elephantCounterT=Math.max(0,(f.elephantCounterT||0)-dt);
   f.elephantChargeT=Math.max(0,(f.elephantChargeT||0)-dt);
   f.tigerPounceT=Math.max(0,(f.tigerPounceT||0)-dt);
+  f.jaguarCommitT=Math.max(0,(f.jaguarCommitT||0)-dt);
+  f.wolfFrenzyT=Math.max(0,(f.wolfFrenzyT||0)-dt);
   f.tigerCounterT=Math.max(0,(f.tigerCounterT||0)-dt);
   f.tigerEvadeT=Math.max(0,(f.tigerEvadeT||0)-dt);
   f.hyenaCounterT=Math.max(0,(f.hyenaCounterT||0)-dt);
@@ -595,7 +597,7 @@ function update(dt){
   // ----- Neutral -----
   let move=0;
   if(!f.block&&!frozen){
-   const sp=240*f.data.speed/7*spd*((f.venomT||0)>0?.82:1)*((f.coilT||0)>0?.38:1);if(inp.l)move=-sp;if(inp.r)move=sp;
+   const snowLeopard=f.data.id==='leopard',jaguar=f.data.id==='jaguar',wolf=f.data.id==='wolf';const sp=240*f.data.speed/7*spd*(snowLeopard?1.10:jaguar?1.035:wolf?1.025:1)*((f.venomT||0)>0?.82:1)*((f.coilT||0)>0?.38:1);if(inp.l)move=-sp;if(inp.r)move=sp;
    // Snow Leopard frost dash: double-tap forward or back.
    if(f.data.id==='leopard'){const tap=inp.r&&!f.tapPrevR?1:inp.l&&!f.tapPrevL?-1:0;f.tapPrevR=inp.r;f.tapPrevL=inp.l;f.tapT=(f.tapT||0)+dt;
     if(tap){if(f.ground&&f.leopardDashCooldown<=0&&f.lastTap===tap&&f.tapT<.26){f.leopardDashT=.22;f.leopardDashCooldown=.7;f.moveVel=tap*680;f.lastTap=0;sfx('whiff')}else{f.lastTap=tap;f.tapT=0}}}
@@ -650,9 +652,9 @@ function update(dt){
   // changes; heavier bodies build and shed momentum more deliberately.
   const bodyMass=FIGHTER_MASS[f.data.id]||1;
   const agility=clamp((f.data.speed||7)/7,.72,1.42);
-  const handling=clamp(12.5*agility/Math.sqrt(bodyMass),8.5,17);
+  const handling=clamp(12.5*agility/Math.sqrt(bodyMass)+(f.data.id==='leopard'?5.2:0),8.5,22);
   const moveResponse=1-Math.exp(-dt*handling);
-  if(f.data.id==='leopard'&&f.leopardDashT>0)f.moveVel=Math.sign(f.moveVel||move)*680;
+  if(f.data.id==='leopard'&&f.leopardDashT>0)f.moveVel=Math.sign(f.moveVel||move)*720;
   else f.moveVel+=(move-f.moveVel)*moveResponse;
   if(Math.abs(f.moveVel)<2&&move===0)f.moveVel=0;
   f.move=f.moveVel;f.x+=f.moveVel*dt;
@@ -675,6 +677,11 @@ function physics(f,dt){
  f.x=clampX(f.x+f.vx*dt);
  f.landImpact=Math.max(0,(f.landImpact||0)-dt*2.8);
  f.frostImpact=Math.max(0,(f.frostImpact||0)-dt*2.4);
+ if(f.data.id==='leopard'&&f.ground&&Math.abs(f.vx)>35)f.vx*=Math.max(0,1-dt*8.5);
+ if(f.data.id==='jaguar'&&f.ground&&Math.abs(f.vx)>30)f.vx*=Math.max(0,1-dt*11.5);
+ // Wolves carry a little forward momentum between coordinated pack attacks,
+ // but settle quickly when grounded so footwork remains controllable.
+ if(f.data.id==='wolf'&&f.ground&&Math.abs(f.vx)>28)f.vx*=Math.max(0,1-dt*8.8);
  f.elephantImpact=Math.max(0,(f.elephantImpact||0)-dt*2.0);
  f.leopardFinisher=Math.max(0,(f.leopardFinisher||0)-dt*2.2);
  f.lionManeFinisher=Math.max(0,(f.lionManeFinisher||0)-dt*2.0);
@@ -743,8 +750,8 @@ function doMove(f,name){
  if(name==='ironCounter'){f.vx=f.dir*215;floatText(f.x,f.y-300,'IRON HIDE COUNTER','#c6a77a');game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='wolfCounter'){f.vx=f.dir*245;floatText(f.x,f.y-300,'PACK COUNTER','#c5d9ed');game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='hyenaSlip'){f.hyenaEvadeT=.17;f.vx=f.dir*405;floatText(f.x,f.y-315,'MAD SLIP','#d7b46a');game.shake=Math.max(game.shake,.16);sfx('whiff')}
- if(name==='jaguarAmbush'){f.vx=f.dir*610;f.vy=-145;f.ground=false;floatText(f.x,f.y-290,'JAGUAR AMBUSH','#e9bd54');game.shake=Math.max(game.shake,.16);sfx('heavy')}
- if(name==='jaguarBite'){f.vx=f.dir*145;floatText(f.x,f.y-290,'PRECISION BITE','#e9bd54');game.shake=Math.max(game.shake,.12);sfx('heavy')}
+ if(name==='jaguarAmbush'){f.vx=f.dir*660;f.vy=-125;f.ground=false;f.jaguarCommitT=.34;floatText(f.x,f.y-290,'JAGUAR AMBUSH','#e9bd54');game.shake=Math.max(game.shake,.16);sfx('heavy')}
+ if(name==='jaguarBite'){f.vx=f.dir*205;f.jaguarCommitT=.22;floatText(f.x,f.y-290,'PRECISION BITE','#e9bd54');game.shake=Math.max(game.shake,.12);sfx('heavy')}
  if(name==='wolfFrenzy'){f.vx=f.dir*585;f.vy=-125;f.ground=false;floatText(f.x,f.y-290,'PACK FRENZY','#c5d9ed');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='tigerPounce'){f.vx=f.dir*640;f.vy=-105;f.ground=false;f.tigerPounceT=.62;floatText(f.x,f.y-290,'STRIPED POUNCE','#e99a45');game.shake=Math.max(game.shake,.13);sfx('heavy')}
  if(name==='lionCounter'){f.vx=f.dir*210;floatText(f.x,f.y-315,'ROAR COUNTER','#f3c45d');game.shake=Math.max(game.shake,.22);sfx('roar')}
@@ -2591,18 +2598,22 @@ function drawSprite(f){
   const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
-  const lionKing=f.data.id==='lion';
+  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger';
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
-  // Lion combat benchmark: the heavy forequarters load before a strike, drive
-  // forward through the shoulders, then settle with a short mane/body follow-through.
+  // Lion: load the heavy forequarters, drive through the shoulders, then settle.
   const lionLoad=lionKing?anticipation*.045:0;
   const lionDrive=lionKing?drive*(f.action==='bite'?.105:f.action==='ender'?.13:.085):0;
   const lionSettle=lionKing?recovery*.035:0;
-  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0);
-  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0);
+  // Tiger: compact spring-loaded crouch, explosive diagonal extension and a
+  // quick elastic recovery. This is intentionally sharper than the lion's weight.
+  const tigerCrouch=tigerKing?anticipation*.065:0;
+  const tigerSnap=tigerKing?drive*(f.action==='bite'?.145:f.action==='ender'?.16:.125):0;
+  const tigerRecover=tigerKing?recovery*.045:0;
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0);
+  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0);
   c.save();
-  c.translate((lionKing?drive*7-anticipation*2:0),-145+drive*4-anticipation*2);
+  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0),-145+drive*(tigerKing?9:4)-anticipation*(tigerKing?5:2));
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
@@ -2629,6 +2640,12 @@ function drawSprite(f){
   const hit=clamp((f.hitAnimTime||0)/.28,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(5+7*pulse),-145);c.rotate(-f.dir*(.035+.055*pulse));
   c.scale(1-.025*pulse,1+.018*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'&&f.data.id==='tiger'){
+  // The tiger gives ground in a quick springy recoil, then snaps back to guard.
+  const hit=clamp((f.hitAnimTime||0)/.24,0,1),pulse=Math.sin(hit*Math.PI);
+  c.save();c.translate(-f.dir*(9+10*pulse),-145-pulse*3);c.rotate(-f.dir*(.06+.075*pulse));
+  c.scale(1-.04*pulse,1+.025*pulse);c.translate(0,145);
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else{
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
