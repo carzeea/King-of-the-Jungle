@@ -439,6 +439,8 @@ function update(dt){
   const atkEdge=f.bufA>0,spEdge=f.bufS>0;
   const elephantGrab=f.data.id==='elephant'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const elephantStomp=f.data.id==='elephant'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
+  const elephantCharge=f.data.id==='elephant'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
+  const hippoRush=f.data.id==='hippo'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
   const spd=(f.instinct?1.2:1);
@@ -465,6 +467,8 @@ function update(dt){
   f.elephantGrabT=Math.max(0,(f.elephantGrabT||0)-dt);
   f.elephantStompT=Math.max(0,(f.elephantStompT||0)-dt);
   f.elephantCounterT=Math.max(0,(f.elephantCounterT||0)-dt);
+  f.elephantChargeT=Math.max(0,(f.elephantChargeT||0)-dt);
+  f.hippoRushT=Math.max(0,(f.hippoRushT||0)-dt);
   f.block=inp.bl&&f.ground&&f.attack<=0&&!frozen;f.blockTime=f.block?f.blockTime+dt:0;
   // ----- Attacking -----
   if(f.attack>0){
@@ -493,6 +497,7 @@ function update(dt){
    else if(o.stun>0&&f.combo>0&&atkEdge)doMove(f,'double');
    else if(o.stun>0&&f.combo>0&&spEdge)doMove(f,'ender');
    else if(atkEdge)doMove(f,'claw');
+   else if(elephantCharge)doMove(f,'charge');
    else if(spEdge)doMove(f,'special');
   }
   if(f.block&&!frozen){
@@ -500,6 +505,7 @@ function update(dt){
    // and block+special = Titan Stomp (the shadow move keeps priority once he has half a meter).
    if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
    else if(spEdge&&elephantStomp){f.block=false;doMove(f,'stomp')}
+   else if(spEdge&&hippoRush){f.block=false;doMove(f,'hippoRush')}
    else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
@@ -550,7 +556,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:MOVES[name];
+ const mv=name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -564,7 +570,9 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
- setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='charge'||name==='hippoRush'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ if(name==='hippoRush'){f.vx=f.dir*610;f.hippoRushT=.74;floatText(f.x,f.y-300,'RIVER RUSH','#83c9d8');game.shake=Math.max(game.shake,.14);sfx('heavy')}
+ if(name==='charge'){f.vx=f.dir*760;f.elephantChargeT=.68;floatText(f.x,f.y-300,'TITAN CHARGE','#e4d7bd');game.shake=Math.max(game.shake,.12);sfx('heavy')}
  if(name==='grab'){f.vx=f.dir*95;f.elephantGrabT=.72;floatText(f.x,f.y-300,'TRUNK GRAB','#e7ddc8');sfx('heavy')}
  if(name==='stomp'){f.vx=f.dir*250;f.elephantStompT=.9;floatText(f.x,f.y-300,'TITAN STOMP','#d7d0bd');sfx('heavy')}
  if(name==='tuskCounter'){f.vx=f.dir*190;floatText(f.x,f.y-300,'TUSK COUNTER','#f0dfb8');sfx('heavy')}
@@ -577,7 +585,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter||mv.charge||mv.hippoRush)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -605,12 +613,26 @@ function resolveHit(i,mv){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
   o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='elephant')o.elephantCounterT=.62;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
  }
+ // Hippo's River Rush lands with a broad water-pressure burst, emphasizing its low, heavy momentum.
+ if(mv.hippoRush){
+  game.fx.push({x:cx,y:cy,t:0,life:.52,color:'#83c9d8',kind:'ring'});
+  game.fx.push({x:f.x+f.dir*82,y:f.y-12,t:0,life:.42,color:'#b8edf0',kind:'ring'});
+  spark(cx,cy,'#9edce5',24);
+  floatText(cx,cy-78,'RIVER RUSH','#a8e3eb');
+  game.shake=Math.max(game.shake,.24);
+ }
  // Elephant's tusk counter adds a brief defensive impact flourish after a successful punish.
  if(mv.tuskCounter){
   game.fx.push({x:cx,y:cy,t:0,life:.42,color:'#e7d6ad',kind:'ring'});
   spark(cx,cy,'#f1e2c3',18);
   floatText(cx,cy-78,'TUSK COUNTER','#f0dfb8');
   game.shake=Math.max(game.shake,.22);
+ }
+ // Titan Charge lands with a broad shoulder-and-tusk impact, reinforcing its bulldozing identity.
+ if(mv.charge){
+  game.fx.push({x:cx,y:cy,t:0,life:.48,color:'#e3d5b9',kind:'ring'});
+  spark(cx,cy,'#e3d5b9',20);floatText(cx,cy-78,'TITAN CHARGE','#e3d5b9');
+  game.shake=Math.max(game.shake,.28);
  }
  // Elephant's Titan Stomp drives a broad ground shock into the opponent, pushing them away without launching them.
  if(mv.stomp){
@@ -632,7 +654,8 @@ function resolveHit(i,mv){
  // Ultra Combo: an ender that lands while the opponent is in DANGER.
  const isEnder=mv.ender||(mv.shadow&&f.hitsDone===mv.hits.length&&comboing);
  if(isEnder&&inDanger(o)&&comboing){startUltra(i);return}
- const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(1-(o.data.defense-7)*.03)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
+ const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
+ const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(1-(o.data.defense-7)*.03)*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
  f.combo=comboing?f.combo+1:1;
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
@@ -643,7 +666,8 @@ function resolveHit(i,mv){
   snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,Math.min(.38,.18+mv.push/900));game.flash=Math.max(game.flash||0,.12);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',22);
   resolveBars(o,f);endCombo(i,true);
  }else{
-  o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.hitHeavy=mv.push>=100||mv.dmg(0)>=9;o.hitAnimTime=0;o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
+  o.stun=chargeArmor?0:mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.hitHeavy=mv.push>=100||mv.dmg(0)>=9;o.hitAnimTime=0;o.vx=f.dir*impactPush*(chargeArmor?.22:1);if(!o.ground&&!chargeArmor)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
+  if(chargeArmor){o.hitFlash=.07;game.shake=Math.max(game.shake,.16);spark(o.x-o.dir*18,o.y-150,'#e3d5b9',10);floatText(o.x,o.y-250,'BULLDOZE','#e3d5b9')}
   f.vx=f.dir*Math.max(20,impactPush*.4);
   hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,(mv.base||mv)===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
   // Scale camera emphasis to attack force, keeping light taps restrained.
@@ -654,7 +678,7 @@ function resolveHit(i,mv){
   if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.14);
   if(!mv.potential)resolveBars(o,f);
  }
- o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
+ o.hitFlash=.1;if(!chargeArmor){o.attack=0;o.move_=null;}o.block=false;
  f.meter=Math.min(100,f.meter+(f.instinct?0:4));o.meter=Math.min(100,o.meter+(o.instinct?0:2.5));
  const signature=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
  const impactCount=mv.shadow?14:mv===MOVES.special?16:mv===MOVES.bite?12:(mv.base||mv)===MOVES.double?8:10;
@@ -1068,7 +1092,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1366,6 +1390,16 @@ function drawFighter(f,i,ghost){
    }
    c.restore();
   }
+  // River Rush leaves a low turquoise wake and two water arcs around the hippo's charge.
+  if(f.data.id==='hippo'&&(f.hippoRushT||0)>.025){
+   const rush=f.hippoRushT/.74,spread=(1-rush)*42;
+   c.save();c.globalAlpha=rush*.52;c.strokeStyle='#9edce5';c.shadowColor='#58b7c9';c.shadowBlur=14;c.lineWidth=3;
+   c.beginPath();c.ellipse(-f.dir*34,-f.y+7,(44+spread)*sizeScale,(12+spread*.12)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.globalAlpha=rush*.42;c.lineWidth=2;
+   for(let arc=0;arc<2;arc++){const y=-f.y-18-arc*15,span=(58+arc*18)*sizeScale;
+    c.beginPath();c.moveTo(-f.dir*18,y+12);c.quadraticCurveTo(f.dir*span*.45,y-20,f.dir*span,y+2);c.stroke();}
+   c.restore();
+  }
   // A forward-curving trunk-sweep accent gives the elephant's close attacks a distinct visual read.
   if(f.data.id==='elephant'&&f.attack>0&&['claw','double','attack_heavy','bite'].includes(f.action)){
    const duration=Math.max(.12,(f.move_&&f.move_.t)||.3),phase=clamp((f.elapsed||0)/duration,0,1);
@@ -1385,6 +1419,13 @@ function drawFighter(f,i,ghost){
    c.save();c.globalAlpha=charge*.42;c.strokeStyle='#d7d0bd';c.shadowColor='#b8aa91';c.shadowBlur=10;c.lineWidth=2+charge*2;
    c.beginPath();c.ellipse(0,-f.y+4,(40+spread)*sizeScale,(9+spread*.12)*sizeScale,0,0,Math.PI*2);c.stroke();
    c.restore();
+  }
+  // A low dust wake and tusk-forward glint mark Elephant's armored Titan Charge.
+  if(f.data.id==='elephant'&&(f.elephantChargeT||0)>.025){
+   const charge=f.elephantChargeT/.68;
+   c.save();c.globalAlpha=charge*.48;c.strokeStyle='#e8dcc5';c.shadowColor='#d4c3a4';c.shadowBlur=15;c.lineWidth=3;
+   c.beginPath();c.ellipse(-f.dir*30,-f.y+5,(36+(1-charge)*28)*sizeScale,(10+(1-charge)*4)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.globalAlpha=charge*.58;c.lineWidth=2;c.beginPath();c.moveTo(f.dir*42,-f.y-145);c.lineTo(f.dir*112,-f.y-160);c.lineTo(f.dir*70,-f.y-128);c.stroke();c.restore();
   }
   // The elephant's special landing creates a broad, weighty ground-shock ring.
   if(f.data.id==='elephant'&&(f.elephantImpact||0)>.025){
@@ -1450,6 +1491,25 @@ function drawFighter(f,i,ghost){
     for(let wing=-1;wing<=1;wing+=2){
      c.beginPath();c.moveTo(wing*54,-128);c.lineTo(wing*104,-158);c.lineTo(wing*91,-122);c.lineTo(wing*126,-105);c.stroke();
     }
+   }
+   c.restore();
+  }
+  // Elephant's Titan victory signature: tusk-shaped champion arcs and a ground-pulse crown.
+  if(f.data.id==='elephant'){
+   const t=f.winT||0,settle=Math.min(1,t/.55),pulse=.5+.5*Math.sin(t*3.4);
+   c.save();c.globalCompositeOperation='lighter';
+   c.globalAlpha=(.32+.2*pulse)*settle;c.strokeStyle='#e6d7b8';c.shadowColor='#d8c5a0';c.shadowBlur=18;c.lineWidth=4;
+   for(let side of [-1,1]){
+    c.beginPath();c.moveTo(side*34,-118);c.quadraticCurveTo(side*78,-174,side*67,-220);c.quadraticCurveTo(side*63,-239,side*49,-225);c.stroke();
+    c.globalAlpha=(.18+.12*pulse)*settle;c.lineWidth=2;c.beginPath();c.moveTo(side*43,-126);c.quadraticCurveTo(side*91,-181,side*78,-228);c.stroke();
+   }
+   c.globalAlpha=(.2+.13*pulse)*settle;c.strokeStyle='#c9b99a';c.shadowBlur=13;c.lineWidth=3;
+   c.beginPath();c.ellipse(0,-8,88+10*Math.sin(t*2.1),15+2*pulse,0,0,Math.PI*2);c.stroke();
+   for(let mote=0;mote<8;mote++){
+    const a=t*1.1+mote*Math.PI/4,rad=96+8*Math.sin(t*2+mote);
+    const mx=Math.cos(a)*rad,my=-105+Math.sin(a)*rad*.58;
+    c.globalAlpha=(.2+.18*(.5+.5*Math.sin(t*4+mote)))*settle;c.fillStyle='#e8ddc6';c.shadowBlur=10;
+    c.beginPath();c.arc(mx,my,2.5+1.5*Math.sin(t*3+mote),0,Math.PI*2);c.fill();
    }
    c.restore();
   }
