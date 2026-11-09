@@ -298,9 +298,12 @@ function cpuInput(i){
   else if(!o.breakWindow&&o.combo>=2&&!f.lockout&&Math.random()<.004*(1-lvl)*60*dt)press('at'); // nervous mash = lockout
   return k;
  }
- // MAJIC's own moves: Jungle Rage (jump+special) once it's off cooldown, Frost Strike (block+special) up close.
+ // MAJIC's own moves: Titan Fury while powered up, True Titan Form (jump+block+special) when hurt, Jungle Rage (jump+special), Frost Strike (block+special) up close.
  if(f.data.id==='majic'&&f.ground&&f.attack<=0&&!game.ko){
-  if(!((f.jungleRageT||0)>0)&&!((f.jungleRageCooldownT||0)>0)&&Math.random()<dt*(.12+lvl*.3)){k.j=true;press('sp');return k}
+  const powered=(f.jungleRageT||0)>0||(f.ascendantT||0)>0;
+  if(powered&&d<400&&Math.random()<dt*(.5+lvl*.8)){k[toward]=true;press('sp');return k}
+  if(!powered&&!((f.ascendantCooldownT||0)>0)&&f.hp<BAR*.55&&Math.random()<dt*(.1+lvl*.25)){k.j=true;k.bl=true;press('sp');return k}
+  if(!powered&&!((f.jungleRageCooldownT||0)>0)&&Math.random()<dt*(.12+lvl*.3)){k.j=true;press('sp');return k}
   if(d<390&&f.meter<50&&Math.random()<dt*(.18+lvl*.4)){k.bl=true;press('sp');return k}
  }
  // Comboing: link auto-doubles, then finish with an ender (or Ultra when the target is in danger).
@@ -334,6 +337,22 @@ function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='m
  combo:0,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
+ // First arrival at MAJIC's summit gets a one-time, three-beat boss entrance.
+ // Mark it before opening the cards so the final callback can safely call start() again.
+ if(tower&&tower.boss&&!tower.bossIntroSeen){
+  tower.bossIntroSeen=true;
+  return storyCard({dark:1,bossIntro:1,slow:820,fig:{id:'majic',anim:'idle',light:.08,hold:1},eyebrow:'THE SUMMIT · THE LAST STEP',title:'THE WORLD GOES SILENT',text:`The wind stops at the top of Majic’s Lair. The stone beneath your feet begins to pulse.
+
+Eleven voices whisper from somewhere inside the mountain. Then every voice falls silent.`},()=>
+   storyCard({dark:1,bossIntro:1,slow:760,fig:{id:'majic',anim:'walk_forward',light:.42,hold:1},eyebrow:'AN ANCIENT SHADOW STIRS',title:'ALL 11. ONE BODY.',text:`A shape steps out of the violet darkness: lion, tusks, wings, scales, stripes and antlers woven into one impossible guardian.
+
+The crowns were never prizes. They were pieces of a lock. And you have opened it.`},()=>
+    storyCard({dark:1,bossIntro:1,slow:700,fig:{id:'majic',anim:'victory',light:1,hold:1},eyebrow:'THE JUNGLE TITAN',title:'MAJIC',text:`“You climbed higher than the others. You brought every story to my door.
+
+Now show me what all eleven could not.”
+
+THE FINAL BATTLE BEGINS.`},start)));
+ }
  show('fight');document.body.classList.add('fighting');setBackdrop('assets/arenas/'+arena.id+'.webp');$('arena-title').textContent=arena.name;
  const cpu2=mode!=='versus'&&mode!=='online';
  $('p1-name').textContent=picks[0].name;$('p2-name').textContent=picks[1].name;
@@ -463,11 +482,13 @@ function update(dt){
   const snakeCoil=f.data.id==='snake'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const stagAntler=f.data.id==='stag'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   const majicFrost=f.data.id==='majic'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
-  const majicRage=f.data.id==='majic'&&inp.j&&spEdge&&f.ground&&(f.jungleRageCooldownT||0)<=0;
+  const majicAscend=f.data.id==='majic'&&inp.j&&(inp.dn||inp.bl)&&spEdge&&f.ground&&(f.ascendantCooldownT||0)<=0;
+  const majicRage=f.data.id==='majic'&&inp.j&&!(inp.dn||inp.bl)&&spEdge&&f.ground&&(f.jungleRageCooldownT||0)<=0;
+  const majicFury=f.data.id==='majic'&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1))&&spEdge&&f.ground&&((f.jungleRageT||0)>0||(f.ascendantT||0)>0);
   const tigerPounce=f.data.id==='tiger'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
-  const spd=(f.instinct?1.2:1)*(f.data.id==='majic'&&(f.jungleRageT||0)>0?1.12:1);
+  const spd=(f.instinct?1.2:1)*(f.data.id==='majic'&&((f.jungleRageT||0)>0||(f.ascendantT||0)>0)?1.12:1);
   if(f.hp<=0&&f.bars<=1){f.action='knockdown';f.koTime+=dt;physics(f,dt);return}
   if(game.ko&&o.hp<=0&&o.bars<=1&&f.ground&&f.attack<=0&&f.stun<=0&&f.down<=0){f.winT=(f.winT||0)+dt;if(f.winT>.18){f.action='victory';physics(f,dt);return}}
   // ----- Knocked down (after an ender) -----
@@ -502,6 +523,8 @@ function update(dt){
   f.stagCounterT=Math.max(0,(f.stagCounterT||0)-dt);
   if((f.jungleRageT||0)>0)f.jungleRageT=Math.max(0,f.jungleRageT-dt);
   if((f.jungleRageCooldownT||0)>0)f.jungleRageCooldownT=Math.max(0,f.jungleRageCooldownT-dt);
+  if((f.ascendantT||0)>0)f.ascendantT=Math.max(0,f.ascendantT-dt);
+  if((f.ascendantCooldownT||0)>0)f.ascendantCooldownT=Math.max(0,f.ascendantCooldownT-dt);
   f.eagleEvadeT=Math.max(0,(f.eagleEvadeT||0)-dt);
   f.badgerCounterT=Math.max(0,(f.badgerCounterT||0)-dt);
   f.hyenaEvadeT=Math.max(0,(f.hyenaEvadeT||0)-dt);
@@ -557,6 +580,7 @@ function update(dt){
    else if(eagleSkyfall)doMove(f,'eagleSkyfall');
    else if(stagAntler)doMove(f,'stagAntler');
    else if(majicRage)doMove(f,'jungleRage');
+   else if(majicFury)doMove(f,'titanFury');
    else if(jaguarAmbush)doMove(f,'jaguarAmbush');
    else if(wolfFrenzy)doMove(f,'wolfFrenzy');
    else if(spEdge)doMove(f,'special');
@@ -564,7 +588,8 @@ function update(dt){
   if(f.block&&!frozen){
    // Elephant while blocking: a fresh block opens the Tusk Counter; otherwise block+attack = Trunk Grab
    // and block+special = Titan Stomp (the shadow move keeps priority once he has half a meter).
-   if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
+   if(spEdge&&majicAscend){f.block=false;doMove(f,'ascendantForm')}
+   else if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
    else if(spEdge&&elephantStomp){f.block=false;doMove(f,'stomp')}
    else if(spEdge&&hippoRush){f.block=false;doMove(f,'hippoRush')}
    else if(spEdge&&lionRoar){f.block=false;doMove(f,'lionRoar')}
@@ -624,7 +649,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='frostStrike'&&f.data.id==='majic'?{t:.78,hits:[.42],dmg:p=>14+p*.82,range:405,stun:.86,push:300,majicFrost:true}:name==='jungleRage'&&f.data.id==='majic'?{t:.72,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicRage:true}:name==='stagAntler'&&f.data.id==='stag'?{t:.72,hits:[.42],dmg:p=>13+p*.74,range:375,stun:.82,push:355,stagAntler:true}:name==='stagCounter'&&f.data.id==='stag'?{t:.54,hits:[.19],dmg:p=>12+p*.72,range:315,stun:.78,push:325,stagCounter:true}:name==='snakeCoil'&&f.data.id==='snake'?{t:.72,hits:[.34],dmg:p=>10.5+p*.62,range:265,stun:.92,push:72,snakeCoil:true}:name==='snakeVenom'&&f.data.id==='snake'?{t:.66,hits:[.29],dmg:p=>11+p*.68,range:285,stun:.72,push:205,snakeVenom:true}:name==='eagleWingCounter'&&f.data.id==='eagle'?{t:.62,hits:[.36],dmg:p=>12+p*.72,range:340,stun:.78,push:325,eagleWingCounter:true}:name==='eagleSkyfall'&&f.data.id==='eagle'?{t:.68,hits:[.48],dmg:p=>13+p*.76,range:365,stun:.76,push:335,eagleSkyfall:true}:name==='ironCounter'&&f.data.id==='badger'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:295,stun:.76,push:305,ironCounter:true}:name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
+ const mv=name==='titanFury'&&f.data.id==='majic'?{t:1.08,hits:[.16,.36,.57,.81],dmg:p=>4.2+p*.28,range:405,stun:.72,push:285,majicFury:true}:name==='ascendantForm'&&f.data.id==='majic'?{t:.82,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicAscendant:true}:name==='frostStrike'&&f.data.id==='majic'?{t:.78,hits:[.42],dmg:p=>14+p*.82,range:405,stun:.86,push:300,majicFrost:true}:name==='jungleRage'&&f.data.id==='majic'?{t:.72,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicRage:true}:name==='stagAntler'&&f.data.id==='stag'?{t:.72,hits:[.42],dmg:p=>13+p*.74,range:375,stun:.82,push:355,stagAntler:true}:name==='stagCounter'&&f.data.id==='stag'?{t:.54,hits:[.19],dmg:p=>12+p*.72,range:315,stun:.78,push:325,stagCounter:true}:name==='snakeCoil'&&f.data.id==='snake'?{t:.72,hits:[.34],dmg:p=>10.5+p*.62,range:265,stun:.92,push:72,snakeCoil:true}:name==='snakeVenom'&&f.data.id==='snake'?{t:.66,hits:[.29],dmg:p=>11+p*.68,range:285,stun:.72,push:205,snakeVenom:true}:name==='eagleWingCounter'&&f.data.id==='eagle'?{t:.62,hits:[.36],dmg:p=>12+p*.72,range:340,stun:.78,push:325,eagleWingCounter:true}:name==='eagleSkyfall'&&f.data.id==='eagle'?{t:.68,hits:[.48],dmg:p=>13+p*.76,range:365,stun:.76,push:335,eagleSkyfall:true}:name==='ironCounter'&&f.data.id==='badger'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:295,stun:.76,push:305,ironCounter:true}:name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -637,14 +662,16 @@ function doMove(f,name){
  const comboLink=o.stun>0&&f.combo>0;
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
- const special=name==='special'||name==='frostStrike'||name==='ender'||name==='shadow'||name==='stagAntler'||name==='snakeVenom'||name==='eagleSkyfall'||name==='eagleWingCounter'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
- setAction(f,name==='frostStrike'?'special_c':name==='jungleRage'?'special_d':name==='badgerBreaker'?'earthslam':name==='stagCounter'?'attack_heavy':name==='snakeCoil'?'special_b':name==='snakeVenom'?'bite':name==='ironCounter'?'attack_heavy':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ const special=name==='special'||name==='titanFury'||name==='frostStrike'||name==='ender'||name==='shadow'||name==='stagAntler'||name==='snakeVenom'||name==='eagleSkyfall'||name==='eagleWingCounter'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
+ setAction(f,name==='frostStrike'?'special_c':name==='jungleRage'||name==='ascendantForm'?'special_d':name==='titanFury'?'ultra_move':name==='badgerBreaker'?'earthslam':name==='stagCounter'?'attack_heavy':name==='snakeCoil'?'special_b':name==='snakeVenom'?'bite':name==='ironCounter'?'attack_heavy':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='tigerSlip'){f.tigerEvadeT=.19;f.vx=f.dir*390;floatText(f.x,f.y-315,'STRIPED SLIP','#f0a34e');game.shake=Math.max(game.shake,.18);sfx('whiff')}
  if(name==='crocodileRoll'){f.vx=f.dir*585;floatText(f.x,f.y-300,'DEATH ROLL','#79d6bd');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='tailCounter'){f.vx=f.dir*260;floatText(f.x,f.y-300,'TAIL COUNTER','#75d8c4');game.shake=Math.max(game.shake,.22);sfx('heavy')}
  if(name==='badgerBreaker'){f.vx=f.dir*75;f.vy=0;floatText(f.x,f.y-300,'EARTHBREAKER','#d7a85b');game.shake=Math.max(game.shake,.16);sfx('heavy')}
  if(name==='frostStrike'){f.vx=f.dir*105;floatText(f.x,f.y-315,'FROST STRIKE','#7fe8ff');banner('FROST STRIKE','THE TITAN COMMANDS THE COLD',.9,'#7fe8ff');spark(f.x+f.dir*30,f.y-155,'#baf6ff',20);game.flash=Math.max(game.flash||0,.09);game.shake=Math.max(game.shake,.18);sfx('frost')}
  if(name==='jungleRage'){f.jungleRageT=7.5;f.jungleRageCooldownT=18;f.vx=f.dir*35;floatText(f.x,f.y-330,'JUNGLE RAGE','#d8b5ff');banner('JUNGLE RAGE','ALL BEASTS ANSWER THE TITAN',1.05,'#c49aff');for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:f.x,y:f.y-155,t:0,life:.72,color,kind:'ring'});spark(f.x+(Math.random()-.5)*100,f.y-145+(Math.random()-.5)*100,color,5)}game.flash=Math.max(game.flash||0,.12);game.shake=Math.max(game.shake,.2);sfx('instinct')}
+ if(name==='ascendantForm'){f.ascendantT=8.5;f.ascendantCooldownT=24;f.jungleRageT=0;f.vx=f.dir*35;floatText(f.x,f.y-350,'TRUE TITAN FORM','#e7c8ff');banner('TRUE TITAN FORM','THE JUNGLE BOWS TO MAJIC',1.25,'#d7b5ff');for(let k=0;k<12;k++){const color=['#e8c56b','#b8a0ff','#8de0d0'][k%3],a=k*Math.PI/6;game.fx.push({x:f.x+Math.cos(a)*72,y:f.y-155+Math.sin(a)*78,t:0,life:.9,color,kind:'ring'});spark(f.x+Math.cos(a)*95,f.y-155+Math.sin(a)*95,color,4)}game.flash=Math.max(game.flash||0,.24);game.shake=Math.max(game.shake,.34);game.hitstop=Math.max(game.hitstop||0,.08);sfx('instinct')}
+ if(name==='titanFury'){f.vx=f.dir*185;f.jungleRageT=0;f.ascendantT=0;floatText(f.x,f.y-330,'TITAN FURY','#e8c8ff');banner('TITAN FURY','ALL BEASTS · ONE SUPREME POWER',1.25,'#d7b5ff');for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:f.x-f.dir*24,y:f.y-150,t:0,life:.72,color,kind:'ring'});spark(f.x+(Math.random()-.5)*90,f.y-150+(Math.random()-.5)*80,color,7)}game.flash=Math.max(game.flash||0,.18);game.shake=Math.max(game.shake,.28);sfx('instinct')}
  if(name==='stagAntler'){f.vx=f.dir*210;f.stagChargeStarted=0;floatText(f.x,f.y-310,'ANTLER CHARGE','#b6d98b');banner('ANTLER CHARGE','THE FOREST BREAKER',.78,'#b6d98b');spark(f.x-f.dir*24,f.y-115,'#b6d98b',12);game.shake=Math.max(game.shake,.14);sfx('heavy')}
  if(name==='stagCounter'){f.vx=f.dir*285;floatText(f.x,f.y-310,'ANTLER COUNTER','#c7e6a0');banner('ANTLER COUNTER','THE FOREST STRIKES BACK',.7,'#b6d98b');spark(f.x+f.dir*24,f.y-135,'#dcebb9',16);game.shake=Math.max(game.shake,.2);sfx('heavy')}
  if(name==='snakeVenom'){f.vx=f.dir*185;floatText(f.x,f.y-300,'VENOM FANG','#a8d66d');banner('VENOM FANG','A POISONED STRIKE',.72,'#a8d66d');game.shake=Math.max(game.shake,.13);sfx('heavy')}
@@ -678,7 +705,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double){const D=S.double||['attack_heavy','attack_light'];return D[mv.eagleWingCombo?Math.min(D.length-1,Math.max(0,f.hitsDone-1)):f.chain%D.length]}
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -932,6 +959,19 @@ function resolveHit(i,mv){
  // Ultra Combo: an ender that lands while the opponent is in DANGER.
  const isEnder=mv.ender||(mv.shadow&&f.hitsDone===mv.hits.length&&comboing);
  if(isEnder&&inDanger(o)&&comboing){startUltra(i);return}
+ // MAJIC's Titan Fury chains four elemental strikes, ending in a combined-beast detonation.
+ if(mv.majicFury){
+  const colors=['#f3c45d','#9edce5','#b6d98b','#c9a0ff'];
+  const color=colors[Math.min(3,(f.hitsDone||1)-1)];
+  game.fx.push({x:cx,y:cy,t:0,life:.42,color,kind:'ring'});
+  spark(cx,cy,color,(f.hitsDone||1)===4?42:22);
+  if((f.hitsDone||0)>=4){
+   for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*24,y:cy+(k%2)*10,t:0,life:.62+k*.08,color:['#e9d2ff','#baf6ff','#f3c45d'][k],kind:'ring'});
+   spark(cx-f.dir*18,cy-35,'#e9d2ff',26);spark(cx+f.dir*34,cy-18,'#baf6ff',22);
+   floatText(cx,cy-118,'THE TITAN REIGNS','#e9d2ff');banner('TITAN FURY','FOUR BEAST POWERS · ONE FINAL BLOW',.9,'#d7b5ff');
+   o.stun=Math.max(o.stun,.92);game.flash=Math.max(game.flash||0,.2);game.shake=Math.max(game.shake,.42);game.hitstop=Math.max(game.hitstop||0,.13);sfx('frostCrack');
+  }else{floatText(cx,cy-82,['LION FORCE','EAGLE STRIKE','FOREST WRATH'][Math.min(2,(f.hitsDone||1)-1)],color);game.shake=Math.max(game.shake,.2);sfx('heavy')}
+ }
  // MAJIC's Frost Strike detonates a supernatural crystal burst on contact.
  if(mv.majicFrost){
   for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*18,y:cy+(k%2)*8,t:0,life:.46+k*.08,color:k===1?'#e7fdff':'#7fe8ff',kind:'ring'});
@@ -957,7 +997,7 @@ function resolveHit(i,mv){
  if(mv.snakeCoil){o.coilT=1.05;o.coilBy=i;o.vx=f.dir*58;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*16,y:cy+(k%2)*9,t:0,life:.72+k*.06,color:k===1?'#c8ed82':'#83bd50',kind:'ring'});spark(cx,cy,'#a8d66d',22);floatText(cx,cy-100,'CONSTRICTED','#a8d66d');banner('CONSTRICTED','MOVEMENT REDUCED',.72,'#a8d66d');game.shake=Math.max(game.shake,.22)}
  if(mv.snakeVenom){o.venomT=2.4;o.venomTick=.78;o.venomBy=i;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*20,y:cy+(k%2)*12,t:0,life:.52+k*.06,color:k===1?'#b8e986':'#78b84f',kind:'ring'});spark(cx,cy,'#a8d66d',24);floatText(cx,cy-94,'VENOMED','#a8d66d');game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.045)}
  const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
- const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(f.data.id==='majic'&&(f.jungleRageT||0)>0?1.18:1)*(1-(o.data.defense-7)*.03)*(o.data.id==='majic'&&(o.jungleRageT||0)>0?.88:1)*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
+ const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*(f.data.id==='majic'&&(f.jungleRageT||0)>0?1.18:1)*(f.data.id==='majic'&&(f.ascendantT||0)>0?1.2:1)*(1-(o.data.defense-7)*.03)*(o.data.id==='majic'&&((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
  f.combo=comboing?f.combo+1:1;
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
@@ -1106,6 +1146,7 @@ function finish(){
  }
  const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
  if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
+ if(resultChampId==='majic'&&!draw_){title='THE JUNGLE TITAN';copy='THE TRUE FORM IS REVEALED · THE JUNGLE BOWS TO MAJIC';}
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=resultChampId;
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
@@ -1158,7 +1199,7 @@ function playVox(url,done){if(!soundOn)return done(false);const a=ac();
 function stopVox(){const s=voxSrc;voxSrc=null;if(s)try{s.stop()}catch(_){}}
 function storyCard(o,next){
  const t=(o.text||'').trim();if(!t)return next();
- const sc=$('story');sc.classList.toggle('dark',!!o.dark);
+ const sc=$('story');sc.classList.toggle('dark',!!o.dark);sc.classList.toggle('boss-intro',!!o.bossIntro);
  const im=$('story-face');if(o.face){im.src=portrait(o.face);im.classList.remove('none')}else im.classList.add('none');
  $('story-eyebrow').textContent=o.eyebrow||'';$('story-title').textContent=o.title||'';
  $('story-text').innerHTML=(o.slow?t.split(/\n/):t.split(/\n+/)).map(x=>x.trim()===''?'<p class="gap"></p>':'<p>'+x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')+'</p>').join('');
@@ -1178,7 +1219,7 @@ const NEW_FIGHTERS=[
  {id:'stag',name:'STAG',icon:'🦌',style:'THE IRON HORN',bio:'An unstoppable charger with iron antlers, crushing kicks and an earth-shaking stomp.',power:9,speed:6,defense:8,color:'#9a6a34'}];
 const unlockedNew=()=>SAVE.get('unlocked',[]);
 function addUnlocked(){for(const f of NEW_FIGHTERS)if(unlockedNew().includes(f.id)&&!roster.includes(f)){const i=roster.indexOf(MAJIC);i>=0?roster.splice(i,0,f):roster.push(f)}}
-const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, a crocodile tail, tiger stripes and the frost-white fur of a snow leopard. Frost Strike, Jungle Rage and the Titan Fury Ultra.',power:13,speed:6,defense:14,color:'#d9a43a'};
+const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, a crocodile tail, tiger stripes and the frost-white fur of a snow leopard. Frost Strike, Jungle Rage, True Titan Form and the Titan Fury Ultra.',power:13,speed:6,defense:14,color:'#d9a43a'};
 const secretUnlocked=()=>!!SAVE.get('secret',false);
 const LOCK_SVG='<svg viewBox="0 0 24 24" width="44%" fill="none" stroke="#e8b95b" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 function mysteryTile(){
@@ -1394,7 +1435,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','jungleRageT','jungleRageCooldownT','stagCounterT','venomT','venomTick','venomBy','coilT','eagleCounterT','eagleEvadeT','badgerCounterT','wolfCounterT','hyenaCounterT','hyenaEvadeT','hyenaFrenzyFinisher','crocodileCounterT','tigerCounterT','tigerEvadeT','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','lionManeFinisher','lionCounterT','tigerPounceT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','ascendantT','ascendantCooldownT','jungleRageT','jungleRageCooldownT','stagCounterT','venomT','venomTick','venomBy','coilT','eagleCounterT','eagleEvadeT','badgerCounterT','wolfCounterT','hyenaCounterT','hyenaEvadeT','hyenaFrenzyFinisher','crocodileCounterT','tigerCounterT','tigerEvadeT','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','elephantChargeT','hippoRushT','lionManeFinisher','lionCounterT','tigerPounceT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1658,6 +1699,23 @@ function drawFighter(f,i,ghost){
  const x=f.x,y=400+f.y;c.save();c.translate(x,y);c.scale(f.dir,1);
  const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.86,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08,majic:1.4,snake:.86,eagle:.9,stag:.92}[f.data.id]||.84;
  if(!ghost){
+  // MAJIC's True Titan Form creates a distinct supernatural silhouette, not just a stronger aura.
+  if(f.data.id==='majic'&&(f.ascendantT||0)>.025){
+   const t=f.ascendantT,pulse=.78+Math.sin((8.5-t)*13)*.18,fade=clamp(Math.min(t,1.1)*1.4,0,1);
+   c.save();c.globalAlpha=fade*pulse;
+   const halo=c.createRadialGradient(0,-160,18,0,-160,205*sizeScale);
+   halo.addColorStop(0,'rgba(196,158,255,.32)');halo.addColorStop(.52,'rgba(113,76,180,.22)');halo.addColorStop(1,'rgba(113,76,180,0)');
+   c.fillStyle=halo;c.beginPath();c.ellipse(0,-158,178*sizeScale,215*sizeScale,0,0,Math.PI*2);c.fill();
+   // Crown-like antler horns and spectral shoulder wings frame the transformed panther.
+   c.lineCap='round';c.lineJoin='round';c.strokeStyle='#e8c56b';c.shadowColor='#c5a0ff';c.shadowBlur=20;c.lineWidth=7*sizeScale;
+   c.beginPath();c.moveTo(-38,-278);c.quadraticCurveTo(-78,-338,-92,-382);c.quadraticCurveTo(-58,-362,-34,-324);c.moveTo(38,-278);c.quadraticCurveTo(78,-338,92,-382);c.quadraticCurveTo(58,-362,34,-324);c.stroke();
+   c.strokeStyle='#bba0ff';c.lineWidth=5*sizeScale;
+   for(let side of [-1,1]){c.beginPath();c.moveTo(side*48,-190);c.quadraticCurveTo(side*132,-260,side*166,-300);c.quadraticCurveTo(side*144,-228,side*102,-164);c.stroke();c.beginPath();c.moveTo(side*70,-156);c.quadraticCurveTo(side*154,-188,side*178,-222);c.stroke()}
+   c.shadowBlur=0;
+   const sigils=['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff'];
+   sigils.forEach((color,n)=>{const a=(8.5-t)*1.15+n*Math.PI/3,px=Math.cos(a)*112*sizeScale,py=-158+Math.sin(a)*136*sizeScale;c.globalAlpha=fade*pulse*.9;c.fillStyle=color;c.shadowColor=color;c.shadowBlur=13;c.beginPath();c.arc(px,py,4.5+Math.sin(a*2)*1.4,0,Math.PI*2);c.fill()});
+   c.restore();
+  }
   // MAJIC's Jungle Rage gathers visual energy from the roster's elemental colors.
   if(f.data.id==='majic'&&(f.jungleRageT||0)>.025){
    const rage=f.jungleRageT/7.5,pulse=.72+Math.sin((7.5-f.jungleRageT)*11)*.16;
@@ -1809,6 +1867,45 @@ function drawFighter(f,i,ghost){
    c.lineTo(Math.cos(a)*118,-150+Math.sin(a)*118);c.stroke();
   }
   c.restore();
+  // MAJIC's final-boss victory: the complete Jungle Titan form revealed in a violet-gold crown.
+  if(f.data.id==='majic'){
+   const t=f.winT||0,settle=Math.min(1,t/.55),pulse=.5+.5*Math.sin(t*3.4),orbit=t*.72;
+   c.save();c.globalCompositeOperation='lighter';
+   // Layered supernatural halo, kept translucent so MAJIC's sprite remains readable.
+   const halo=c.createRadialGradient(0,-158,18,0,-158,205);
+   halo.addColorStop(0,'rgba(193,145,255,.23)');halo.addColorStop(.58,'rgba(117,72,205,.12)');halo.addColorStop(1,'rgba(117,72,205,0)');
+   c.globalAlpha=(.62+.18*pulse)*settle;c.fillStyle=halo;c.beginPath();c.ellipse(0,-158,205,224,0,0,Math.PI*2);c.fill();
+   // Three rotating titan rings suggest the combined power of the entire animal kingdom.
+   for(let ring=0;ring<3;ring++){
+    const a=orbit*(ring%2?-.7:1)+ring*1.05;
+    c.save();c.translate(0,-154);c.rotate(a);c.globalAlpha=(.24+.12*pulse)*settle;
+    c.strokeStyle=ring===1?'#f0d18a':'#c7a0ff';c.shadowColor=ring===1?'#f2c66e':'#9c65ff';c.shadowBlur=22;c.lineWidth=ring===1?3:2.4;
+    c.beginPath();c.ellipse(0,0,92+ring*19,130+ring*13,0,0,Math.PI*2);c.stroke();c.restore();
+   }
+   // Crown horns rise above the head, with a central violet jewel.
+   c.globalAlpha=(.42+.16*pulse)*settle;c.strokeStyle='#e8cf9a';c.shadowColor='#bd8cff';c.shadowBlur=23;c.lineWidth=4;
+   c.beginPath();c.moveTo(-42,-218);c.quadraticCurveTo(-65,-255,-88,-270);c.lineTo(-75,-235);c.moveTo(-42,-218);c.lineTo(-53,-264);c.moveTo(42,-218);c.quadraticCurveTo(65,-255,88,-270);c.lineTo(75,-235);c.moveTo(42,-218);c.lineTo(53,-264);c.moveTo(-42,-218);c.quadraticCurveTo(0,-244,42,-218);c.stroke();
+   c.fillStyle='#e8c9ff';c.shadowColor='#d2a5ff';c.shadowBlur=20;c.beginPath();c.arc(0,-238,6+2*pulse,0,Math.PI*2);c.fill();
+   // Spectral wings unfold behind the shoulders, then hold as a regal silhouette.
+   for(const side of [-1,1]){
+    c.save();c.scale(side,1);c.globalAlpha=(.28+.13*pulse)*settle;c.strokeStyle='#b99aff';c.shadowColor='#8f5be8';c.shadowBlur=19;c.lineWidth=3;
+    c.beginPath();c.moveTo(43,-168);c.quadraticCurveTo(104,-218,142,-194);c.quadraticCurveTo(128,-154,83,-125);c.moveTo(86,-160);c.lineTo(130,-174);c.moveTo(76,-145);c.lineTo(117,-145);c.stroke();c.restore();
+   }
+   // Eleven orbiting sparks represent the original beasts bound into MAJIC.
+   const colors=['#f0c66e','#b99aff','#7fe0d1','#e58d62','#a6c9ff','#d9a6d5'];
+   for(let mote=0;mote<11;mote++){
+    const a=orbit+mote*Math.PI*2/11,rad=112+12*Math.sin(t*2+mote*1.7),x=Math.cos(a)*rad,y=-151+Math.sin(a)*rad*.78;
+    c.globalAlpha=(.32+.34*(.5+.5*Math.sin(t*4+mote)))*settle;c.fillStyle=colors[mote%colors.length];c.shadowColor=c.fillStyle;c.shadowBlur=15;
+    c.beginPath();c.arc(x,y,2.1+1.1*(.5+.5*Math.sin(t*3+mote)),0,Math.PI*2);c.fill();
+   }
+   // A final ground seal pulses beneath the Titan.
+   for(let wave=0;wave<3;wave++){
+    const phase=(t*1.05+wave*.72)%2.3,rad=54+phase*42;
+    c.globalAlpha=(.28*(1-phase/2.3))*settle;c.strokeStyle=wave===1?'#f0d18a':'#b994ff';c.lineWidth=2.7;c.shadowBlur=16;
+    c.beginPath();c.ellipse((wave-1)*8,-6,rad,rad*.2,0,0,Math.PI*2);c.stroke();
+   }
+   c.restore();
+  }
   // Snow Leopard's victory signature: a rising frost spiral and orbiting ice shards.
   if(f.data.id==='leopard'){
    const t=f.winT||0;
@@ -2246,7 +2343,7 @@ function drawSprite(f){
   case'attack_heavy':anim='attack_heavy';fr=Math.floor(ap*A.attack_heavy[0]);break;
   case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
-  case'special_b':case'special_c':case'special_d':anim=A[f.action]?f.action:S.special;fr=Math.floor(ap*A[anim][0]);break;
+  case'special_b':case'special_c':case'special_d':case'ultra_move':anim=A[f.action]?f.action:S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'ender':anim='uppercut';fr=Math.floor(ap*A.uppercut[0]);break;
   case'shadow':if(S.shadow){anim=S.shadow;fr=Math.floor(ap*A[anim][0])}else{anim=S.double[Math.floor(p*5)%2];fr=Math.floor(p*5*A[anim][0])%A[anim][0]}break;
   case'ultraseq':anim=S.ultra[Math.floor(now*6)%S.ultra.length];fr=Math.floor(now*36);break;
