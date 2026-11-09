@@ -499,7 +499,7 @@ function update(dt){
  if(a.hp>0&&b.hp>0&&!a.attack&&!a.stun)a.dir=b.x>=a.x?1:-1;
  if(a.hp>0&&b.hp>0&&!b.attack&&!b.stun)b.dir=a.x>=b.x?1:-1;
  F.forEach((f,i)=>{if(inDanger(f)&&f.hp>0&&!game.dangerSaid[i]){game.dangerSaid[i]=1;floatText(f.x,f.y-310,'DANGER','#ff4030');say('Danger')}});
- F.forEach(f=>{if(f.instinct||f.action==='shadow'){f.trail.push({x:f.x,y:f.y,dir:f.dir,a:f.action,t:.25});}f.trail=f.trail.filter(p=>(p.t-=dt)>0).slice(-6)});
+ F.forEach(f=>{const frostPounce=f.data.id==='leopard'&&f.action==='pounce'&&f.attack>0;if(f.instinct||f.action==='shadow'||frostPounce){f.trail.push({x:f.x,y:f.y,dir:f.dir,a:f.action,frost:!!frostPounce,t:frostPounce?.32:.25});}f.trail=f.trail.filter(p=>(p.t-=dt)>0).slice(-10)});
  hud();
 }
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -507,10 +507,12 @@ const clampX=x=>Math.max(72,Math.min(1028,x));
 function physics(f,dt){
  f.x=clampX(f.x+f.vx*dt);
  f.landImpact=Math.max(0,(f.landImpact||0)-dt*2.8);
+ f.frostImpact=Math.max(0,(f.frostImpact||0)-dt*2.4);
  const wasAirborne=!f.ground;
  f.y+=f.vy*dt;f.vy+=1500*dt;
  if(f.y>0){
   if(wasAirborne){
+   if(f.data.id==='leopard'&&f.action==='pounce'&&f.attack>0)f.frostImpact=.52;
    // Capture landing speed before zeroing vertical velocity. This is visual
    // feedback only and does not add damage, stun, or alter the jump arc.
    f.landImpact=clamp(Math.abs(f.vy)/900,.18,1);
@@ -985,10 +987,10 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','comboLinked','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
- const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
+ const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
  const cb=i=>$('p'+i+'-combo');
  return{t:'s',q:++ON.seq,f:F,tm:r2(time),b:game.banner,fl:r2(game.flash),sh:r2(game.shake),ko:r2(game.ko),it:r2(game.intro),u:game.ultra?{i:game.ultra.i}:null,sl:game.slow,
   // Keep recent presentation and the two-stage Titan's Bane state aligned
@@ -1142,7 +1144,7 @@ function draw(){
  // Ultra / Instinct darken the stage so the fighters pop.
  const dim=game.ultra?.55:game.fighters.some(f=>f.instinct)?.18:0;if(dim){c.fillStyle=`rgba(10,0,20,${dim})`;c.fillRect(-60,-60,w+120,h+120)}
  drawStains();
- game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter='hue-rotate(220deg) saturate(3)';drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
+ game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter=p.frost?'brightness(1.35) saturate(.75) hue-rotate(155deg)':'hue-rotate(220deg) saturate(3)';if(p.frost){c.shadowColor='rgba(105,225,255,.95)';c.shadowBlur=22;}drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
  game.fighters.forEach((f,i)=>drawFighter(f,i));
  drawFx();
  if(game.koBurst&&game.ko>0){
@@ -1229,6 +1231,17 @@ function drawFighter(f,i,ghost){
    c.beginPath();c.ellipse(0,-f.y,radius*sizeScale,radius*.22*sizeScale,0,0,Math.PI*2);c.stroke();
    c.restore();
   }
+  // Frost Pounce leaves a brief icy shock ring on the snow leopard's landing.
+  if(f.data.id==='leopard'&&(f.frostImpact||0)>.025){
+   const frost=f.frostImpact/ .52;
+   const spread=(1-frost)*48;
+   c.save();c.globalAlpha=frost*.78;c.strokeStyle='#9cefff';c.shadowColor='#54dfff';c.shadowBlur=18;
+   c.lineWidth=2+frost*2;c.beginPath();
+   c.ellipse(0,-f.y, (34+spread)*sizeScale,(9+spread*.12)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.globalAlpha=frost*.48;c.lineWidth=1.5;c.beginPath();
+   c.ellipse(0,-f.y,(48+spread*1.25)*sizeScale,(5+spread*.08)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.restore();
+  }
   c.restore();
  }
  if(f.action==='victory'&&!ghost){
@@ -1256,7 +1269,7 @@ function drawFighter(f,i,ghost){
 }
 function phase(f){return f.actionTotal>0?Math.min(.999,Math.max(0,1-f.actionTime/f.actionTotal)):0}
 function drawSprite(f){
- const S=SPRITES[f.data.id],A=S.anims,now=performance.now()/1000,p=phase(f),ap=p*p*(3-2*p);let anim='idle',fr=0;
+ const S=SPRITES[f.data.id],A=S.anims,now=performance.now()/1000,p=phase(f),visualP=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action)?Math.min(.999,p*1.12):p,ap=visualP*visualP*(3-2*visualP);let anim='idle',fr=0;
  const seq=(list,t)=>{const k=list[Math.min(list.length-1,Math.floor(t*list.length))];return k};
  switch(f.action){
   case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2);break}
@@ -1303,9 +1316,10 @@ function drawSprite(f){
   const anticipation=1-clamp(p/(f.comboLinked?.14:.22),0,1);
   const drive=clamp((p-(f.comboLinked?.11:.16))/(f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(f.comboLinked?.78:.68))/(f.comboLinked?.22:.32),0,1);
-  const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105);
+  const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
+  const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
   const lean=-.035*anticipation+forward*drive-.035*recovery;
-  const stretch=1+.055*drive-.025*anticipation-.025*recovery;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery;
   const squash=1-.035*drive+.025*anticipation+.025*recovery;
   c.save();
   c.translate(0,-145+drive*4-anticipation*2);
