@@ -4,7 +4,7 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online','recovery'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online','recovery','rise'];
 // Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
 const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
@@ -741,7 +741,7 @@ const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:
 let champRaf=0;
 function champion(f){
  if(tower&&tower.boss&&!tower.speechDone){tower.speechDone=true;const txt=(STORY.forgotten.majicSpeech||'').split('[FIGHTER]').join(f.name);
-  return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt,voice:majicVox(f.id)},()=>champion(f))}
+  return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt,voice:majicVox(f.id)},()=>{if(!SAVE.get('riseSeen',false)){SAVE.set('riseSeen',true);$('rise-btn').classList.remove('hidden');playRise(()=>champion(f))}else champion(f)})}
  const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
  if(tower.kind!=='forgotten'){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}}
 if(tower.kind!=='forgotten'){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().includes(n.id));
@@ -868,6 +868,22 @@ function recovery(f,next){
    raf2=requestAnimationFrame(frame)};
   raf2=requestAnimationFrame(frame)})}
 
+/* ---------- The Rise of MAJIC: James's movie. Plays after the first MAJIC win; replay from the menu ---------- */
+function playRise(next){
+ const v=$('rise-video'),skip=$('rise-skip'),tap=$('rise-play');let done=false,guard=performance.now(),raf3=0;
+ const end=()=>{if(done)return;done=true;cancelAnimationFrame(raf3);try{v.pause()}catch(_){}v.removeAttribute('src');v.load();
+  window.removeEventListener('keydown',key,true);AU&&AU.duckMusic(1);next()};
+ const key=e=>{if(performance.now()-guard<800)return;if(['Escape','Enter'].includes(e.key)){e.preventDefault();e.stopPropagation();end()}
+  else if(e.key===' '){e.preventDefault();e.stopPropagation();v.paused?v.play().catch(()=>{}):v.pause()}};
+ const go=()=>{tap.classList.add('hidden');v.play().then(()=>tap.classList.add('hidden')).catch(()=>tap.classList.remove('hidden'))};
+ skip.onclick=()=>{if(performance.now()-guard>500)end()};tap.onclick=go;v.onended=end;v.onclick=()=>{if(v.paused)go()};
+ v.onerror=()=>{if(!done)end()};
+ window.addEventListener('keydown',key,true);
+ AU&&AU.duckMusic(0);show('rise');v.src='assets/cinema/rise-of-majic.mp4?v=8.3';v.currentTime=0;go();
+ // controller: B or Start skips
+ const pad=()=>{if(done)return;const ps=navigator.getGamepads?[...navigator.getGamepads()].filter(Boolean):[];const b=ps.some(p=>(p.buttons[1]&&p.buttons[1].pressed)||(p.buttons[9]&&p.buttons[9].pressed));
+  if(performance.now()-guard>800&&b&&!pad.held)return end();pad.held=b;raf3=requestAnimationFrame(pad)};raf3=requestAnimationFrame(pad)}
+
 /* ---------- Online play: share a code, fight a friend ---------- */
 const NET=window.KOTJNet||{send(){},fast(){},leave(){},host(){},join(){return ''},on(){}};
 const BTN=['l','r','j','bl','at','sp','ins'];
@@ -950,6 +966,8 @@ const JOIN=new URLSearchParams(location.search).get('join');
 if(JOIN){try{history.replaceState(null,'',location.pathname)}catch(_){}
  const go=()=>{if(!$('menu').classList.contains('started'))return setTimeout(go,250);openOnline(JOIN)};setTimeout(go,250)}
 
+$('rise-btn').classList.toggle('hidden',!SAVE.get('riseSeen',false));
+$('rise-btn').onclick=()=>{ac();playRise(()=>{show('menu');AU&&soundOn&&AU.music('music.menu')})};
 /* ---------- Rendering ---------- */
 
 // Sprite-sheet fighters: one horizontal strip per animation -> [frames, frameW, frameH, worldScale]
@@ -1167,5 +1185,5 @@ addUnlocked();if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
-window.__kotj={get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();

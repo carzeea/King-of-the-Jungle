@@ -556,3 +556,12 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 #recovery-name{margin:4px 0 0;font:800 clamp(11px,1.5vw,16px) Inter;letter-spacing:.2em;color:#f5ecd8;text-shadow:0 2px 6px #000}
 .rec-skip{position:absolute;bottom:3%;right:3%;margin:0;font:800 11px Inter;letter-spacing:.25em;color:#ffffff99;animation:recblink 1.6s infinite}
 @keyframes recblink{50%{opacity:.35}}
+
+/* ---------- Build 8.1: The Rise of MAJIC ---------- */
+.rise-screen{position:fixed!important;inset:0;z-index:70;background:#000;margin:0!important;padding:0!important;max-width:none!important}
+#rise-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rise-skip{position:absolute;right:2.5%;bottom:2.2%;z-index:2;background:rgba(0,0,0,.45)!important;border:1px solid #e8b95b88!important;color:#f3dfae!important;font:800 12px Inter!important;letter-spacing:.25em;padding:8px 14px!important;border-radius:8px}
+.cover-menu .rise-btn{border-color:rgba(190,120,255,.75)!important;box-shadow:0 0 18px rgba(160,70,255,.3)}
+.cover-menu .rise-btn b{color:#e2c6ff}
+#rise-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:block}
+.rise-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;font:italic 900 34px "Barlow Condensed",Impact,sans-serif!important;letter-spacing:.1em;padding:16px 40px!important;border-radius:12px;background:linear-gradient(180deg,#fff0a8,#ffc94a 45%,#d98a12)!important;color:#5a0d06!important;border:none!important}
