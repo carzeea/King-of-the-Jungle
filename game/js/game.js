@@ -441,6 +441,8 @@ function update(dt){
   const elephantStomp=f.data.id==='elephant'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
   const elephantCharge=f.data.id==='elephant'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
   const hippoRush=f.data.id==='hippo'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
+  const grizzlyMaul=f.data.id==='grizzly'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
+  const grizzlyPaw=f.data.id==='grizzly'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
   const spd=(f.instinct?1.2:1);
@@ -500,6 +502,7 @@ function update(dt){
    else if(o.stun>0&&f.combo>0&&spEdge)doMove(f,'ender');
    else if(atkEdge)doMove(f,'claw');
    else if(elephantCharge)doMove(f,'charge');
+   else if(grizzlyMaul)doMove(f,'grizzlyMaul');
    else if(spEdge)doMove(f,'special');
   }
   if(f.block&&!frozen){
@@ -508,7 +511,7 @@ function update(dt){
    if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
    else if(spEdge&&elephantStomp){f.block=false;doMove(f,'stomp')}
    else if(spEdge&&hippoRush){f.block=false;doMove(f,'hippoRush')}
-   else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(f.data.id==='hippo'&&f.hippoCounterT>0){f.hippoCounterT=0;doMove(f,'riverCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
+   else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(f.data.id==='hippo'&&f.hippoCounterT>0){f.hippoCounterT=0;doMove(f,'riverCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else if(grizzlyPaw&&!(o.stun>0&&f.combo>0))doMove(f,'grizzlyPaw');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
   // from vx, which is reserved for hit knockback and physics impulses.
@@ -558,7 +561,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
+ const mv=name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -572,7 +575,9 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
- setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ if(name==='grizzlyMaul'){f.vx=f.dir*560;floatText(f.x,f.y-300,'BEAR MAUL','#c99a70');game.shake=Math.max(game.shake,.16);sfx('heavy')}
+ if(name==='grizzlyPaw'){f.vx=f.dir*115;floatText(f.x,f.y-300,'CRUSHING PAW','#d6ad83');game.shake=Math.max(game.shake,.12);sfx('heavy')}
  if(name==='riverCounter'){f.vx=f.dir*225;floatText(f.x,f.y-300,'RIVER COUNTER','#9edce5');game.shake=Math.max(game.shake,.18);sfx('heavy')}
  if(name==='hippoRush'){f.vx=f.dir*610;f.hippoRushT=.74;floatText(f.x,f.y-300,'RIVER RUSH','#83c9d8');game.shake=Math.max(game.shake,.14);sfx('heavy')}
  if(name==='charge'){f.vx=f.dir*760;f.elephantChargeT=.68;floatText(f.x,f.y-300,'TITAN CHARGE','#e4d7bd');game.shake=Math.max(game.shake,.12);sfx('heavy')}
@@ -588,7 +593,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter||mv.riverCounter||mv.charge||mv.hippoRush)return'attack_heavy';
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -615,6 +620,20 @@ function resolveHit(i,mv){
  if(o.block&&o.ground&&!comboing){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
   o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='elephant')o.elephantCounterT=.62;if(o.data.id==='hippo')o.hippoCounterT=.68;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+ }
+ // Grizzly's Crushing Paw drives a single heavyweight strike into the ground.
+ if(mv.grizzlyPaw){
+  game.fx.push({x:cx,y:cy,t:0,life:.48,color:'#c99a70',kind:'ring'});
+  game.fx.push({x:f.x+f.dir*58,y:f.y-8,t:0,life:.34,color:'#e0b98e',kind:'ring'});
+  spark(cx,cy,'#d6ad83',20);floatText(cx,cy-78,'CRUSHING PAW','#e0b98e');
+  game.shake=Math.max(game.shake,.25);
+ }
+ // Grizzly's Bear Maul lands with a rugged double shock, emphasizing its crushing forward momentum.
+ if(mv.grizzlyMaul){
+  game.fx.push({x:cx,y:cy,t:0,life:.5,color:'#c99a70',kind:'ring'});
+  game.fx.push({x:f.x+f.dir*74,y:f.y-10,t:0,life:.38,color:'#e0b98e',kind:'ring'});
+  spark(cx,cy,'#c99a70',22);floatText(cx,cy-78,'BEAR MAUL','#e0b98e');
+  game.shake=Math.max(game.shake,.27);
  }
  // Hippo's River Rush lands with a broad water-pressure burst, emphasizing its low, heavy momentum.
  if(mv.hippoRush){
@@ -1529,6 +1548,28 @@ function drawFighter(f,i,ghost){
     c.globalAlpha=(.2+.18*(.5+.5*Math.sin(t*4+mote)))*settle;c.fillStyle='#e8ddc6';c.shadowBlur=10;
     c.beginPath();c.arc(mx,my,2.5+1.5*Math.sin(t*3+mote),0,Math.PI*2);c.fill();
    }
+   c.restore();
+  }
+  // Hippo's River victory signature: rolling turquoise waves and rising water droplets.
+  if(f.data.id==='hippo'){
+   const t=f.winT||0,settle=Math.min(1,t/.48),pulse=.5+.5*Math.sin(t*3.1);
+   c.save();c.globalCompositeOperation='lighter';
+   c.globalAlpha=(.24+.16*pulse)*settle;c.strokeStyle='#65e9df';c.shadowColor='#28c9c2';c.shadowBlur=19;c.lineWidth=3;
+   for(let wave=0;wave<3;wave++){
+    const phase=t*1.8+wave*Math.PI*.66;
+    c.beginPath();c.ellipse(0,-10+wave*3,76+wave*20+12*Math.sin(phase),12+wave*3,0,0,Math.PI*2);c.stroke();
+   }
+   for(let drop=0;drop<9;drop++){
+    const phase=t*1.35+drop*2.399;
+    const x=Math.cos(phase)*(66+12*Math.sin(t*2+drop));
+    const y=-92-Math.abs(Math.sin(phase*1.3))*(35+drop%3*12);
+    const r=2.2+1.4*(.5+.5*Math.sin(t*4+drop));
+    c.globalAlpha=(.24+.25*(.5+.5*Math.sin(t*3+drop)))*settle;
+    c.fillStyle=drop%2?'#b9fff4':'#55dcd3';c.shadowBlur=12;
+    c.beginPath();c.ellipse(x,y,r*.8,r*1.35,Math.sin(phase)*.3,0,Math.PI*2);c.fill();
+   }
+   c.globalAlpha=(.18+.12*pulse)*settle;c.strokeStyle='#a5fff2';c.lineWidth=2;c.shadowBlur=15;
+   c.beginPath();c.arc(0,-145,78+9*Math.sin(t*2),Math.PI*1.08,Math.PI*1.92);c.stroke();
    c.restore();
   }
  }
