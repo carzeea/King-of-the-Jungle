@@ -141,6 +141,7 @@ function sfx(type){
  else if(type==='breaker'){tone(200,1400,.35,.3,'sawtooth');noise(.3,3000,.5)}
  else if(type==='lockout'){tone(300,90,.4,.25,'square')}
  else if(type==='instinct'){tone(120,900,.6,.3,'sawtooth')}
+ else if(type==='frost'){tone(880,1320,.18,.16,'sine');setTimeout(()=>{if(soundOn){const b=ac();if(b){const o=b.createOscillator(),g=b.createGain();o.type='sine';o.frequency.setValueAtTime(1320,b.currentTime);o.frequency.exponentialRampToValueAtTime(1760,b.currentTime+.22);g.gain.setValueAtTime(.13,b.currentTime);g.gain.exponentialRampToValueAtTime(.001,b.currentTime+.28);o.connect(g).connect(b.destination);o.start();o.stop(b.currentTime+.28)}}},95)}
  else if(type==='ultra'){noise(.07,3000,.45);tone(400,120,.08,.3,'square')}
  else if(type==='boom'){noise(.6,900,.9);tone(80,25,.7,.9)}
 }
@@ -728,8 +729,10 @@ function finish(){
   }else{title='DEFEATED';copy=tower.boss?'MAJIC crushes your challenge. The Jungle Titan still rules.':tower.kind==='forgotten'?`${picks[1].name} drags you back into the dark.`:`${picks[1].name} stops your climb at fight ${tower.index+1}. Try again.`;$('rematch').textContent='TRY AGAIN';}
   $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt=""${f.echo?' class="echo-face"':''}>${f.name}</div>`).join('')+((tower.kind==='forgotten'||tower.reveal||tower.boss)?(tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:`<div class="${tower.reveal?'next':''}"><span class="q">?</span>???</div>`):'');
  }
+ const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
+ if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
- if(soundOn&&AU){const champId=draw_?null:(p1won?picks[0].id:picks[1].id);
+ if(soundOn&&AU){const champId=resultChampId;
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
