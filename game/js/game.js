@@ -151,6 +151,11 @@ if(AU)[['now','n'],['ultra','u'],['duckMusic','d']].forEach(([fn,tag])=>{const o
 // Play a labeled clip from the sound library; if it isn't loaded yet, use the built-in synth sound.
 function snd(key,fallback,vol=1,rate=1){if(!soundOn)return;if(!(AU&&AU.now(key,vol,rate))&&fallback)sfx(fallback)}
 const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
+// Relative body mass for hit reactions. Knockback only; no damage or unlock changes.
+const FIGHTER_MASS={badger:1.08,hyena:.94,wolf:.9,leopard:.72,jaguar:.86,
+ crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.28,hippo:1.38,elephant:1.5,
+ eagle:.76,snake:.7,majic:1.04};
+const impactScale=f=>Math.max(.68,Math.min(1.28,1/(FIGHTER_MASS[f.data.id]||1)));
 function hitSound(f,mv){
  const r=.94+Math.random()*.12;
  if(mv===MOVES.bite)return snd('sfx.bite','heavy',1,r);
@@ -530,14 +535,17 @@ function resolveHit(i,mv){
  f.combo=comboing?f.combo+1:1;
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
- if(isEnder){ // cash in everything: potential becomes real, bonus for long combos
-  o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*mv.push;o.vy=-330;o.ground=false;
-  snd('sfx.heavyImpact','heavy');game.shake=.25;game.hitstop=.11;spark(cx,cy,'#ffd36b',18);
+ const bodyResponse=impactScale(o);
+ const impactPush=mv.push*bodyResponse;
+ if(isEnder){ // finishers move lighter fighters farther; heavyweight fighters resist displacement
+  o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*impactPush;o.vy=-330*Math.max(.88,Math.min(1.08,bodyResponse));o.ground=false;
+  snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,.25);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',18);
   resolveBars(o,f);endCombo(i,true);
  }else{
-  o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.vx=f.dir*mv.push;if(!o.ground)o.vy=-160;
-  f.vx=f.dir*Math.max(20,mv.push*.4);
-  hitSound(f,mv);game.hitstop=mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07;if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.12);
+  o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
+  f.vx=f.dir*Math.max(20,impactPush*.4);
+  hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
+  if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.12);
   if(!mv.potential)resolveBars(o,f);
  }
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
