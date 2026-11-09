@@ -766,13 +766,16 @@ function doMove(f,name){
 }
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
-const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
+// Fighter art is drawn slightly bigger/wider than the measured sprites (build 9.22–9.23); hit ranges scale to match.
+const BODY_PRESENCE={badger:1.09,wolf:1.07,hyena:1.08,leopard:1.045,jaguar:1.075,crocodile:1.08,lion:1.065,tiger:1.06,grizzly:1.075,hippo:1.065,elephant:1.045,eagle:1.07,snake:1.045,stag:1.06,majic:1.0},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.035,majic:1.0};
+const artScale=f=>(BODY_PRESENCE[f.data.id]||1)*(BODY_WIDTH[f.data.id]||1);
+const bodyFront=f=>((HB[f.data.id]&&HB[f.data.id].body[0])||85)*artScale(f);
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury||mv.majicEclipse)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double){const D=S.double||['attack_heavy','attack_light'];return D[mv.eagleWingCombo?Math.min(D.length-1,Math.max(0,f.hitsDone-1)):f.chain%D.length]}
  if(mv===MOVES.special)return S.special||'special_pounce';
  if(mv===MOVES.shadow)return S.shadow||(S.double||['attack_heavy'])[0];return'attack_light'}
-function reachOf(f,anim){const r=HB[f.data.id]&&HB[f.data.id].reach[anim];return Math.max(bodyFront(f)+60,r?r[0]:180)}
+function reachOf(f,anim){const r=HB[f.data.id]&&HB[f.data.id].reach[anim];return Math.max(bodyFront(f)+60,(r?r[0]:180)*artScale(f))}
 // distance between the two fighters' centres at which this strike touches the opponent's body
 const hitDist=(f,o,anim,extra)=>reachOf(f,anim)+18+bodyFront(o)*.85+(extra||0);
 function resolveHit(i,mv){
@@ -789,7 +792,7 @@ function resolveHit(i,mv){
  else if(mv.eagleSkyfall){if(!(d<=365&&Math.abs(f.y-o.y)<230&&facing))return;}
  else if(!(d<=hitDist(f,o,anim,mv.shadow?40:0)&&Math.abs(f.y-o.y)<130&&facing))return;
  // where the strike lands: the defender's front edge, at the height of the fist/claw/jaws
- const cx=o.x-f.dir*bodyFront(o)*.75,cy=o.y-Math.max(70,Math.min(240,reach?reach[1]:160));
+ const cx=o.x-f.dir*bodyFront(o)*.75,cy=o.y-Math.max(70,Math.min(240,reach?reach[1]*(BODY_PRESENCE[f.data.id]||1):160));
  const comboing=o.stun>0&&f.combo>0;
  // The third connected strike of the snow leopard's triple claw gets a brief signature flourish.
  if(f.data.id==='leopard'&&mv.hits.length===3&&f.hitsDone===3){
@@ -2553,13 +2556,21 @@ function drawSprite(f){
   case'down':if(f.down>.35){anim=S.fall[0];fr=seq(S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seq(S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1],Math.floor(f.koTime*9));break;
   case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
-  default:anim='idle';fr=Math.floor(now*9);
+  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.5,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate)};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
  if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
  if(!img||!img.complete||!img.naturalWidth)return false;
  const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
+ // Species-calibrated body presence: modestly enlarges the existing HD art
+ // without stretching anatomy or changing the original fighter silhouettes.
+ const bodyPresence=BODY_PRESENCE[f.data.id]||1;
+ // Species silhouette calibration: add width where the real animal's mass or
+ // body plan calls for it, while keeping frame height and foot anchoring stable.
+ const bodyWidth=BODY_WIDTH[f.data.id]||1;
+ const baseW=fw/sc*bodyPresence,drawW=baseW*bodyWidth,drawH=fh/sc*bodyPresence;
+ const drawX=-px-(drawW-fw/sc)*.5,drawY=-py+6-(drawH-fh/sc);
  if(f.action==='earthslam'&&ap>.5){c.save();c.globalAlpha=.8*(1-ap);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+ap*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
  const impactTint=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
  if(f.hitFlash>0){
@@ -2580,19 +2591,47 @@ function drawSprite(f){
   const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
+  const lionKing=f.data.id==='lion';
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
-  const lean=-.035*anticipation+forward*drive-.035*recovery;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery;
-  const squash=1-.035*drive+.025*anticipation+.025*recovery;
+  // Lion combat benchmark: the heavy forequarters load before a strike, drive
+  // forward through the shoulders, then settle with a short mane/body follow-through.
+  const lionLoad=lionKing?anticipation*.045:0;
+  const lionDrive=lionKing?drive*(f.action==='bite'?.105:f.action==='ender'?.13:.085):0;
+  const lionSettle=lionKing?recovery*.035:0;
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0);
+  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0);
   c.save();
-  c.translate(0,-145+drive*4-anticipation*2);
+  c.translate((lionKing?drive*7-anticipation*2:0),-145+drive*4-anticipation*2);
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
   c.restore();
+ }else if(f.action==='idle'||f.action==='breathing'){
+  // Species-specific idle cadence: subtle breathing, balance shifts and
+  // alertness rhythms. The sprite art stays untouched and the feet remain
+  // anchored, so this adds life without rubbery stretching or sliding.
+  const idleProfile={
+   badger:[.010,.010,.010,1.7], wolf:[.014,.014,.018,2.2], hyena:[.018,.016,.024,2.8],
+   leopard:[.012,.009,.018,3.0], jaguar:[.011,.010,.014,2.5], crocodile:[.006,.006,.008,1.0],
+   lion:[.014,.010,.012,1.45], tiger:[.012,.009,.016,2.7], grizzly:[.018,.012,.009,1.15],
+   hippo:[.016,.008,.006,.95], elephant:[.012,.006,.005,.8], eagle:[.009,.012,.025,2.1],
+   snake:[.009,.014,.010,1.35], stag:[.010,.009,.016,1.8], majic:[.012,.014,.020,1.7]
+  }[f.data.id]||[.01,.01,.01,1.5];
+  const [breath,sway,tilt,rate]=idleProfile,cycle=now*rate+(Math.max(0,game.fighters.indexOf(f))*.83),wave=Math.sin(cycle),slow=Math.sin(cycle*.47+.8);
+  const sx=1+breath*(.35+.65*Math.sin(cycle*.72)),sy=1-breath*(.35+.65*Math.sin(cycle*.72));
+  const lean=wave*tilt*.22,shift=slow*sway*18;
+  c.save();c.translate(shift,-py+6);c.rotate(lean);c.scale(sx,sy);c.translate(-shift,py-6);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'&&f.data.id==='lion'){
+  // A lion absorbs impact through its shoulders, then recoils as a heavy cat.
+  const hit=clamp((f.hitAnimTime||0)/.28,0,1),pulse=Math.sin(hit*Math.PI);
+  c.save();c.translate(-f.dir*(5+7*pulse),-145);c.rotate(-f.dir*(.035+.055*pulse));
+  c.scale(1-.025*pulse,1+.018*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else{
-  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
  }
  c.filter='none';
  return true;
