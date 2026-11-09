@@ -982,16 +982,21 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','hitAnimTime','hitHeavy','landImpact','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
+const FK=['x','y','vx','vy','moveVel','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
  const cb=i=>$('p'+i+'-combo');
  return{t:'s',q:++ON.seq,f:F,tm:r2(time),b:game.banner,fl:r2(game.flash),sh:r2(game.shake),ko:r2(game.ko),it:r2(game.intro),u:game.ultra?{i:game.ultra.i}:null,sl:game.slow,
+  // Keep recent presentation and the two-stage Titan's Bane state aligned
+  // with the authoritative host simulation.
+  kb:game.koBurst?{x:r2(game.koBurst.x),y:r2(game.koBurst.y),t:r2(game.koBurst.t||0)}:null,
+  bn:game.baneN||0,bi:game.bane||0,
   c:[cb(1).textContent,cb(1).classList.contains('active'),cb(2).textContent,cb(2).classList.contains('active'),$('combat-callout').textContent]}}
 function applySnap(s){
  s.f.forEach((d,i)=>Object.assign(game.fighters[i],d));time=s.tm;$('timer').textContent=Math.ceil(time);
  game.banner=s.b;game.flash=s.fl;game.shake=s.sh;game.ko=s.ko;game.intro=s.it;game.ultra=s.u;game.slow=s.sl;
+ game.koBurst=s.kb||null;game.baneN=s.bn||0;game.bane=s.bi||0;
  const [a,aa,b,bb,cc]=s.c;$('p1-combo').textContent=a;$('p1-combo').classList.toggle('active',aa);$('p2-combo').textContent=b;$('p2-combo').classList.toggle('active',bb);$('combat-callout').textContent=cc;
  hud()}
 function hostSend(){
@@ -1220,6 +1225,20 @@ function drawFighter(f,i,ghost){
    c.lineWidth=2+impact*3;
    c.beginPath();c.ellipse(0,-f.y,radius*sizeScale,radius*.22*sizeScale,0,0,Math.PI*2);c.stroke();
    c.restore();
+  }
+  c.restore();
+ }
+ if(f.action==='victory'&&!ghost){
+  const winPulse=.5+.5*Math.sin((f.winT||0)*3.2);
+  c.save();c.globalAlpha=.12+.08*winPulse;c.fillStyle='#ffd36b';
+  const aura=c.createRadialGradient(0,-150,18,0,-150,170);
+  aura.addColorStop(0,'rgba(255,211,107,.28)');aura.addColorStop(1,'rgba(255,211,107,0)');
+  c.fillStyle=aura;c.beginPath();c.ellipse(0,-150,170,205,0,0,Math.PI*2);c.fill();
+  c.globalAlpha=.18+.12*winPulse;c.strokeStyle='#ffd36b';c.lineWidth=2;
+  for(let ray=0;ray<7;ray++){
+   const a=-Math.PI*.92+ray*Math.PI*.84/6;
+   c.beginPath();c.moveTo(Math.cos(a)*78,-150+Math.sin(a)*78);
+   c.lineTo(Math.cos(a)*118,-150+Math.sin(a)*118);c.stroke();
   }
   c.restore();
  }
