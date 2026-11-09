@@ -606,3 +606,69 @@ body.fighting .majic-boss-hud.hidden{display:none}
 @keyframes royalEntrance{0%{opacity:0;transform:translateY(-18px) scale(.94);filter:brightness(1.8)}65%{opacity:1;transform:translateY(2px) scale(1.01)}100%{opacity:1;transform:none;filter:none}}
 @keyframes royalSweep{to{transform:translateX(110%)}}
 @media(max-width:520px){.royal-champion-entrance{gap:8px;padding:7px 10px}.royal-champion-portrait{width:44px;height:44px}.royal-crown-wrap{width:32px}.royal-champion-copy b{font-size:8px}.royal-champion-copy strong{font-size:20px}}
+
+/* Build 9.13: persistent Hall of Champions for MAJIC summit victories */
+.champ-hall{position:absolute;left:3vw;top:25vh;width:min(290px,28vw);max-height:58vh;padding:12px 13px;border:1px solid rgba(232,185,91,.62);border-radius:8px;background:linear-gradient(145deg,rgba(18,13,24,.9),rgba(48,30,12,.82));box-shadow:0 0 22px rgba(183,130,48,.2),inset 0 0 18px rgba(255,215,130,.06);color:#f5ecd8;overflow:hidden;pointer-events:none}
+.champ-hall h3{margin:0 0 9px;text-align:center;font:900 19px/1 \"Barlow Condensed\",Impact,sans-serif;letter-spacing:.16em;color:#ffd36b;text-shadow:0 0 12px rgba(255,190,80,.35)}
+.champ-hall p{margin:0;text-align:center;font-size:12px;line-height:1.5;color:#d8c9aa}.champ-hall-list{display:grid;gap:6px;max-height:calc(58vh - 42px);overflow:hidden}
+.champ-hall-entry{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:4px 6px;border-bottom:1px solid rgba(232,185,91,.18);font-size:11px;font-weight:800;letter-spacing:.04em}
+.champ-hall-entry img{width:34px;height:34px;object-fit:cover;border:1px solid rgba(255,211,107,.65);border-radius:4px}.champ-hall-entry b{font-size:9px;color:#ffd36b;white-space:nowrap}
+@media(max-width:800px){.champ-hall{left:3vw;right:3vw;top:auto;bottom:12vh;width:auto;max-height:18vh;padding:7px 9px}.champ-hall h3{font-size:14px;margin-bottom:5px}.champ-hall-list{display:flex;gap:7px;max-height:none;overflow:hidden}.champ-hall-entry{display:flex;flex:0 0 auto;gap:5px;padding:2px 5px;font-size:9px}.champ-hall-entry img{width:25px;height:25px}.champ-hall-entry b{font-size:8px}}
+
+
+/* Build 9.14: persistent local Tower records and championship leaderboard */
+.champ-record-board{position:absolute;right:3vw;top:25vh;width:min(290px,28vw);padding:12px 13px;border:1px solid rgba(151,119,220,.62);border-radius:8px;background:linear-gradient(145deg,rgba(15,13,27,.92),rgba(35,25,55,.86));box-shadow:0 0 22px rgba(132,94,205,.2),inset 0 0 18px rgba(190,160,255,.06);color:#f5ecd8;pointer-events:none}
+.champ-record-board h3{margin:0 0 10px;text-align:center;font:900 18px/1 \"Barlow Condensed\",Impact,sans-serif;letter-spacing:.13em;color:#d9c0ff;text-shadow:0 0 12px rgba(166,125,255,.35)}
+.champ-record-row{display:grid;gap:3px;padding:7px 3px;border-bottom:1px solid rgba(190,160,255,.17)}.champ-record-row:last-child{border:0}.champ-record-row span{font:800 9px \"Barlow Condensed\",Impact,sans-serif;letter-spacing:.12em;color:#bba7d9}.champ-record-row b{font:900 14px \"Barlow Condensed\",Impact,sans-serif;color:#fff0c8;overflow-wrap:anywhere}
+@media(max-width:800px){.champ-record-board{right:3vw;left:3vw;top:4vh;bottom:auto;width:auto;padding:7px 9px}.champ-record-board h3{font-size:13px;margin-bottom:4px}.champ-record-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 2px}.champ-record-row span{font-size:8px}.champ-record-row b{font-size:10px;text-align:right}.champ-hall{bottom:17vh}}
+
+/* Fighter-specific achievement medals */
+.result-achievements{width:min(560px,94vw);margin:10px auto 14px;padding:12px 15px;border:1px solid rgba(232,185,91,.4);border-radius:9px;background:linear-gradient(145deg,rgba(24,31,21,.94),rgba(38,27,17,.9));box-shadow:inset 0 0 20px rgba(232,185,91,.06)}
+.result-achievements h3{margin:0 0 8px;color:#e8c477;font:900 16px 'Barlow Condensed';letter-spacing:.14em}.result-achievements p{margin:0;font-size:11px;color:#aeb49f}.achievement-list{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}.achievement-medal{display:flex;align-items:center;gap:8px;min-width:210px;padding:8px 10px;border:1px solid rgba(232,185,91,.32);border-radius:6px;background:#0d130dcc;text-align:left}.achievement-medal>b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#f7d98b,#9d6c2c);color:#24190b;font-size:20px;box-shadow:0 0 12px #e8b95b55}.achievement-medal span{display:grid;gap:2px}.achievement-medal strong{font:900 12px 'Barlow Condensed';letter-spacing:.08em;color:#ffe2a0}.achievement-medal small{font-size:9px;color:#b7bdac}
+@media(max-width:650px){.result-achievements{padding:8px;margin:6px auto 10px}.achievement-medal{min-width:100%;padding:6px 8px}.achievement-medal>b{width:29px;height:29px;font-size:17px}}
+
+/* Fighter achievement gallery */
+.achievement-gallery-screen{text-align:center;background:radial-gradient(ellipse at 50% 0%,#3b2a18aa,transparent 55%)}
+.achievement-gallery-screen .select-title{margin-bottom:22px}
+.achievement-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:1100px;margin:0 auto 22px;text-align:left}
+.achievement-fighter-card{padding:13px;border:1px solid rgba(232,185,91,.42);border-radius:9px;background:linear-gradient(145deg,rgba(30,39,27,.96),rgba(17,20,16,.96));box-shadow:inset 0 0 22px #e8b95b0b}
+.achievement-fighter-head{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:11px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e8b95b30}
+.achievement-fighter-head img{width:58px;height:58px;object-fit:cover;object-position:top;border:1px solid #e8b95b;border-radius:5px}
+.achievement-fighter-head h3{margin:0 0 3px;color:#f5d58b;font:900 22px 'Barlow Condensed';letter-spacing:.1em}
+.achievement-fighter-head small{font-size:9px;color:#b7bdac;letter-spacing:.08em}.achievement-fighter-head>b{color:#ffd36b;font:900 18px 'Barlow Condensed'}
+.achievement-medal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.achievement-gallery-medal{display:flex;align-items:center;gap:7px;min-height:48px;padding:6px;border:1px solid #e8b95b30;border-radius:5px;background:#080d0acc}
+.achievement-gallery-medal>b{display:grid;place-items:center;flex:0 0 29px;height:29px;border-radius:50%;background:radial-gradient(circle,#f7d98b,#9d6c2c);color:#24190b;font-size:17px}
+.achievement-gallery-medal strong{display:block;font:900 10px 'Barlow Condensed';letter-spacing:.04em;color:#ffe2a0}.achievement-gallery-medal small{display:block;font-size:8px;line-height:1.3;color:#b7bdac}
+.achievement-gallery-medal.locked{opacity:.48;filter:saturate(.45)}.achievement-gallery-medal.unlocked{border-color:#e8b95b88;box-shadow:0 0 10px #e8b95b18}
+#achievement-gallery-back{display:block;margin:0 auto;min-width:220px}
+@media(max-width:760px){.achievement-gallery-grid{grid-template-columns:1fr}.achievement-gallery-screen{padding-top:18px}.achievement-fighter-card{padding:10px}.achievement-medal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.achievement-medal-grid{grid-template-columns:1fr}.achievement-fighter-head img{width:48px;height:48px}}
+
+/* Fighter mastery progression */
+.fighter-mastery-rank{display:inline-block;margin-top:4px;padding:2px 7px;border:1px solid #e8b95b66;border-radius:3px;background:linear-gradient(90deg,#6c4b1d55,#17190fcc);color:#ffe09a;font:900 10px 'Barlow Condensed';letter-spacing:.13em}
+.fighter-mastery-track{height:8px;margin:4px 1px 3px;overflow:hidden;border:1px solid #d6aa5c66;border-radius:10px;background:#050907;box-shadow:inset 0 1px 3px #000}
+.fighter-mastery-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#8c5c22,#e6bd62,#fff0b0);box-shadow:0 0 9px #e8b95b88;transition:width .35s ease}
+.fighter-mastery-caption{display:flex;justify-content:space-between;gap:8px;margin:0 2px 9px;color:#b9ad8d;font:700 8px 'Barlow Condensed';letter-spacing:.1em}
+@media(max-width:390px){.fighter-mastery-caption{font-size:7px}}
+
+/* Fighter-specific mastery rewards */
+.mastery-fighter-title{margin-top:3px;color:var(--mastery-accent,#e8b95b);font:900 10px 'Barlow Condensed';letter-spacing:.18em;text-shadow:0 0 9px var(--mastery-accent,#e8b95b)}
+.mastery-reward-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 0}
+.mastery-reward{display:flex;align-items:center;gap:7px;min-height:39px;padding:6px;border:1px solid color-mix(in srgb,var(--mastery-accent,#e8b95b) 48%,transparent);border-radius:5px;background:#080d0acc}
+.mastery-reward>b{display:grid;place-items:center;flex:0 0 25px;height:25px;border-radius:50%;background:color-mix(in srgb,var(--mastery-accent,#e8b95b) 26%,#111);color:var(--mastery-accent,#e8b95b);font-size:15px}
+.mastery-reward strong{display:block;color:#ffe2a0;font:900 9px 'Barlow Condensed';letter-spacing:.07em}.mastery-reward small{display:block;color:#b7bdac;font-size:8px;line-height:1.25}
+.mastery-reward.locked{opacity:.42;filter:saturate(.35)}.mastery-reward.unlocked{box-shadow:inset 0 0 12px color-mix(in srgb,var(--mastery-accent,#e8b95b) 13%,transparent)}
+.achievement-fighter-card.mastery-legend{border-color:var(--mastery-accent,#e8b95b);box-shadow:inset 0 0 24px color-mix(in srgb,var(--mastery-accent,#e8b95b) 16%,transparent),0 0 14px color-mix(in srgb,var(--mastery-accent,#e8b95b) 17%,transparent)}
+.mastery-unlock{display:grid;gap:2px;margin:9px auto 0;padding:7px 12px;max-width:390px;border:1px solid #e8b95b88;border-radius:5px;background:linear-gradient(90deg,#241a0dcc,#60451d88,#241a0dcc);color:#ffe2a0;text-align:center}.mastery-unlock b{font:900 12px 'Barlow Condensed';letter-spacing:.14em}.mastery-unlock span{font-size:9px;color:#e4d3a7}
+#winner-portrait.mastery-legend-portrait{filter:drop-shadow(0 0 12px var(--mastery-aura)) drop-shadow(0 0 26px var(--mastery-aura));animation:masteryLegendPulse 2.4s ease-in-out infinite}
+@keyframes masteryLegendPulse{0%,100%{filter:drop-shadow(0 0 8px var(--mastery-aura)) drop-shadow(0 0 18px var(--mastery-aura))}50%{filter:drop-shadow(0 0 17px var(--mastery-aura)) drop-shadow(0 0 34px var(--mastery-aura))}}
+@media(max-width:760px){.mastery-reward-grid{grid-template-columns:1fr 1fr}.mastery-reward{min-height:36px;padding:5px}.mastery-reward small{font-size:7px}}
+/* Build 9.18 merge: keep the Hall and Record Board clear of the champion headline, copy and unlock banner. */
+@media(min-width:801px){
+ .champ-record-board{left:3vw;right:auto;top:44vh;width:min(270px,24vw);padding:9px 11px}
+ .champ-record-board h3{font-size:15px;margin-bottom:6px}
+ .champ-hall{left:3vw;right:auto;top:auto;bottom:4vh;width:min(270px,24vw);max-height:22vh;padding:9px 11px}
+ .champ-hall h3{font-size:15px;margin-bottom:6px}.champ-hall-list{max-height:calc(22vh - 34px)}
+}
+@media(max-width:800px){.champ-record-board{top:auto;bottom:calc(17vh + 86px)}}

@@ -595,3 +595,14 @@ body.fighting{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-u
 body.fighting .majic-boss-hud{position:absolute;top:clamp(106px,15.5vh,140px);left:50%;transform:translateX(-50%);width:min(560px,64vw);margin:0;z-index:6;pointer-events:none;opacity:.94}
 body.fighting .majic-boss-hud.hidden{display:none}
 @media(max-width:700px),(max-height:500px){body.fighting .majic-boss-hud{top:clamp(64px,15vh,96px);width:min(420px,78vw);padding:5px 8px}}
+
+/* Build 9.12: the newly crowned fighter receives a one-time royal entrance on Tower select. */
+.royal-champion-entrance{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;width:min(620px,92vw);margin:12px auto 2px;padding:9px 22px 9px 14px;overflow:hidden;border:1px solid rgba(255,220,135,.9);border-radius:8px;background:linear-gradient(100deg,rgba(35,18,8,.96),rgba(92,55,15,.92),rgba(28,15,8,.96));box-shadow:0 0 12px rgba(255,190,75,.55),inset 0 0 18px rgba(255,220,130,.16);animation:royalEntrance .9s cubic-bezier(.2,.8,.2,1) both}
+.royal-champion-entrance:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,rgba(255,244,190,.25) 48%,transparent 72%);transform:translateX(-110%);animation:royalSweep 1.4s .35s ease-out both;pointer-events:none}
+.royal-crown-wrap{width:42px;height:36px;display:grid;place-items:center;filter:drop-shadow(0 0 9px #ffd36b)}.royal-crown-wrap img{width:100%;object-fit:contain}
+.royal-champion-portrait{width:54px;height:54px;object-fit:cover;border:2px solid #f4d58c;border-radius:5px;box-shadow:0 0 12px rgba(255,205,100,.55)}
+.royal-champion-copy{display:grid;gap:1px;text-align:left}.royal-champion-copy b{font:800 10px 'Barlow Condensed',Impact,sans-serif;letter-spacing:.17em;color:#f8df9e}.royal-champion-copy strong{font:italic 900 25px/1 'Barlow Condensed',Impact,sans-serif;letter-spacing:.06em;color:#fff4d2;text-shadow:0 0 12px rgba(255,195,75,.55)}.royal-champion-copy small{font:800 8px 'Barlow Condensed',Impact,sans-serif;letter-spacing:.22em;color:#d6b36c}
+.fighter-tile.royal-champion-tile{filter:drop-shadow(0 0 8px rgba(255,225,145,.9)) drop-shadow(0 0 22px rgba(255,180,50,.7))!important}.fighter-tile.royal-champion-tile:before{content:'CHAMPION';position:absolute;z-index:5;top:7%;left:4%;padding:3px 6px;background:linear-gradient(90deg,#fff0b8,#c88b2c);color:#2a1605;font:900 9px 'Barlow Condensed',Impact,sans-serif;letter-spacing:.1em;border-radius:3px;box-shadow:0 0 8px #ffd36b}
+@keyframes royalEntrance{0%{opacity:0;transform:translateY(-18px) scale(.94);filter:brightness(1.8)}65%{opacity:1;transform:translateY(2px) scale(1.01)}100%{opacity:1;transform:none;filter:none}}
+@keyframes royalSweep{to{transform:translateX(110%)}}
+@media(max-width:520px){.royal-champion-entrance{gap:8px;padding:7px 10px}.royal-champion-portrait{width:44px;height:44px}.royal-crown-wrap{width:32px}.royal-champion-copy b{font-size:8px}.royal-champion-copy strong{font-size:20px}}

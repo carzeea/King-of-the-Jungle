@@ -4,7 +4,7 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','stage','fight','result','champion','story','online','recovery','rise'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','achievement-gallery','stage','fight','result','champion','story','online','recovery','rise'];
 // Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
 const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
@@ -231,11 +231,11 @@ function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(
 function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
- if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0};picks=[chosen,tower.ladder[0]];arena=towerArena();
+ if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
   return start()}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
   const others=roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id).sort(()=>Math.random()-.5).slice(0,3).map(f=>({...f,name:'FALLEN '+f.name,echo:true}));
-  tower={kind:'forgotten',player:chosen,ladder:others,index:0};picks=[chosen,others[0]];arena=towerArena();
+  tower={kind:'forgotten',player:chosen,ladder:others,index:0,startedAt:Date.now()};picks=[chosen,others[0]];arena=towerArena();
   return storyCard({dark:1,title:'',text:STORY.forgotten.enter},()=>storyCard({dark:1,title:'ECHO 1',text:STORY.forgotten.echoes[0]},start))}
  if(step===1){step=2;chosen=picks[1].id===picks[0].id?roster[(roster.indexOf(picks[0])+1)%roster.length]:picks[1];render()}else openStage();
 };
@@ -348,7 +348,7 @@ function cpuInput(i){
 /* ---------- Match flow ---------- */
 function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='majic'?3:2,potential:0,data,ground:true,block:false,blockTime:0,attack:0,stun:0,walk:0,move:0,moveVel:0,
  action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,bossPhase:data.id==='majic'?1:0,
- combo:0,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
+ combo:0,bestCombo:0,usedUltra:false,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
  // First arrival at MAJIC's summit gets a one-time, three-beat boss entrance.
@@ -1033,7 +1033,7 @@ function resolveHit(i,mv){
  if(mv.snakeVenom){o.venomT=2.4;o.venomTick=.78;o.venomBy=i;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*20,y:cy+(k%2)*12,t:0,life:.52+k*.06,color:k===1?'#b8e986':'#78b84f',kind:'ring'});spark(cx,cy,'#a8d66d',24);floatText(cx,cy-94,'VENOMED','#a8d66d');game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.045)}
  const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
  const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
- f.combo=comboing?f.combo+1:1;
+ f.combo=comboing?f.combo+1:1;f.bestCombo=Math.max(f.bestCombo||0,f.combo);
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
  const bodyResponse=impactScale(o);
@@ -1115,6 +1115,7 @@ function comboBreaker(i){
 }
 function startUltra(i){
  const f=game.fighters[i],o=game.fighters[1-i];
+ f.usedUltra=true;
  game.ultra={i,t:0,next:0,hits:0,max:18+Math.floor(f.combo*.8),start:o.hp};
  o.potential=0;o.stun=9;f.attack=9;setAction(f,'ultraseq',9);game.flash=1;snd('sfx.heavyImpact','boom');if(AU&&soundOn&&AU.has('ultra.'+f.data.id)){AU.duckMusic(.3);AU.ultra(f.data.id)}
  banner('ULTRA','',.6,'#ff5ad8');say('Ultra combo');
@@ -1206,6 +1207,7 @@ function finish(){
   $('tower-ladder').innerHTML=tower.ladder.map((f,n)=>`<div class="${n<tower.index||tower.done?'done':n===tower.index?'next':''}"><img src="${portrait(f.id)}" alt=""${f.echo?' class="echo-face"':''}>${f.name}</div>`).join('')+((tower.kind==='forgotten'||tower.reveal||tower.boss)?(tower.boss?`<div class="${tower.done?'done':'next'}"><img src="${portrait('majic')}" alt="">MAJIC</div>`:`<div class="${tower.reveal?'next':''}"><span class="q">?</span>???</div>`):'');
  }
  const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
+ const winnerIndex=draw_?-1:(p1won?0:1),medals=winnerIndex>=0&&!game.fighters[winnerIndex].ai?awardFighterAchievements(game.fighters[winnerIndex],true,flawless,!!(tower&&tower.boss&&winnerIndex===0)):[];renderAchievementAwards(medals,winnerIndex>=0&&!game.fighters[winnerIndex].ai?game.fighters[winnerIndex]:null);
  if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
  if(resultChampId==='majic'&&!draw_){title='THE JUNGLE TITAN';copy='THE TRUE FORM IS REVEALED · THE JUNGLE BOWS TO MAJIC';}
  if(tower&&tower.boss&&!draw_){if(resultChampId==='majic'){title='THE JUNGLE TITAN';copy='“I AM THE LAW OF THIS WILD. THE CROWN WAS ALWAYS MINE.” · MAJIC HOLDS THE SUMMIT';}else{title='THE TITAN FALLS';copy='“IMPOSSIBLE... THE JUNGLE HAS CHOSEN YOU.” · MAJIC’S TRUE FORM IS DEFEATED';}}
@@ -1213,7 +1215,7 @@ function finish(){
  if(soundOn&&AU){const champId=resultChampId;
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
- const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;
+ const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=portrait(champ.id);$('winner-portrait').alt=champ.name;const champRec=SAVE.get('fighterAchievements',{})[champ.id]||{},champMastery=masteryFor(champRec),champReward=MASTERY_REWARDS[champ.id]||{title:'JUNGLE ELITE',aura:'#e8b95b'};$('winner-portrait').classList.toggle('mastery-legend-portrait',champMastery.level>=5);$('winner-portrait').style.setProperty('--mastery-aura',champReward.aura);$('winner-portrait').title=champMastery.level>=2?champReward.title:'';
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
@@ -1227,9 +1229,35 @@ $('tower-next').onclick=()=>{
  picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
  if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
  start()};
-$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=LAIR;return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=LAIR;return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0;tower.startedAt=Date.now();tower.recordsSaved=false;tower.hallSaved=false}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
+const ACHIEVEMENTS=[{id:'flawless',name:'FLAWLESS FIGHTER',icon:'✦',desc:'Win without losing a life bar'},{id:'combo10',name:'COMBO MASTER',icon:'⚡',desc:'Land a 10-hit combo'},{id:'ultra',name:'ULTRA FINISHER',icon:'✹',desc:'Win after unleashing an Ultra Combo'},{id:'titan',name:'TITAN SLAYER',icon:'♛',desc:'Defeat MAJIC in the Tower'}];
+const MASTERY_LEVELS=[{name:'ROOKIE',xp:0},{name:'CONTENDER',xp:300},{name:'HUNTER',xp:800},{name:'CHAMPION',xp:1600},{name:'LEGEND',xp:3000}];
+const MASTERY_REWARDS={badger:{title:'IRONROOT',sig:'Earthbreaker Crest',aura:'#d7a75c'},wolf:{title:'MOONFANG',sig:'Pack Leader Mantle',aura:'#9dc9f4'},hyena:{title:'MAD JESTER',sig:'Chaos Crown',aura:'#e5b34d'},leopard:{title:'FROSTBORN',sig:'Glacier Halo',aura:'#8ceaff'},jaguar:{title:'NIGHTSTALKER',sig:'Ambush Mark',aura:'#e9b45d'},crocodile:{title:'RIVER REAPER',sig:'Marshscale Mantle',aura:'#7ed2a2'},lion:{title:'SUN KING',sig:'Solar Mane Crest',aura:'#ffd36b'},tiger:{title:'STRIPE EMPEROR',sig:'Fury Stripes',aura:'#f4a34c'},grizzly:{title:'IRON PAW',sig:'Mountain Guard',aura:'#c69a70'},hippo:{title:'TIDEBREAKER',sig:'River Crown',aura:'#77d6dc'},elephant:{title:'TITANHEART',sig:'Colossus Crown',aura:'#d9d0bd'},eagle:{title:'SKY SOVEREIGN',sig:'Skyfire Wings',aura:'#f4d889'},snake:{title:'VENOM LORD',sig:'Serpent Halo',aura:'#8bd68a'},stag:{title:'ANCIENT WARDEN',sig:'Forest Spirit Antlers',aura:'#a9d78a'},majic:{title:'VOID ASCENDANT',sig:'Infinite Adaptation Aura',aura:'#b58aff'}};
+function masteryFor(rec){const xp=Math.max(0,rec.masteryXP||0);let i=0;for(let n=0;n<MASTERY_LEVELS.length;n++)if(xp>=MASTERY_LEVELS[n].xp)i=n;const cur=MASTERY_LEVELS[i],next=MASTERY_LEVELS[i+1]||null;return {name:cur.name,level:i+1,xp,next:next?next.xp:null,progress:next?Math.max(0,Math.min(100,(xp-cur.xp)/(next.xp-cur.xp)*100)):100,remaining:next?Math.max(0,next.xp-xp):0};}
+function awardFighterAchievements(f,won,flawless,titan){
+ if(!f||!won)return [];
+ const all=SAVE.get('fighterAchievements',{}),rec=all[f.data.id]||{unlocked:[],wins:0,bestCombo:0,masteryXP:0};
+ rec.unlocked=rec.unlocked||[];rec.wins=(rec.wins||0)+1;rec.bestCombo=Math.max(rec.bestCombo||0,f.bestCombo||0);
+ const earned=[];if(flawless)earned.push('flawless');if((f.bestCombo||0)>=10)earned.push('combo10');if(f.usedUltra)earned.push('ultra');if(titan)earned.push('titan');
+ const fresh=earned.filter(id=>!rec.unlocked.includes(id));rec.unlocked=[...new Set([...rec.unlocked,...earned])];
+ const oldMastery=masteryFor(rec);rec.masteryXP=(rec.masteryXP||0)+100+Math.min(100,(f.bestCombo||0)*3)+fresh.length*50;const newMastery=masteryFor(rec);rec.masteryLevelUp=newMastery.level>oldMastery.level?newMastery.name:null;rec.lastWin=Date.now();all[f.data.id]=rec;SAVE.set('fighterAchievements',all);
+ return fresh.map(id=>ACHIEVEMENTS.find(a=>a.id===id)).filter(Boolean);
+}
+function renderAchievementAwards(items,f){const el=$('result-achievements');if(!el)return;const rec=f?SAVE.get('fighterAchievements',{})[f.data.id]||{}:{},m=masteryFor(rec),reward=MASTERY_REWARDS[f?.data.id]||{title:'JUNGLE ELITE',sig:'Champion Aura',aura:'#e8b95b'};const levelUp=rec.masteryLevelUp?`<div class="mastery-unlock"><b>✦ ${rec.masteryLevelUp} RANK UNLOCKED</b><span>${rec.masteryLevelUp==='CONTENDER'?reward.title+' fighter title':rec.masteryLevelUp==='HUNTER'?reward.sig:rec.masteryLevelUp==='CHAMPION'?'Exclusive victory flourish':'Legendary '+reward.title+' aura'}</span></div>`:'';el.innerHTML=(items.length?`<h3>NEW FIGHTER MEDALS · ${f.data.name}</h3><div class="achievement-list">${items.map(a=>`<div class="achievement-medal"><b>${a.icon}</b><span><strong>${a.name}</strong><small>${a.desc}</small></span></div>`).join('')}</div>`:'<h3>FIGHTER ACHIEVEMENTS</h3><p>No new medals this match. Keep fighting to earn them.</p>')+levelUp;el.classList.toggle('earned',!!items.length||!!levelUp)}
+function renderAchievementGallery(){
+ const grid=$('achievement-gallery-grid'),all=SAVE.get('fighterAchievements',{});if(!grid)return;
+ const fighters=roster.slice();let unlocked=0,total=0;
+ grid.innerHTML=fighters.map(f=>{const rec=all[f.id]||{unlocked:[],wins:0,bestCombo:0,masteryXP:0},ids=rec.unlocked||[],m=masteryFor(rec);unlocked+=ids.length;total+=ACHIEVEMENTS.length;
+  const rw=MASTERY_REWARDS[f.id]||{title:'JUNGLE ELITE',sig:'Champion Aura',aura:'#e8b95b'},rewardRows=[{level:2,name:'Fighter Title',detail:rw.title,icon:'✦'},{level:3,name:'Signature Crest',detail:rw.sig,icon:'♛'},{level:4,name:'Victory Flourish',detail:'Exclusive champion entrance effect',icon:'✹'},{level:5,name:'Legend Aura',detail:'Permanent '+rw.title+' glow',icon:'✧'}];
+  return `<article class="achievement-fighter-card ${m.level>=5?'mastery-legend':''}" style="--mastery-accent:${rw.aura}"><div class="achievement-fighter-head"><img src="${portrait(f.id)}" alt="${f.name}"><div><h3>${f.name}</h3><small>${rec.wins||0} WINS · BEST COMBO ${rec.bestCombo||0}</small><div class="fighter-mastery-rank">${m.name} · LEVEL ${m.level}</div><div class="mastery-fighter-title">${m.level>=2?rw.title:'TITLE LOCKED'}</div></div><b>${ids.length}/${ACHIEVEMENTS.length}</b></div><div class="fighter-mastery-track"><div class="fighter-mastery-fill" style="width:${m.progress.toFixed(1)}%"></div></div><div class="fighter-mastery-caption"><span>${m.xp.toLocaleString()} MASTERY XP</span><span>${m.next===null?'MAXIMUM MASTERY':m.remaining.toLocaleString()+' XP TO NEXT LEVEL'}</span></div><div class="mastery-reward-grid">${rewardRows.map(r=>`<div class="mastery-reward ${m.level>=r.level?'unlocked':'locked'}"><b>${r.icon}</b><span><strong>${r.name}</strong><small>${m.level>=r.level?r.detail:'Unlock at '+MASTERY_LEVELS[r.level-1].name}</small></span></div>`).join('')}</div><div class="achievement-medal-grid">${ACHIEVEMENTS.map(a=>`<div class="achievement-gallery-medal ${ids.includes(a.id)?'unlocked':'locked'}"><b>${a.icon}</b><span><strong>${a.name}</strong><small>${ids.includes(a.id)?'UNLOCKED':a.desc}</small></span></div>`).join('')}</div></article>`;
+ }).join('');
+ $('achievement-gallery-summary').textContent=`${unlocked} OF ${total} MEDALS UNLOCKED · ${fighters.length} FIGHTER PROFILES · MASTERY RANKS TRACKED PER FIGHTER`;
+}
+$('open-achievement-gallery').onclick=()=>{renderAchievementGallery();show('achievement-gallery')};
+$('achievement-gallery-back').onclick=()=>{show('menu')};
+
 const crowns=()=>SAVE.get('crowns',[]);
 const STORY=window.KOTJ_STORY||{fighters:{},forgotten:{echoes:[]}};STORY.forgotten=STORY.forgotten||{echoes:[]};STORY.forgotten.echoes=STORY.forgotten.echoes||[];
 const storyOf=id=>(STORY.fighters||{})[id]||{};
@@ -1300,10 +1328,17 @@ const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:
  lion:[.63,.1,.21],tiger:[.69,.1,.2],grizzly:[.6,.11,.2],hippo:[.62,.12,.2],elephant:[.5,.11,.21],snake:[.44,.16,.17],eagle:[.72,.24,.16],stag:[.5,.29,.16],majic:[.55,.13,.13]};
 let champRaf=0;
 function champion(f){
- if(tower&&tower.boss)SAVE.set('jungleChampion',{id:f.id});
+ if(tower&&tower.boss&&!tower.hallSaved){tower.hallSaved=true;
+  SAVE.set('jungleChampion',{id:f.id});
+  const hall=SAVE.get('hallOfChampions',[]),entry=hall.find(x=>x.id===f.id);
+  if(entry){entry.wins=(entry.wins||1)+1;entry.lastWin=Date.now()}
+  else hall.push({id:f.id,name:f.name,wins:1,firstWin:Date.now(),lastWin:Date.now()});
+  SAVE.set('hallOfChampions',hall);
+ }
  if(tower&&tower.boss&&!tower.championCinematicSeen){tower.championCinematicSeen=true;return storyCard({dark:1,slow:2100,fig:{id:f.id,anim:'victory',light:.34,hold:1},eyebrow:'THE JUNGLE CHOOSES ITS CHAMPION',title:'A NEW ERA BEGINS',text:`The eclipse breaks. Violet shadows lift from the canopy, ancient roots glow beneath the arena, and the creatures of the jungle gather in silence.\n\nThe crown is no longer MAJIC’s. **${f.name}** stands as the new guardian of the wild.`},()=>champion(f))}
  if(tower&&tower.boss&&!tower.speechDone){tower.speechDone=true;const txt=(STORY.forgotten.majicSpeech||'').split('[FIGHTER]').join(f.name);
   return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt,voice:majicVox(f.id)},()=>{if(!SAVE.get('riseSeen',false)){SAVE.set('riseSeen',true);$('rise-btn').classList.remove('hidden');playRise(()=>champion(f))}else champion(f)})}
+ if(tower&&!tower.recordsSaved&&tower.kind==='tower'){tower.recordsSaved=true;const records=SAVE.get('globalTowerRecords',{fastestMs:null,totalChampionships:0,majicVictories:0});records.totalChampionships=(records.totalChampionships||0)+1;if(tower.boss)records.majicVictories=(records.majicVictories||0)+1;if(tower.startedAt){const elapsed=Math.max(0,Date.now()-tower.startedAt);if(records.fastestMs==null||elapsed<records.fastestMs)records.fastestMs=elapsed}SAVE.set('globalTowerRecords',records)}
  const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
  if(tower.kind!=='forgotten'){firstCrown=!list.includes(f.id);if(firstCrown){list.push(f.id);SAVE.set('crowns',list)}}
 if(tower.kind!=='forgotten'){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().includes(n.id));
@@ -1311,6 +1346,10 @@ if(tower.kind!=='forgotten'){const left=NEW_FIGHTERS.filter(n=>!unlockedNew().in
    notes.push(`NEW FIGHTER UNLOCKED · ${nf.name}`)}}
  if(secret){newUnlock=!secretUnlocked();if(newUnlock){SAVE.set('secret',true);if(!roster.includes(MAJIC))roster.push(MAJIC);notes.push('MAJIC HAS JOINED THE ROSTER')}}
  $('champ-unlock').textContent=notes.join(' · ');
+ const hallEl=$('champ-hall'),hall=SAVE.get('hallOfChampions',[]);
+ if(hallEl){hallEl.innerHTML=hall.length?`<h3>HALL OF CHAMPIONS</h3><div class="champ-hall-list">${hall.slice().sort((a,b)=>(b.wins||0)-(a.wins||0)).map(x=>`<div class="champ-hall-entry"><img src="${portrait(x.id)}" alt=""><span>${x.name||x.id.toUpperCase()}</span><b>${x.wins||1} ${x.wins===1?'CROWN':'CROWNS'}</b></div>`).join('')}</div>`:'<h3>HALL OF CHAMPIONS</h3><p>Defeat MAJIC to claim your place in history.</p>';hallEl.classList.toggle('empty',!hall.length)}
+ const board=$('champ-record-board'),records=SAVE.get('globalTowerRecords',{fastestMs:null,totalChampionships:0,majicVictories:0}),topChampion=hall.slice().sort((a,b)=>(b.wins||0)-(a.wins||0))[0];
+ if(board){const fmt=ms=>{if(ms==null)return 'NOT SET';const sec=Math.floor(ms/1000),m=Math.floor(sec/60),r=sec%60;return `${m}:${String(r).padStart(2,'0')}`};board.innerHTML=`<h3>JUNGLE RECORD BOARD</h3><div class="champ-record-row"><span>FASTEST TOWER</span><b>${fmt(records.fastestMs)}</b></div><div class="champ-record-row"><span>MOST MAJIC VICTORIES</span><b>${topChampion?`${topChampion.name||topChampion.id.toUpperCase()} · ${topChampion.wins||1}`:'NONE YET'}</b></div><div class="champ-record-row"><span>CHAMPIONSHIPS WON</span><b>${records.totalChampionships||0}</b></div>`}
  forgottenMenu();
  $('champ-name').textContent=f.name;
  $('champ-copy').textContent=secret?(((storyOf(f.id).trueEnding||'').split(/(?<=[.!?])\s/)[0])||`${f.name} reached the summit and defeated MAJIC.`):(`${f.name} conquered all ${tower.ladder.length} challengers and takes the crown in Majic's Lair.`);
