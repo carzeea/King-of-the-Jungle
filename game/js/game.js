@@ -156,6 +156,14 @@ const FIGHTER_MASS={badger:1.08,hyena:.94,wolf:.9,leopard:.72,jaguar:.86,
  crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.28,hippo:1.38,elephant:1.5,
  eagle:.76,snake:.7,majic:1.04};
 const impactScale=f=>Math.max(.68,Math.min(1.28,1/(FIGHTER_MASS[f.data.id]||1)));
+// Each fighter carries a restrained signature impact color, so attacks read
+// as belonging to that animal without changing damage, timing, or hitboxes.
+const FIGHTER_IMPACT={
+ badger:'#d7a85b',hyena:'#d7a85b',wolf:'#b8d7ff',leopard:'#9ce7ff',
+ jaguar:'#e9c46a',crocodile:'#78d6a3',lion:'#ffb347',tiger:'#ff8247',
+ grizzly:'#c99a70',hippo:'#83c9d8',elephant:'#c6b7a0',eagle:'#fff0a6',
+ snake:'#a8e06f',stag:'#b6d98b',majic:'#bd8cff'
+};
 function hitSound(f,mv){
  const r=.94+Math.random()*.12;
  if(mv===MOVES.bite)return snd('sfx.bite','heavy',1,r);
@@ -496,7 +504,21 @@ function update(dt){
 }
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const clampX=x=>Math.max(72,Math.min(1028,x));
-function physics(f,dt){f.x=clampX(f.x+f.vx*dt);f.y+=f.vy*dt;f.vy+=1500*dt;if(f.y>0){f.y=0;f.vy=0;f.ground=true}f.vx*=Math.pow(.004,dt)}
+function physics(f,dt){
+ f.x=clampX(f.x+f.vx*dt);
+ f.landImpact=Math.max(0,(f.landImpact||0)-dt*2.8);
+ const wasAirborne=!f.ground;
+ f.y+=f.vy*dt;f.vy+=1500*dt;
+ if(f.y>0){
+  if(wasAirborne){
+   // Capture landing speed before zeroing vertical velocity. This is visual
+   // feedback only and does not add damage, stun, or alter the jump arc.
+   f.landImpact=clamp(Math.abs(f.vy)/900,.18,1);
+  }
+  f.y=0;f.vy=0;f.ground=true;
+ }
+ f.vx*=Math.pow(.004,dt);
+}
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
  const mv=MOVES[name];
@@ -550,18 +572,24 @@ function resolveHit(i,mv){
  const impactPush=mv.push*bodyResponse;
  if(isEnder){ // finishers move lighter fighters farther; heavyweight fighters resist displacement
   o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*impactPush;o.vy=-330*Math.max(.88,Math.min(1.08,bodyResponse));o.ground=false;
-  snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,.25);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',18);
+  snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,Math.min(.38,.18+mv.push/900));game.flash=Math.max(game.flash||0,.12);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',22);
   resolveBars(o,f);endCombo(i,true);
  }else{
   o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.hitHeavy=mv.push>=100||mv.dmg(0)>=9;o.hitAnimTime=0;o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
   f.vx=f.dir*Math.max(20,impactPush*.4);
   hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
-  if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.12);
+  // Scale camera emphasis to attack force, keeping light taps restrained.
+  const cameraImpact=clamp((mv.push-35)/520,0,.24);
+  if(cameraImpact>0)game.shake=Math.max(game.shake,cameraImpact);
+  if(mv.push>=105)game.flash=Math.max(game.flash||0,.055);
+  if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.14);
   if(!mv.potential)resolveBars(o,f);
  }
  o.hitFlash=.1;o.attack=0;o.move_=null;o.block=false;
  f.meter=Math.min(100,f.meter+(f.instinct?0:4));o.meter=Math.min(100,o.meter+(o.instinct?0:2.5));
- spark(cx,cy-Math.random()*16,mv.shadow?'#c68bff':'#fff0b0',10);
+ const signature=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
+ const impactCount=mv.shadow?14:mv===MOVES.special?16:mv===MOVES.bite?12:mv===MOVES.double?8:10;
+ spark(cx,cy-Math.random()*16,mv.shadow?'#c68bff':signature,impactCount);
  bleed(cx,cy+8-Math.random()*20,f.dir,isEnder?12:mv===MOVES.bite?10:mv===MOVES.special?9:(mv===MOVES.double&&f.chain%2)?6:mv.shadow?4:3);
  const p='p'+(i+1);if(f.combo>=2){$(p+'-combo').textContent=f.combo+' HITS';$(p+'-combo').classList.toggle('active',f.combo>=3)}
  hud();
@@ -948,7 +976,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','hitAnimTime','hitHeavy','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
+const FK=['x','y','vx','vy','moveVel','hitAnimTime','hitHeavy','landImpact','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
@@ -1123,17 +1151,30 @@ function drawFighter(f,i,ghost){
  const x=f.x,y=400+f.y;c.save();c.translate(x,y);c.scale(f.dir,1);
  const sizeScale={badger:.70,wolf:.82,hyena:.80,leopard:.86,jaguar:.86,crocodile:.90,lion:.88,tiger:.86,grizzly:.98,hippo:1.00,elephant:1.08,majic:1.4,snake:.86,eagle:.9,stag:.92}[f.data.id]||.84;
  if(!ghost){
-  // Contact shadow stays on the arena floor while the fighter rises, widening
-  // and softening with height to give jumps a stronger 2.5D sense of space.
-  const lift=Math.max(0,Math.min(1,-f.y/230));
-  c.save();c.globalAlpha=.34*(1-lift*.76);c.fillStyle='#050806';
-  c.shadowColor='#000';c.shadowBlur=5+lift*15;c.beginPath();
-  c.ellipse(0,-f.y,(58+lift*19)*sizeScale,Math.max(3,10-lift*5),0,0,Math.PI*2);c.fill();c.shadowBlur=0;
-  if(f.ground&&(Math.abs(f.move||0)>35||f.attack>0)){
-   c.globalAlpha=.10;const glow=c.createRadialGradient(0,-f.y,4,0,-f.y,72*sizeScale);
-   glow.addColorStop(0,'rgba(236,190,104,.34)');glow.addColorStop(1,'rgba(236,190,104,0)');
-   c.fillStyle=glow;c.beginPath();c.ellipse(0,-f.y,72*sizeScale,15,0,0,Math.PI*2);c.fill();
-  }c.restore();
+  // Layered floor contact shadow and warm bounce light anchor the sprite to the arena.
+  const lift=clamp((-f.y)/260,0,1),moving=Math.min(1,Math.abs(f.moveVel||f.move||0)/240);
+  c.save();
+  c.globalAlpha=.34*(1-lift*.78);
+  c.fillStyle='#050403';c.shadowColor='#000';c.shadowBlur=5+lift*18;
+  c.beginPath();c.ellipse(0,-f.y,58*sizeScale*(1+lift*.22),Math.max(3,10-lift*5),0,0,Math.PI*2);c.fill();
+  c.shadowBlur=0;
+  if(moving>.08&&f.ground){
+   c.globalAlpha=.12*moving;
+   const glow=c.createRadialGradient(0,-f.y,2,0,-f.y,76*sizeScale);
+   glow.addColorStop(0,'rgba(244,190,104,.30)');glow.addColorStop(1,'rgba(244,190,104,0)');
+   c.fillStyle=glow;c.beginPath();c.ellipse(0,-f.y,76*sizeScale,16,0,0,Math.PI*2);c.fill();
+  }
+  // A brief expanding floor ripple sells the weight of a landing.
+  if((f.landImpact||0)>.025){
+   const impact=f.landImpact;
+   const radius=24+(1-impact)*10+(1-impact)*54;
+   c.save();c.globalAlpha=impact*.42;
+   c.strokeStyle=FIGHTER_IMPACT[f.data.id]||'#e8c36d';
+   c.lineWidth=2+impact*3;
+   c.beginPath();c.ellipse(0,-f.y,radius*sizeScale,radius*.22*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.restore();
+  }
+  c.restore();
  }
  if(f.instinct&&!ghost){c.shadowColor='#5fe3ff';c.shadowBlur=26;}
  if(SPRITES[f.data.id]&&drawSprite(f)){}
@@ -1176,8 +1217,36 @@ function drawSprite(f){
  if(!img||!img.complete||!img.naturalWidth)return false;
  const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
  if(f.action==='earthslam'&&ap>.5){c.save();c.globalAlpha=.8*(1-ap);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+ap*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
- c.filter=f.hitFlash>0?'brightness(2.4)':(f.data.echo?'grayscale(1) brightness(.55) contrast(1.25) drop-shadow(0 0 8px rgba(150,110,255,.9))':'none');
- c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);c.filter='none';
+ const impactTint=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
+ if(f.hitFlash>0){
+  c.filter=f.data.echo
+   ?`brightness(2.15) drop-shadow(0 0 12px ${impactTint}) drop-shadow(0 0 7px rgba(150,110,255,.9))`
+   :`brightness(2.15) drop-shadow(0 0 13px ${impactTint})`;
+ }else{
+  c.filter=f.data.echo?'grayscale(1) brightness(.55) contrast(1.25) drop-shadow(0 0 8px rgba(150,110,255,.9))':'none';
+ }
+ // Small anticipation, committed strike, and recovery body motion make the
+ // sprite sequence read as one connected action rather than a frame swap.
+ const attackAction=['claw','double','bite','earthslam','pounce','ender','shadow'].includes(f.action);
+ if(attackAction){
+  const anticipation=1-clamp(p/.22,0,1);
+  const drive=clamp((p-.16)/.42,0,1);
+  const recovery=clamp((p-.68)/.32,0,1);
+  const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105);
+  const lean=-.035*anticipation+forward*drive-.035*recovery;
+  const stretch=1+.055*drive-.025*anticipation-.025*recovery;
+  const squash=1-.035*drive+.025*anticipation+.025*recovery;
+  c.save();
+  c.translate(0,-145+drive*4-anticipation*2);
+  c.rotate(lean);
+  c.scale(stretch,squash);
+  c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);
+  c.restore();
+ }else{
+  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);
+ }
+ c.filter='none';
  return true;
 }
 function drawGeneric(f,i){
