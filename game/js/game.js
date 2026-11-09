@@ -176,8 +176,8 @@ function snd(key,fallback,vol=1,rate=1){if(!soundOn)return;if(!(AU&&AU.now(key,v
 const HEAVY_SPECIAL=['badger','grizzly','hippo','elephant'];
 // Relative body mass for hit reactions. Knockback only; no damage or unlock changes.
 const FIGHTER_MASS={badger:1.08,hyena:.94,wolf:.9,leopard:.72,jaguar:.86,
- crocodile:1.12,lion:1.02,tiger:.94,grizzly:1.42,hippo:1.38,elephant:1.5,
- eagle:.76,snake:.7,stag:.88,majic:1.04};
+ crocodile:1.24,lion:1.02,tiger:.94,grizzly:1.42,hippo:1.38,elephant:1.5,
+ eagle:.76,snake:.7,stag:.96,majic:1.04};
 const impactScale=f=>Math.max(.68,Math.min(1.28,1/(FIGHTER_MASS[f.data.id]||1)));
 // Each fighter carries a restrained signature impact color, so attacks read
 // as belonging to that animal without changing damage, timing, or hitboxes.
@@ -597,7 +597,7 @@ function update(dt){
   // ----- Neutral -----
   let move=0;
   if(!f.block&&!frozen){
-   const snowLeopard=f.data.id==='leopard',jaguar=f.data.id==='jaguar',wolf=f.data.id==='wolf';const sp=240*f.data.speed/7*spd*(snowLeopard?1.10:jaguar?1.035:wolf?1.025:1)*((f.venomT||0)>0?.82:1)*((f.coilT||0)>0?.38:1);if(inp.l)move=-sp;if(inp.r)move=sp;
+   const snowLeopard=f.data.id==='leopard',jaguar=f.data.id==='jaguar',wolf=f.data.id==='wolf';const stag=f.data.id==='stag';const sp=240*f.data.speed/7*spd*(snowLeopard?1.10:jaguar?1.035:wolf?1.025:stag?1.035:1)*((f.venomT||0)>0?.82:1)*((f.coilT||0)>0?.38:1);if(inp.l)move=-sp;if(inp.r)move=sp;
    // Snow Leopard frost dash: double-tap forward or back.
    if(f.data.id==='leopard'){const tap=inp.r&&!f.tapPrevR?1:inp.l&&!f.tapPrevL?-1:0;f.tapPrevR=inp.r;f.tapPrevL=inp.l;f.tapT=(f.tapT||0)+dt;
     if(tap){if(f.ground&&f.leopardDashCooldown<=0&&f.lastTap===tap&&f.tapT<.26){f.leopardDashT=.22;f.leopardDashCooldown=.7;f.moveVel=tap*680;f.lastTap=0;sfx('whiff')}else{f.lastTap=tap;f.tapT=0}}}
@@ -653,7 +653,7 @@ function update(dt){
   // and shed momentum more deliberately.
   const bodyMass=FIGHTER_MASS[f.data.id]||1;
   const agility=clamp((f.data.speed||7)/7,.72,1.42);
-  const handling=clamp(12.5*agility/Math.sqrt(bodyMass)+(f.data.id==='leopard'?5.2:0)+(f.data.id==='hyena'?4.4:0),7.8,26);
+  const handling=clamp(12.5*agility/Math.sqrt(bodyMass)+(f.data.id==='leopard'?5.2:0)+(f.data.id==='hyena'?4.4:0)+(f.data.id==='stag'?1.8:0),7.8,26);
   const moveResponse=1-Math.exp(-dt*handling);
   if(f.data.id==='leopard'&&f.leopardDashT>0)f.moveVel=Math.sign(f.moveVel||move)*720;
   else if(f.data.id==='hyena'&&move!==0&&Math.sign(move)!==Math.sign(f.moveVel||move)&&Math.abs(f.moveVel)>95){f.moveVel+=(move-f.moveVel)*Math.min(1,moveResponse*1.32)}
@@ -661,6 +661,15 @@ function update(dt){
   else if(f.data.id==='grizzly'&&move!==0){f.moveVel+=(move-f.moveVel)*moveResponse*.82}
   else if(f.data.id==='hippo'&&move===0){f.moveVel*=Math.exp(-dt*3.25)}
   else if(f.data.id==='hippo'&&move!==0){f.moveVel+=(move-f.moveVel)*moveResponse*.72}
+  // Crocodile: low-slung ambush predator. It builds forward drive deliberately,
+  // carries momentum through a committed rush, and pivots more slowly than
+  // the feline fighters. This changes handling only, not attack balance.
+  else if(f.data.id==='crocodile'&&move===0){f.moveVel*=Math.exp(-dt*3.9)}
+  else if(f.data.id==='crocodile'&&move!==0){const reversal=Math.sign(move)!==Math.sign(f.moveVel||move);f.moveVel+=(move-f.moveVel)*moveResponse*(reversal?.68:.86)}
+  // Stag: grounded forest guardian. It carries athletic leg-drive into a charge,
+  // but plants and redirects its weight deliberately when changing direction.
+  else if(f.data.id==='stag'&&move===0){f.moveVel*=Math.exp(-dt*5.2)}
+  else if(f.data.id==='stag'&&move!==0){const reversal=Math.sign(move)!==Math.sign(f.moveVel||move);f.moveVel+=(move-f.moveVel)*moveResponse*(reversal?.76:1.04)}
   else f.moveVel+=(move-f.moveVel)*moveResponse;
   if(Math.abs(f.moveVel)<2&&move===0)f.moveVel=0;
   f.move=f.moveVel;f.x+=f.moveVel*dt;
@@ -2569,7 +2578,7 @@ function drawSprite(f){
   case'down':if(f.down>.35){anim=S.fall[0];fr=seq(S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seq(S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1],Math.floor(f.koTime*9));break;
   case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
-  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.5,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate)};
+  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate)};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
@@ -2604,7 +2613,7 @@ function drawSprite(f){
   const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
-  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger',elephantTitan=f.data.id==='elephant';
+  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger',elephantTitan=f.data.id==='elephant',eagleSky=f.data.id==='eagle',snakeSerpent=f.data.id==='snake';
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
   // Lion: load the heavy forequarters, drive through the shoulders, then settle.
   const lionLoad=lionKing?anticipation*.045:0;
@@ -2620,11 +2629,21 @@ function drawSprite(f){
   const elephantLoad=elephantTitan?anticipation*.075:0;
   const elephantDrive=elephantTitan?drive*(f.action==='ender'?.17:f.action==='bite'?.145:.115):0;
   const elephantSettle=elephantTitan?recovery*.065:0;
-  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0);
-  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0);
+  // Eagle: fold into a compact dive, spear forward through the strike, then
+  // flare upward into a controlled aerial recovery.
+  const eagleDive=eagleSky?anticipation*.035:0;
+  const eagleStrike=eagleSky?drive*(f.action==='ender'?.19:f.action==='bite'?.16:.13):0;
+  const eagleFlare=eagleSky?recovery*.075:0;
+  // Snake: draw the body into a compact coil, snap forward with a short precise strike,
+  // then let the long body uncoil and settle instead of using a mammalian lunge.
+  const snakeCoil=snakeSerpent?anticipation*.052:0;
+  const snakeStrike=snakeSerpent?drive*(f.action==='bite'?.105:f.action==='ender'?.125:.075):0;
+  const snakeUncoil=snakeSerpent?recovery*.042:0;
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle-eagleDive+eagleStrike-eagleFlare;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0)+(eagleSky?drive*.075-recovery*.025:0)+(snakeSerpent?drive*.035-anticipation*.018:0);
+  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0)+(eagleSky?anticipation*.035+recovery*.045:0)+(snakeSerpent?anticipation*.065+recovery*.025:0);
   c.save();
-  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0),-145+drive*(tigerKing?9:elephantTitan?6:4)-anticipation*(tigerKing?5:elephantTitan?8:2));
+  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0)+(eagleSky?drive*13-anticipation*4:0)+(snakeSerpent?drive*5-anticipation*2:0),-145+drive*(tigerKing?9:elephantTitan?6:eagleSky?13:4)-anticipation*(tigerKing?5:elephantTitan?8:eagleSky?3:2)-eagleFlare*18+(snakeSerpent?snakeCoil*10-snakeStrike*8+snakeUncoil*5:0));
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
@@ -2657,6 +2676,12 @@ function drawSprite(f){
   const hit=clamp((f.hitAnimTime||0)/.24,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(9+10*pulse),-145-pulse*3);c.rotate(-f.dir*(.06+.075*pulse));
   c.scale(1-.04*pulse,1+.025*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'&&f.data.id==='eagle'){
+  // Aerial predator recoil: the wings/body give way, then the bird regains lift.
+  const hit=clamp((f.hitAnimTime||0)/.26,0,1),pulse=Math.sin(hit*Math.PI);
+  c.save();c.translate(-f.dir*(7+8*pulse),-145-pulse*5);c.rotate(-f.dir*(.075+.045*pulse));
+  c.scale(1-.035*pulse,1+.045*pulse);c.translate(0,145);
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='elephant'){
   // Heavy elephant recoil: the head and forequarters dip, then the body settles.
