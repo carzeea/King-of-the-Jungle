@@ -645,7 +645,13 @@ function ultraStep(dt){
 function koFinish(o,f,ultra){
  if(game.ko)return;o.koTime=0;game.ko=ultra?3.2:2.2;
  AU&&AU.duckMusic(.4);if(!ultra)bleed(o.x,o.y-150,f.dir,14);
- if(!ultra){banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say('K O');game.slow=.35;game.slowT=.8;game.shake=.35;}
+ if(!ultra){
+  banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say('K O');
+  game.slow=.35;game.slowT=.8;game.shake=Math.max(game.shake||0,.35);
+  game.koBurst={x:o.x,y:400+o.y-145,t:0};
+  game.flash=Math.max(game.flash||0,.12);
+  spark(o.x,o.y-145,'#ffd36b',26);
+ }
 }
 
 /* ---------- FX ---------- */
@@ -1074,10 +1080,14 @@ function draw(){
  // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
  const aspect=pw/ph,F=game.fighters,gap=Math.abs(F[0].x-F[1].x);
  let vh=Math.min(570,1210/aspect);                                    // largest view that stays inside the arena art
- const want=1;   // steady camera on every device: it pans with the fighters but never zooms
- const kz=1-Math.pow(.92,frameDt*60),kp=1-Math.pow(.88,frameDt*60);cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
- const air=Math.min(F[0].y,F[1].y);                                   // keep jumping fighters in shot
- let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*.5;
+ // A restrained adaptive lens: tighten slightly when fighters close in,
+ // widen when they spread out, and ease rather than snapping between scales.
+ const want=clamp(1.02+(420-gap)/5200,.96,1.045);
+ const kz=1-Math.pow(.94,frameDt*60),kp=1-Math.pow(.88,frameDt*60);
+ cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
+ const air=Math.min(F[0].y,F[1].y); // follow the highest fighter without losing floor context
+ const airFollow=clamp(-air/420,0,1);
+ let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*(.5+.12*airFollow);
  tx=Math.max(-60,Math.min(1160-vw,tx));ty=Math.max(-30,Math.min(550-vh,ty));
  if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*kp;cam.y+=(ty-cam.y)*kp}
  const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
@@ -1102,12 +1112,41 @@ function draw(){
  c.strokeStyle='#b69a61';c.globalAlpha=.62;c.lineWidth=3;c.beginPath();c.ellipse(550,455,142,35,0,0,Math.PI*2);c.stroke();c.beginPath();c.ellipse(550,455,105,24,0,0,Math.PI*2);c.stroke();c.globalAlpha=1;
  c.strokeStyle='#4c422e';c.lineWidth=1;for(let x=0;x<1100;x+=110){c.beginPath();c.moveTo(x,405);c.lineTo(x+25,520);c.stroke();}
  }
+ // Subtle atmospheric depth: slow drifting motes at staggered depths sit
+ // between the arena artwork and fighters. They remain cosmetic and cheap.
+ {
+  const atmosphere=arena.id==='royal-colosseum'?'#b58cff':arena.id==='frozen-kingdom'?'#c9efff':'#e7c78a';
+  for(let n=0;n<24;n++){
+   const depth=.35+(n%5)*.13;
+   const x=((n*173+t*(8+(n%4)*3)*depth)%1220)-60;
+   const baseY=42+(n*67)%320;
+   const y=baseY+Math.sin(t*.55+n*1.7)*7;
+   const r=.7+(n%3)*.45;
+   c.globalAlpha=.055+(n%4)*.012;
+   c.fillStyle=atmosphere;c.beginPath();c.arc(x,y,r*depth,0,Math.PI*2);c.fill();
+  }
+  c.globalAlpha=1;
+  const haze=c.createLinearGradient(0,275,0,410);
+  haze.addColorStop(0,'rgba(210,220,205,0)');
+  haze.addColorStop(1,'rgba(210,220,205,.055)');
+  c.fillStyle=haze;c.fillRect(-60,260,w+120,160);
+ }
  // Ultra / Instinct darken the stage so the fighters pop.
  const dim=game.ultra?.55:game.fighters.some(f=>f.instinct)?.18:0;if(dim){c.fillStyle=`rgba(10,0,20,${dim})`;c.fillRect(-60,-60,w+120,h+120)}
  drawStains();
  game.fighters.forEach((f,i)=>{f.trail.forEach(p=>{c.save();c.globalAlpha=p.t*1.2;c.filter='hue-rotate(220deg) saturate(3)';drawFighter({...f,x:p.x,y:p.y,dir:p.dir,hitFlash:0,trail:[]},i,true);c.restore()})});
  game.fighters.forEach((f,i)=>drawFighter(f,i));
  drawFx();
+ if(game.koBurst&&game.ko>0){
+  const elapsed=2.2-game.ko;
+  const pulse=clamp(elapsed/.72,0,1);
+  const radius=38+pulse*245;
+  c.save();c.globalAlpha=(1-pulse)*.7;c.strokeStyle='#ffcf78';c.lineWidth=8*(1-pulse)+1;
+  c.beginPath();c.ellipse(game.koBurst.x,game.koBurst.y,radius,radius*.42,0,0,Math.PI*2);c.stroke();
+  c.globalAlpha=(1-pulse)*.18;c.fillStyle='#ffcf78';
+  c.beginPath();c.ellipse(game.koBurst.x,game.koBurst.y,radius*.72,radius*.3,0,0,Math.PI*2);c.fill();
+  c.restore();
+ }
  {const s=Math.min(pw/w,ph/h);c.setTransform(s,0,0,s,(pw-w*s)/2,(ph-h*s)/2);}
  if(game.flash>0){c.fillStyle=`rgba(255,255,255,${Math.min(.75,game.flash*.6)})`;c.fillRect(-w,-h,3*w,3*h)}
  drawComboCounters();drawBanner();
@@ -1142,9 +1181,17 @@ function drawComboCounters(){
 function drawBanner(){
  const b=game.banner;if(!b)return;const k=b.t/b.life,s=k<.12?1.6-k/.12*.6:1,a=k>.8?(1-k)/.2:1;
  c.save();c.translate(550,235);c.scale(s,s);c.globalAlpha=a;c.textAlign='center';
- c.font='900 84px Impact,"Barlow Condensed",sans-serif';c.lineWidth=12;c.strokeStyle='#000';c.strokeText(b.text,0,0);
+ // Thin metallic rails and a moving glint give round/KO banners a compact
+ // championship presentation without obscuring the action.
+ const railW=Math.min(460,Math.max(170,b.text.length*19));
+ c.globalAlpha=a*.72;c.lineWidth=2;c.strokeStyle=b.color;
+ c.beginPath();c.moveTo(-railW,-28);c.lineTo(-railW+28,-28);c.moveTo(railW-28,-28);c.lineTo(railW,-28);c.stroke();
+ const sweep=((b.t*310)%(railW*2))-railW;
+ c.globalAlpha=a*.34;c.fillStyle=b.color;c.fillRect(sweep-1,-34,2,7);
+ c.globalAlpha=a;c.font='900 84px Impact,"Barlow Condensed",sans-serif';c.lineWidth=12;c.strokeStyle='#000';c.strokeText(b.text,0,0);
  const g=c.createLinearGradient(0,-70,0,10);g.addColorStop(0,'#ffffff');g.addColorStop(.5,b.color);g.addColorStop(1,'#7a2b00');c.fillStyle=g;c.shadowColor=b.color;c.shadowBlur=30;c.fillText(b.text,0,0);c.shadowBlur=0;
  if(b.sub){c.font='900 26px Impact,"Barlow Condensed",sans-serif';c.lineWidth=6;c.strokeText(b.sub,0,40);c.fillStyle='#fff3cf';c.fillText(b.sub,0,40)}
+ c.globalAlpha=a*.72;c.lineWidth=2;c.strokeStyle=b.color;c.beginPath();c.moveTo(-railW,54);c.lineTo(-railW+28,54);c.moveTo(railW-28,54);c.lineTo(railW,54);c.stroke();
  c.restore();
 }
 function drawFighter(f,i,ghost){
