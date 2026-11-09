@@ -681,11 +681,24 @@ function koFinish(o,f,ultra){
  if(game.ko)return;o.koTime=0;game.ko=ultra?3.2:2.2;
  AU&&AU.duckMusic(.4);if(!ultra)bleed(o.x,o.y-150,f.dir,14);
  if(!ultra){
-  banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');say('K O');
-  game.slow=.35;game.slowT=.8;game.shake=Math.max(game.shake||0,.35);
-  game.koBurst={x:o.x,y:400+o.y-145,t:0};
-  game.flash=Math.max(game.flash||0,.12);
-  spark(o.x,o.y-145,'#ffd36b',26);
+  if(f.data.id==='leopard'){
+   // Signature Frost Fatality presentation: a brief icy cinematic on the final KO.
+   // This is presentation-only; damage, hitboxes, and KO timing remain unchanged.
+   banner('FROST FATALITY','THE JUNGLE FREEZES',2.4,'#9cefff');
+   game.slow=.24;game.slowT=.95;game.shake=Math.max(game.shake||0,.38);
+   game.koBurst={x:o.x,y:400+o.y-145,t:0,frost:true};
+   game.fx.push({x:o.x,y:o.y-145,t:0,life:.58,color:'#baf6ff',kind:'ring'});
+   game.fx.push({x:o.x,y:o.y-145,t:0,life:.82,color:'#62dcff',kind:'ring'});
+   spark(o.x,o.y-145,'#baf6ff',48);spark(o.x,o.y-145,'#65dfff',28);
+   game.flash=Math.max(game.flash||0,.16);
+  }else{
+   banner('K.O.',f.data.name+' WINS',2,'#ff5a4a');
+   game.slow=.35;game.slowT=.8;game.shake=Math.max(game.shake||0,.35);
+   game.koBurst={x:o.x,y:400+o.y-145,t:0};
+   game.flash=Math.max(game.flash||0,.12);
+   spark(o.x,o.y-145,'#ffd36b',26);
+  }
+  say('K O');
  }
 }
 
@@ -1027,7 +1040,7 @@ function makeSnap(){
  return{t:'s',q:++ON.seq,f:F,tm:r2(time),b:game.banner,fl:r2(game.flash),sh:r2(game.shake),ko:r2(game.ko),it:r2(game.intro),u:game.ultra?{i:game.ultra.i}:null,sl:game.slow,
   // Keep recent presentation and the two-stage Titan's Bane state aligned
   // with the authoritative host simulation.
-  kb:game.koBurst?{x:r2(game.koBurst.x),y:r2(game.koBurst.y),t:r2(game.koBurst.t||0)}:null,
+  kb:game.koBurst?{x:r2(game.koBurst.x),y:r2(game.koBurst.y),t:r2(game.koBurst.t||0),frost:!!game.koBurst.frost}:null,
   bn:game.baneN||0,bi:game.bane||0,
   c:[cb(1).textContent,cb(1).classList.contains('active'),cb(2).textContent,cb(2).classList.contains('active'),$('combat-callout').textContent]}}
 function applySnap(s){
@@ -1183,9 +1196,9 @@ function draw(){
   const elapsed=2.2-game.ko;
   const pulse=clamp(elapsed/.72,0,1);
   const radius=38+pulse*245;
-  c.save();c.globalAlpha=(1-pulse)*.7;c.strokeStyle='#ffcf78';c.lineWidth=8*(1-pulse)+1;
+  c.save();c.globalAlpha=(1-pulse)*.7;c.strokeStyle=game.koBurst.frost?'#9cefff':'#ffcf78';c.lineWidth=8*(1-pulse)+1;
   c.beginPath();c.ellipse(game.koBurst.x,game.koBurst.y,radius,radius*.42,0,0,Math.PI*2);c.stroke();
-  c.globalAlpha=(1-pulse)*.18;c.fillStyle='#ffcf78';
+  c.globalAlpha=(1-pulse)*.18;c.fillStyle=game.koBurst.frost?'#9cefff':'#ffcf78';
   c.beginPath();c.ellipse(game.koBurst.x,game.koBurst.y,radius*.72,radius*.3,0,0,Math.PI*2);c.fill();
   c.restore();
  }
