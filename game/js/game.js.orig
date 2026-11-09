@@ -1950,6 +1950,22 @@ function drawFighter(f,i,ghost){
     c.beginPath();c.arc(px,py,13+Math.sin(a*2)*3,0,Math.PI*1.55);c.stroke();c.fillStyle=color;c.beginPath();c.arc(px,py,3.5,0,Math.PI*2);c.fill();});
    c.restore();
   }
+  // MAJIC's base Shadow Panther presence: restrained violet energy follows his natural silhouette.
+  // The aura intensifies with boss phases without changing his underlying animal anatomy.
+  if(f.data.id==='majic'&&tower&&tower.boss){
+   const phase=Math.max(1,Math.min(3,f.bossPhase||1)),time=performance.now()/1000,move=Math.min(1,Math.abs(f.moveVel||f.move||0)/220);
+   c.save();c.globalCompositeOperation='lighter';
+   const pulse=.5+.5*Math.sin(time*(phase===1?2.2:phase===2?3.5:5.2));
+   const alpha=(phase===1?.12:phase===2?.19:.25)*(1+move*.35);
+   const aura=c.createRadialGradient(0,-150,54,0,-150,190*sizeScale);
+   aura.addColorStop(0,`rgba(126,78,190,${alpha})`);aura.addColorStop(.58,`rgba(95,54,155,${alpha*.55})`);aura.addColorStop(1,'rgba(95,54,155,0)');
+   c.fillStyle=aura;c.beginPath();c.ellipse(0,-150,150*sizeScale,185*sizeScale,0,0,Math.PI*2);c.fill();
+   // Small spectral paw sparks reinforce the panther identity rather than adding humanoid armor.
+   for(let side of [-1,1]){const px=side*(phase===1?65:phase===2?78:90)*sizeScale,py=-14+Math.sin(time*4+side)*3;
+    c.globalAlpha=(.22+pulse*.18)*(phase===1?1:1.35);c.fillStyle=phase===2?'#a6e7d1':'#c7a2ff';c.shadowColor=c.fillStyle;c.shadowBlur=10+phase*3;
+    c.beginPath();c.ellipse(px,py,5+phase,2.5,side*.25,0,Math.PI*2);c.fill();}
+   c.restore();
+  }
   // Layered floor contact shadow and warm bounce light anchor the sprite to the arena.
   const lift=clamp((-f.y)/260,0,1),moving=Math.min(1,Math.abs(f.moveVel||f.move||0)/240);
   c.save();
@@ -2613,7 +2629,7 @@ function drawSprite(f){
   const drive=clamp((p-(leopardLink?.075:f.comboLinked?.11:.16))/(leopardLink?.34:f.comboLinked?.40:.42),0,1);
   const recovery=clamp((p-(leopardLink?.86:f.comboLinked?.78:.68))/(leopardLink?.14:f.comboLinked?.22:.32),0,1);
   const leopardSharp=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action);
-  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger',elephantTitan=f.data.id==='elephant',eagleSky=f.data.id==='eagle',snakeSerpent=f.data.id==='snake';
+  const lionKing=f.data.id==='lion',tigerKing=f.data.id==='tiger',elephantTitan=f.data.id==='elephant',eagleSky=f.data.id==='eagle',snakeSerpent=f.data.id==='snake',majicPanther=f.data.id==='majic';
   const forward=(f.action==='bite'?.12:f.action==='ender'?.16:f.action==='earthslam'?.08:.105)*(leopardSharp?1.22:1);
   // Lion: load the heavy forequarters, drive through the shoulders, then settle.
   const lionLoad=lionKing?anticipation*.045:0;
@@ -2639,9 +2655,14 @@ function drawSprite(f){
   const snakeCoil=snakeSerpent?anticipation*.052:0;
   const snakeStrike=snakeSerpent?drive*(f.action==='bite'?.105:f.action==='ender'?.125:.075):0;
   const snakeUncoil=snakeSerpent?recovery*.042:0;
-  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle-eagleDive+eagleStrike-eagleFlare;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0)+(eagleSky?drive*.075-recovery*.025:0)+(snakeSerpent?drive*.035-anticipation*.018:0);
-  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0)+(eagleSky?anticipation*.035+recovery*.045:0)+(snakeSerpent?anticipation*.065+recovery*.025:0);
+  // MAJIC moves as a true shadow panther: low stalking compression,
+  // powerful shoulder-led extension, then a controlled feline settle.
+  const majicStalk=majicPanther?anticipation*.072:0;
+  const majicLunge=majicPanther?drive*(f.action==='bite'?.175:f.action==='ender'?.19:.135):0;
+  const majicSettle=majicPanther?recovery*.052:0;
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle-eagleDive+eagleStrike-eagleFlare+majicStalk+majicLunge-majicSettle;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0)+(eagleSky?drive*.075-recovery*.025:0)+(snakeSerpent?drive*.035-anticipation*.018:0)+(majicPanther?drive*.065-anticipation*.028-recovery*.018:0);
+  const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0)+(eagleSky?anticipation*.035+recovery*.045:0)+(snakeSerpent?anticipation*.065+recovery*.025:0)+(majicPanther?anticipation*.075+recovery*.035:0);
   c.save();
   c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0)+(eagleSky?drive*13-anticipation*4:0)+(snakeSerpent?drive*5-anticipation*2:0),-145+drive*(tigerKing?9:elephantTitan?6:eagleSky?13:4)-anticipation*(tigerKing?5:elephantTitan?8:eagleSky?3:2)-eagleFlare*18+(snakeSerpent?snakeCoil*10-snakeStrike*8+snakeUncoil*5:0));
   c.rotate(lean);
@@ -2658,7 +2679,7 @@ function drawSprite(f){
    leopard:[.012,.009,.018,3.0], jaguar:[.011,.010,.014,2.5], crocodile:[.006,.006,.008,1.0],
    lion:[.014,.010,.012,1.45], tiger:[.012,.009,.016,2.7], grizzly:[.018,.012,.009,1.15],
    hippo:[.021,.013,.005,.78], elephant:[.012,.006,.005,.8], eagle:[.009,.012,.025,2.1],
-   snake:[.009,.014,.010,1.35], stag:[.010,.009,.016,1.8], majic:[.012,.014,.020,1.7]
+   snake:[.009,.014,.010,1.35], stag:[.010,.009,.016,1.8], majic:[.016,.012,.018,1.35]
   }[f.data.id]||[.01,.01,.01,1.5];
   const [breath,sway,tilt,rate]=idleProfile,cycle=now*rate+(Math.max(0,game.fighters.indexOf(f))*.83),wave=Math.sin(cycle),slow=Math.sin(cycle*.47+.8);
   const sx=1+breath*(.35+.65*Math.sin(cycle*.72)),sy=1-breath*(.35+.65*Math.sin(cycle*.72));
@@ -2682,6 +2703,12 @@ function drawSprite(f){
   const hit=clamp((f.hitAnimTime||0)/.26,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(7+8*pulse),-145-pulse*5);c.rotate(-f.dir*(.075+.045*pulse));
   c.scale(1-.035*pulse,1+.045*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'&&f.data.id==='majic'){
+  // MAJIC absorbs impact through the forequarters, then recoils like a powerful cat.
+  const hit=clamp((f.hitAnimTime||0)/.27,0,1),pulse=Math.sin(hit*Math.PI);
+  c.save();c.translate(-f.dir*(6+9*pulse),-145-pulse*2);c.rotate(-f.dir*(.045+.065*pulse));
+  c.scale(1-.03*pulse,1+.022*pulse);c.translate(0,145);
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='elephant'){
   // Heavy elephant recoil: the head and forequarters dip, then the body settles.

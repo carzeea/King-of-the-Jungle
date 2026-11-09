@@ -2660,11 +2660,24 @@ function drawSprite(f){
   const majicStalk=majicPanther?anticipation*.072:0;
   const majicLunge=majicPanther?drive*(f.action==='bite'?.175:f.action==='ender'?.19:.135):0;
   const majicSettle=majicPanther?recovery*.052:0;
-  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle-eagleDive+eagleStrike-eagleFlare+majicStalk+majicLunge-majicSettle;
-  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0)+(eagleSky?drive*.075-recovery*.025:0)+(snakeSerpent?drive*.035-anticipation*.018:0)+(majicPanther?drive*.065-anticipation*.028-recovery*.018:0);
+  // Full-roster body mechanics: every species receives a distinct whole-body
+  // anticipation, drive and recovery signature. These are subtle transforms
+  // over the existing HD frames, not replacements or stretched sprite sheets.
+  const speciesMotion={
+   badger:[.050,.085,.040,5, .030], wolf:[.030,.105,.028,9,.045], hyena:[.025,.125,.020,12,.055],
+   leopard:[.035,.135,.025,11,.050], jaguar:[.050,.145,.035,9,.040], crocodile:[.065,.095,.060,4,.025],
+   lion:[.055,.105,.045,6,.030], tiger:[.065,.155,.040,12,.060], grizzly:[.075,.090,.070,4,.025],
+   hippo:[.080,.105,.075,3,.020], elephant:[.085,.115,.080,4,.020], eagle:[.035,.165,.065,13,.070],
+   snake:[.070,.115,.050,6,.035], stag:[.045,.125,.035,9,.045], majic:[.075,.175,.050,8,.065]
+  }[f.data.id]||[.04,.10,.04,6,.03];
+  const [speciesLoad,speciesDrive,speciesRecover,speciesShift,speciesStretch]=speciesMotion;
+  const speciesLean=anticipation*speciesLoad+drive*speciesDrive-recovery*speciesRecover;
+  const speciesX=(drive*speciesShift-anticipation*speciesShift*.22);
+  const lean=-.035*anticipation+forward*drive-.035*recovery+lionLoad+lionDrive-lionSettle-tigerCrouch+tigerSnap-tigerRecover+elephantLoad+elephantDrive-elephantSettle-eagleDive+eagleStrike-eagleFlare+majicStalk+majicLunge-majicSettle+speciesLean*.42;
+  const stretch=1+(.055*(leopardSharp?1.18:1))*drive-.025*anticipation-.025*recovery+(lionKing?drive*.025:0)+(tigerKing?drive*.055-anticipation*.025:0)+(elephantTitan?drive*.018-anticipation*.018:0)+(eagleSky?drive*.075-recovery*.025:0)+(snakeSerpent?drive*.035-anticipation*.018:0)+(majicPanther?drive*.065-anticipation*.028-recovery*.018:0)+drive*speciesStretch*.24-anticipation*speciesLoad*.08-recovery*speciesRecover*.05;
   const squash=1-.035*drive+.025*anticipation+.025*recovery+(lionKing?anticipation*.035+recovery*.018:0)+(tigerKing?anticipation*.055+recovery*.012:0)+(elephantTitan?anticipation*.055+recovery*.035:0)+(eagleSky?anticipation*.035+recovery*.045:0)+(snakeSerpent?anticipation*.065+recovery*.025:0)+(majicPanther?anticipation*.075+recovery*.035:0);
   c.save();
-  c.translate((lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0)+(eagleSky?drive*13-anticipation*4:0)+(snakeSerpent?drive*5-anticipation*2:0),-145+drive*(tigerKing?9:elephantTitan?6:eagleSky?13:4)-anticipation*(tigerKing?5:elephantTitan?8:eagleSky?3:2)-eagleFlare*18+(snakeSerpent?snakeCoil*10-snakeStrike*8+snakeUncoil*5:0));
+  c.translate(speciesX+(lionKing?drive*7-anticipation*2:0)+(tigerKing?drive*11-anticipation*5:0)+(elephantTitan?drive*5-anticipation*3:0)+(eagleSky?drive*13-anticipation*4:0)+(snakeSerpent?drive*5-anticipation*2:0),-145+drive*(tigerKing?9:elephantTitan?6:eagleSky?13:4)-anticipation*(tigerKing?5:elephantTitan?8:eagleSky?3:2)-eagleFlare*18+(snakeSerpent?snakeCoil*10-snakeStrike*8+snakeUncoil*5:0));
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
@@ -2715,6 +2728,14 @@ function drawSprite(f){
   const hit=clamp((f.hitAnimTime||0)/.34,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(3+5*pulse),-145-pulse*7);c.rotate(-f.dir*(.018+.035*pulse));
   c.scale(1-.018*pulse,1+.032*pulse);c.translate(0,145);
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+ }else if(f.action==='hit'){
+  // Species-tuned recoil for the remaining roster: low animals compress,
+  // agile hunters give ground sharply, and heavyweight bodies absorb impact.
+  const hit=clamp((f.hitAnimTime||0)/.30,0,1),pulse=Math.sin(hit*Math.PI);
+  const recoil={badger:[5,.045,.025],wolf:[8,.060,.035],hyena:[10,.075,.040],leopard:[11,.070,.045],jaguar:[7,.055,.035],crocodile:[4,.025,.020],grizzly:[4,.030,.018],hippo:[3,.018,.015],stag:[7,.050,.030],snake:[5,.035,.025]}[f.data.id]||[6,.04,.025];
+  c.save();c.translate(-f.dir*(recoil[0]+recoil[0]*.45*pulse),-145-pulse*(f.data.id==='snake'?2:4));c.rotate(-f.dir*(recoil[1]+recoil[2]*pulse));
+  c.scale(1-.018*pulse,1+.022*pulse);c.translate(0,145);
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else{
   c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
