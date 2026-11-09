@@ -196,7 +196,18 @@ $('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='SOUND: '+(sound
 
 /* ---------- Menus ---------- */
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();b.dataset.mode==='online'?openOnline():openSelect(b.dataset.mode)});
-function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];if(m==='online'){ON.mine=null;ON.theirs=null}render();show('select')}
+function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];if(m==='online'){ON.mine=null;ON.theirs=null}render();show('select');royalChampionEntrance()}
+function royalChampionEntrance(){
+ const old=$('royal-champion-entrance');if(old)old.remove();
+ if(mode!=='tower')return;
+ const champion=SAVE.get('jungleChampion',null);if(!champion||!champion.id)return;
+ const f=roster.find(x=>x.id===champion.id);if(!f)return;
+ const title=document.querySelector('#select .select-title');if(!title)return;
+ const banner=document.createElement('div');banner.id='royal-champion-entrance';banner.className='royal-champion-entrance';
+ banner.innerHTML=`<span class="royal-crown-wrap"><img src="assets/ui/crown.webp" alt=""></span><img class="royal-champion-portrait" src="${portrait(f.id)}" alt="${f.name}"><span class="royal-champion-copy"><b>THE JUNGLE HAS A NEW CHAMPION</b><strong>${f.name}</strong><small>THE CROWN REMEMBERS</small></span>`;
+ title.append(banner);const tile=[...document.querySelectorAll('#roster .fighter-tile')].find(x=>x.querySelector('strong')?.textContent===f.name);if(tile)tile.classList.add('royal-champion-tile');
+ SAVE.set('jungleChampion',null);
+}
 function selectBack(){if(mode==='online')menu();else show('menu')}
 function render(){
  const who=mode==='versus'?`PLAYER ${step}`:'PLAYER 1';
@@ -375,7 +386,7 @@ THE FINAL BATTLE BEGINS.`},start)));
  else if(finalBoss){game.intro=2.4;banner('FINAL BOSS',`${picks[1].name} AWAITS IN ${arena.name}`,2.3,'#ff5a3a')}
  else if(tower&&tower.kind==='forgotten')banner(`ECHO ${tower.index+1}`,`${picks[1].name} · ${arena.name}`,1.8,'#b9a0ff');
  else banner(tower?`FIGHT ${tower.index+1}`:'ROUND 1',`${picks[0].name} VS ${picks[1].name} · ${arena.name}`,1.4);
- if(AU&&soundOn){AU.music('music.'+arena.id);
+ if(AU&&soundOn){AU.music('music.'+arena.id);if(tower&&tower.boss&&AU.setMusicIntensity)AU.setMusicIntensity(1);
   const pre=tower&&tower.index===tower.ladder.length-1?'voice.final-fight':(tower?null:'voice.round-one');
   if(AU.loaded('voice.fight')){                         // Holden: "Round one!" / "Final fight!" then "Fight!"
    if(pre&&AU.loaded(pre)){AU.now(pre);setTimeout(()=>{if(game&&!game.over)AU.now('voice.fight')},1000)}
@@ -1058,18 +1069,24 @@ function majicBossPhase(o){
  const phase=o.bars<=1?3:o.bars<=2?2:1;
  if(phase<=(o.bossPhase||1))return;
  o.bossPhase=phase;
+ if(AU&&soundOn&&AU.setMusicIntensity)AU.setMusicIntensity(phase);
  if(phase===2){
   o.jungleRageT=999;o.jungleRageCooldownT=999;
-  banner('PHASE II · JUNGLE RAGE','THE ELEVEN BEASTS AWAKEN',1.8,'#c49aff');
-  floatText(o.x,o.y-350,'JUNGLE RAGE','#d8b5ff');
+  banner('MAJIC · JUNGLE RAGE','“You survived the climb. Now face the rage of the eleven.”',2.6,'#c49aff');
+  floatText(o.x,o.y-350,'THE ELEVEN AWAKEN','#d8b5ff');
   for(const color of ['#f3c45d','#9edce5','#b6d98b','#a8d66d','#f0a34e','#b9f6ff']){game.fx.push({x:o.x,y:o.y-155,t:0,life:1.05,color,kind:'ring'});spark(o.x+(Math.random()-.5)*130,o.y-150+(Math.random()-.5)*90,color,7)}
   game.flash=Math.max(game.flash||0,.22);game.shake=Math.max(game.shake,.38);game.hitstop=Math.max(game.hitstop||0,.1);sfx('instinct');
  }else{
   o.jungleRageT=0;o.ascendantT=999;o.ascendantCooldownT=999;
-  banner('PHASE III · TRUE TITAN','THE FINAL FORM HAS AWAKENED',2,'#e1c6ff');
-  floatText(o.x,o.y-365,'TRUE TITAN FORM','#e7c8ff');
+  banner('MAJIC · TRUE TITAN','“You have seen my power. Now witness my true form.”',2.8,'#e1c6ff');
+  floatText(o.x,o.y-365,'TRUE TITAN AWAKENS','#e7c8ff');
   for(let k=0;k<18;k++){const color=['#e8c56b','#b8a0ff','#8de0d0'][k%3],a=k*Math.PI/9;game.fx.push({x:o.x+Math.cos(a)*82,y:o.y-155+Math.sin(a)*78,t:0,life:1.15,color,kind:'ring'});spark(o.x+Math.cos(a)*112,o.y-155+Math.sin(a)*95,color,5)}
-  game.flash=Math.max(game.flash||0,.34);game.shake=Math.max(game.shake,.52);game.hitstop=Math.max(game.hitstop||0,.14);sfx('instinct');
+  // The True Titan awakening sends a visible, arena-wide floor shockwave outward.
+  game.fx.push({x:o.x,y:400,t:0,life:1.12,color:'#c7a5ff',kind:'titanWave'});
+  game.fx.push({x:o.x,y:400,t:-.2,life:1.12,color:'#e8c56b',kind:'titanWave'});
+  game.fx.push({x:o.x,y:400,t:-.4,life:1.12,color:'#8de0d0',kind:'titanWave'});
+  for(let k=0;k<34;k++){const a=k*Math.PI*2/34,speed=260+Math.random()*300;game.fx.push({x:o.x,y:396,t:0,life:.42+Math.random()*.2,color:['#c7a5ff','#e8c56b','#8de0d0'][k%3],kind:'spark',vx:Math.cos(a)*speed,vy:Math.sin(a)*speed*.28})}
+  game.flash=Math.max(game.flash||0,.42);game.shake=Math.max(game.shake,.68);game.hitstop=Math.max(game.hitstop||0,.2);sfx('instinct');
  }
  hud();
 }
@@ -1191,6 +1208,7 @@ function finish(){
  const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
  if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
  if(resultChampId==='majic'&&!draw_){title='THE JUNGLE TITAN';copy='THE TRUE FORM IS REVEALED · THE JUNGLE BOWS TO MAJIC';}
+ if(tower&&tower.boss&&!draw_){if(resultChampId==='majic'){title='THE JUNGLE TITAN';copy='“I AM THE LAW OF THIS WILD. THE CROWN WAS ALWAYS MINE.” · MAJIC HOLDS THE SUMMIT';}else{title='THE TITAN FALLS';copy='“IMPOSSIBLE... THE JUNGLE HAS CHOSEN YOU.” · MAJIC’S TRUE FORM IS DEFEATED';}}
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=resultChampId;
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
@@ -1282,6 +1300,8 @@ const CROWN_AT={badger:[.66,.13,.2],wolf:[.6,.12,.2],hyena:[.62,.11,.2],leopard:
  lion:[.63,.1,.21],tiger:[.69,.1,.2],grizzly:[.6,.11,.2],hippo:[.62,.12,.2],elephant:[.5,.11,.21],snake:[.44,.16,.17],eagle:[.72,.24,.16],stag:[.5,.29,.16],majic:[.55,.13,.13]};
 let champRaf=0;
 function champion(f){
+ if(tower&&tower.boss)SAVE.set('jungleChampion',{id:f.id});
+ if(tower&&tower.boss&&!tower.championCinematicSeen){tower.championCinematicSeen=true;return storyCard({dark:1,slow:2100,fig:{id:f.id,anim:'victory',light:.34,hold:1},eyebrow:'THE JUNGLE CHOOSES ITS CHAMPION',title:'A NEW ERA BEGINS',text:`The eclipse breaks. Violet shadows lift from the canopy, ancient roots glow beneath the arena, and the creatures of the jungle gather in silence.\n\nThe crown is no longer MAJIC’s. **${f.name}** stands as the new guardian of the wild.`},()=>champion(f))}
  if(tower&&tower.boss&&!tower.speechDone){tower.speechDone=true;const txt=(STORY.forgotten.majicSpeech||'').split('[FIGHTER]').join(f.name);
   return storyCard({dark:1,slow:2600,fig:{id:'majic',anim:'hit_heavy',light:.22,hold:1},eyebrow:'THE JUNGLE TITAN FALLS',title:'MAJIC',text:txt,voice:majicVox(f.id)},()=>{if(!SAVE.get('riseSeen',false)){SAVE.set('riseSeen',true);$('rise-btn').classList.remove('hidden');playRise(()=>champion(f))}else champion(f)})}
  const secret=!!tower.boss,list=crowns();let firstCrown=false,awaken=false,newUnlock=false,newFighter=null;const notes=[];
@@ -1334,10 +1354,14 @@ $('champ-crowns').textContent=tower.kind==='forgotten'?'':`TOWER CROWNS: ${list.
    const dw=fw*sc,dh=im.height*sc,x=fx-meta[3]*(HD[f.id].s||.8)*sc,y=fy-dh+bob;
    cx.save();cx.shadowColor='rgba(255,200,90,.55)';cx.shadowBlur=30*dpr;cx.drawImage(im,i*fw,0,fw,im.height,x,y,dw,dh);cx.restore();
    if(tops&&crown.complete&&crown.naturalWidth){
-    // the crown floats down and settles on the fighter's head, then stays there as they breathe
-    const T=tops[i],ct=Math.min(1,Math.max(0,(t-1.4)/.9)),e=1-Math.pow(1-ct,3),cw=T.hw*sc,ch=cw*crown.height/crown.width;
+    // The ordinary tower crown settles quickly. Defeating MAJIC triggers a slower
+    // coronation: a golden beam calls the crown down, then an energy seal ignites.
+    const T=tops[i],start=secret?2.05:1.4,duration=secret?1.35:.9,ct=Math.min(1,Math.max(0,(t-start)/duration)),e=1-Math.pow(1-ct,3),cw=T.hw*sc,ch=cw*crown.height/crown.width;
     const hx=x+T.hx*sc,hy=y+(T.t+im.height*.02)*sc-ch,cy=-ch+(hy+ch)*e;
-    cx.save();cx.globalAlpha=Math.min(1,ct*3);cx.shadowColor='rgba(255,220,120,.9)';cx.shadowBlur=24*dpr;cx.drawImage(crown,hx-cw/2,cy,cw,ch);cx.restore()}}
+    if(secret&&ct<1){cx.save();cx.globalAlpha=(1-ct)*(.35+.2*Math.sin(t*18));const beam=cx.createLinearGradient(hx,cy-ch*3,hx,hy);beam.addColorStop(0,'rgba(255,240,170,0)');beam.addColorStop(.55,'rgba(255,220,120,.28)');beam.addColorStop(1,'rgba(255,246,198,.72)');cx.fillStyle=beam;cx.beginPath();cx.moveTo(hx-cw*.55,cy-ch*2.7);cx.lineTo(hx+cw*.55,cy-ch*2.7);cx.lineTo(hx+cw*.8,hy+ch*.2);cx.lineTo(hx-cw*.8,hy+ch*.2);cx.fill();cx.restore()}
+    cx.save();cx.globalAlpha=Math.min(1,ct*3);cx.shadowColor='rgba(255,220,120,.9)';cx.shadowBlur=(secret?34:24)*dpr;cx.drawImage(crown,hx-cw/2,cy,cw,ch);cx.restore();
+    if(secret&&ct>=1){const pulse=.5+.5*Math.sin((t-(start+duration))*5);cx.save();cx.globalCompositeOperation='lighter';cx.globalAlpha=.32+.22*pulse;cx.strokeStyle='#ffe7a0';cx.lineWidth=3*dpr;cx.shadowColor='#ffd36b';cx.shadowBlur=20*dpr;cx.beginPath();cx.ellipse(hx,hy+ch*.48,cw*(1.15+pulse*.12),ch*(.42+pulse*.08),0,0,Math.PI*2);cx.stroke();cx.restore()}}}
+  if(secret&&t>3.42){const q=Math.min(1,(t-3.42)/.8),a=(1-q)*.7;cx.save();cx.globalCompositeOperation='lighter';cx.globalAlpha=a;cx.strokeStyle='#f6d77f';cx.lineWidth=5*dpr;cx.shadowColor='#ffe7a0';cx.shadowBlur=28*dpr;cx.beginPath();cx.ellipse(fx,fy-10*dpr,28*dpr+q*190*dpr,8*dpr+q*35*dpr,0,0,Math.PI*2);cx.stroke();cx.restore()}
   if(t>1.9)for(const p of conf){p.y+=p.v*dt;p.r+=dt*4;if(p.y>1.05){p.y=-.05;p.x=Math.random()}
    cx.save();cx.translate(p.x*W,p.y*H);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-4*dpr*p.s,-2*dpr*p.s,8*dpr*p.s,4*dpr*p.s);cx.restore()}
   champRaf=requestAnimationFrame(draw)})(t0);
@@ -1748,6 +1772,7 @@ function drawFx(){
    const sp=Math.min(3,Math.hypot(p.vx,p.vy)/260);c.ellipse(p.x,p.y,p.r*(1+sp*.6),p.r,Math.atan2(p.vy,p.vx),0,Math.PI*2);c.fill()}
   else if(p.kind==='mist'){c.globalAlpha=.35*k;c.fillStyle='#9c1015';c.beginPath();c.arc(p.x,p.y,p.r*(1+p.t*2.5),0,Math.PI*2);c.fill()}
   else if(p.kind==='ring'){c.strokeStyle=p.color;c.globalAlpha=k;c.lineWidth=5*k;c.beginPath();c.arc(p.x,p.y,20+p.t*420,0,Math.PI*2);c.stroke()}
+  else if(p.kind==='titanWave'){const progress=Math.max(0,p.t/p.life),radius=30+progress*1160;c.globalAlpha=Math.max(0,k)*.9;c.strokeStyle=p.color;c.lineWidth=13*k+1;c.shadowColor=p.color;c.shadowBlur=24;c.beginPath();c.ellipse(p.x,400,radius,13+progress*18,0,0,Math.PI*2);c.stroke();c.shadowBlur=0}
   else if(p.kind==='text'){c.globalAlpha=Math.min(1,k*2);c.font='900 30px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#000';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y)}
  }c.globalAlpha=1;
 }

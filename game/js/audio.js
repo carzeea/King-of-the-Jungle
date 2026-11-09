@@ -6,7 +6,7 @@
    and overlapping hits; music and long cues use a single streaming <audio> element. */
 (()=>{
  const BASE='audio/';
- let clips={},ctx=null,enabled=true,master=null,musicEl=null,musicKey=null,musicVol=.42,ready=null;
+ let clips={},ctx=null,enabled=true,master=null,musicEl=null,musicKey=null,musicVol=.42,musicIntensity=1,ready=null;
  const buffers={},loading={};
  const urlFor=(c,local)=>local?BASE+c.file:c.source;
  function ac(){if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.connect(ctx.destination)}catch(_){}}
@@ -37,7 +37,7 @@
   await ready;if(musicKey===key&&musicEl){if(enabled&&musicEl.paused)musicEl.play().catch(()=>{});return}
   const old=musicEl;if(old)fade(old,0,500,()=>old.pause());
   musicKey=key;musicEl=null;if(!clips[key])return;
-  const a=stream(key,{loop:true});musicVol=a.volume;a.volume=0;musicEl=a;
+  const a=stream(key,{loop:true});musicVol=a.volume;a.playbackRate=musicIntensity;a.volume=0;musicEl=a;
   if(enabled){a.play().then(()=>fade(a,musicVol,800)).catch(()=>{})}
  }
  window.KOTJAudio={
@@ -46,8 +46,9 @@
   shadow(id){return cue('shadow.'+id)},
   ultra(id){return cue('ultra.'+id)},
   pauseMusic(p){if(!musicEl)return;if(p)musicEl.pause();else if(enabled)musicEl.play().catch(()=>{})},
+  setMusicIntensity(phase=1){musicIntensity=phase>=3?1.09:phase===2?1.045:1;if(musicEl){musicEl.playbackRate=musicIntensity;const target=Math.min(1,musicVol*(phase>=3?1.08:phase===2?1.04:1));fade(musicEl,target,850)}},
   duckMusic(level=.35){if(musicEl&&enabled)fade(musicEl,musicVol*level,300)},
-  stopMusic(){if(musicEl){const m=musicEl;fade(m,0,400,()=>m.pause())}musicEl=null;musicKey=null},
+  stopMusic(){if(musicEl){const m=musicEl;fade(m,0,400,()=>m.pause())}musicEl=null;musicKey=null;musicIntensity=1},
   setEnabled(v){enabled=!!v;if(!enabled){if(musicEl)musicEl.pause();cues.forEach(a=>a.pause());cues.clear()}else if(musicEl)musicEl.play().catch(()=>{})},
   preload(keys){ready.then(()=>{ac();keys.forEach(k=>clips[k]&&load(k))})},
   // Play right now if the clip is already decoded; otherwise start loading it and report false.
