@@ -311,8 +311,8 @@ function cpuInput(i){
 }
 
 /* ---------- Match flow ---------- */
-function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='majic'?3:2,potential:0,data,ground:true,block:false,blockTime:0,attack:0,stun:0,walk:0,move:0,
- action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,
+function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='majic'?3:2,potential:0,data,ground:true,block:false,blockTime:0,attack:0,stun:0,walk:0,move:0,moveVel:0,
+ action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,
  combo:0,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
 function start(){
@@ -434,7 +434,7 @@ function update(dt){
   if(f.down>0){f.down-=dt;f.action='down';physics(f,dt);if(f.down<=0)f.action='idle';return}
   // ----- Hitstun: the only thing you can do is try a Combo Breaker -----
   if(f.stun>0){
-   f.stun-=dt;f.action='hit';
+   f.hitAnimTime=(f.action==='hit'?(f.hitAnimTime||0)+dt:0);f.stun-=dt;f.action='hit';
    f.bufA=0;f.bufS=0;
    if(rawAtk&&o.combo>=1&&!f.lockout){
     if(o.breakWindow>0)comboBreaker(i);
@@ -471,10 +471,20 @@ function update(dt){
    if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
    else if(atkEdge){f.block=false;doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
-  f.move=move;f.x+=move*dt;
+  // Smoothly accelerate and decelerate horizontal input. Keep this separate
+  // from vx, which is reserved for hit knockback and physics impulses.
+  // Character-specific handling: agile fighters react quickly to direction
+  // changes; heavier bodies build and shed momentum more deliberately.
+  const bodyMass=FIGHTER_MASS[f.data.id]||1;
+  const agility=clamp((f.data.speed||7)/7,.72,1.42);
+  const handling=clamp(12.5*agility/Math.sqrt(bodyMass),8.5,17);
+  const moveResponse=1-Math.exp(-dt*handling);
+  f.moveVel+=(move-f.moveVel)*moveResponse;
+  if(Math.abs(f.moveVel)<2&&move===0)f.moveVel=0;
+  f.move=f.moveVel;f.x+=f.moveVel*dt;
   physics(f,dt);
   if(f.attack<=0)f.action=f.block?'block':(!f.ground?'jump':Math.abs(move)>35?'walk':(Math.floor(performance.now()/1800)%3===0?'breathing':'idle'));
-  f.walk+=Math.abs(move)*dt*.025;
+  f.walk+=Math.abs(f.moveVel)*dt*.025;
  });
  const gap=Math.abs(a.x-b.x),minGap=Math.max(130,(bodyFront(a)+bodyFront(b))*.95);
  if(gap<minGap&&Math.abs(a.y-b.y)<120){const push=(minGap-gap)/2,s=a.x<b.x?-1:1;a.x=clampX(a.x+push*s);b.x=clampX(b.x-push*s);}
@@ -484,6 +494,7 @@ function update(dt){
  F.forEach(f=>{if(f.instinct||f.action==='shadow'){f.trail.push({x:f.x,y:f.y,dir:f.dir,a:f.action,t:.25});}f.trail=f.trail.filter(p=>(p.t-=dt)>0).slice(-6)});
  hud();
 }
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const clampX=x=>Math.max(72,Math.min(1028,x));
 function physics(f,dt){f.x=clampX(f.x+f.vx*dt);f.y+=f.vy*dt;f.vy+=1500*dt;if(f.y>0){f.y=0;f.vy=0;f.ground=true}f.vx*=Math.pow(.004,dt)}
 function doMove(f,name){
@@ -542,7 +553,7 @@ function resolveHit(i,mv){
   snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,.25);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',18);
   resolveBars(o,f);endCombo(i,true);
  }else{
-  o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
+  o.stun=mv.stun*Math.max(.5,1-Math.max(0,f.combo-4)*.06);o.hitHeavy=mv.push>=100||mv.dmg(0)>=9;o.hitAnimTime=0;o.vx=f.dir*impactPush;if(!o.ground)o.vy=-160*Math.max(.88,Math.min(1.08,bodyResponse));
   f.vx=f.dir*Math.max(20,impactPush*.4);
   hitSound(f,mv);game.hitstop=Math.max(game.hitstop||0,mv===MOVES.double?.045:mv===MOVES.bite?.1:mv===MOVES.special?.11:mv.shadow?.05:.07);
   if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.12);
@@ -937,7 +948,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
+const FK=['x','y','vx','vy','moveVel','hitAnimTime','hitHeavy','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,t:r2(p.t)}));return o});
@@ -1135,20 +1146,25 @@ function drawFighter(f,i,ghost){
 }
 function phase(f){return f.actionTotal>0?Math.min(.999,Math.max(0,1-f.actionTime/f.actionTotal)):0}
 function drawSprite(f){
- const S=SPRITES[f.data.id],A=S.anims,now=performance.now()/1000,p=phase(f);let anim='idle',fr=0;
+ const S=SPRITES[f.data.id],A=S.anims,now=performance.now()/1000,p=phase(f),ap=p*p*(3-2*p);let anim='idle',fr=0;
  const seq=(list,t)=>{const k=list[Math.min(list.length-1,Math.floor(t*list.length))];return k};
  switch(f.action){
   case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2);break}
   case'block':anim='block';fr=Math.min(3,Math.floor(f.blockTime*20));break;
-  case'claw':anim='attack_light';fr=Math.floor(p*A.attack_light[0]);break;
-  case'double':anim=S.double[f.chain%2];fr=1+Math.floor(p*(A[anim][0]-1));break;
-  case'bite':anim='bite';fr=Math.floor(p*A.bite[0]);break;
-  case'earthslam':case'pounce':anim=S.special;fr=Math.floor(p*A[anim][0]);break;
-  case'ender':anim='uppercut';fr=Math.floor(p*A.uppercut[0]);break;
-  case'shadow':if(S.shadow){anim=S.shadow;fr=Math.floor(p*A[anim][0])}else{anim=S.double[Math.floor(p*5)%2];fr=Math.floor(p*5*A[anim][0])%A[anim][0]}break;
+  case'claw':anim='attack_light';fr=Math.floor(ap*A.attack_light[0]);break;
+  case'double':anim=S.double[f.chain%2];fr=1+Math.floor(ap*(A[anim][0]-1));break;
+  case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
+  case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
+  case'ender':anim='uppercut';fr=Math.floor(ap*A.uppercut[0]);break;
+  case'shadow':if(S.shadow){anim=S.shadow;fr=Math.floor(ap*A[anim][0])}else{anim=S.double[Math.floor(p*5)%2];fr=Math.floor(p*5*A[anim][0])%A[anim][0]}break;
   case'ultraseq':anim=S.ultra[Math.floor(now*6)%S.ultra.length];fr=Math.floor(now*36);break;
   case'jump':{anim='jump';const n=A.jump[0];fr=Math.round((Math.max(-560,Math.min(560,f.vy))+560)/1120*(n-3))+1;break}
-  case'hit':anim='hit_light';fr=Math.floor(now*18);break;
+  case'hit':{
+   anim=f.hitHeavy&&A.hit_heavy?'hit_heavy':'hit_light';
+   const count=A[anim][0];
+   fr=Math.min(count-1,Math.floor((f.hitAnimTime||0)*Math.max(8,count*5)));
+   break;
+  }
   case'down':if(f.down>.35){anim=S.fall[0];fr=seq(S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seq(S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1],Math.floor(f.koTime*9));break;
   case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
@@ -1159,7 +1175,7 @@ function drawSprite(f){
  if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
  if(!img||!img.complete||!img.naturalWidth)return false;
  const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
- if(f.action==='earthslam'&&p>.5){c.save();c.globalAlpha=.8*(1-p);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+p*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
+ if(f.action==='earthslam'&&ap>.5){c.save();c.globalAlpha=.8*(1-ap);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+ap*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
  c.filter=f.hitFlash>0?'brightness(2.4)':(f.data.echo?'grayscale(1) brightness(.55) contrast(1.25) drop-shadow(0 0 8px rgba(150,110,255,.9))':'none');
  c.drawImage(img,fr*fw,0,fw,fh,-px,-py+6,fw/sc,fh/sc);c.filter='none';
  return true;
