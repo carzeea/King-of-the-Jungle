@@ -523,12 +523,14 @@ function physics(f,dt){
  f.x=clampX(f.x+f.vx*dt);
  f.landImpact=Math.max(0,(f.landImpact||0)-dt*2.8);
  f.frostImpact=Math.max(0,(f.frostImpact||0)-dt*2.4);
+ f.elephantImpact=Math.max(0,(f.elephantImpact||0)-dt*2.0);
  f.leopardFinisher=Math.max(0,(f.leopardFinisher||0)-dt*2.2);
  const wasAirborne=!f.ground;
  f.y+=f.vy*dt;f.vy+=1500*dt;
  if(f.y>0){
   if(wasAirborne){
    if(f.data.id==='leopard'&&f.action==='pounce'&&f.attack>0)f.frostImpact=.52;
+   if(f.data.id==='elephant'&&f.elephantSlamArmed){f.elephantImpact=.62;f.elephantSlamArmed=0;}
    // Capture landing speed before zeroing vertical velocity. This is visual
    // feedback only and does not add damage, stun, or alter the jump arc.
    f.landImpact=clamp(Math.abs(f.vy)/900,.18,1);
@@ -556,7 +558,7 @@ function doMove(f,name){
  setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='double'){f.breakWindow=.26;f.vx=f.dir*Math.max(f.dir*f.vx,120);sfx('whiff')}   // the gold flash: break NOW
  if(name==='claw'||name==='bite'){f.vx=f.dir*Math.max(f.dir*f.vx,name==='bite'?110:60);sfx('whiff')}
- if(name==='special'){const frostPounce=f.data.id==='leopard';f.vx=f.dir*(f.data.id==='badger'?260:frostPounce?500:420);f.vy=f.data.id==='badger'?-120:frostPounce?-245:-230;f.ground=false}
+ if(name==='special'){const frostPounce=f.data.id==='leopard';f.vx=f.dir*(f.data.id==='badger'?260:frostPounce?500:420);f.vy=f.data.id==='badger'?-120:frostPounce?-245:-230;f.ground=false;if(f.data.id==='elephant')f.elephantSlamArmed=1}
  if(name==='ender'){f.vx=f.dir*200;f.vy=-140;f.ground=false;floatText(f.x,f.y-300,'ENDER','#ffd36b')}
  if(name==='shadow'){f.meter-=50;f.vx=f.dir*380;game.flash=.35;soundOn&&AU&&AU.now('voice.shadow-attack');if(AU&&soundOn&&AU.has('shadow.'+f.data.id))AU.shadow(f.data.id);else sfx('instinct');banner('SHADOW '+({badger:'RAMPAGE',wolf:'FRENZY',hyena:'MADNESS',leopard:'BLUR',jaguar:'MAULER',crocodile:'DEATH ROLL',lion:'ROAR',tiger:'STRIPES',grizzly:'MAUL',hippo:'STAMPEDE',elephant:'TITAN'}[f.data.id]||'STRIKE'),'',.8,'#c68bff')}
 }
@@ -1037,7 +1039,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1335,6 +1337,17 @@ function drawFighter(f,i,ghost){
    }
    c.restore();
   }
+  // The elephant's special landing creates a broad, weighty ground-shock ring.
+  if(f.data.id==='elephant'&&(f.elephantImpact||0)>.025){
+   const slam=f.elephantImpact/.62,spread=(1-slam)*76;
+   c.save();c.globalAlpha=slam*.72;c.strokeStyle='#d7d0bd';c.shadowColor='#b8b0a0';c.shadowBlur=13;
+   c.lineWidth=3+slam*3;c.beginPath();
+   c.ellipse(0,-f.y, (52+spread)*sizeScale,(13+spread*.14)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.globalAlpha=slam*.34;c.lineWidth=2;
+   for(let shard=0;shard<6;shard++){const a=shard*Math.PI/3,inner=48+spread*.35,outer=inner+22;
+    c.beginPath();c.moveTo(Math.cos(a)*inner,-f.y+Math.sin(a)*inner*.22);c.lineTo(Math.cos(a)*outer,-f.y+Math.sin(a)*outer*.22);c.stroke();}
+   c.restore();
+  }
   // Frost Pounce leaves a brief icy shock ring on the snow leopard's landing.
   if(f.data.id==='leopard'&&(f.frostImpact||0)>.025){
    const frost=f.frostImpact/ .52;
@@ -1378,6 +1391,17 @@ function drawFighter(f,i,ghost){
    }
    c.globalAlpha=.22+.12*winPulse;c.strokeStyle='#83eaff';c.shadowColor='#4bdcff';c.shadowBlur=18;c.lineWidth=3;
    c.beginPath();c.ellipse(0,-148,105+8*Math.sin(t*2),138,Math.sin(t*.8)*.12,0,Math.PI*2);c.stroke();
+   // Brief crown-and-wing flourish frames her settled victory pose.
+   const flourish=1-Math.min(1,t/.72),pulse=.5+.5*Math.sin(t*7);
+   if(flourish>0){
+    c.globalAlpha=flourish*(.58+.2*pulse);c.strokeStyle='#d9fbff';c.fillStyle='rgba(105,220,255,.18)';c.lineWidth=2.2;
+    c.shadowColor='#68ddff';c.shadowBlur=16;
+    c.beginPath();c.moveTo(-48,-178);c.lineTo(-78,-222);c.lineTo(-60,-214);c.lineTo(-42,-244);c.lineTo(-24,-211);
+    c.lineTo(0,-232);c.lineTo(24,-211);c.lineTo(42,-244);c.lineTo(60,-214);c.lineTo(78,-222);c.lineTo(48,-178);c.closePath();c.fill();c.stroke();
+    for(let wing=-1;wing<=1;wing+=2){
+     c.beginPath();c.moveTo(wing*54,-128);c.lineTo(wing*104,-158);c.lineTo(wing*91,-122);c.lineTo(wing*126,-105);c.stroke();
+    }
+   }
    c.restore();
   }
  }
