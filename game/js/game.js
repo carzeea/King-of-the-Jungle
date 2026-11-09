@@ -454,6 +454,7 @@ function update(dt){
   f.leopardCounter=Math.max(0,(f.leopardCounter||0)-dt);
   f.leopardDashT=Math.max(0,(f.leopardDashT||0)-dt);
   f.leopardAirFollowT=Math.max(0,(f.leopardAirFollowT||0)-dt);
+  f.leopardFrostDiveT=Math.max(0,(f.leopardFrostDiveT||0)-dt);
   f.leopardDashCooldown=Math.max(0,(f.leopardDashCooldown||0)-dt);
   f.block=inp.bl&&f.ground&&f.attack<=0&&!frozen;f.blockTime=f.block?f.blockTime+dt:0;
   // ----- Attacking -----
@@ -476,7 +477,7 @@ function update(dt){
    if(f.data.id==='leopard'){const tap=inp.r&&!f.tapPrevR?1:inp.l&&!f.tapPrevL?-1:0;f.tapPrevR=inp.r;f.tapPrevL=inp.l;f.tapT=(f.tapT||0)+dt;
     if(tap){if(f.ground&&f.leopardDashCooldown<=0&&f.lastTap===tap&&f.tapT<.26){f.leopardDashT=.22;f.leopardDashCooldown=.7;f.moveVel=tap*680;f.lastTap=0;sfx('whiff')}else{f.lastTap=tap;f.tapT=0}}}
    if(inp.j&&f.ground){if(f.data.id==='leopard'&&f.leopardDashT>0)f.leopardAirFollowT=.65;f.vy=-560;f.ground=false;}
-   if(f.data.id==='leopard'&&!f.ground&&f.leopardAirFollowT>0&&atkEdge){f.leopardAirFollowT=0;doMove(f,'bite');f.vx=f.dir*430;f.vy=-95;floatText(f.x,f.y-285,'FROST DIVE','#9feaff')}
+   if(f.data.id==='leopard'&&!f.ground&&f.leopardAirFollowT>0&&atkEdge){f.leopardAirFollowT=0;f.leopardFrostDiveT=.9;doMove(f,'bite');f.vx=f.dir*430;f.vy=-95;floatText(f.x,f.y-285,'FROST DIVE','#9feaff')}
    else if(insEdge&&f.meter>=100&&!f.instinct){f.instinct=8;sfx('instinct');banner('INSTINCT',f.data.name,1);say('Instinct');game.flash=.5}
    else if(f.data.id==='leopard'&&f.leopardCounter>0&&atkEdge){f.leopardCounter=0;doMove(f,'bite');f.vx=f.dir*270;floatText(f.x,f.y-285,'FROST COUNTER','#9feaff')}
    else if(o.stun>0&&f.combo>0&&atkEdge)doMove(f,'double');
@@ -584,6 +585,15 @@ function resolveHit(i,mv){
  if(o.block&&o.ground&&!comboing){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
   o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+ }
+ // Frost Dive gets a signature icy burst only when its aerial bite actually connects.
+ if(f.data.id==='leopard'&&f.leopardFrostDiveT>0&&mv===MOVES.bite){
+  f.leopardFrostDiveT=0;
+  game.fx.push({x:cx,y:cy,t:0,life:.34,color:'#baf6ff',kind:'ring'});
+  game.fx.push({x:cx,y:cy,t:0,life:.48,color:'#66dfff',kind:'ring'});
+  spark(cx,cy,'#baf6ff',24);
+  floatText(cx,cy-72,'FROST IMPACT','#baf6ff');
+  game.shake=Math.max(game.shake,.12);
  }
  // Ultra Combo: an ender that lands while the opponent is in DANGER.
  const isEnder=mv.ender||(mv.shadow&&f.hitsDone===mv.hits.length&&comboing);
@@ -1287,6 +1297,25 @@ function drawFighter(f,i,ghost){
    c.lineTo(Math.cos(a)*118,-150+Math.sin(a)*118);c.stroke();
   }
   c.restore();
+  // Snow Leopard's victory signature: a rising frost spiral and orbiting ice shards.
+  if(f.data.id==='leopard'){
+   const t=f.winT||0;
+   c.save();c.globalCompositeOperation='lighter';
+   const orbit= t*1.65;
+   for(let shard=0;shard<6;shard++){
+    const a=orbit+shard*Math.PI/3;
+    const rx=78+12*Math.sin(t*2+shard), ry=92+10*Math.cos(t*1.7+shard);
+    const sx=Math.cos(a)*rx, sy=-152+Math.sin(a)*ry;
+    c.save();c.translate(sx,sy);c.rotate(a+Math.PI/2);
+    c.globalAlpha=.34+.38*(.5+.5*Math.sin(t*4+shard));
+    c.strokeStyle='#b9f6ff';c.shadowColor='#62ddff';c.shadowBlur=13;c.lineWidth=2;
+    c.beginPath();c.moveTo(0,-11);c.lineTo(0,11);c.moveTo(-7,-4);c.lineTo(7,4);c.moveTo(-7,4);c.lineTo(7,-4);c.stroke();
+    c.restore();
+   }
+   c.globalAlpha=.22+.12*winPulse;c.strokeStyle='#83eaff';c.shadowColor='#4bdcff';c.shadowBlur=18;c.lineWidth=3;
+   c.beginPath();c.ellipse(0,-148,105+8*Math.sin(t*2),138,Math.sin(t*.8)*.12,0,Math.PI*2);c.stroke();
+   c.restore();
+  }
  }
  if(f.instinct&&!ghost){c.shadowColor='#5fe3ff';c.shadowBlur=26;}
  if(SPRITES[f.data.id]&&drawSprite(f)){}
