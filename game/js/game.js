@@ -437,6 +437,8 @@ function update(dt){
   // Input buffer: a press up to 0.15 s early still comes out at the first legal moment.
   f.bufA=rawAtk?.15:Math.max(0,(f.bufA||0)-dt);f.bufS=rawSp?.15:Math.max(0,(f.bufS||0)-dt);
   const atkEdge=f.bufA>0,spEdge=f.bufS>0;
+  const elephantGrab=f.data.id==='elephant'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
+  const elephantStomp=f.data.id==='elephant'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
   f.lockout=Math.max(0,f.lockout-dt);f.breakWindow=Math.max(0,f.breakWindow-dt);f.hitFlash=Math.max(0,f.hitFlash-dt);
   if(f.instinct>0){f.instinct=Math.max(0,f.instinct-dt);f.meter=f.instinct/8*100;if(!f.instinct)f.meter=0}
   const spd=(f.instinct?1.2:1);
@@ -460,6 +462,9 @@ function update(dt){
   f.leopardAirFollowT=Math.max(0,(f.leopardAirFollowT||0)-dt);
   f.leopardFrostDiveT=Math.max(0,(f.leopardFrostDiveT||0)-dt);
   f.leopardDashCooldown=Math.max(0,(f.leopardDashCooldown||0)-dt);
+  f.elephantGrabT=Math.max(0,(f.elephantGrabT||0)-dt);
+  f.elephantStompT=Math.max(0,(f.elephantStompT||0)-dt);
+  f.elephantCounterT=Math.max(0,(f.elephantCounterT||0)-dt);
   f.block=inp.bl&&f.ground&&f.attack<=0&&!frozen;f.blockTime=f.block?f.blockTime+dt:0;
   // ----- Attacking -----
   if(f.attack>0){
@@ -484,14 +489,18 @@ function update(dt){
    if(f.data.id==='leopard'&&!f.ground&&f.leopardAirFollowT>0&&atkEdge){f.leopardAirFollowT=0;f.leopardFrostDiveT=.9;doMove(f,'bite');f.vx=f.dir*430;f.vy=-95;floatText(f.x,f.y-285,'FROST DIVE','#9feaff')}
    else if(insEdge&&f.meter>=100&&!f.instinct){f.instinct=8;sfx('instinct');banner('INSTINCT',f.data.name,1);say('Instinct');game.flash=.5}
    else if(f.data.id==='leopard'&&f.leopardCounter>0&&atkEdge){f.leopardCounter=0;doMove(f,'bite');f.vx=f.dir*270;floatText(f.x,f.y-285,'FROST COUNTER','#9feaff')}
+   else if(f.data.id==='elephant'&&f.elephantCounterT>0&&atkEdge){f.elephantCounterT=0;doMove(f,'tuskCounter');}
    else if(o.stun>0&&f.combo>0&&atkEdge)doMove(f,'double');
    else if(o.stun>0&&f.combo>0&&spEdge)doMove(f,'ender');
    else if(atkEdge)doMove(f,'claw');
    else if(spEdge)doMove(f,'special');
   }
   if(f.block&&!frozen){
+   // Elephant while blocking: a fresh block opens the Tusk Counter; otherwise block+attack = Trunk Grab
+   // and block+special = Titan Stomp (the shadow move keeps priority once he has half a meter).
    if(spEdge&&f.meter>=50){f.block=false;doMove(f,'shadow')}
-   else if(atkEdge){f.block=false;doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
+   else if(spEdge&&elephantStomp){f.block=false;doMove(f,'stomp')}
+   else if(atkEdge){f.block=false;if(f.data.id==='elephant'&&f.elephantCounterT>0){f.elephantCounterT=0;doMove(f,'tuskCounter')}else if(elephantGrab&&!(o.stun>0&&f.combo>0))doMove(f,'grab');else doMove(f,o.stun>0&&f.combo>0?'double':'bite')}
   }
   // Smoothly accelerate and decelerate horizontal input. Keep this separate
   // from vx, which is reserved for hit knockback and physics impulses.
@@ -541,7 +550,7 @@ function physics(f,dt){
 }
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
- const mv=MOVES[name];
+ const mv=name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:MOVES[name];
  const o=game.fighters.find(x=>x!==f);
  if(o.stun>0&&f.combo>0&&(name==='ender'||name==='double'||name==='shadow'))o.stun=Math.max(o.stun,mv.hits[0]+.12); /* a linked move is guaranteed to connect */
  // The snow leopard turns her linked double into a rapid three-hit claw flurry.
@@ -555,7 +564,10 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='ender'||name==='shadow';
- setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ setAction(f,name==='claw'?'claw':name==='bite'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
+ if(name==='grab'){f.vx=f.dir*95;f.elephantGrabT=.72;floatText(f.x,f.y-300,'TRUNK GRAB','#e7ddc8');sfx('heavy')}
+ if(name==='stomp'){f.vx=f.dir*250;f.elephantStompT=.9;floatText(f.x,f.y-300,'TITAN STOMP','#d7d0bd');sfx('heavy')}
+ if(name==='tuskCounter'){f.vx=f.dir*190;floatText(f.x,f.y-300,'TUSK COUNTER','#f0dfb8');sfx('heavy')}
  if(name==='double'){f.breakWindow=.26;f.vx=f.dir*Math.max(f.dir*f.vx,120);sfx('whiff')}   // the gold flash: break NOW
  if(name==='claw'||name==='bite'){f.vx=f.dir*Math.max(f.dir*f.vx,name==='bite'?110:60);sfx('whiff')}
  if(name==='special'){const frostPounce=f.data.id==='leopard';f.vx=f.dir*(f.data.id==='badger'?260:frostPounce?500:420);f.vy=f.data.id==='badger'?-120:frostPounce?-245:-230;f.ground=false;if(f.data.id==='elephant')f.elephantSlamArmed=1}
@@ -565,7 +577,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 const bodyFront=f=>(HB[f.data.id]&&HB[f.data.id].body[0])||85;
-function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};
+function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.grab)return'bite';if(mv.stomp||mv.tuskCounter)return'attack_heavy';
  if(mv===MOVES.claw)return S.claw||'attack_light';if(mv===MOVES.bite)return'bite';if(mv===MOVES.ender)return'uppercut';
  if((mv.base||mv)===MOVES.double)return(S.double||['attack_heavy','attack_light'])[f.chain%2];
  if(mv===MOVES.special)return S.special||'special_pounce';
@@ -578,6 +590,7 @@ function resolveHit(i,mv){
  if(o.down>0||(o.hp<=0&&o.bars<=1))return;
  const d=Math.abs(f.x-o.x),facing=(o.x-f.x)*f.dir>=-15;
  const anim=moveAnim(f,mv),reach=HB[f.data.id]&&HB[f.data.id].reach[anim];
+ if(mv.grab&&Math.abs(f.x-o.x)>255)return;
  if(!(d<=hitDist(f,o,anim,mv.shadow?40:0)&&Math.abs(f.y-o.y)<130&&facing))return;
  // where the strike lands: the defender's front edge, at the height of the fist/claw/jaws
  const cx=o.x-f.dir*bodyFront(o)*.75,cy=o.y-Math.max(70,Math.min(240,reach?reach[1]:160));
@@ -590,7 +603,22 @@ function resolveHit(i,mv){
  // Blocked: openers are stopped cold (specials chip a little).
  if(o.block&&o.ground&&!comboing){
   if(mv===MOVES.special||mv.shadow){o.hp=Math.max(1,o.hp-(mv.shadow?1:2));}
-  o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+  o.vx=f.dir*90;if(o.data.id==='leopard')o.leopardCounter=.42;if(o.data.id==='elephant')o.elephantCounterT=.62;f.meter=Math.min(100,f.meter+2);snd('sfx.block','block');spark(o.x-o.dir*20,o.y-170,'#9fd9ff',6);hud();return;
+ }
+ // Elephant's tusk counter adds a brief defensive impact flourish after a successful punish.
+ if(mv.tuskCounter){
+  game.fx.push({x:cx,y:cy,t:0,life:.42,color:'#e7d6ad',kind:'ring'});
+  spark(cx,cy,'#f1e2c3',18);
+  floatText(cx,cy-78,'TUSK COUNTER','#f0dfb8');
+  game.shake=Math.max(game.shake,.22);
+ }
+ // Elephant's Titan Stomp drives a broad ground shock into the opponent, pushing them away without launching them.
+ if(mv.stomp){
+  game.fx.push({x:cx,y:cy,t:0,life:.58,color:'#d7d0bd',kind:'ring'});
+  game.fx.push({x:f.x+f.dir*92,y:f.y-8,t:0,life:.46,color:'#b8aa91',kind:'ring'});
+  spark(cx,cy,'#d7d0bd',26);
+  floatText(cx,cy-82,'TITAN STOMP','#e8dfce');
+  game.shake=Math.max(game.shake,.3);
  }
  // Frost Dive gets a signature icy burst only when its aerial bite actually connects.
  if(f.data.id==='leopard'&&f.leopardFrostDiveT>0&&mv===MOVES.bite){
@@ -622,6 +650,7 @@ function resolveHit(i,mv){
   const cameraImpact=clamp((mv.push-35)/520,0,.24);
   if(cameraImpact>0)game.shake=Math.max(game.shake,cameraImpact);
   if(mv.push>=105)game.flash=Math.max(game.flash||0,.055);
+  if(mv.grab){o.down=.42;o.stun=Math.max(o.stun,.78);o.vx=f.dir*230;o.vy=-230;o.ground=false;game.shake=Math.max(game.shake,.24);game.fx.push({x:cx,y:cy,t:0,life:.42,color:'#e7ddc8',kind:'ring'});spark(cx,cy,'#e7ddc8',20);floatText(cx,cy-72,'TITAN GRAB','#e7ddc8');}
   if(mv===MOVES.bite||mv===MOVES.special)game.shake=Math.max(game.shake,.14);
   if(!mv.potential)resolveBars(o,f);
  }
@@ -1039,7 +1068,7 @@ function netInput(i){
   if(cn>(ON.used[n]||0)){if(!v&&!ON.prevOut[n])v=true;ON.used[n]=cn}  // a quick tap that fell between packets still lands
   k[n]=v;ON.prevOut[n]=v}
  return k}
-const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
+const FK=['x','y','vx','vy','moveVel','comboLinked','frostImpact','leopardFinisher','leopardDashT','elephantImpact','elephantSlamArmed','elephantStompT','elephantCounterT','dir','hp','bars','potential','block','blockTime','attack','stun','walk','move','action','actionTime','actionTotal','hitFlash','hitAnimTime','hitHeavy','landImpact','combo','meter','lockout','breakWindow','instinct','down','koTime','chain','winT','ground','elapsed','sec','secT','secPrev'];
 const r2=v=>typeof v==='number'?Math.round(v*100)/100:v;
 function makeSnap(){
  const F=game.fighters.map(f=>{const o={};for(const k of FK)o[k]=r2(f[k]);o.trail=f.trail.map(p=>({x:p.x|0,y:p.y|0,dir:p.dir,a:p.a,frost:!!p.frost,t:r2(p.t)}));return o});
@@ -1337,6 +1366,26 @@ function drawFighter(f,i,ghost){
    }
    c.restore();
   }
+  // A forward-curving trunk-sweep accent gives the elephant's close attacks a distinct visual read.
+  if(f.data.id==='elephant'&&f.attack>0&&['claw','double','attack_heavy','bite'].includes(f.action)){
+   const duration=Math.max(.12,(f.move_&&f.move_.t)||.3),phase=clamp((f.elapsed||0)/duration,0,1);
+   const sweep=Math.sin(phase*Math.PI),reach=(f.action==='attack_heavy'?104: f.action==='bite'?86:72)*sizeScale;
+   if(sweep>.12){
+    c.save();c.globalAlpha=sweep*.52;c.strokeStyle='#e6ddc9';c.shadowColor='#d2c3a5';c.shadowBlur=12;c.lineWidth=f.action==='attack_heavy'?5:3;
+    for(let arc=0;arc<2;arc++){
+     const y=-132-arc*13,span=reach+arc*17;
+     c.beginPath();c.moveTo(14,y+18);c.quadraticCurveTo(span*.48,y-30,span,y+4);c.stroke();
+    }
+    c.restore();
+   }
+  }
+  // Titan Stomp builds a low dust-and-pressure ring beneath the elephant during its charge.
+  if(f.data.id==='elephant'&&(f.elephantStompT||0)>.025){
+   const charge=f.elephantStompT/.9,spread=(1-charge)*38;
+   c.save();c.globalAlpha=charge*.42;c.strokeStyle='#d7d0bd';c.shadowColor='#b8aa91';c.shadowBlur=10;c.lineWidth=2+charge*2;
+   c.beginPath();c.ellipse(0,-f.y+4,(40+spread)*sizeScale,(9+spread*.12)*sizeScale,0,0,Math.PI*2);c.stroke();
+   c.restore();
+  }
   // The elephant's special landing creates a broad, weighty ground-shock ring.
   if(f.data.id==='elephant'&&(f.elephantImpact||0)>.025){
    const slam=f.elephantImpact/.62,spread=(1-slam)*76;
@@ -1423,6 +1472,7 @@ function drawSprite(f){
   case'block':anim='block';fr=Math.min(3,Math.floor(f.blockTime*20));break;
   case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.floor(ap*A[anim][0]);break;
   case'double':anim=S.double[f.chain%2];fr=1+Math.floor(ap*(A[anim][0]-1));break;
+  case'attack_heavy':anim='attack_heavy';fr=Math.floor(ap*A.attack_heavy[0]);break;
   case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'ender':anim='uppercut';fr=Math.floor(ap*A.uppercut[0]);break;
