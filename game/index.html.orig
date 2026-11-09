@@ -9,7 +9,7 @@
   <meta property="og:description" content="11 armored beasts. One crown. Can you climb the Tower? Free in your browser on phone, PC or controller. No download.">
   <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3">
-  <link rel="stylesheet" href="styles.css?v=9.12">
+  <link rel="stylesheet" href="styles.css?v=9.18">
 </head>
 <body>
   <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp?v=7.1" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
@@ -17,7 +17,7 @@
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 9.12</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 9.18</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -34,18 +34,24 @@
           <button class="secondary" data-mode="cpu"><b>VS CPU</b><small>Any fighter, any arena</small></button>
           <button class="secondary" data-mode="versus"><b>LOCAL 2 PLAYER</b><small>Same screen, two fighters</small></button>
           <button class="secondary online-btn" data-mode="online"><b>PLAY ONLINE</b><small>Share a code · fight a friend anywhere</small></button>
+          <button id="open-achievement-gallery" class="secondary"><b>FIGHTER ACHIEVEMENTS</b><small>View medals, wins, and combat records</small></button>
           <button class="secondary rise-btn hidden" id="rise-btn"><b>MAJIC'S RISE</b><small>How the Jungle Titan was made</small></button>
           <button class="secondary forgotten-btn hidden" data-mode="forgotten"><b>? ? ?</b><small>&nbsp;</small></button>
           <button class="blood-btn cover-setting">BLOOD: OFF</button>
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 9.12</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 9.18</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">KING <small>OF THE</small> JUNGLE</h2><p class="st-sub">FIGHTER SELECT</p><p id="select-instruction">Player 1: choose a fighter</p></div>
       <div class="select-layout"><div id="roster" class="roster-grid"></div><aside class="fighter-card"><div class="fighter-number" id="fighter-number">01</div><div class="fighter-portrait"><img id="fighter-portrait" alt=""></div><h3 id="fighter-name">LION</h3><p id="fighter-style">BALANCED POWER</p><p id="fighter-bio">A commanding all-round fighter.</p><div class="stat"><span>POWER</span><b id="power-stat">8</b></div><div class="stat"><span>SPEED</span><b id="speed-stat">7</b></div><div class="stat"><span>DEFENSE</span><b id="defense-stat">8</b></div><button id="confirm-fighter" class="primary full">CONFIRM FIGHTER</button></aside></div>
       <div id="select-hints" class="select-hints"></div>
+    </section>
+    <section id="achievement-gallery" class="screen hidden achievement-gallery-screen">
+      <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">FIGHTER <small>ACHIEVEMENT</small> GALLERY</h2><p class="st-sub">EVERY FIGHTER · EVERY ACCOMPLISHMENT</p><p id="achievement-gallery-summary">Your combat legacy</p></div>
+      <div id="achievement-gallery-grid" class="achievement-gallery-grid"></div>
+      <button id="achievement-gallery-back" class="secondary">BACK TO MAIN MENU</button>
     </section>
     <section id="stage" class="screen hidden">
       <div class="select-title stage-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main st-small">KING <small>OF THE</small> JUNGLE</h2><p class="st-eyebrow">STAGE SELECT</p><h3 class="st-big">CHOOSE YOUR ARENA</h3><p id="stage-vs">LION VS WOLF</p></div>
@@ -69,9 +75,9 @@
       <div class="meter-row"><div class="meter-panel"><span>P1 INSTINCT</span><div class="meter-track"><div id="p1-meter" class="meter-fill"></div></div></div><div class="breaker-hint">COMBO: ATTACK → ATTACK (auto-double) → SPECIAL (ender) · GETTING COMBOED? TAP ATTACK ON THE GOLD FLASH TO BREAK</div><div class="meter-panel right"><span>P2 INSTINCT</span><div class="meter-track"><div id="p2-meter" class="meter-fill"></div></div></div></div>
       <div class="fight-actions"><button id="pause" class="secondary">PAUSE</button><button id="back-menu" class="secondary">MAIN MENU</button><button id="sound" class="secondary">SOUND: ON</button><button id="fullscreen" class="secondary">FULL SCREEN</button><button class="secondary blood-btn">BLOOD: OFF</button></div>
     </section>
-    <section id="result" class="screen result-screen hidden"><div class="winner-art"><div class="winner-burst"></div><img id="winner-portrait" alt=""><img class="winner-crown" src="assets/ui/crown.webp" alt=""></div><p class="eyebrow">THE ARENA HAS SPOKEN</p><h2 id="winner-title">PLAYER 1 WINS</h2><p id="winner-copy">The crown belongs to the victor.</p><div id="tower-ladder" class="tower-ladder"></div><button id="tower-next" class="primary hidden">NEXT FIGHT</button><button id="rematch" class="primary">REMATCH</button><button id="result-menu" class="secondary">MAIN MENU</button></section>
+    <section id="result" class="screen result-screen hidden"><div class="winner-art"><div class="winner-burst"></div><img id="winner-portrait" alt=""><img class="winner-crown" src="assets/ui/crown.webp" alt=""></div><p class="eyebrow">THE ARENA HAS SPOKEN</p><h2 id="winner-title">PLAYER 1 WINS</h2><p id="winner-copy">The crown belongs to the victor.</p><div id="tower-ladder" class="tower-ladder"></div><aside id="result-achievements" class="result-achievements" aria-live="polite"></aside><button id="tower-next" class="primary hidden">NEXT FIGHT</button><button id="rematch" class="primary">REMATCH</button><button id="result-menu" class="secondary">MAIN MENU</button></section>
     <section id="story" class="screen story-screen hidden"><div id="story-fig" class="story-fig"></div><div class="story-card"><img id="story-face" alt=""><p class="eyebrow" id="story-eyebrow"></p><h2 id="story-title"></h2><div id="story-text"></div><button id="story-next" class="primary">CONTINUE</button></div></section>
-    <section id="champion" class="screen champion-screen hidden"><canvas id="champ-canvas"></canvas><div class="champ-text"><p class="eyebrow">TOWER CONQUERED</p><h2>KING OF THE JUNGLE</h2><p class="champ-name" id="champ-name"></p><p id="champ-copy"></p><p id="champ-crowns" class="champ-crowns"></p><p id="champ-unlock" class="champ-unlock hidden">NEW FIGHTER UNLOCKED · MAJIC IS NOW PLAYABLE</p></div><div id="champ-credits" class="champ-credits"></div><button id="champ-continue" class="primary champ-continue">CONTINUE</button></section>
+    <section id="champion" class="screen champion-screen hidden"><canvas id="champ-canvas"></canvas><div class="champ-text"><p class="eyebrow">TOWER CONQUERED</p><h2>KING OF THE JUNGLE</h2><p class="champ-name" id="champ-name"></p><p id="champ-copy"></p><p id="champ-crowns" class="champ-crowns"></p><p id="champ-unlock" class="champ-unlock hidden">NEW FIGHTER UNLOCKED · MAJIC IS NOW PLAYABLE</p></div><aside id="champ-hall" class="champ-hall" aria-label="Hall of Champions"></aside><aside id="champ-record-board" class="champ-record-board" aria-label="Jungle record board"></aside><div id="champ-credits" class="champ-credits"></div><button id="champ-continue" class="primary champ-continue">CONTINUE</button></section>
     <section id="rise" class="screen hidden rise-screen"><video id="rise-video" playsinline preload="none" poster="assets/cinema/rise-poster.jpg"></video><button id="rise-play" class="rise-play hidden">▶ PLAY</button><button id="rise-skip" class="rise-skip">SKIP ▸</button></section>
     <section id="recovery" class="screen hidden recovery-screen"><canvas id="recovery-canvas"></canvas><div class="rec-cap"><p class="rec-eyebrow">CAE'S CORNER</p><h2>RECOVERY TIME</h2><p id="recovery-name"></p></div><p class="rec-skip">TAP OR PRESS ANY BUTTON TO CONTINUE</p></section>
     <section id="online" class="screen hidden online-screen">
@@ -96,7 +102,7 @@
     </section>
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=9.12"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=9.12"></script>
+  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=9.12"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=9.18"></script>
 <script>(function(){var last=0;
 document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
 document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});

@@ -4,7 +4,25 @@
    combo breakers with lockout, two life bars, DANGER state, Shadow moves, Instinct mode and
    cinematic ULTRA COMBO finishers. Plus: portraits, Badger sprites, touch, gamepad, CPU, Tower. */
 (()=>{
-const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','achievement-gallery','stage','fight','result','champion','story','online','recovery','rise'];
+const $=id=>document.getElementById(id), roster=KOTJ_ROSTER, screens=['menu','select','dojo','achievement-gallery','stage','fight','result','champion','story','online','recovery','rise'];
+let dojoChallenge={step:0,complete:false,medal:false};
+const DOJO_SIGNATURE_TRIALS={
+ badger:{move:'badgerBreaker',label:'EARTHBREAKER',hint:'Land Badger’s Earthbreaker after a 3-hit combo.'},
+ wolf:{move:'wolfFrenzy',label:'PACK FRENZY',hint:'Finish a 3-hit combo with Wolf’s Pack Frenzy.'},
+ hyena:{move:'hyenaFeint',label:'MAD FEINT',hint:'Finish a 3-hit combo with Hyena’s Mad Feint.'},
+ leopard:{move:'special',label:'FROST POUNCE',hint:'Finish a 3-hit combo with Snow Leopard’s Frost Pounce.'},
+ jaguar:{move:'jaguarAmbush',label:'PRECISION AMBUSH',hint:'Finish a 3-hit combo with Jaguar’s Precision Ambush.'},
+ crocodile:{move:'crocodileRoll',label:'DEATH ROLL',hint:'Finish a 3-hit combo with Crocodile’s Death Roll.'},
+ lion:{move:'lionRoar',label:'KING’S ROAR',hint:'Finish a 3-hit combo with Lion’s King’s Roar.'},
+ tiger:{move:'tigerPounce',label:'STRIPED POUNCE',hint:'Finish a 3-hit combo with Tiger’s Striped Pounce.'},
+ grizzly:{move:'grizzlyMaul',label:'CRUSHING MAUL',hint:'Finish a 3-hit combo with Grizzly’s Crushing Maul.'},
+ hippo:{move:'hippoRush',label:'RIVER RUSH',hint:'Finish a 3-hit combo with Hippo’s River Rush.'},
+ elephant:{move:'stomp',label:'TITAN STOMP',hint:'Finish a 3-hit combo with Elephant’s Titan Stomp.'},
+ eagle:{move:'eagleSkyfall',label:'SKYFALL',hint:'Finish a 3-hit combo with Eagle’s Skyfall.'},
+ snake:{move:'snakeCoil',label:'VENOM COIL',hint:'Finish a 3-hit combo with Snake’s Venom Coil.'},
+ stag:{move:'stagAntler',label:'ANTLER CHARGE',hint:'Finish a 3-hit combo with Stag’s Antler Charge.'},
+ majic:{move:'frostStrike',label:'FROST STRIKE',hint:'Finish a 3-hit combo with MAJIC’s Frost Strike.'}
+};
 // Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
 const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
 const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
@@ -196,6 +214,7 @@ $('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='SOUND: '+(sound
 
 /* ---------- Menus ---------- */
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ac();b.dataset.mode==='online'?openOnline():openSelect(b.dataset.mode)});
+$('open-dojo').onclick=()=>{ac();show('dojo');setBackdrop('assets/ui/select-bg.webp')};$('dojo-back').onclick=menu;$('dojo-start').onclick=()=>{ac();openSelect('training')};
 function openSelect(m){mode=m;step=1;tower=null;picks=[roster[6],roster[1]];chosen=picks[0];if(m==='online'){ON.mine=null;ON.theirs=null}render();show('select');royalChampionEntrance()}
 function royalChampionEntrance(){
  const old=$('royal-champion-entrance');if(old)old.remove();
@@ -211,8 +230,8 @@ function royalChampionEntrance(){
 function selectBack(){if(mode==='online')menu();else show('menu')}
 function render(){
  const who=mode==='versus'?`PLAYER ${step}`:'PLAYER 1';
-  $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
- $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
+  $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='training'?'CHOOSE YOUR FIGHTER · ENTER THE TRAINING ARENA':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
+ $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='training'?'ENTER THE DOJO':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
  $('roster').innerHTML='';
  roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');if(f.id==='majic')b.classList.add('titan');
   b.innerHTML=`<span class="tf"><img src="${portrait(f.id)}" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
@@ -231,6 +250,7 @@ function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(
 function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
+ if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
  if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
   return start()}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
@@ -299,6 +319,7 @@ function cpuBrain(level){return{level,think:0,hold:{},wantBlock:0,doubles:0,pres
 function cpuInput(i){
  const f=game.fighters[i],o=game.fighters[1-i],ai=f.ai,lvl=ai.level,dt=game.dt;
  const k={l:false,r:false,j:false,dn:false,bl:false,at:false,sp:false,ins:false};
+ if(mode==='training')return k; // the dojo dummy stands still and never attacks
  const press=n=>{if(!ai.pressed[n]){k[n]=true;ai.pressed[n]=true}};
  for(const n in ai.pressed)if(ai.pressed[n]&&Math.random()<.5)ai.pressed[n]=false; // release so the next press is a new edge
  ai.think-=dt;ai.wantBlock=Math.max(0,ai.wantBlock-dt);ai.breakTry=Math.max(0,ai.breakTry-dt);
@@ -368,17 +389,19 @@ Now show me what all eleven could not.”
 THE FINAL BATTLE BEGINS.`},start)));
  }
  show('fight');document.body.classList.add('fighting');setBackdrop('assets/arenas/'+arena.id+'.webp');$('arena-title').textContent=arena.name;
+ dojoChallenge={step:0,complete:false,medal:false};$('dojo-challenge-hud').classList.toggle('hidden',mode!=='training');$('dojo-challenge-status').textContent='IN TRAINING';$('dojo-challenge-fill').style.width='0%';[1,2,3].forEach(n=>$('dojo-step-'+n).classList.remove('done'));
+ if(mode==='training'){const trial=DOJO_SIGNATURE_TRIALS[picks[0].id]||DOJO_SIGNATURE_TRIALS.badger;$('dojo-challenge-title').textContent=picks[0].name+' · SIGNATURE TRIAL';$('dojo-step-1').textContent='Land your first clean hit';$('dojo-step-2').textContent='Build a 3-hit combo';$('dojo-step-3').textContent=trial.hint;}
  const cpu2=mode!=='versus'&&mode!=='online';
  $('p1-name').textContent=picks[0].name;$('p2-name').textContent=picks[1].name;
  $('p1-face').src=portrait(picks[0].id);$('p2-face').src=portrait(picks[1].id);
- $('p1-tag').textContent=mode==='online'?(ON.side===0?'YOU':'FRIEND'):'PLAYER 1';$('p2-tag').textContent=mode==='online'?(ON.side===1?'YOU':'FRIEND'):cpu2?'CPU':'PLAYER 2';
- $('mode-label').textContent=mode==='forgotten'?'? ? ?':mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':mode==='online'?'ONLINE':'VERSUS';
+ $('p1-tag').textContent=mode==='online'?(ON.side===0?'YOU':'FRIEND'):'PLAYER 1';$('p2-tag').textContent=mode==='training'?'DUMMY':mode==='online'?(ON.side===1?'YOU':'FRIEND'):cpu2?'CPU':'PLAYER 2';
+ $('mode-label').textContent=mode==='training'?'TRAINING':mode==='forgotten'?'? ? ?':mode==='tower'?'TOWER':mode==='cpu'?'VS CPU':mode==='online'?'ONLINE':'VERSUS';
  $('round-label').textContent=tower?(tower.boss?'THE SUMMIT':tower.kind==='forgotten'?`ECHO ${tower.index+1} / 3`:`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
  $('p2-face').classList.toggle('echo-face',!!picks[1].echo);
- time=99;paused=false;Object.assign(ON,{inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1});$('pause').classList.toggle('hidden',mode==='online');cam.z=1;cam.snap=true;resStart();
+ time=99;paused=false;if(mode==='training')$('timer').textContent='∞';Object.assign(ON,{inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1});$('pause').classList.toggle('hidden',mode==='online');cam.z=1;cam.snap=true;resStart();
  setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
- if(cpu2)game.fighters[1].ai=cpuBrain(tower&&tower.boss?1.35:tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
+ if(cpu2)game.fighters[1].ai=cpuBrain(mode==='training'?.12:tower&&tower.boss?1.35:tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
  updateGuide();hud();$('combat-callout').textContent='';$('pause').textContent='PAUSE';
  const finalBoss=tower&&tower.kind==='tower'&&tower.index===tower.ladder.length-1;
@@ -431,9 +454,9 @@ function loop(t){
   else if(game.ultra)ultraStep(dt);
   else if(game.hitstop>0)game.hitstop-=real;
   else{
-   if(!game.ko){time=Math.max(0,time-dt);$('timer').textContent=Math.ceil(time);}
+   if(!game.ko&&mode!=='training'){time=Math.max(0,time-dt);$('timer').textContent=Math.ceil(time);}
    update(dt);
-   if(!game.ko&&time===0){game.ko=2;banner('TIME','',1.6);say('Time');}
+   if(!game.ko&&mode!=='training'&&time===0){game.ko=2;banner('TIME','',1.6);say('Time');}
   }
   game.zoom=1;
   if(mode==='online')hostSend();
@@ -443,6 +466,7 @@ function loop(t){
 }
 const total=f=>(f.bars-1)*BAR+f.hp;
 function hud(){
+ if(mode==='training'&&dojoChallenge){$('dojo-challenge-status').textContent=dojoChallenge.complete?'MASTERED · MEDAL EARNED':`STEP ${Math.min(3,dojoChallenge.step+1)} OF 3`;$('dojo-challenge-fill').style.width=(dojoChallenge.step/3*100)+'%'}
  game.fighters.forEach((f,i)=>{const p='p'+(i+1),track=$(p+'-health').parentElement;
   $(p+'-health').style.width=Math.max(0,f.hp)+'%';
   const pot=Math.min(f.potential,BAR-Math.max(0,f.hp));$(p+'-pot').style.width=Math.max(0,pot)+'%';
@@ -636,6 +660,7 @@ function update(dt){
   if(f.attack<=0)f.action=f.block?'block':(!f.ground?'jump':Math.abs(move)>35?'walk':(Math.floor(performance.now()/1800)%3===0?'breathing':'idle'));
   f.walk+=Math.abs(f.moveVel)*dt*.025;
  });
+ if(mode==='training'){F.forEach(f=>{f.hp=BAR;f.bars=f.data.id==='majic'?3:2;f.potential=0});b.down=0;}
  const gap=Math.abs(a.x-b.x),minGap=Math.max(130,(bodyFront(a)+bodyFront(b))*.95);
  if(gap<minGap&&Math.abs(a.y-b.y)<120){const push=(minGap-gap)/2,s=a.x<b.x?-1:1;a.x=clampX(a.x+push*s);b.x=clampX(b.x-push*s);}
  if(a.hp>0&&b.hp>0&&!a.attack&&!a.stun)a.dir=b.x>=a.x?1:-1;
@@ -668,6 +693,20 @@ function physics(f,dt){
  }
  f.vx*=Math.pow(.004,dt);
 }
+function dojoChallengeHit(f,mv){
+ if(mode!=='training'||f!==game.fighters[0]||dojoChallenge.complete)return;
+ const trial=DOJO_SIGNATURE_TRIALS[f.data.id]||DOJO_SIGNATURE_TRIALS.badger;
+ if(dojoChallenge.step<1)dojoChallenge.step=1;
+ if(f.combo>=3&&dojoChallenge.step<2)dojoChallenge.step=2;
+ if(f.combo>=3&&f.dojoMoveName!==trial.move)dojoChallenge.comboAt=performance.now();
+ // The signature can land in the combo itself or right after it: many signatures can't be cancelled into mid-combo.
+ const now=performance.now(),fresh=f.combo>=3||(dojoChallenge.comboAt&&now-dojoChallenge.comboAt<2600);
+ if(f.dojoMoveName===trial.move&&fresh&&dojoChallenge.step>=2&&dojoChallenge.step<3){dojoChallenge.step=3;dojoChallenge.complete=true;dojoChallenge.medal=true;
+  try{const key='kotj-dojo-medals-v1',data=JSON.parse(localStorage.getItem(key)||'{}'),id=f.data.id;data[id]=true;localStorage.setItem(key,JSON.stringify(data));const tk='kotj-dojo-signature-trials-v1',trials=JSON.parse(localStorage.getItem(tk)||'{}');trials[id]={label:trial.label,completedAt:Date.now()};localStorage.setItem(tk,JSON.stringify(trials))}catch(e){}
+  banner('DOJO MASTERED','SIGNATURE COMBO COMPLETE · MEDAL EARNED',1.7,'#e8c66f');floatText(f.x,f.y-340,'DOJO MEDAL EARNED','#f2d58c');spark(f.x,f.y-150,'#e8c66f',24);sfx('victory');
+ }
+ [1,2,3].forEach(n=>$('dojo-step-'+n).classList.toggle('done',dojoChallenge.step>=n));$('dojo-challenge-status').textContent=dojoChallenge.complete?'MASTERED · MEDAL EARNED':`STEP ${Math.min(3,dojoChallenge.step+1)} OF 3`;$('dojo-challenge-fill').style.width=(dojoChallenge.step/3*100)+'%';
+}
 function doMove(f,name){
  f.bufA=0;f.bufS=0;
  const mv=name==='majicEclipse'&&f.data.id==='majic'?{t:1.38,hits:[.34,.72,1.10],dmg:p=>6.2+p*.38,range:390,stun:.78,push:315,majicEclipse:true}:name==='titanFury'&&f.data.id==='majic'?{t:1.08,hits:[.16,.36,.57,.81],dmg:p=>4.2+p*.28,range:405,stun:.72,push:285,majicFury:true}:name==='ascendantForm'&&f.data.id==='majic'?{t:.82,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicAscendant:true}:name==='frostStrike'&&f.data.id==='majic'?{t:.78,hits:[.42],dmg:p=>14+p*.82,range:405,stun:.86,push:300,majicFrost:true}:name==='jungleRage'&&f.data.id==='majic'?{t:.72,hits:[],dmg:p=>0,range:0,stun:0,push:0,majicRage:true}:name==='stagAntler'&&f.data.id==='stag'?{t:.72,hits:[.42],dmg:p=>13+p*.74,range:375,stun:.82,push:355,stagAntler:true}:name==='stagCounter'&&f.data.id==='stag'?{t:.54,hits:[.19],dmg:p=>12+p*.72,range:315,stun:.78,push:325,stagCounter:true}:name==='snakeCoil'&&f.data.id==='snake'?{t:.72,hits:[.34],dmg:p=>10.5+p*.62,range:265,stun:.92,push:72,snakeCoil:true}:name==='snakeVenom'&&f.data.id==='snake'?{t:.66,hits:[.29],dmg:p=>11+p*.68,range:285,stun:.72,push:205,snakeVenom:true}:name==='eagleWingCounter'&&f.data.id==='eagle'?{t:.62,hits:[.36],dmg:p=>12+p*.72,range:340,stun:.78,push:325,eagleWingCounter:true}:name==='eagleSkyfall'&&f.data.id==='eagle'?{t:.68,hits:[.48],dmg:p=>13+p*.76,range:365,stun:.76,push:335,eagleSkyfall:true}:name==='ironCounter'&&f.data.id==='badger'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:295,stun:.76,push:305,ironCounter:true}:name==='badgerBreaker'&&f.data.id==='badger'?{t:.72,hits:[.36],dmg:p=>12+p*.72,range:310,stun:.78,push:315,badgerBreaker:true}:name==='wolfCounter'&&f.data.id==='wolf'?{t:.54,hits:[.20],dmg:p=>12+p*.68,range:300,stun:.72,push:300,wolfCounter:true}:name==='hyenaFeint'&&f.data.id==='hyena'?{t:.58,hits:[.34],dmg:p=>13+p*.72,range:270,stun:.76,push:310,hyenaFeint:true}:name==='hyenaSlip'&&f.data.id==='hyena'?{t:.48,hits:[.16],dmg:p=>10+p*.66,range:295,stun:.66,push:265,hyenaSlip:true}:name==='tailCounter'&&f.data.id==='crocodile'?{t:.58,hits:[.22],dmg:p=>12+p*.72,range:325,stun:.74,push:325,tailCounter:true}:name==='jaguarAmbush'&&f.data.id==='jaguar'?{t:.66,hits:[.20,.43],dmg:p=>7+p*.54,range:335,stun:.68,push:285,jaguarAmbush:true}:name==='jaguarBite'&&f.data.id==='jaguar'?{t:.58,hits:[.24],dmg:p=>15+p*.78,range:245,stun:.86,push:340,jaguarBite:true}:name==='wolfFrenzy'&&f.data.id==='wolf'?{t:.78,hits:[.20,.40,.60],dmg:p=>6+p*.43,range:330,stun:.66,push:245,wolfFrenzy:true}:name==='crocodileRoll'&&f.data.id==='crocodile'?{t:.82,hits:[.27,.53],dmg:p=>7+p*.58,range:345,stun:.74,push:305,crocodileRoll:true}:name==='tigerSlip'&&f.data.id==='tiger'?{t:.48,hits:[.16],dmg:p=>10+p*.68,range:300,stun:.66,push:270,tigerSlip:true}:name==='tigerPounce'&&f.data.id==='tiger'?{t:.62,hits:[.22,.40],dmg:p=>5+p*.4,range:310,stun:.56,push:155,tigerPounce:true}:name==='lionCounter'&&f.data.id==='lion'?{t:.56,hits:[.20],dmg:p=>12+p*.72,range:365,stun:.78,push:335,lionCounter:true}:name==='lionRoar'&&f.data.id==='lion'?{t:.84,hits:[.43],dmg:p=>7+p*.62,range:440,stun:.82,push:365,lionRoar:true}:name==='grizzlyPaw'&&f.data.id==='grizzly'?{t:.66,hits:[.34],dmg:p=>11+p*.72,range:285,stun:.7,push:245,grizzlyPaw:true}:name==='grizzlyMaul'&&f.data.id==='grizzly'?{t:.72,hits:[.29,.49],dmg:p=>9+p*.72,range:305,stun:.62,push:285,grizzlyMaul:true}:name==='hippoRush'&&f.data.id==='hippo'?{t:.74,hits:[.30,.52],dmg:p=>9+p*.62,range:320,stun:.58,push:265,hippoRush:true}:name==='charge'&&f.data.id==='elephant'?{t:.68,hits:[.24,.43],dmg:p=>7+p*.52,range:325,stun:.48,push:245,charge:true}:name==='grab'&&f.data.id==='elephant'?{t:.72,hits:[.31],dmg:p=>12+p*.85,range:250,stun:.78,push:175,grab:true}:name==='stomp'&&f.data.id==='elephant'?{t:.9,hits:[.48],dmg:p=>9+p*.7,range:330,stun:.58,push:340,stomp:true}:name==='tuskCounter'&&f.data.id==='elephant'?{t:.52,hits:[.19],dmg:p=>13+p*.72,range:285,stun:.72,push:295,tuskCounter:true}:name==='bearCounter'&&f.data.id==='grizzly'?{t:.54,hits:[.20],dmg:p=>12+p*.7,range:290,stun:.72,push:300,bearCounter:true}:name==='riverCounter'&&f.data.id==='hippo'?{t:.56,hits:[.20],dmg:p=>12+p*.68,range:295,stun:.68,push:285,riverCounter:true}:MOVES[name];
@@ -684,6 +723,7 @@ function doMove(f,name){
  f.comboLinked=comboLink;
  if(f.ground&&!mv.shadow){const need=Math.abs(o.x-f.x)-hitDist(f,o,moveAnim(f,mv))+6;const maxGap=comboLink?105:70;if(need>0&&need<maxGap){const chase=comboLink?Math.min(260,need*4.2):Math.min(380,need*6);f.vx=f.dir*Math.max(Math.abs(f.vx),chase)}}
  const special=name==='special'||name==='titanFury'||name==='majicEclipse'||name==='frostStrike'||name==='ender'||name==='shadow'||name==='stagAntler'||name==='snakeVenom'||name==='eagleSkyfall'||name==='eagleWingCounter'||name==='tigerPounce'||name==='jaguarAmbush'||name==='wolfFrenzy';
+ f.dojoMoveName=name;f.dojoMoveSpecial=!!special||['frostStrike','stagAntler','snakeCoil','snakeVenom','eagleSkyfall','eagleWingCounter','badgerBreaker','hyenaFeint','wolfFrenzy','jaguarAmbush','tigerPounce','lionRoar','grizzlyMaul','grizzlyPaw','hippoRush','crocodileRoll','charge','grab','stomp','majicEclipse'].includes(name);
  setAction(f,name==='frostStrike'?'special_c':name==='jungleRage'||name==='ascendantForm'?'special_d':name==='titanFury'||name==='majicEclipse'?'ultra_move':name==='badgerBreaker'?'earthslam':name==='stagCounter'?'attack_heavy':name==='snakeCoil'?'special_b':name==='snakeVenom'?'bite':name==='ironCounter'?'attack_heavy':name==='claw'?'claw':name==='bite'||name==='jaguarBite'||name==='hyenaFeint'?'bite':name==='double'?'double':name==='grab'?'bite':name==='stomp'||name==='tuskCounter'||name==='bearCounter'||name==='riverCounter'||name==='charge'||name==='hippoRush'||name==='grizzlyMaul'||name==='grizzlyPaw'||name==='lionRoar'||name==='lionCounter'||name==='tigerSlip'||name==='crocodileRoll'||name==='tailCounter'||name==='wolfCounter'||name==='hyenaSlip'?'attack_heavy':name==='shadow'?'shadow':name==='ender'?'ender':special?(f.data.id==='badger'?'earthslam':'pounce'):name,moveData.t);
  if(name==='tigerSlip'){f.tigerEvadeT=.19;f.vx=f.dir*390;floatText(f.x,f.y-315,'STRIPED SLIP','#f0a34e');game.shake=Math.max(game.shake,.18);sfx('whiff')}
  if(name==='crocodileRoll'){f.vx=f.dir*585;floatText(f.x,f.y-300,'DEATH ROLL','#79d6bd');game.shake=Math.max(game.shake,.16);sfx('heavy')}
@@ -1032,14 +1072,14 @@ function resolveHit(i,mv){
  if(mv.snakeCoil){o.coilT=1.05;o.coilBy=i;o.vx=f.dir*58;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*16,y:cy+(k%2)*9,t:0,life:.72+k*.06,color:k===1?'#c8ed82':'#83bd50',kind:'ring'});spark(cx,cy,'#a8d66d',22);floatText(cx,cy-100,'CONSTRICTED','#a8d66d');banner('CONSTRICTED','MOVEMENT REDUCED',.72,'#a8d66d');game.shake=Math.max(game.shake,.22)}
  if(mv.snakeVenom){o.venomT=2.4;o.venomTick=.78;o.venomBy=i;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*20,y:cy+(k%2)*12,t:0,life:.52+k*.06,color:k===1?'#b8e986':'#78b84f',kind:'ring'});spark(cx,cy,'#a8d66d',24);floatText(cx,cy-94,'VENOMED','#a8d66d');game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.045)}
  const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
- const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1);
- f.combo=comboing?f.combo+1:1;f.bestCombo=Math.max(f.bestCombo||0,f.combo);
+ const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1)*(mode==='training'?0:1);
+ f.combo=comboing?f.combo+1:1;f.bestCombo=Math.max(f.bestCombo||0,f.combo);dojoChallengeHit(f,mv);
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
  const bodyResponse=impactScale(o);
  const impactPush=mv.push*bodyResponse;
  if(isEnder){ // finishers move lighter fighters farther; heavyweight fighters resist displacement
-  o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*impactPush;o.vy=-330*Math.max(.88,Math.min(1.08,bodyResponse));o.ground=false;
+  if(mode!=='training')o.hp-=f.combo*1.2;o.potential=0;o.stun=0;o.down=.9;o.vx=f.dir*impactPush;o.vy=-330*Math.max(.88,Math.min(1.08,bodyResponse));o.ground=false;
   snd('sfx.heavyImpact','heavy');game.shake=Math.max(game.shake,Math.min(.38,.18+mv.push/900));game.flash=Math.max(game.flash||0,.12);game.hitstop=Math.max(game.hitstop||0,.11);spark(cx,cy,'#ffd36b',22);
   resolveBars(o,f);endCombo(i,true);
  }else{
@@ -1197,6 +1237,7 @@ function finish(){
  const winnerF=draw_?null:(p1won?p:q),flawless=!!winnerF&&total(winnerF)>=2*BAR-.01;
  if(flawless)copy='FLAWLESS VICTORY · '+copy;
  $('tower-next').classList.add('hidden');$('rematch').textContent='REMATCH';$('tower-ladder').innerHTML='';
+ if(mode==='training'){title='TRAINING SESSION';copy='Practice complete when you are ready. Your dummy does not attack or run out of health.';$('rematch').textContent='KEEP PRACTICING';$('tower-next').classList.add('hidden');}
  if(tower){
   if(p1won&&tower.boss){title='THE TRUE KING';copy=`${tower.player.name} defeated MAJIC at the summit.`;$('rematch').textContent='CLIMB AGAIN';tower.done=true}
   else if(p1won){tower.index++;
@@ -1219,7 +1260,8 @@ function finish(){
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
  pad.classList.add('hidden');document.body.classList.remove('fighting','paused','touch');cancelAnimationFrame(raf);
- if(tower&&tower.done)champion(tower.player);
+ if(mode==='training'){show('fight');game.over=false;paused=false;time=99;$('timer').textContent='∞';raf=requestAnimationFrame(loop);return}
+ else if(tower&&tower.done)champion(tower.player);
  else if(mode==='cpu'&&!tower&&arena.id==='caes-corner'&&p1won&&!draw_)recovery(picks[0],()=>show('result'));
  else show('result');
 }
@@ -1229,7 +1271,7 @@ $('tower-next').onclick=()=>{
  picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();
  if(tower.kind==='forgotten')return storyCard({dark:1,title:`ECHO ${tower.index+1}`,text:STORY.forgotten.echoes[tower.index]},start);
  start()};
-$('rematch').onclick=()=>{if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=LAIR;return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0;tower.startedAt=Date.now();tower.recordsSaved=false;tower.hallSaved=false}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
+$('rematch').onclick=()=>{if(mode==='training'){clean();return start()}if(mode==='online'){NET.send({t:'again'});return openSelect('online')}if(tower){if(tower.boss&&!tower.done){picks=[tower.player,MAJIC];arena=LAIR;return start()}if(tower.reveal)tower.reveal=false;if(tower.done){tower.done=false;tower.boss=false;tower.speechDone=false;tower.index=0;tower.startedAt=Date.now();tower.recordsSaved=false;tower.hallSaved=false}else if(game&&total(game.fighters[0])>total(game.fighters[1])&&tower.index>0)tower.index--;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena()}start()};
 /* ---------- Tower champion: saved crowns, ending scene, secret unlock ---------- */
 const SAVE={get(k,d){try{const v=localStorage.getItem('kotj.'+k);return v==null?d:JSON.parse(v)}catch(_){return d}},set(k,v){try{localStorage.setItem('kotj.'+k,JSON.stringify(v))}catch(_){}}};
 const ACHIEVEMENTS=[{id:'flawless',name:'FLAWLESS FIGHTER',icon:'✦',desc:'Win without losing a life bar'},{id:'combo10',name:'COMBO MASTER',icon:'⚡',desc:'Land a 10-hit combo'},{id:'ultra',name:'ULTRA FINISHER',icon:'✹',desc:'Win after unleashing an Ultra Combo'},{id:'titan',name:'TITAN SLAYER',icon:'♛',desc:'Defeat MAJIC in the Tower'}];

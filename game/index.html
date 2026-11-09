@@ -9,7 +9,7 @@
   <meta property="og:description" content="11 armored beasts. One crown. Can you climb the Tower? Free in your browser on phone, PC or controller. No download.">
   <meta property="og:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://kingofthejunglegame.netlify.app/og-cover.jpg?v=3">
-  <link rel="stylesheet" href="styles.css?v=9.18">
+  <link rel="stylesheet" href="styles.css?v=9.21">
 </head>
 <body>
   <div id="splash" aria-hidden="true"><div class="splash-blur"></div><img src="assets/ui/cover.webp?v=7.1" alt="King of the Jungle cover art"><div class="splash-hint">OR PRESS ANY KEY / BUTTON</div></div>
@@ -17,7 +17,7 @@
   s.addEventListener('pointerdown',go);addEventListener('keydown',function(e){if(!done){go(e)}},{capture:true,once:true});(function pad(){if(done)return;var g=navigator.getGamepads?[].slice.call(navigator.getGamepads()):[];if(g.some(function(x){return x&&x.buttons.some(function(b){return b.pressed})})){go();return}requestAnimationFrame(pad)})()})();</script>
   <div id="backdrop" aria-hidden="true"><div class="bd-img bd-a"></div><div class="bd-img bd-b"></div><div class="bd-rays"></div><div class="bd-vignette"></div><canvas id="bd-embers"></canvas></div>
   <main id="app">
-    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 9.18</div></header>
+    <header class="topbar"><img class="brand-crown" src="assets/ui/crown.webp" alt=""><div><div class="eyebrow">A LEGACY UNLEASHED</div><h1>KING OF THE JUNGLE</h1></div><div class="build-tag">WEB BUILD · 9.21</div></header>
     <section id="menu" class="screen cover">
       <div class="cover-bg"></div><div class="cover-rays"></div><canvas id="embers" class="cover-embers"></canvas><div class="cover-vignette"></div>
       <div class="cover-hero"><div class="hero-glow"></div><img src="assets/characters/lion/lion-hero.webp" alt="The Lion, King of the Jungle"></div>
@@ -34,6 +34,7 @@
           <button class="secondary" data-mode="cpu"><b>VS CPU</b><small>Any fighter, any arena</small></button>
           <button class="secondary" data-mode="versus"><b>LOCAL 2 PLAYER</b><small>Same screen, two fighters</small></button>
           <button class="secondary online-btn" data-mode="online"><b>PLAY ONLINE</b><small>Share a code · fight a friend anywhere</small></button>
+          <button id="open-dojo" class="secondary"><b>FIGHTER TRAINING DOJO</b><small>Practice combos, specials, blocks, and counters</small></button>
           <button id="open-achievement-gallery" class="secondary"><b>FIGHTER ACHIEVEMENTS</b><small>View medals, wins, and combat records</small></button>
           <button class="secondary rise-btn hidden" id="rise-btn"><b>MAJIC'S RISE</b><small>How the Jungle Titan was made</small></button>
           <button class="secondary forgotten-btn hidden" data-mode="forgotten"><b>? ? ?</b><small>&nbsp;</small></button>
@@ -41,12 +42,22 @@
         </div>
       </div>
       <div class="cover-roster"><span>11 FIGHTERS · ONE THRONE</span><div id="cover-faces"></div></div>
-      <div class="cover-meta"><span id="cover-build">WEB BUILD · 9.18</span><span>© King of the Jungle · J. Hardy</span></div>
+      <div class="cover-meta"><span id="cover-build">WEB BUILD · 9.21</span><span>© King of the Jungle · J. Hardy</span></div>
     </section>
     <section id="select" class="screen hidden">
       <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">KING <small>OF THE</small> JUNGLE</h2><p class="st-sub">FIGHTER SELECT</p><p id="select-instruction">Player 1: choose a fighter</p></div>
       <div class="select-layout"><div id="roster" class="roster-grid"></div><aside class="fighter-card"><div class="fighter-number" id="fighter-number">01</div><div class="fighter-portrait"><img id="fighter-portrait" alt=""></div><h3 id="fighter-name">LION</h3><p id="fighter-style">BALANCED POWER</p><p id="fighter-bio">A commanding all-round fighter.</p><div class="stat"><span>POWER</span><b id="power-stat">8</b></div><div class="stat"><span>SPEED</span><b id="speed-stat">7</b></div><div class="stat"><span>DEFENSE</span><b id="defense-stat">8</b></div><button id="confirm-fighter" class="primary full">CONFIRM FIGHTER</button></aside></div>
       <div id="select-hints" class="select-hints"></div>
+    </section>
+    <section id="dojo" class="screen hidden dojo-screen">
+      <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">FIGHTER <small>TRAINING</small> DOJO</h2><p class="st-sub">MASTER YOUR STYLE · OWN THE ARENA</p><p>Choose a fighter and practice against a non-attacking training dummy.</p></div>
+      <div class="dojo-grid">
+        <article class="dojo-card"><b>GUIDED COMBO CHALLENGE</b><p>Follow the three-step lesson: land a hit, build a 3-hit chain, then connect a signature special to earn your fighter's medal.</p><span>HIT · LINK · SIGNATURE</span></article>
+        <article class="dojo-card"><b>DEFENSE &amp; COUNTERS</b><p>Work on guarding, reading attacks, counter timing, and combo breakers.</p><span>BLOCK · READ · REVERSE</span></article>
+        <article class="dojo-card"><b>SIGNATURE ABILITIES</b><p>Explore each animal's unique movement, special attacks, and character-specific combat style.</p><span>LEARN YOUR FIGHTER</span></article>
+      </div>
+      <p class="dojo-controls"><strong>PLAYER 1 CONTROLS</strong> Move: A / D · Jump: W · Block: S · Attack: F · Special: G · Instinct: H</p>
+      <div class="dojo-actions"><button id="dojo-back" class="secondary">BACK TO MENU</button><button id="dojo-start" class="primary">CHOOSE YOUR FIGHTER</button></div>
     </section>
     <section id="achievement-gallery" class="screen hidden achievement-gallery-screen">
       <div class="select-title"><img class="st-crown" src="assets/ui/crown.webp" alt=""><h2 class="st-main">FIGHTER <small>ACHIEVEMENT</small> GALLERY</h2><p class="st-sub">EVERY FIGHTER · EVERY ACCOMPLISHMENT</p><p id="achievement-gallery-summary">Your combat legacy</p></div>
@@ -66,6 +77,7 @@
         <div class="majic-phase-track"><div class="majic-phase-segment" data-phase="1"><i></i><b>I · FROST GUARD</b></div><div class="majic-phase-segment" data-phase="2"><i></i><b>II · JUNGLE RAGE</b></div><div class="majic-phase-segment" data-phase="3"><i></i><b>III · TRUE TITAN</b></div></div>
       </div>
       <div class="combat-readouts"><div class="combo-readout" id="p1-combo">0 HIT COMBO</div><div class="combat-center" id="combat-callout">FIGHT!</div><div class="combo-readout" id="p2-combo">0 HIT COMBO</div></div>
+      <div id="dojo-challenge-hud" class="dojo-challenge-hud hidden" aria-live="polite"><div class="dojo-challenge-top"><strong id="dojo-challenge-title">DOJO SIGNATURE TRIAL</strong><span id="dojo-challenge-status">IN TRAINING</span></div><ol><li id="dojo-step-1">Land your first hit</li><li id="dojo-step-2">Build a 3-hit combo</li><li id="dojo-step-3">Complete your fighter’s signature move</li></ol><div class="dojo-challenge-progress"><i id="dojo-challenge-fill"></i></div></div>
       <div class="arena"><div class="arena-sun"></div><div class="arena-back"></div><div class="arena-floor"></div><canvas id="game-canvas" width="1100" height="520" aria-label="Fighting game arena"></canvas><div class="arena-title" id="arena-title">JUNGLE TEMPLE</div><div class="rotate-hint">↻ Turn your phone sideways for full-screen fights</div></div>
       <div id="touch-pad" class="touch-pad hidden">
         <div class="pad-left"><button data-k="l" aria-label="Move left">◀</button><button data-k="j" aria-label="Jump">▲</button><button data-k="r" aria-label="Move right">▶</button><button data-k="bl" class="wide" aria-label="Block">BLOCK</button></div>
@@ -102,7 +114,7 @@
     </section>
     <footer><span>© KING OF THE JUNGLE</span><span>Created and Developed by J. Hardy</span></footer>
   </main>
-  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=9.12"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=9.18"></script>
+  <script src="js/roster.js?v=7.1"></script><script src="js/story.js?v=7.7"></script><script src="js/sprites-hd.js?v=8.0"></script><script src="js/audio.js?v=9.12"></script><script src="js/hitboxes.js?v=8.0"></script><script src="js/net.js?v=7.1"></script><script src="js/game.js?v=9.21"></script>
 <script>(function(){var last=0;
 document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});
 document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});
