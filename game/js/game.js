@@ -142,6 +142,9 @@ function sfx(type){
  else if(type==='lockout'){tone(300,90,.4,.25,'square')}
  else if(type==='instinct'){tone(120,900,.6,.3,'sawtooth')}
  else if(type==='frost'){tone(880,1320,.18,.16,'sine');setTimeout(()=>{if(soundOn){const b=ac();if(b){const o=b.createOscillator(),g=b.createGain();o.type='sine';o.frequency.setValueAtTime(1320,b.currentTime);o.frequency.exponentialRampToValueAtTime(1760,b.currentTime+.22);g.gain.setValueAtTime(.13,b.currentTime);g.gain.exponentialRampToValueAtTime(.001,b.currentTime+.28);o.connect(g).connect(b.destination);o.start();o.stop(b.currentTime+.28)}}},95)}
+ else if(type==='frostWind'){noise(.42,1800,.16);tone(520,180,.48,.16,'sine')}
+ else if(type==='frostCrack'){noise(.16,5200,.42);tone(980,260,.2,.22,'triangle')}
+ else if(type==='frostShatter'){noise(.48,7200,.38);tone(1480,420,.42,.2,'sine')}
  else if(type==='ultra'){noise(.07,3000,.45);tone(400,120,.08,.3,'square')}
  else if(type==='boom'){noise(.6,900,.9);tone(80,25,.7,.9)}
 }
@@ -685,6 +688,8 @@ function koFinish(o,f,ultra){
    // Signature Frost Fatality presentation: a brief icy cinematic on the final KO.
    // This is presentation-only; damage, hitboxes, and KO timing remain unchanged.
    banner('FROST FATALITY','THE JUNGLE FREEZES',2.4,'#9cefff');
+   // Three synthesized cues line up with the freeze, shell crack, and crystal shatter.
+   if(soundOn){sfx('frostWind');setTimeout(()=>sfx('frostCrack'),420);setTimeout(()=>sfx('frostShatter'),850)}
    game.slow=.24;game.slowT=.95;game.shake=Math.max(game.shake||0,.38);
    game.koBurst={x:o.x,y:400+o.y-145,t:0,frost:true};
    game.fx.push({x:o.x,y:o.y-145,t:0,life:.58,color:'#baf6ff',kind:'ring'});
@@ -1139,12 +1144,28 @@ function draw(){
  // widen when they spread out, and ease rather than snapping between scales.
  const want=clamp(1.02+(420-gap)/5200,.96,1.045);
  const kz=1-Math.pow(.94,frameDt*60),kp=1-Math.pow(.88,frameDt*60);
- cam.z+=(want-cam.z)*kz;vh/=cam.z;const vw=vh*aspect;
+ cam.z+=(want-cam.z)*kz;vh/=cam.z;
+ // Frost Fatality lens: push toward the frozen opponent, hold through the crack,
+ // then pull back as the ice bursts apart. This changes only the camera framing.
+ const frostVictim=game.koBurst?.frost&&game.ko>0?F.find(f=>f.hp<=0):null;
+ let cameraEase=kp;
+ if(frostVictim){
+  const elapsed=2.2-game.ko;
+  const smooth=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
+  const push=smooth(elapsed/.48),pull=smooth((elapsed-.78)/.52);
+  const cineZoom=1+.17*push*(1-pull);
+  vh/=cineZoom;cameraEase=1-Math.pow(.78,frameDt*60);
+ }
+ const vw=vh*aspect;
  const air=Math.min(F[0].y,F[1].y); // follow the highest fighter without losing floor context
  const airFollow=clamp(-air/420,0,1);
  let tx=(F[0].x+F[1].x)/2-vw/2,ty=400-vh*.84+Math.min(0,air)*(.5+.12*airFollow);
+ if(frostVictim){
+  // Keep the defeated fighter just off-center so the frozen silhouette remains the focus.
+  tx=frostVictim.x-vw*.57;ty=(400+frostVictim.y-145)-vh*.48;
+ }
  tx=Math.max(-60,Math.min(1160-vw,tx));ty=Math.max(-30,Math.min(550-vh,ty));
- if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*kp;cam.y+=(ty-cam.y)*kp}
+ if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*cameraEase;cam.y+=(ty-cam.y)*cameraEase}
  const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
  if(game.shake>0)c.translate((Math.random()-.5)*22*Math.min(1,game.shake/.3),(Math.random()-.5)*14*Math.min(1,game.shake/.3));
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
