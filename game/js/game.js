@@ -1670,9 +1670,9 @@ const SPRITES={
  stag:{s:0.6,anims:{"idle":[16,102,171,85,283],"walk_forward":[8,135,171,111,282],"walk_back":[8,135,171,111,282],"run":[8,135,171,111,282],"crouch":[3,163,220,154,365],"block":[6,136,166,113,274],"attack_light":[8,162,162,118,268],"bite":[8,107,171,85,283],"special_pounce":[6,107,171,85,283],"special_b":[6,162,162,118,268],"special_c":[5,107,171,85,283],"special_d":[5,136,184,113,304],"ultra_move":[10,162,162,118,268],"attack_heavy":[8,136,184,113,304],"uppercut":[7,136,184,113,304],"victory":[8,154,169,127,280],"jump":[7,163,220,154,365],"hit_light":[4,102,171,85,282],"hit_heavy":[6,102,171,85,282],"knockdown":[9,220,175,285,290],"knockdown_getup":[6,152,167,164,277],"defeat":[5,220,175,285,290]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- majic:{s:0.6,anims:{"idle":[16,222,240,187,396],"walk_forward":[8,229,235,245,388],"walk_back":[8,229,235,245,388],"run":[8,229,235,245,388],"dash":[4,229,235,245,388],"crouch":[3,222,238,62,393],"block":[6,222,238,62,393],"attack_light":[8,243,214,216,354],"bite":[8,232,239,193,396],"special_pounce":[6,232,239,193,396],"special_b":[6,243,214,216,354],"special_c":[5,232,239,193,396],"special_d":[5,243,230,210,381],"ultra_move":[10,243,214,216,354],"attack_heavy":[8,243,230,210,381],"uppercut":[7,243,230,210,381],"victory":[8,222,240,187,396],"jump":[7,222,238,62,393],"hit_light":[4,224,239,190,395],"hit_heavy":[6,224,239,190,395],"knockdown":[9,325,246,398,407],"knockdown_getup":[6,325,246,398,407],"defeat":[5,325,246,398,407]},
+ majic:{s:0.6,anims:{"idle":[16,222,240,187,396],"walk_forward":[8,245,241,185,399],"walk_back":[8,245,241,185,399],"run":[8,245,241,185,399],"dash":[4,245,241,185,399],"crouch":[3,235,211,200,348],"block":[6,222,238,62,393],"attack_light":[8,243,214,216,354],"bite":[8,232,239,193,396],"special_pounce":[6,232,239,193,396],"special_b":[6,243,214,216,354],"special_c":[5,232,239,193,396],"special_d":[5,225,229,180,379],"ultra_move":[10,243,214,216,354],"attack_heavy":[8,225,229,180,379],"uppercut":[7,225,229,180,379],"victory":[8,247,244,205,403],"jump":[7,235,211,200,348],"hit_light":[4,224,239,190,395],"hit_heavy":[6,224,239,190,395],"knockdown":[9,325,246,398,407],"knockdown_getup":[6,238,234,206,387],"defeat":[5,325,246,398,407]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_c','special_d','attack_heavy'],
-  fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]},
+  fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
  badger:{s:0.6,anims:{"idle":[16,109,127,20,211],"walk_forward":[8,97,127,82,209],"walk_back":[8,97,127,82,209],"run":[8,97,127,82,209],"block":[6,112,128,21,212],"attack_light":[8,127,126,103,208],"bite":[8,109,127,92,210],"claw_swipe":[6,127,126,103,208],"attack_heavy":[8,117,125,89,207],"uppercut":[8,127,126,103,208],"pounce":[8,109,127,92,210],"special_earth_slam":[7,117,125,89,207],"shadow_rampage":[10,127,126,103,208],"victory":[7,109,127,92,210],"jump":[7,112,128,21,212],"crouch":[4,112,128,21,212],"hit_light":[4,109,127,20,210],"hit_heavy":[6,109,127,20,210],"knockdown":[9,176,125,85,207],"knockdown_getup":[6,176,125,85,207],"defeat":[5,176,125,85,207]},
   claw:'claw_swipe',double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]},
@@ -1707,11 +1707,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.22';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.23';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.22';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.23';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -2775,7 +2775,6 @@ forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
 window.__kotj={rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
-})();
-
 (()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
  w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
+})();
