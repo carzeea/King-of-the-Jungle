@@ -1661,9 +1661,9 @@ $('rise-btn').onclick=()=>{ac();playRise(()=>{show('menu');AU&&soundOn&&AU.music
 // Standardized fighter frames (KOTJ_V2_Fighter_Animations): one strip per animation.
 // anims[name] = [frames, frame w, frame h (stored px), pivot x, pivot y (game units)]; stored at scale s.
 const SPRITES={
- snake:{s:0.6,anims:{"idle":[16,149,166,122,274],"walk_forward":[8,94,150,93,247],"walk_back":[8,94,150,93,247],"run":[8,94,150,93,247],"crouch":[3,141,164,25,272],"block":[6,141,164,25,272],"attack_light":[8,160,161,123,267],"bite":[8,149,165,122,274],"special_pounce":[6,149,165,122,274],"special_b":[6,160,161,123,267],"special_c":[5,149,165,122,274],"special_d":[5,147,170,114,281],"ultra_move":[10,160,161,123,267],"attack_heavy":[8,147,170,114,281],"uppercut":[7,147,170,114,281],"victory":[8,149,165,122,274],"jump":[7,141,164,25,272],"hit_light":[4,149,165,122,273],"hit_heavy":[6,149,165,122,273],"knockdown":[9,233,164,271,272],"knockdown_getup":[6,233,164,271,272],"defeat":[5,233,164,271,272]},
+ snake:{s:0.6,anims:{"idle":[16,149,166,122,274],"walk_forward":[8,158,158,147,261],"walk_back":[8,158,158,147,261],"run":[8,158,158,147,261],"crouch":[3,160,148,126,245],"block":[6,141,164,25,272],"attack_light":[8,160,161,123,267],"bite":[8,149,165,122,274],"special_pounce":[6,149,165,122,274],"special_b":[6,160,161,123,267],"special_c":[5,149,165,122,274],"special_d":[5,180,164,143,271],"ultra_move":[10,160,161,123,267],"attack_heavy":[8,180,164,143,271],"uppercut":[7,180,164,143,271],"victory":[8,124,171,105,283],"jump":[7,160,148,126,245],"hit_light":[4,149,165,122,273],"hit_heavy":[6,149,165,122,273],"knockdown":[9,233,164,271,272],"knockdown_getup":[6,183,161,125,267],"defeat":[5,233,164,271,272]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
-  fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]},
+  fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
  eagle:{s:0.6,anims:{"idle":[16,146,158,121,261],"walk_forward":[8,143,155,190,257],"walk_back":[8,143,155,190,257],"run":[8,143,155,190,257],"crouch":[3,145,156,108,258],"block":[6,145,156,108,258],"attack_light":[8,150,158,124,261],"bite":[8,151,157,125,260],"special_pounce":[6,151,157,125,260],"special_b":[6,150,158,124,261],"ultra_move":[10,150,158,124,261],"attack_heavy":[8,149,159,123,263],"uppercut":[7,149,159,123,263],"victory":[8,146,158,121,261],"jump":[7,145,156,108,258],"hit_light":[4,146,157,122,259],"hit_heavy":[6,146,157,122,259],"knockdown":[9,208,161,255,266],"knockdown_getup":[6,208,161,255,266],"defeat":[5,208,161,255,266]},
   double:['attack_light','attack_heavy','special_b'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]},
@@ -1707,11 +1707,11 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown',[7,3,2,1,0]],ko:['knockdown',8]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.21';spriteImg[id][k]=im}}
+const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.22';spriteImg[id][k]=im}}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.21';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.22';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
