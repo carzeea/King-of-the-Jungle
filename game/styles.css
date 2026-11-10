@@ -757,3 +757,4 @@ body.fighting .majic-boss-hud.hidden{display:none}
 #select.v2sel .fighter-tile.titan{aspect-ratio:4/5!important;height:auto!important}
 @media (max-width:820px){#select.v2sel{padding-bottom:16px!important}#select.v2sel .select-hints{position:static!important;flex-wrap:wrap!important;gap:8px 14px!important;margin-top:12px!important;background:rgba(0,0,0,.75)!important}#select.v2sel .select-hints .hint b{min-width:24px;height:24px;font-size:11px}}
 #select.v2sel #fighter-portrait{height:min(52vh,540px)!important}
+@media (min-width:821px){#select.v2sel #confirm-fighter{display:none}}
