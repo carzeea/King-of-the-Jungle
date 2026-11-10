@@ -233,21 +233,32 @@ function render(){
   $('select-instruction').textContent=mode==='forgotten'?'CHOOSE WHO ENTERS':mode==='tower'?'CHOOSE YOUR FIGHTER · CLIMB ALL 10 OPPONENTS':mode==='training'?'CHOOSE YOUR FIGHTER · ENTER THE TRAINING ARENA':mode==='cpu'&&step===2?'CHOOSE YOUR CPU OPPONENT':`${who}: CHOOSE YOUR FIGHTER`;
  $('confirm-fighter').textContent=mode==='forgotten'?'ENTER':mode==='tower'?'START THE TOWER':mode==='training'?'ENTER THE DOJO':mode==='cpu'&&step===2?'CONFIRM CPU OPPONENT':`CONFIRM ${who}`;
  $('roster').innerHTML='';
- roster.forEach((f,i)=>{if(mode==='forgotten'&&f.id==='majic')return;const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');if(f.id==='majic')b.classList.add('titan');
-  b.innerHTML=`<span class="tf"><img src="${portrait(f.id)}" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
+ const ORDER=[['lion','tiger','jaguar','wolf','hyena','badger','majic'],['grizzly','crocodile','hippo','elephant','leopard','snake','eagle','stag']];
+ ORDER.forEach(row=>{const r=document.createElement('div');r.className='sel-row';row.forEach(id=>{const f=roster.find(x=>x.id===id);
+  if(!f){if(NEW_FIGHTERS.some(n=>n.id===id)){const l=document.createElement('div');l.className='fighter-tile locked';l.title='Clear the Tower to unlock a hidden fighter';l.innerHTML='<span class="tf"><b class="q">?</b><i class="lock">🔒</i></span>';r.append(l)}return}
+  if(mode==='forgotten'&&f.id==='majic')return;const i=roster.indexOf(f);
+  const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');b.dataset.id=f.id;if(f.id==='majic')b.classList.add('titan');
+  b.innerHTML=`<span class="tf"><img src="assets/ui/cards/${f.id}.webp?v=10.16" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
   b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
-  b.ondblclick=()=>$('confirm-fighter').click();$('roster').append(b)});
+  b.ondblclick=()=>$('confirm-fighter').click();r.append(b)});$('roster').append(r)});
  card(chosen,roster.indexOf(chosen));selectWait();
  const sel=document.querySelector('.fighter-tile.selected');if(sel&&document.getElementById('select').contains(sel)&&!$('select').classList.contains('hidden'))sel.scrollIntoView({block:'nearest',behavior:'smooth'});
  selectHints();
 }
+function selMove(dx,dy){const t=[...document.querySelectorAll('#roster .fighter-tile:not(.locked)')];const cur=t.find(e=>e.dataset.id===chosen.id)||t[0];if(!cur)return;let n=cur;
+ if(dx){const k=t.indexOf(cur);n=t[(k+dx+t.length)%t.length]}
+ else{const rows=[...document.querySelectorAll('#roster .sel-row')].filter(r=>r.querySelector('.fighter-tile:not(.locked)'));const ri=rows.indexOf(cur.parentElement),tr=rows[ri+dy];if(tr){const cx=cur.offsetLeft+cur.offsetWidth/2;n=[...tr.querySelectorAll('.fighter-tile:not(.locked)')].reduce((a,b)=>Math.abs(a.offsetLeft+a.offsetWidth/2-cx)<=Math.abs(b.offsetLeft+b.offsetWidth/2-cx)?a:b)}}
+ const f=roster.find(x=>x.id===n.dataset.id);if(f&&f!==chosen){chosen=f;render()}}
 function gridCols(){const t=[...document.querySelectorAll('#roster .fighter-tile')];if(t.length<2)return 1;const y=t[0].offsetTop;return Math.max(1,t.filter(e=>e.offsetTop===y).length)}
 function randomPick(){const pool=roster.filter(f=>f.id!==chosen.id&&!(mode==='forgotten'&&f.id==='majic'));chosen=pool[Math.floor(Math.random()*pool.length)];render()}
 function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const kind=pads[0]?padKind(pads[0]):isTouch()?'touch':'kb';
  const B={xbox:['✚','A','B','Y','☰'],ps:['✚','✕','○','△','☰'],kb:['← →','ENTER','ESC','R','P'],touch:['👆','✔','↩','🎲','']}[kind];
- el.innerHTML=[['SELECT FIGHTER',B[0],'dpad'],['CONFIRM',B[1],'ka'],['BACK',B[2],'kb'],['RANDOM',B[3],'ky']].map(([t,k,c])=>`<span class="hint"><b class="${c}">${k}</b>${t}</span>`).join('');
- if(kind==='touch'){el.querySelectorAll('.hint')[0].lastChild.textContent='TAP A FIGHTER';el.querySelectorAll('.hint')[1].onclick=()=>$('confirm-fighter').click()}el.querySelectorAll('.hint')[2].onclick=()=>selectBack();el.querySelectorAll('.hint')[3].onclick=()=>randomPick()}
-function card(f,i){$('confirm-fighter').disabled=false;setBackdrop(portrait(f.id));$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=portrait(f.id);$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
+ el.innerHTML=[['SELECT',B[1],'ka'],['BACK',B[2],'kb'],['RANDOM',B[3],'ky'],['OPTIONS',kind==='kb'?'P':(B[4]||'⚙'),'kopt'],['TOWER MODE',kind==='kb'?'T':'🏰','ktower']].map(([t,k,c])=>`<span class="hint"><b class="${c}">${k}</b>${t}</span>`).join('');
+ const H=el.querySelectorAll('.hint');H[0].onclick=()=>$('confirm-fighter').click();H[1].onclick=()=>selectBack();H[2].onclick=()=>randomPick();H[3].onclick=()=>selOpts();H[4].onclick=()=>selTower();H[4].classList.toggle('on',mode==='tower');H[4].style.display=mode==='online'?'none':''}
+const selOptsOpen=()=>!$('sel-opts').classList.contains('hidden');
+function selOpts(on){const o=$('sel-opts');const v=on===undefined?o.classList.contains('hidden'):on;o.classList.toggle('hidden',!v);if(v){$('so-sound').textContent=$('sound').textContent;$('so-blood').textContent=document.querySelector('.blood-btn').textContent}}
+function selTower(){if(mode==='online'||mode==='tower')return;openSelect('tower')}
+function card(f,i){$('confirm-fighter').disabled=false;setBackdrop('assets/arenas/jungle-temple.webp');$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=`assets/ui/hero/${f.id}.webp?v=10.16`;$('select').dataset.f=f.id;$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
  if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
@@ -268,10 +279,10 @@ window.addEventListener('keydown',e=>{if(!game&&!$('stage').classList.contains('
  if(k==='ArrowRight')n=(n+1)%N;else if(k==='ArrowLeft')n=(n+N-1)%N;else if(k==='ArrowDown')n=Math.min(N-1,n+3);else if(k==='ArrowUp')n=Math.max(0,n-3);
  else if(k==='Enter'){e.preventDefault();$('stage-go').click();return}else if(k==='Escape'){$('stage-back').click();return}else return;
  e.preventDefault();stagePick=n;renderStages()}});
-window.addEventListener('keydown',e=>{if(!game&&!$('select').classList.contains('hidden')){const i=roster.indexOf(chosen),cols=gridCols();let n=i;const k=e.key;
-  if(k==='ArrowRight')n=(i+1)%roster.length;else if(k==='ArrowLeft')n=(i+roster.length-1)%roster.length;else if(k==='ArrowDown')n=Math.min(roster.length-1,i+cols);else if(k==='ArrowUp')n=Math.max(0,i-cols);
-  else if(k==='Enter'){e.preventDefault();$('confirm-fighter').click();return}else if(k==='Escape'){selectBack();return}else if(k==='r'||k==='R'){randomPick();return}else return;
-  e.preventDefault();if(n!==i){chosen=roster[n];render()}return}
+window.addEventListener('keydown',e=>{if(!game&&!$('select').classList.contains('hidden')){const k=e.key;
+  if(k==='ArrowRight')selMove(1,0);else if(k==='ArrowLeft')selMove(-1,0);else if(k==='ArrowDown')selMove(0,1);else if(k==='ArrowUp')selMove(0,-1);
+  else if(k==='Enter'){e.preventDefault();if(selOptsOpen())return selOpts(false);$('confirm-fighter').click();return}else if(k==='Escape'){if(selOptsOpen())return selOpts(false);selectBack();return}else if(k==='r'||k==='R'){randomPick();return}else if(k==='p'||k==='P'){selOpts();return}else if(k==='t'||k==='T'){selTower();return}else return;
+  e.preventDefault();return}
  if(!game)return;const k=norm(e);if(KEYS.some(m=>Object.values(m).includes(k))){e.preventDefault();if(!kb[k])tap[k]=true;kb[k]=true}if(k==='Escape'||k==='p')togglePause()});
 window.addEventListener('keyup',e=>{kb[norm(e)]=false});
 window.addEventListener('blur',()=>{for(const k in kb)kb[k]=false});
@@ -304,9 +315,8 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
    if((g.l&&!p.l)||(g.up&&!p.up))bs[(i-1+bs.length)%bs.length].focus();
    if((g.r&&!p.r)||(g.dn&&!p.dn))bs[(i+1)%bs.length].focus();
    if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))(document.activeElement&&bs.includes(document.activeElement)?document.activeElement:bs[0]).click()}}
- if(vis==='select'){const i=roster.indexOf(chosen),cols=gridCols();let n=i;if(g.r&&!p.r)n=(i+1)%roster.length;if(g.l&&!p.l)n=(i+roster.length-1)%roster.length;
-  if(g.dn&&!p.dn)n=Math.min(roster.length-1,i+cols);if(g.up&&!p.up)n=Math.max(0,i-cols);
-  if(n!==i){chosen=roster[n];render()}if((g.a&&!p.a)||(g.at&&!p.at)||(g.start&&!p.start))$('confirm-fighter').click();if(g.back&&!p.back)selectBack();if(g.sp&&!p.sp)randomPick()}
+ if(vis==='select'){if(g.r&&!p.r)selMove(1,0);if(g.l&&!p.l)selMove(-1,0);if(g.dn&&!p.dn)selMove(0,1);if(g.up&&!p.up)selMove(0,-1);
+  if(g.start&&!p.start)selOpts();else if((g.a&&!p.a)||(g.at&&!p.at)){if(selOptsOpen())selOpts(false);else $('confirm-fighter').click()}if(g.back&&!p.back){if(selOptsOpen())selOpts(false);else selectBack()}if(g.sp&&!p.sp)randomPick()}
  if(vis==='stage'){let n=stagePick;const N=RND()+1;if(g.r&&!p.r)n=(n+1)%N;if(g.l&&!p.l)n=(n+N-1)%N;if(g.dn&&!p.dn)n=Math.min(N-1,n+3);if(g.up&&!p.up)n=Math.max(0,n-3);if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
  if(vis==='online'&&g.back&&!p.back)$('ol-back').click();
  if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
@@ -2766,3 +2776,6 @@ render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
 window.__kotj={rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 })();
+
+(()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
+ w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
