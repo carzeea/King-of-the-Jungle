@@ -2666,7 +2666,7 @@ function drawFighter(f,i,ghost){
  else{c.scale(sizeScale,sizeScale);drawGeneric(f,i);}
  c.shadowBlur=0;c.restore();
  if(ghost)return;
- if(f.block){c.strokeStyle='#e8c36d';c.lineWidth=3;c.beginPath();c.arc(x+f.dir*20,y-120,65,f.dir>0?-1.4:Math.PI-1.4,f.dir>0?1.4:Math.PI+1.4);c.stroke();}
+ 
  if(f.breakWindow>0){c.strokeStyle='#ffd36b';c.globalAlpha=.9;c.lineWidth=4;c.beginPath();c.arc(x,y-140,95+Math.sin(performance.now()/30)*6,0,Math.PI*2);c.stroke();c.globalAlpha=1}
  c.fillStyle='#f4e9cf';c.font='bold 12px Inter';c.textAlign='center';c.fillText((f.ai?'CPU · ':'')+f.data.name,x,470);
 }
