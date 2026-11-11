@@ -154,3 +154,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AU9ZtGS9iX1t4na0E5euamaF30Dkj7Tx3yVd4K65toXGp4P7flMhDDXiiv0N1LtF3Hs3XSc4
 - victory AfsJuIRRIZL83xZQ0BNnzX4zKK28NI9Um7OM4vVMBRljZ3agExEU7n5LIVTCwt4mZG-jR6nQ
 - block AbFjzK4P27TQ5NZEz1AGpp4UlB7e8uIx0eJj9od0P8dEFpRJCezmayZ_7v7MgmWP9gHgPw-3
+
+## Hippo (side view) — auto_fighter.py
+- idle AUrrpu_7a4x4kyEHwW5vqGzhqZv4Rd9bg4goHmnrwtmwpfYwSrqaHHSnQ-qzUjR7PLEiCC23
+- walk AXWL07KpHUfOUdpA_Gz6DFs8t-Ih6wp4xpcImbbMskitP4W1LyEkrv9cz3r41ibDkQdVvVJB
+- light Ae0q1cBtt0KBR5sqNR5L-7a0dYeVmIwL64J78gVaTgHoog3IUdYT3Az5fu4K-UfHz52DLNrZ
+- heavy AXeuJnta9YYqlOTRcH-sUP5RXhF3OexsSNPza6uiRcnclFfBFV3Y8QMz7jlbLTKt2ZrySSiH
+- jump ATqbmR3fbEP6P5mfTZ4GQJMlF07tfo1rJZtDaRMKqcb7qSNzCnRvLBy0oQ7regfZQSI8KOzU
+- special AcnxZdKZQ8-mx56Gagr9eCHepZDBM-ZQSeglxLacktaRmkRO2_Pefud3PYoo9l7uJ_H8-VZU
+- hit AUw7wsrEswnvwNxngoX9zQfP5VSNE960UzM0gH5cbMHvVeL-u81KmIu7SvKCAbS5qprWr4Ki
+- knock AYM03lWr6icjHOV-4OcbS6gqVnZp4Je_UuNjAvr2CtfY8csYTtw0Q3grLejyIdx-YAKRhzKc
+- victory Aeo0G26-vZnHtKPgIGOI23ZwRnDVfm9LexMfbsR61cI3-ScHWgYXYMKlrs1JN0jFt6M-2rWu
+- block AbvzCtqD9xrKGd8T6Y5Mpe2d4bdmEGlSeHI6eycgwvFJ2aNdeSBVzYh5VeR45pqYFU82Y31p
