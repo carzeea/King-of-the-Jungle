@@ -23,3 +23,12 @@ Settings that worked (James approved the Eagle stance look on 2026-11-11):
 
 ## Remaining fighters
 lion, tiger, jaguar, wolf, hyena, badger, grizzly, crocodile, hippo, elephant, leopard, snake, stag, majic — same 9 moves each (walk included). Go live only when all 15 are done and James says so.
+
+## Eagle side-view redo (side-on fighting)
+Starter: kling-start/eagle-side.jpg · model kling-video-v3_0_turbo · 1080p
+- Stance → idle (frames 42–120, ping-pong): ASUYCu3wdnLyLemREzWWzlQyqDl0Gws0zbaD7if55cYxxkziUffFoXp5QV_X1_VRrSNsrmXI
+- Heavy → attack_heavy, uppercut (72–120): Ae0R9xClzpVIaOt6kK-nYEcv-Ma_ch7M47yOaCv9hZkxnFvIDE1Dug6iA3XpC17ZWZ3SgccZ
+- Wing spread → jump (78–120): AeWQXMCaPXUk3sL8G8cJCm6qb0NX5MJeYUwmMc7KKQp1n_tyXc0HzorsZXRK1RFxdVpmWM_w
+- Special → special_pounce, special_b (54–114): AT88Q46dblmWVSXM5ESEU5FJzBzuu4USKqJ7zKQJUQLvFBc_V_A8M45Uikuh-g-k34syWH7b
+- Knockdown 6 s → knockdown/defeat (12–96), knockdown_getup (96–145): ATIbtuSM_p99fOaqMRWQJ-w-2WXkIqRPhzMWbPvaCCRRx5djpqWVnYoPk8IpDA2ACrVc1wDy
+Lesson: starters must be side-view, otherwise moves come toward the camera.
