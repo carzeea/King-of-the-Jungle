@@ -82,3 +82,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AY8OtnGVkBIduxMKNQcK4QeAoL8XFQEz7ZW_PQEX2d5SQn4ZwL1YasPGUkCK-pD4L94h3hSs
 - victory AVRO8NZUw5nWYG5izHilsLRdpvmISWyqCMRAy569EoAF_u4jjMncBzA_2Pknbk3dNAXyIncG
 - block AaK440GUwxq_HYDKruJoJMZFEFBr-oVqYfGczK4oR1ZWqA97oWnvYXfVWMeVtaxyWY0qWBx8
+
+## Snow Leopard (side view) — auto_fighter.py
+- idle AWXo4_tXftfIwdxrF8kiWPBXHD207bksLCgSF91o5PidLhQgEQTsthLrnQhh0HUJU8F8f3vZ
+- walk ARzweIi61IM851ue1KcY0G-iQzeIisYsPsF-gV_9w_rVroKkDb_Ws1eF_skQv2DmP_Fnwlcl
+- light Ad1htjdIdy_26bnucHEnyKDcRAF8CVuQAuRaxrvpRU3bsp1ROKtukJ-sVdMgcNymXldwrLL2
+- heavy AZWmkCeph2sCNxcAoRrvLO6vZE4tOjNQ6JpEyjyrI-o4eQjtUgLyilrjbsgrv7bbame-05df
+- jump ARruU1dhMPfHwwRXTBkNOP9i6-hdk8uOECXgSvavum9OIu--wy29gtJwVcXc06-1pughCJQr
+- special AQ9CJBiGZVNagEeK1uMmWM47jCDYGsY1N-KQnikZaf14DSkJjbz6wPQpXWjyvXbiqFuvkCnt
+- hit ARciXKxuUNG_xVdQW60avwledcvYkpBWr60ZzRUBZipRqJN8PcXs4nFJahyAK1XKBTIzsICP
+- knock ARNBWJJ1h4xC8dvLaqqKfzex6WnfXHfxTP0LSBEsZtedfLRVl4hagVIunArG2Z-9o5aks6jy
+- victory AZsO3LvjhojRtozMAVnsWAuuXlDNm_ghsq9Gfd8Pdu1Fa34lh9WaGHn3GCWIYvcpXJBInjGE
+- block ARzzIXllYYtWDp4o7S24ZIFm3yquKcqp2dcbb5X4Jo_uFUyZ0Wzv-rpZkZF8clDuREJb-g9h

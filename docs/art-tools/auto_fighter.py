@@ -78,6 +78,9 @@ M,F=masks(clip('victory'));d,top,bot=stats(M);act=np.where(d>d.max()*.2)[0];s=ma
 jobs.append(('victory',['victory'],s,len(M),2,None))
 M,F=masks(clip('block'));d,top,bot=stats(M);act=np.where(d>d.max()*.3)[0];s=max(0,int(act[0])-6) if len(act) else 0
 jobs.append(('block',['block'],s,min(len(M),s+34),2,None))
+_have=json.loads(open('/home/claude/king-of-the-jungle/game/js/sprites-hd.js').read().split('=',1)[1].strip().rstrip(';'))[fid]['anims']
+_extra={'special':['special_c','ultra_move'],'heavy':['special_d'],'walk':['dash']}
+jobs=[(n,a+[x for x in _extra.get(n,[]) if x in _have],s_,e_,st,fr) for n,a,s_,e_,st,fr in jobs]
 print(json.dumps(jobs))
 if dry:sys.exit()
 out=f'/tmp/build_{fid}';os.makedirs(out,exist_ok=True)
