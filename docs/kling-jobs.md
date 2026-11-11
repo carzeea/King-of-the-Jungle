@@ -94,3 +94,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock ARNBWJJ1h4xC8dvLaqqKfzex6WnfXHfxTP0LSBEsZtedfLRVl4hagVIunArG2Z-9o5aks6jy
 - victory AZsO3LvjhojRtozMAVnsWAuuXlDNm_ghsq9Gfd8Pdu1Fa34lh9WaGHn3GCWIYvcpXJBInjGE
 - block ARzzIXllYYtWDp4o7S24ZIFm3yquKcqp2dcbb5X4Jo_uFUyZ0Wzv-rpZkZF8clDuREJb-g9h
+
+## Grizzly (side view) — auto_fighter.py
+- idle AeMaFyCi3V0PgPP0LuryynW83qx3T0CJ2UyAiZKUacKsavicWH7C8qxAAkvW0AzfMqhW_6e1
+- walk AX2Yc3SLwChVMOH48iga6RS2oHIG934IwuOWqH1u7PG2NMg6HZONHdymlTAbZGyNSs-36k5v
+- light AegO74YZA76dAeHONacml6fpGcPKdqW8y4UuE_QWjcCqzILFpx706shSYd25JF5eNrDN5T16
+- heavy AR4E83OMp-Cb2B5CWx0otFAE3ISjs1qYjUqbsNGur60HkrC6W4kGSTNl1PPg2ooimNz0UQw6
+- jump ATnyL4mmEcThVE_r4yNYb607uwH3Vp47Ad_rMThFgDdQ-fN1agUTqItlHTPyuiEU3-S9hvif
+- special Acu0VrsfeYNoYlSo1FLEl1QiY_7mEcZ_kFGBZ15LcpONicJoPEuILwuyfSNPiEJsbf8ded1T
+- hit AUgLymOcvQErA-1p-ca0w2b5aLx6pDp90BPpPOPEn4VLNXpz2sxDhxYlJlNLRiIYWQ77wR-6
+- knock AfNksBvU1TBG55Khkd5fCfGWW6u5Qr0Iezvtga-t0a9DkTRSBFnjdO3hblxJPGYfyj2V0_Q2
+- victory Aan3wZCzB1m30-dbAd9iEneiZK__gIv_sKNzcvD9c3Qj0SCRPR8RUIbK22WDpGm-a0wrAW5h
+- block AYHT95EFFy3_O3fKId-Ip2WFu-H3WT-ezHf7g-0OnwJCjvhqvyg_Zuedkd-6zOXGOFVEguBo
