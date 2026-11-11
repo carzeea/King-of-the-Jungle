@@ -13,9 +13,9 @@ out = {}
 for fid, d in HD.items():
     sc = d.get('s', .8); A = d['anims']
     def frames(name):
-        n, fw, fh, px, py = A[name]
+        m = A[name]; n, fw, fh, px, py = m[:5]; cols = m[5] if len(m) > 5 else n
         im = np.array(Image.open(os.path.join(ROOT, f'assets/characters/{fid}/frames-hd/{name}.webp')).convert('RGBA'))[..., 3] > 110
-        return [im[:, i*fw:(i+1)*fw] for i in range(n)], px, py
+        return [im[(i//cols)*fh:(i//cols+1)*fh, (i%cols)*fw:(i%cols+1)*fw] for i in range(n)], px, py
     # body: torso rows only (between 30% and 80% of figure height), median edge per frame
     fr, px, py = frames('idle'); fronts = []; backs = []
     for f in fr:
@@ -27,7 +27,7 @@ for fid, d in HD.items():
     front, back = float(np.median(fronts)), float(np.median(backs))
     reach = {}
     for name in A:
-        if name in ('idle', 'walk_forward', 'walk_back', 'run', 'crouch', 'jump', 'block', 'hit_light', 'hit_heavy', 'knockdown_getup', 'victory', 'defeat', 'breathing', 'dash'):
+        if name in ('fall','idle', 'walk_forward', 'walk_back', 'run', 'crouch', 'jump', 'block', 'hit_light', 'hit_heavy', 'knockdown_getup', 'victory', 'defeat', 'breathing', 'dash'):
             continue
         fr, px, py = frames(name); best = (0, 160)
         for f in fr:
