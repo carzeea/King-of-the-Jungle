@@ -2120,6 +2120,25 @@ function drawFighter(f,i,ghost){
     c.beginPath();c.moveTo(Math.cos(a)*inner,-f.y+Math.sin(a)*inner*.22);c.lineTo(Math.cos(a)*outer,-f.y+Math.sin(a)*outer*.22);c.stroke();}
    c.restore();
   }
+  // Species-specific special-move accents stay anchored to the fighter and preserve sprite scale.
+  // Short-lived frost crystals and ground mist add physical texture without obscuring the opponent.
+  if(f.data.id==='leopard'&&['pounce','special_b','special_c','special_d','shadow','ultraseq'].includes(f.action)){
+   const t=phase(f),intensity=Math.sin(Math.PI*t),seed=(f.x||0)*.013;
+   c.save();c.globalAlpha=.58*intensity;c.strokeStyle='#c5f5ff';c.fillStyle='#b5edff';c.lineWidth=1.6;c.shadowColor='#75dfff';c.shadowBlur=7;
+   for(let j=0;j<9;j++){const a=j*2.399+seed,rad=24+55*t+(j%3)*9;
+    const xx=f.dir*(25+rad*Math.cos(a)),yy=-f.y-115+rad*.62*Math.sin(a)-25*t;
+    const len=5+(j%4)*3;c.beginPath();c.moveTo(xx,yy-len);c.lineTo(xx+len*.45,yy);c.lineTo(xx,yy+len);c.lineTo(xx-len*.45,yy);c.closePath();c.fill();
+   }
+   c.globalAlpha=.20*intensity;c.fillStyle='#e1faff';c.beginPath();c.ellipse(f.dir*36,-f.y-8,58+35*t,9+4*t,0,0,Math.PI*2);c.fill();c.restore();
+  }
+  // Cobra: a fast tongue flick and small venom droplets during biting and coil specials.
+  if(f.data.id==='snake'&&['bite','pounce','special_b','special_c','special_d','shadow'].includes(f.action)){
+   const t=phase(f),flick=Math.max(0,1-Math.abs(t-.43)/.24),reach=25+45*flick;
+   if(flick>0){c.save();c.globalAlpha=.9*flick;c.strokeStyle='#ed6574';c.lineWidth=2.5;c.lineCap='round';
+    const sx=f.dir*38,sy=-f.y-173;c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(sx+f.dir*reach*.6,sy-7,sx+f.dir*reach,sy+3);c.stroke();
+    c.beginPath();c.moveTo(sx+f.dir*reach,sy+3);c.lineTo(sx+f.dir*(reach+11),sy-4);c.moveTo(sx+f.dir*reach,sy+3);c.lineTo(sx+f.dir*(reach+11),sy+10);c.stroke();
+    c.fillStyle='#a6df73';for(let j=0;j<3;j++){const dx=sx+f.dir*(reach+12+j*13),dy=sy+10+j*7;c.beginPath();c.arc(dx,dy,2.5+j*.5,0,Math.PI*2);c.fill()}c.restore();}
+  }
   // Frost Pounce leaves a brief icy shock ring on the snow leopard's landing.
   if(f.data.id==='leopard'&&(f.frostImpact||0)>.025){
    const frost=f.frostImpact/ .52;
