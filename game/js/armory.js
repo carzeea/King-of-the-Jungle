@@ -294,6 +294,7 @@ function panelLocker(p){
 function panelCoins(p){
  p.innerHTML=`<h3>BUY JUNGLE COINS</h3><div class="arm-testbanner">TEST MODE — no real money is charged. Real checkout (Square) switches on only after the owner approves production payments.</div>
  <div class="arm-packs">${PACKS.map(k=>`<button class="arm-pack" data-pack="${k.id}"><b>${k.name}</b><span class="jc">${fmt(k.coins)} JC</span><span class="usd">$${k.price.toFixed(2)}</span></button>`).join('')}</div>
+ <h4>EARN COINS BY PLAYING <small>FREE</small></h4><div class="arm-earn"><span>Win a fight <b>+${EARN.win}</b></span><span>Lose a fight <b>+${EARN.loss}</b></span><span>Draw <b>+${EARN.draw}</b></span><span>Flawless victory <b>+${EARN.flawless}</b></span><span>10+ hit combo <b>+${EARN.combo10}</b></span><span>Each Tower floor won <b>+${EARN.towerFloor}</b></span><span>Conquer the Tower <b>+${EARN.towerClear}</b></span><span>Defeat MAJIC <b>+${EARN.titan}</b></span><span>First win of the day <b>+${EARN.firstWin}</b></span></div><p class="arm-sub">Up to ${fmt(EARN.dailyCap)} coins a day from playing${S.earn&&S.earn.day===today()?` · earned today: ${fmt(S.earn.total)}`:''}. Training mode doesn't pay out.</p>
  <h4>PURCHASE HISTORY</h4><div class="arm-receipts">${S.receipts.length?S.receipts.slice().reverse().map(r=>`<button class="arm-rcpt" data-rcpt="${r.ref}"><b>${r.pack}</b><span>${fmt(r.coins)} JC · $${r.total.toFixed(2)}</span><small>${new Date(r.date).toLocaleString()} · ${r.ref}</small></button>`).join(''):'<p class="arm-sub">No purchases yet.</p>'}</div>`;
  p.querySelectorAll('[data-pack]').forEach(b=>b.onclick=()=>buyPack(PACKS.find(k=>k.id===b.dataset.pack)));
  p.querySelectorAll('[data-rcpt]').forEach(b=>b.onclick=()=>showReceipt(S.receipts.find(r=>r.ref===b.dataset.rcpt)));
@@ -324,12 +325,38 @@ function showReceipt(r){
 
 function render(){renderFighters();renderLooks();renderSaved();drawStage().then(()=>{if(tab==='colors')renderPanel()});renderPanel();coinPills();playAnim()}
 
+
+// ---------- earning Jungle Coins by playing ----------
+const EARN={win:60,loss:20,draw:30,flawless:40,combo10:20,towerFloor:40,towerClear:500,titan:250,firstWin:150,dailyCap:2000};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function reward(r){
+ if(!r||r.mode==='training')return null;
+ const lines=[];const add=(n,label)=>{if(n>0)lines.push([n,label])};
+ if(r.draw)add(EARN.draw,'Draw');else if(r.won)add(EARN.win,'Victory');else add(EARN.loss,'Fought hard');
+ if(r.won&&r.flawless)add(EARN.flawless,'Flawless');
+ if(r.combo>=10)add(EARN.combo10,r.combo+'-hit combo');
+ if(r.won&&r.tower)add(EARN.towerFloor,'Tower floor');
+ if(r.won&&r.towerDone)add(EARN.towerClear,'Tower conquered');
+ if(r.won&&r.titan)add(EARN.titan,'Defeated MAJIC');
+ const d=today();if(!S.earn||S.earn.day!==d)S.earn={day:d,total:0,firstWin:false};
+ if(r.won&&!S.earn.firstWin){S.earn.firstWin=true;add(EARN.firstWin,'First win today')}
+ let total=lines.reduce((a,[n])=>a+n,0);const room=Math.max(0,EARN.dailyCap-S.earn.total);const capped=total>room;total=Math.min(total,room);
+ S.earn.total+=total;S.coins+=total;S.earnedAll=(S.earnedAll||0)+total;save();coinPills();
+ return{total,lines,capped,balance:S.coins};
+}
+function showReward(res){
+ const box=document.getElementById('winner-copy');if(!box)return;let el=document.getElementById('jc-reward');
+ if(!el){el=document.createElement('div');el.id='jc-reward';el.className='jc-reward';box.after(el)}
+ if(!res){el.innerHTML='';return}
+ el.innerHTML=res.total>0?`<b>+${fmt(res.total)} <small>JUNGLE COINS</small></b><span>${res.lines.map(([n,l])=>`${l} +${n}`).join(' · ')}</span>${res.capped?'<em>Daily coin limit reached — more tomorrow</em>':''}`:`<span>Daily coin limit reached — more tomorrow</span>`;
+ el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+}
 // ---------- hooks into the rest of the game ----------
 function open(startFid){buildScreen();if(startFid&&isOpen(startFid))fid=startFid;loadCurrent();tab='wardrobe';(window.__kotjShow||(()=>{}))('armory');render()}
 function heroInto(id,img){const o=S.equipped[id];if(!o||(o.look==='original'?!origTargets(o):!owns(id+'.'+o.look)))return;outfitURL(id,o,600).then(u=>{if(img.dataset.armFor===id)img.src=u}).catch(()=>{})}
 function auraFor(id){const o=S.equipped[id];return o&&o.aura&&S.owned['aura.'+o.aura]?(AURAS.find(a=>a.id===o.aura)||{}).color:null}
 function cycleOutfit(id){return false;const owned=['original',...['royal','street','hybrid'].filter(l=>owns(id+'.'+l))];if(owned.length<2)return false;const o=S.equipped[id]||freshOutfit();S.lookColors=S.lookColors||{};if(o.look!=='original')S.lookColors[id+'.'+o.look]={colors:o.colors||{},materials:o.materials||{}};const i=owned.indexOf(o.look);o.look=owned[(i+1)%owned.length];const kept=S.lookColors[id+'.'+o.look]||{colors:{},materials:{}};o.colors=JSON.parse(JSON.stringify(kept.colors));o.materials=JSON.parse(JSON.stringify(kept.materials));S.equipped[id]=o;save();return lookName(id,o.look)}
-window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,fightColors,lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
+window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,fightColors,reward:r=>{const x=reward(r);showReward(x);return x},lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
 
 function addEntryPoints(){
  buildScreen();

@@ -1304,6 +1304,7 @@ function finish(){
  }
  const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
  const winnerIndex=draw_?-1:(p1won?0:1),medals=winnerIndex>=0&&!game.fighters[winnerIndex].ai?awardFighterAchievements(game.fighters[winnerIndex],true,flawless,!!(tower&&tower.boss&&winnerIndex===0)):[];renderAchievementAwards(medals,winnerIndex>=0&&!game.fighters[winnerIndex].ai?game.fighters[winnerIndex]:null);
+ try{if(window.KOTJ_ARMORY&&mode!=='training'){const me=(net&&ON&&ON.side===1)?1:0,local=mode==='versus'&&!net,won=!draw_&&(local?true:(net?iWon:winnerIndex===me)),hum=game.fighters.filter(x=>!x.ai);KOTJ_ARMORY.reward({mode,draw:draw_,won,flawless:!!flawless,combo:Math.max(0,...hum.map(x=>x.bestCombo||0)),tower:!!tower,towerDone:!!(tower&&tower.done),titan:!!(tower&&tower.boss)})}}catch(_){}
  if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
  if(resultChampId==='majic'&&!draw_){title='THE JUNGLE TITAN';copy='THE TRUE FORM IS REVEALED · THE JUNGLE BOWS TO MAJIC';}
  if(tower&&tower.boss&&!draw_){if(resultChampId==='majic'){title='THE JUNGLE TITAN';copy='“I AM THE LAW OF THIS WILD. THE CROWN WAS ALWAYS MINE.” · MAJIC HOLDS THE SUMMIT';}else{title='THE TITAN FALLS';copy='“IMPOSSIBLE... THE JUNGLE HAS CHOSEN YOU.” · MAJIC’S TRUE FORM IS DEFEATED';}}
