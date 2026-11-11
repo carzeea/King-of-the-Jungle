@@ -258,7 +258,7 @@ function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(
 const selOptsOpen=()=>!$('sel-opts').classList.contains('hidden');
 function selOpts(on){const o=$('sel-opts');const v=on===undefined?o.classList.contains('hidden'):on;o.classList.toggle('hidden',!v);if(v){$('so-sound').textContent=$('sound').textContent;$('so-blood').textContent=document.querySelector('.blood-btn').textContent}}
 function selTower(){if(mode==='online'||mode==='tower')return;openSelect('tower')}
-function card(f,i){$('confirm-fighter').disabled=false;setBackdrop('assets/arenas/jungle-temple.webp');$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=`assets/ui/hero/${f.id}.webp?v=10.16`;$('select').dataset.f=f.id;$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
+function card(f,i){try{spriteImg[f.id]}catch(_){}$('confirm-fighter').disabled=false;setBackdrop('assets/arenas/jungle-temple.webp');$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=`assets/ui/hero/${f.id}.webp?v=10.16`;$('select').dataset.f=f.id;$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
  if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
@@ -314,7 +314,7 @@ function inputFor(i){
  const g=readPad(i);if(g){for(const n in k)k[n]=k[n]||g[n];if(g.start&&!padPrev[i].start)togglePause();padPrev[i]=g}
  return k;
 }
-let menuPrev={};setInterval(()=>{if(game)return;const g=readPadAny();if(!g)return;const p=menuPrev;menuPrev=g;
+let menuPrev={};setInterval(()=>{if(game)return;const g=readPadAny();if(!g)return;const p=menuPrev;menuPrev=g;if(document.getElementById('splash'))return; // the button that closes the splash doesn't also press START
  if(Object.keys(g).some(k=>g[k]&&!p[k]))document.documentElement.classList.add('pad-nav');
  const vis=screens.find(s=>!$(s).classList.contains('hidden'));
  if(vis==='menu'){const m=$('menu');
@@ -388,7 +388,15 @@ function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='m
  action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,bossPhase:data.id==='majic'?1:0,
  combo:0,bestCombo:0,usedUltra:false,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
+function fighterLoading(on){let el=document.getElementById('fighter-loading');
+ if(!el){el=document.createElement('div');el.id='fighter-loading';el.innerHTML='<img src="assets/ui/crown.webp" alt=""><b>THE FIGHTERS ARE ENTERING THE ARENA</b><i></i>';document.body.appendChild(el)}
+ el.classList.toggle('on',!!on)}
 function start(){
+ // Make sure both fighters' frames have arrived before the bell (slow phone connections).
+ if(mode!=='online'&&picks[0]&&picks[1]){const ids=[picks[0].id,picks[1].id],ready=()=>ids.every(id=>{const a=spriteImg[id];return !a||Object.values(a).every(im=>im.complete)});
+  if(start._waiting)return;
+  if(!ready()){start._waiting=performance.now();fighterLoading(true);
+   const iv=setInterval(()=>{if(ready()||performance.now()-start._waiting>20000){clearInterval(iv);start._waiting=0;fighterLoading(false);start()}},120);return}}
  // First arrival at MAJIC's summit gets a one-time, three-beat boss entrance.
  // Mark it before opening the cards so the final callback can safely call start() again.
  if(tower&&tower.boss&&!tower.bossIntroSeen){
@@ -416,7 +424,7 @@ THE FINAL BATTLE BEGINS.`},start)));
  $('round-label').textContent=tower?(tower.boss?'THE SUMMIT':tower.kind==='forgotten'?`ECHO ${tower.index+1} / 3`:`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
  $('p2-face').classList.toggle('echo-face',!!picks[1].echo);
  time=99;paused=false;if(mode==='training')$('timer').textContent='∞';Object.assign(ON,{inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1});$('pause').classList.toggle('hidden',mode==='online');cam.z=1;cam.snap=true;resStart();
- setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}},0);
+ setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}try{const nx=tower&&tower.ladder&&tower.ladder[tower.index+1];if(nx&&nx.id)setTimeout(()=>spriteImg[nx.id],4000)}catch(_){}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(mode==='training'?.12:tower&&tower.boss?1.35:tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
@@ -1714,11 +1722,13 @@ const SPRITES={
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]}
 };
-const spriteImg={};for(const id in SPRITES){spriteImg[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.33';spriteImg[id][k]=im}}
+// Fighter frames load only when a fighter is first needed (highlighted on select, or in a fight), not all 15 at start-up.
+const spriteImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&SPRITES[id]){t[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=10.40';t[id][k]=im}}return t[id]}});
+function spritesReady(id){const a=spriteImg[id];if(!a)return true;const idle=a.idle||a[Object.keys(a)[0]];return !!(idle&&idle.complete&&idle.naturalWidth)}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.33';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=10.40';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -1734,6 +1744,14 @@ function draw(){
  const want=clamp(1.02+(420-gap)/5200,.96,1.045);
  const kz=1-Math.pow(.94,frameDt*60),kp=1-Math.pow(.88,frameDt*60);
  cam.z+=(want-cam.z)*kz;vh/=cam.z;
+ // Headroom for tall fighters (MAJIC, Elephant, Grizzly) and big jumps: pull the lens back just enough
+ // to keep every head below the health bars. The arena art is enlarged around the floor to match.
+ const vhBase=Math.min(570,1210/aspect);let tallest=0;for(const f of F)if(f._top!=null)tallest=Math.max(tallest,400-f._top);
+ if(!cam.hudT||performance.now()-cam.hudT>600){cam.hudT=performance.now();try{const cr=canvas.getBoundingClientRect();let hb=0;for(const q of document.querySelectorAll('#fight .fight-hud,body.touch #fight .meter-row,#fight .majic-boss-hud:not(.hidden)')){const r=q.getBoundingClientRect();if(r.height&&r.top<cr.top+cr.height*.4)hb=Math.max(hb,r.bottom)}cam.hud=clamp((hb-cr.top)/cr.height,.06,.3)}catch(_){cam.hud=.14}}
+ const vhNeed=Math.min(vhBase*1.6,(tallest+30)/(.84-(cam.hud||.14)));cam.vx=cam.vx||vh;const vxT=Math.max(vh,vhNeed);
+ cam.vx+=(vxT-cam.vx)*(vxT>cam.vx?1-Math.pow(.8,frameDt*60):1-Math.pow(.95,frameDt*60));if(cam.snap)cam.vx=vxT;vh=Math.max(vh,cam.vx);
+ const hudF=cam.hud||.14,akT=Math.max(1,vh/vhBase,(tallest+30+hudF*vh)/430);cam.ak=cam.ak||akT;cam.ak+=(akT-cam.ak)*(akT>cam.ak?1-Math.pow(.8,frameDt*60):1-Math.pow(.95,frameDt*60));if(cam.snap)cam.ak=akT;
+ const artK=Math.max(1,vh/vhBase,cam.ak);cam.artK=artK;
  // Frost Fatality lens: push toward the frozen opponent, hold through the crack,
  // then pull back as the ice bursts apart. This changes only the camera framing.
  const frostVictim=game.koBurst?.frost&&game.ko>0?F.find(f=>f.hp<=0):null;
@@ -1753,18 +1771,19 @@ function draw(){
   // Keep the defeated fighter just off-center so the frozen silhouette remains the focus.
   tx=frostVictim.x-vw*.57;ty=(400+frostVictim.y-145)-vh*.48;
  }
- tx=Math.max(-60,Math.min(1160-vw,tx));ty=Math.max(-30,Math.min(550-vh,ty));
+ if(!frostVictim)ty=Math.min(ty,400-tallest-30-hudF*vh);
+ tx=Math.max(550-610*artK,Math.min(550+610*artK-vw,tx));ty=Math.max(400-430*artK,Math.min(400+150*artK-vh,ty));
  if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*cameraEase;cam.y+=(ty-cam.y)*cameraEase}
  const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
  if(game.shake>0)c.translate((Math.random()-.5)*22*Math.min(1,game.shake/.3),(Math.random()-.5)*14*Math.min(1,game.shake/.3));
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
  const t=performance.now()/1000;
  const bgi=arenaImg[arena.id];
- if(bgi&&bgi.complete&&bgi.naturalWidth){c.drawImage(bgi,-60,-30,w+120,h+60);
+ if(bgi&&bgi.complete&&bgi.naturalWidth){c.drawImage(bgi,550-610*artK,400-430*artK,1220*artK,580*artK);
   // soft vignette + floor shade so fighters stay readable on bright stages
-  const vg=c.createLinearGradient(0,0,0,h);vg.addColorStop(0,'rgba(0,0,0,.35)');vg.addColorStop(.35,'rgba(0,0,0,.05)');vg.addColorStop(.75,'rgba(0,0,0,.08)');vg.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=vg;c.fillRect(-60,-60,w+120,h+120);
+  const vy0=400-430*artK,vy1=400+150*artK,vg=c.createLinearGradient(0,vy0,0,vy1);vg.addColorStop(0,'rgba(0,0,0,.35)');vg.addColorStop(.35,'rgba(0,0,0,.05)');vg.addColorStop(.75,'rgba(0,0,0,.08)');vg.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=vg;c.fillRect(550-610*artK,vy0,1220*artK,vy1-vy0);
   // flicker on the braziers
-  c.globalAlpha=.02+Math.random()*.025;c.fillStyle='#ffb04a';c.fillRect(-60,-60,w+120,h+120);c.globalAlpha=1;
+  c.globalAlpha=.02+Math.random()*.025;c.fillStyle='#ffb04a';c.fillRect(550-610*artK,400-430*artK,1220*artK,580*artK);c.globalAlpha=1;
  }else{
  const sky=c.createLinearGradient(0,0,0,405);sky.addColorStop(0,'#142a25');sky.addColorStop(.55,'#294538');sky.addColorStop(1,'#536044');c.fillStyle=sky;c.fillRect(-60,-60,w+120,465);
  c.globalAlpha=.2;c.fillStyle='#e3bd71';c.beginPath();c.arc(550,105,108,0,Math.PI*2);c.fill();c.globalAlpha=1;
@@ -2973,4 +2992,14 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
   if(e('a')){const t=cur||(v==='result'?(!$('tower-next').classList.contains('hidden')?$('tower-next'):$('rematch')):bs[0]);if(t&&t.tagName!=='INPUT')t.click();else if(t)t.focus()}
   else if(e('back')&&back&&back.offsetParent){back.click()}
  },60)}
+
+// Measure how high each fighter is really drawn (head, wings, raised arms) so the camera can keep it on screen.
+{const _dF3=drawFighter;drawFighter=function(f,i,ghost){if(ghost||!game)return _dF3.apply(this,arguments);
+  const di=c.drawImage;let top=1e9;
+  c.drawImage=function(){const a=arguments,n=a.length,dy=n>=9?a[6]:a[2],dh=n>=9?a[8]:(n>=5?a[4]:(a[0].height||0));const m=c.getTransform();
+   const y1=m.d*dy+m.f,y2=m.d*(dy+dh)+m.f;top=Math.min(top,y1,y2);return di.apply(c,a)};
+  let r;try{r=_dF3.apply(this,arguments)}finally{c.drawImage=di}
+  if(top<1e9){const m0=c.getTransform();const sc=m0.d||1;// world y = (device y - camera offset)/scale
+   f._top=(top-m0.f)/sc}
+  return r}}
 })();

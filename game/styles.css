@@ -843,3 +843,10 @@ html.kotj-touch.kotj-portrait body{overflow:hidden}
 html.pad-nav button:focus,html.pad-nav input:focus,html.pad-nav .padfocus{outline:3px solid #ffd36b!important;outline-offset:2px;box-shadow:0 0 0 2px #000,0 0 18px 4px rgba(255,190,70,.75)!important;position:relative;z-index:3}
 #fs-tip{position:fixed;left:50%;bottom:18px;transform:translate(-50%,160%);z-index:99998;padding:9px 18px;background:rgba(14,9,6,.92);border:1px solid #e9b44c;border-radius:20px;color:#ffd36b;font:800 12px Inter,sans-serif;letter-spacing:.14em;transition:transform .35s;pointer-events:none}
 #fs-tip.on{transform:translate(-50%,0)}
+#fighter-loading{position:fixed;inset:0;z-index:9500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:radial-gradient(ellipse at 50% 45%,rgba(40,20,8,.92),rgba(5,4,3,.97) 70%);color:#ffd36b}
+#fighter-loading.on{display:flex}
+#fighter-loading img{width:72px;animation:flPulse 1.2s ease-in-out infinite}
+#fighter-loading b{font:900 clamp(14px,2.2vw,24px) 'Barlow Condensed',Inter,sans-serif;letter-spacing:.14em;text-align:center;padding:0 16px}
+#fighter-loading i{width:min(320px,60vw);height:4px;border-radius:2px;background:linear-gradient(90deg,transparent,#e9b44c,transparent);background-size:50% 100%;background-repeat:no-repeat;animation:flBar 1.1s linear infinite}
+@keyframes flPulse{50%{transform:scale(1.08);filter:drop-shadow(0 0 14px rgba(255,190,70,.8))}}
+@keyframes flBar{from{background-position:-50% 0}to{background-position:150% 0}}
