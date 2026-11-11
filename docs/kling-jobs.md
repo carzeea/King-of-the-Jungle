@@ -166,3 +166,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AYM03lWr6icjHOV-4OcbS6gqVnZp4Je_UuNjAvr2CtfY8csYTtw0Q3grLejyIdx-YAKRhzKc
 - victory Aeo0G26-vZnHtKPgIGOI23ZwRnDVfm9LexMfbsR61cI3-ScHWgYXYMKlrs1JN0jFt6M-2rWu
 - block AbvzCtqD9xrKGd8T6Y5Mpe2d4bdmEGlSeHI6eycgwvFJ2aNdeSBVzYh5VeR45pqYFU82Y31p
+
+## Snake (side view) — auto_fighter.py
+- idle Ae56ol67XfaJjwmqyPbZWX6m7Tm1-2w2MDjkie2MzCL2sILgmOQRejBXf3ndjo5fUinuJvm2
+- walk AVSPtEcmxzBB4qrB6rMLK48UXMH-_v4MkD6pTswJrB3Wc00_W1aR8gx2jYvbQaj9DEBSvLoO
+- light AT2Z9MgaOx1-2QpC0rAr08pf0wfVzoH2Vxt1LkOt4MEdRHTFf15__Afo7VulklL7Sw6tSp7z
+- heavy AWAB76U-xZpzWrECENX1te4NL1ZgQSSZlBzteRsbuVoFpvGA4uaQUfc8skqyyoVYqzXPlPFw
+- jump AZl930tNmxtyJ7zfD2Tg3BSJ7wdWFY7SkHddBfhI7RA66YK0enSGZmeW13KZVFF_AcwmJTCB
+- special AX6WOujcTP22UdUvf_-7p9UUjQKEuh6fVGBr8sSi5HGEM7Ny9e9OxivjshQLsmYshQFMhxp0
+- hit AeOPzLUWNPY34ULuLMman811KW-S3O_LOtcB02iFfdG6skYLNsjUXkTJkCXpawanTIAkDb1H
+- knock AcAK2JCUwMB-DtrJN2Ns5gfk3q4yyaORO1zYJe7EGoqqrQBKe9otgrarVjRiG7u248L-wxMA
+- victory AWgUYPTaJO5bPrOM4K1TiH1PZfFeigdUb9EsS6RDjKqefWnYPfk5TyfPX6Rca_UyDXWzGuw1
+- block AbfGlhQ85FURxeLvWolODC_ql-4lNdkkK9PpzwJBkBr-VGR4ZdnaGeKyLJ60NCnc4UfnTbiZ
