@@ -3180,11 +3180,11 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
 // breathing + fighting-stance bounce when standing, stride bob and lean when walking, stretch on take-off,
 // squash + dust on landing, lunge into every strike, recoil when hit, and heavy footfalls for the big beasts.
 const MOTION={ // w: weight (0 light .. 1 huge), br: breath, bn: stance bounce px, sw: sway, hz: idle speed, ln: strike lean
- lion:{w:.55,br:.016,bn:3,sw:.012,hz:2.4,ln:.07}, tiger:{w:.5,br:.014,bn:5,sw:.012,hz:2.9,ln:.08}, jaguar:{w:.35,br:.012,bn:6,sw:.014,hz:3.4,ln:.09},
- leopard:{w:.3,br:.012,bn:6,sw:.015,hz:3.3,ln:.09}, wolf:{w:.4,br:.013,bn:5,sw:.012,hz:3.1,ln:.08}, hyena:{w:.35,br:.014,bn:6,sw:.02,hz:3.6,ln:.08},
- badger:{w:.45,br:.016,bn:4,sw:.01,hz:3.2,ln:.09}, grizzly:{w:.85,br:.022,bn:2,sw:.014,hz:1.9,ln:.06}, crocodile:{w:.75,br:.016,bn:2,sw:.018,hz:1.8,ln:.06},
- hippo:{w:.9,br:.024,bn:2,sw:.012,hz:1.7,ln:.05}, elephant:{w:1,br:.022,bn:1,sw:.012,hz:1.5,ln:.05}, eagle:{w:.3,br:.012,bn:7,sw:.016,hz:3.2,ln:.09},
- snake:{w:.4,br:.012,bn:2,sw:.04,hz:2.2,ln:.1,snake:1}, stag:{w:.6,br:.016,bn:4,sw:.012,hz:2.4,ln:.07}, majic:{w:1,br:.022,bn:3,sw:.016,hz:2.1,ln:.06}};
+ lion:{w:.55,br:0.024,bn:5.1,sw:0.0192,hz:2.4,ln:.07}, tiger:{w:.5,br:0.021,bn:8.5,sw:0.0192,hz:2.9,ln:.08}, jaguar:{w:.35,br:0.018,bn:10.2,sw:0.0224,hz:3.4,ln:.09},
+ leopard:{w:.3,br:0.018,bn:10.2,sw:0.024,hz:3.3,ln:.09}, wolf:{w:.4,br:0.0195,bn:8.5,sw:0.0192,hz:3.1,ln:.08}, hyena:{w:.35,br:0.021,bn:10.2,sw:0.032,hz:3.6,ln:.08},
+ badger:{w:.45,br:0.024,bn:6.8,sw:0.016,hz:3.2,ln:.09}, grizzly:{w:.85,br:0.033,bn:3.4,sw:0.0224,hz:1.9,ln:.06}, crocodile:{w:.75,br:0.024,bn:3.4,sw:0.0288,hz:1.8,ln:.06},
+ hippo:{w:.9,br:0.036,bn:3.4,sw:0.0192,hz:1.7,ln:.05}, elephant:{w:1,br:0.033,bn:1.7,sw:0.0192,hz:1.5,ln:.05}, eagle:{w:.3,br:0.018,bn:11.9,sw:0.0256,hz:3.2,ln:.09},
+ snake:{w:.4,br:0.018,bn:3.4,sw:0.064,hz:2.2,ln:.1,snake:1}, stag:{w:.6,br:0.024,bn:6.8,sw:0.0192,hz:2.4,ln:.07}, majic:{w:1,br:0.033,bn:5.1,sw:0.0256,hz:2.1,ln:.06}};
 function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puff',x:x+(Math.random()-.5)*(60+big*80),y:398,vx:(Math.random()-.5)*(50+big*60),vy:-15-Math.random()*25,r:7+Math.random()*7+big*6,grow:40+big*25,life:.4+big*.15,color:'#a88c6e',alpha:.35,_n:1,t:0})}
 {const _dF4=drawFighter;drawFighter=function(f,i,ghost){
   const M=f&&f.data&&MOTION[f.data.id];if(!M||!game||ghost)return _dF4.apply(this,arguments);
@@ -3245,4 +3245,18 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   f._poisonT-=dt;c.save();c.filter='sepia(.55) hue-rotate(45deg) saturate(1.7) brightness(.92)';try{r=_dF5.apply(this,arguments)}finally{c.restore()}
   if(Math.random()<.35)game.fx.push({kind:'pp',sh:'drop',x:f.x+R(-50,50),y:400+f.y-R(60,240),vx:R(-30,30),vy:R(-60,-10),g:300,r:R(3,5),life:.6,color:Math.random()<.5?'#a8ff4a':'#5fd22a',glow:1,t:0,_n:1});
   return r}}
+
+{const _dF6=drawFighter;drawFighter=function(f,i,ghost){
+  if(!game||!f||!f.data||f.data.id!=='eagle'||f.hp<=0&&game.ko||['down','knockdown','hit'].includes(f.action))return _dF6.apply(this,arguments);
+  const t=performance.now()/1000,air=!f.ground,walk=f.action==='walk';
+  const flap=air?Math.sin(t*14):walk?Math.sin(t*7)*.7:Math.sin(t*3.2)*.75+Math.sin(t*7.1)*.12;
+  const fx=f.x,top=f._top!=null?f._top:400+f.y-330,bot=400+f.y+10,H=bot-top,core=H*.2,sy=top+H*.3;
+  c.save();c.beginPath();c.rect(fx-core,-3000,core*2,6000);c.clip();_dF6.apply(this,arguments);c.restore();
+  for(const s of[-1,1]){c.save();c.beginPath();if(s<0)c.rect(fx-4000,-3000,4000-core,6000);else c.rect(fx+core,-3000,4000,6000);c.clip();
+   c.translate(fx+s*core,sy);c.rotate(s*flap*.16);c.scale(1,1-flap*.07);c.translate(-(fx+s*core),-sy);
+   _dF6.apply(this,arguments);c.restore()}
+  // downdraft under the wings while hovering/jumping
+  if(air&&Math.random()<.4)game.fx.push({kind:'pp',sh:'puff',x:fx+R(-90,90),y:398,vx:R(-120,120),vy:-10,r:R(10,16),grow:60,life:.4,color:'#c8bfae',alpha:.3,t:0,_n:1});
+  if(Math.random()<(air?.25:.04))game.fx.push({kind:'pp',sh:'feather',x:fx+R(-150,150),y:top+H*R(.2,.5),vx:R(-40,40),vy:R(10,40),g:60,drag:.98,rot:R(0,6),sway:R(0,6),r:R(10,16),life:R(1,1.6),color:Math.random()<.6?'#ffffff':'#8a6a40',t:0,_n:1});
+  }}
 })();
