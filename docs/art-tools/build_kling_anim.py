@@ -44,6 +44,8 @@ band = m0[int(top0 + (feet0 - top0) * .4):int(top0 + (feet0 - top0) * .7)]
 hipx = float(np.median([(np.where(r)[0].min() + np.where(r)[0].max()) / 2 for r in band if r.any()]))
 
 idx = list(range(start, min(end, len(allf)), step))
+if os.environ.get('FRAMES'):   # e.g. FRAMES=64-80,93-108 (inclusive ranges, step applies)
+    idx = [i for r in os.environ['FRAMES'].split(',') for i in range(int(r.split('-')[0]), int(r.split('-')[1]) + 1, step)]
 if os.environ.get('PINGPONG'): idx = idx + idx[-2:0:-1]   # seamless loop: forward then back
 K = [key(allf[i]) for i in idx]
 U = np.zeros(K[0].shape[:2], bool)
