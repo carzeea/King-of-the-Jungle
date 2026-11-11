@@ -930,3 +930,12 @@ html.kotj-touch #select.v2sel .select-hints .hint:first-child b{background:#2a15
 .sx-panel.hidden{display:none}
 .sx-panel button{padding:9px 6px;border-radius:10px;border:1px solid rgba(255,211,107,.6);background:rgba(20,14,8,.86);color:#ffe7b0;font:700 13px "Barlow Condensed",sans-serif;letter-spacing:.04em}
 .sx-panel .sx-u{grid-column:1/-1;opacity:.55}.sx-panel .sx-u.ready{opacity:1;background:linear-gradient(90deg,#7a1f6a,#c98a1c);color:#fff}
+.touch-pad .sx-panel{position:fixed;right:max(10px,env(safe-area-inset-right));left:auto;top:auto;bottom:calc(118px + env(safe-area-inset-bottom));width:min(380px,58vw);display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.touch-pad .sx-panel.hidden{display:none}
+.touch-pad .sx-panel button{width:auto!important;height:auto!important;min-height:38px;border-radius:10px!important;padding:8px 6px!important;font-size:13px!important;line-height:1.1;white-space:normal;background:rgba(20,14,8,.9)!important;color:#ffe7b0!important;border:1px solid rgba(255,211,107,.65)!important;box-shadow:none!important}
+.touch-pad .sx-panel .sx-u{grid-column:1/-1;opacity:.55}
+.touch-pad .sx-panel .sx-u.ready{opacity:1;background:linear-gradient(90deg,#7a1f6a,#c98a1c)!important;color:#fff!important}
+.touch-pad .sx-star{background:radial-gradient(circle,#ffe7a0,#c98a1c)!important;color:#3a2200!important;font-size:22px!important}
+body #touch-pad .sx-panel button,body.fighting #touch-pad .sx-panel button{width:100%!important;max-width:none!important;margin:0!important;background:rgba(20,14,8,.9)!important;backdrop-filter:none}
+body #touch-pad .sx-panel .sx-u.ready,body.fighting #touch-pad .sx-panel .sx-u.ready{background:linear-gradient(90deg,#7a1f6a,#c98a1c)!important}
+body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gradient(circle,#ffe7a0,#c98a1c)!important;color:#3a2200!important}
