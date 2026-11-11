@@ -46,3 +46,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AQRdnPobMVaoJrnPrDpWCREBomOz_J-JyoGc_p7KBUlIwNEXcCfRdkkMJSDdkRCXbuSiBfME
 - victory ASrCf_9WQ6iHF-p034Id3yErDTdLNLlAvE0yxQnQBEPSTQdYpMEivTvUKZzwkCUB8_Fy0-tw
 - block AfV_s7s91TOOL__T4L65mrmvlzXdhhow4vlcEXUzFOX0TNATseu91SkmPCWCSa6o5etRw7p6
+
+## Lion (side view) — auto_fighter.py lion <clips> 260
+- idle AaPGyrNkUhWv3UZHLqgXVmljCumqI0eZHnzDkPCpxJ4TNvEnEAjNwH_ptgMbCv0zVE7uDNxz
+- walk AfDKai5emyp70nIDYhRK9YmQaJQoRLlQUas_mL0Dw6ips5p5pTctVe8HafQdmYL7mucNZ0ZP
+- light AREMjxjP68PRHeHDoHN0QEeMeyqLCrAINy1F78_TM3fGFjZuIULtMbzmyFvl2EiDEm46QxGi
+- heavy AVAo3JPajcSQ0ZrZOSCxQ7__dclXsoO7jEI9LYsTRwIMZWNejORx9uQWxYvPWy-Z4cTtauqV
+- jump Af58Ly83c8qeRQYnQSi7guJz-SKDNrfOj9JmtFozOAz-6EfD3B_6-MZFrK6CYxmwIdQsVKtZ
+- special AaxIUj-arZCUaGG4679YCEthmm7RatZTEBQrW8ZtOiH_nytPKVIocNSRTjIRIE6mniZ3TRC2
+- hit AbNKV9aN7CK6wFO59vMd4eiqAx2fRetyRJfsqpX1anyeiiEyO95MfLBJk6dDNTDx32duH_n5
+- knock AYmZJom3El6j7-JFT1XPCsg7GrLASTh0GjVJgO2HbCBFTg3DhH7k3psyvNrCRxa7MHoc9OAH
+- victory AaciGzeAi9oRtrp0YqOTqnvcAcgTCSBXesnI6ie_sTCb62GupHpWABgiMXvaIakNXmyIzgaP
+- block AYM_Y2jrxNNTJ_gHZgiEZR9EGpPsAAYs3ETUYWZkGIwQq24VTLPTsYsbpcW_6l9eP6EplZjb

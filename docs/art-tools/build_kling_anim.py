@@ -20,6 +20,7 @@ extra = sys.argv[8:]
 G = '/home/claude/king-of-the-jungle/game'
 
 tmp = tempfile.mkdtemp()
+import atexit, shutil; atexit.register(lambda: shutil.rmtree(tmp, ignore_errors=True))
 subprocess.run(['ffmpeg', '-loglevel', 'error', '-i', video, f'{tmp}/%04d.png'], check=True)
 allf = sorted(glob.glob(f'{tmp}/*.png'))
 
