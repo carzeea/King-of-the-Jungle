@@ -2620,15 +2620,15 @@ function drawSprite(f){
  switch(f.action){
   case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2*X(anim));break}
   case'block':anim='block';fr=Math.min(3*X('block')+(X('block')-1),Math.floor(f.blockTime*20*X('block')));break;
-  case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.floor(ap*A[anim][0]);break;
+  case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));break;
   case'double':anim=S.double[f.move_&&f.move_.eagleWingCombo?Math.min(S.double.length-1,f.hitsDone):f.chain%S.double.length];fr=1+Math.floor(ap*(A[anim][0]-1));break;
   case'attack_heavy':anim='attack_heavy';fr=Math.floor(ap*A.attack_heavy[0]);break;
   case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'special_b':case'special_c':case'special_d':case'ultra_move':anim=A[f.action]?f.action:S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'ender':anim='uppercut';fr=Math.floor(ap*A.uppercut[0]);break;
-  case'shadow':if(S.shadow){anim=S.shadow;fr=Math.floor(ap*A[anim][0])}else{anim=S.double[Math.floor(p*5)%2];fr=Math.floor(p*5*A[anim][0])%A[anim][0]}break;
-  case'ultraseq':anim=S.ultra[Math.floor(now*6)%S.ultra.length];fr=Math.floor(now*36);break;
+  case'shadow':{const signature=[S.shadow,'shadow_rampage','ultra_move','special_d','special_c','special_b',S.special].find(a=>a&&A[a]);if(signature){anim=signature;fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}else{anim=S.double[Math.min(S.double.length-1,Math.floor(p*S.double.length))];fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}break;}
+  case'ultraseq':{const options=(S.ultra||[]).filter(a=>A[a]);anim=options.length?options[Math.floor(now*4)%options.length]:(A.ultra_move?'ultra_move':S.special);fr=Math.floor(now*24)%A[anim][0];break;}
   case'jump':{anim='jump';const n=A.jump[0];fr=Math.round((Math.max(-560,Math.min(560,f.vy))+560)/1120*(n-3))+1;break}
   case'hit':{
    anim=f.hitHeavy&&A.hit_heavy?'hit_heavy':'hit_light';
