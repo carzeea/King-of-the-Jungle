@@ -2120,6 +2120,63 @@ function drawFighter(f,i,ghost){
     c.beginPath();c.moveTo(Math.cos(a)*inner,-f.y+Math.sin(a)*inner*.22);c.lineTo(Math.cos(a)*outer,-f.y+Math.sin(a)*outer*.22);c.stroke();}
    c.restore();
   }
+  // Fifteen distinct signatures: procedural accents follow actual attack phases.
+  // These effects are intentionally screen-space modest and do not resize fighter art.
+  if(['earthslam','pounce','special_b','special_c','special_d','shadow','ultraseq','ultra_move','ender'].includes(f.action)||(f.move_&&f.attack>0&&f.action==='attack_heavy'&&f.move_!==MOVES.double)){
+   const signature={
+    lion:['#f5c75d','roar'],tiger:['#ff9c48','slash'],jaguar:['#43d7c6','slash'],
+    wolf:['#b9d9ff','wind'],hyena:['#e65c66','echo'],badger:['#bda57b','debris'],
+    grizzly:['#d9ad79','impact'],crocodile:['#65c9a2','spray'],hippo:['#64e1e4','wave'],
+    elephant:['#c6b9a0','debris'],eagle:['#e3e9fc','wind'],stag:['#e9c477','antler'],
+    majic:['#bc83ff','adaptive']
+   }[f.data.id];
+   if(signature){
+    const [color,kind]=signature,t=phase(f),power=Math.sin(Math.PI*t),dir=f.dir||1;
+    const originX=dir*54,originY=-f.y-132;
+    c.save();c.strokeStyle=color;c.fillStyle=color;c.lineCap='round';c.lineJoin='round';
+    c.globalAlpha=.60*power;c.shadowColor=color;c.shadowBlur=kind==='adaptive'?14:6;
+    if(kind==='slash'||kind==='antler'){
+     c.lineWidth=kind==='antler'?3:4;
+     for(let j=0;j<3;j++){const y=originY+(j-1)*19;
+      c.beginPath();c.moveTo(dir*12,y+21);c.quadraticCurveTo(dir*(68+40*t),y-33,dir*(105+48*t),y-9);c.stroke();}
+     if(kind==='antler'){c.lineWidth=2;c.beginPath();c.moveTo(originX,originY);c.lineTo(dir*95,originY-76);c.moveTo(dir*68,originY-44);c.lineTo(dir*43,originY-85);c.moveTo(dir*82,originY-61);c.lineTo(dir*112,originY-94);c.stroke();}
+    }else if(kind==='roar'||kind==='impact'||kind==='wave'){
+     c.lineWidth=kind==='impact'?5:3;
+     for(let j=0;j<3;j++){const radius=25+t*(70+j*21);c.beginPath();c.ellipse(originX+dir*radius*.4,kind==='wave'?-f.y-14:originY,radius,kind==='wave'?10+j*4:radius*.65,0,-1.1,1.1);c.stroke();}
+    }else if(kind==='debris'||kind==='spray'){
+     for(let j=0;j<12;j++){const a=j*2.399,spread=15+90*t+(j%3)*7;
+      const x=dir*24+Math.cos(a)*spread,y=-f.y-(kind==='spray'?65:9)-Math.abs(Math.sin(a))*spread*.5;
+      c.beginPath();if(kind==='spray')c.ellipse(x,y,2.5,6,Math.cos(a),0,Math.PI*2);
+      else{c.moveTo(x,y-5);c.lineTo(x+5,y+4);c.lineTo(x-5,y+4);c.closePath();}c.fill();}
+    }else if(kind==='wind'||kind==='echo'||kind==='adaptive'){
+     for(let j=0;j<5;j++){const a=j*1.256+t*2,rad=33+25*t+j*7;
+      const x=originX+Math.cos(a)*rad,y=originY+Math.sin(a)*rad;
+      c.lineWidth=kind==='adaptive'?2.5:2;c.beginPath();c.arc(x,y,11+j*2,a,a+1.9);c.stroke();
+      if(kind==='adaptive'){c.beginPath();c.moveTo(x,y-10);c.lineTo(x+dir*9,y);c.lineTo(x,y+10);c.stroke();}
+     }
+    }
+    c.restore();
+   }
+  }
+  // Species-specific special-move accents stay anchored to the fighter and preserve sprite scale.
+  // Short-lived frost crystals and ground mist add physical texture without obscuring the opponent.
+  if(f.data.id==='leopard'&&['pounce','special_b','special_c','special_d','shadow','ultraseq'].includes(f.action)){
+   const t=phase(f),intensity=Math.sin(Math.PI*t),seed=(f.x||0)*.013;
+   c.save();c.globalAlpha=.58*intensity;c.strokeStyle='#c5f5ff';c.fillStyle='#b5edff';c.lineWidth=1.6;c.shadowColor='#75dfff';c.shadowBlur=7;
+   for(let j=0;j<9;j++){const a=j*2.399+seed,rad=24+55*t+(j%3)*9;
+    const xx=f.dir*(25+rad*Math.cos(a)),yy=-f.y-115+rad*.62*Math.sin(a)-25*t;
+    const len=5+(j%4)*3;c.beginPath();c.moveTo(xx,yy-len);c.lineTo(xx+len*.45,yy);c.lineTo(xx,yy+len);c.lineTo(xx-len*.45,yy);c.closePath();c.fill();
+   }
+   c.globalAlpha=.20*intensity;c.fillStyle='#e1faff';c.beginPath();c.ellipse(f.dir*36,-f.y-8,58+35*t,9+4*t,0,0,Math.PI*2);c.fill();c.restore();
+  }
+  // Cobra: a fast tongue flick and small venom droplets during biting and coil specials.
+  if(f.data.id==='snake'&&(['bite','pounce','special_b','special_c','special_d','shadow'].includes(f.action)||(f.action==='attack_heavy'&&f.move_&&f.attack>0))){
+   const t=phase(f),flick=Math.max(0,1-Math.abs(t-.43)/.24),reach=25+45*flick;
+   if(flick>0){c.save();c.globalAlpha=.9*flick;c.strokeStyle='#ed6574';c.lineWidth=2.5;c.lineCap='round';
+    const sx=f.dir*38,sy=-f.y-173;c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(sx+f.dir*reach*.6,sy-7,sx+f.dir*reach,sy+3);c.stroke();
+    c.beginPath();c.moveTo(sx+f.dir*reach,sy+3);c.lineTo(sx+f.dir*(reach+11),sy-4);c.moveTo(sx+f.dir*reach,sy+3);c.lineTo(sx+f.dir*(reach+11),sy+10);c.stroke();
+    c.fillStyle='#a6df73';for(let j=0;j<3;j++){const dx=sx+f.dir*(reach+12+j*13),dy=sy+10+j*7;c.beginPath();c.arc(dx,dy,2.5+j*.5,0,Math.PI*2);c.fill()}c.restore();}
+  }
   // Frost Pounce leaves a brief icy shock ring on the snow leopard's landing.
   if(f.data.id==='leopard'&&(f.frostImpact||0)>.025){
    const frost=f.frostImpact/ .52;
@@ -2620,15 +2677,15 @@ function drawSprite(f){
  switch(f.action){
   case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2*X(anim));break}
   case'block':anim='block';fr=Math.min(3*X('block')+(X('block')-1),Math.floor(f.blockTime*20*X('block')));break;
-  case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.floor(ap*A[anim][0]);break;
+  case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));break;
   case'double':anim=S.double[f.move_&&f.move_.eagleWingCombo?Math.min(S.double.length-1,f.hitsDone):f.chain%S.double.length];fr=1+Math.floor(ap*(A[anim][0]-1));break;
   case'attack_heavy':anim='attack_heavy';fr=Math.floor(ap*A.attack_heavy[0]);break;
   case'bite':anim='bite';fr=Math.floor(ap*A.bite[0]);break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'special_b':case'special_c':case'special_d':case'ultra_move':anim=A[f.action]?f.action:S.special;fr=Math.floor(ap*A[anim][0]);break;
   case'ender':anim='uppercut';fr=Math.floor(ap*A.uppercut[0]);break;
-  case'shadow':if(S.shadow){anim=S.shadow;fr=Math.floor(ap*A[anim][0])}else{anim=S.double[Math.floor(p*5)%2];fr=Math.floor(p*5*A[anim][0])%A[anim][0]}break;
-  case'ultraseq':anim=S.ultra[Math.floor(now*6)%S.ultra.length];fr=Math.floor(now*36);break;
+  case'shadow':{const signature=[S.shadow,'shadow_rampage','ultra_move','special_d','special_c','special_b',S.special].find(a=>a&&A[a]);if(signature){anim=signature;fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}else{anim=S.double[Math.min(S.double.length-1,Math.floor(p*S.double.length))];fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}break;}
+  case'ultraseq':{const options=(S.ultra||[]).filter(a=>A[a]);anim=options.length?options[Math.floor(now*4)%options.length]:(A.ultra_move?'ultra_move':S.special);fr=Math.floor(now*24)%A[anim][0];break;}
   case'jump':{anim='jump';const n=A.jump[0];fr=Math.round((Math.max(-560,Math.min(560,f.vy))+560)/1120*(n-3))+1;break}
   case'hit':{
    anim=f.hitHeavy&&A.hit_heavy?'hit_heavy':'hit_light';
@@ -2638,7 +2695,7 @@ function drawSprite(f){
   }
   case'down':if(f.down>.35){anim=S.fall[0];fr=seqX(anim,S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seqX(anim,S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1]*X(anim),Math.floor(f.koTime*9*X(anim)));break;
-  case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8*X('victory')));break;
+  case'victory':{anim='victory';const n=A.victory[0],rate=8*X('victory'),intro=Math.min(n-1,Math.floor(f.winT*rate));const loopStart=Math.max(0,Math.floor(n*.55));fr=f.winT<(n/rate)?intro:loopStart+(Math.floor((f.winT-n/rate)*rate)%(n-loopStart));break;}
   default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;const ir=idleRate*X('idle');fr=Math.floor(now*ir);f._ifr=now*ir-fr};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
