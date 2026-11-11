@@ -1676,59 +1676,60 @@ $('rise-btn').onclick=()=>{ac();playRise(()=>{show('menu');AU&&soundOn&&AU.music
 // Standardized fighter frames (KOTJ_V2_Fighter_Animations): one strip per animation.
 // anims[name] = [frames, frame w, frame h (stored px), pivot x, pivot y (game units)]; stored at scale s.
 const SPRITES={
- snake:{s:0.6,anims:{"idle":[16,149,166,122,274],"walk_forward":[8,158,158,147,261],"walk_back":[8,158,158,147,261],"run":[8,158,158,147,261],"crouch":[3,160,148,126,245],"block":[6,141,164,25,272],"attack_light":[8,160,161,123,267],"bite":[8,149,165,122,274],"special_pounce":[6,149,165,122,274],"special_b":[6,160,161,123,267],"special_c":[5,149,165,122,274],"special_d":[5,180,164,143,271],"ultra_move":[10,160,161,123,267],"attack_heavy":[8,180,164,143,271],"uppercut":[7,180,164,143,271],"victory":[8,124,171,105,283],"jump":[7,160,148,126,245],"hit_light":[4,149,165,122,273],"hit_heavy":[6,149,165,122,273],"knockdown":[9,233,164,271,272],"knockdown_getup":[6,183,161,125,267],"defeat":[5,233,164,271,272]},
+ snake:{s:0.6,anims:{"idle":[32,149,166,122,274],"walk_forward":[8,158,158,147,261],"walk_back":[8,158,158,147,261],"run":[8,158,158,147,261],"crouch":[6,160,148,126,245],"block":[12,141,164,25,272],"attack_light":[16,160,161,123,267],"bite":[16,149,165,122,274],"special_pounce":[12,149,165,122,274],"special_b":[12,160,161,123,267],"special_c":[10,149,165,122,274],"special_d":[5,180,164,143,271],"ultra_move":[20,160,161,123,267],"attack_heavy":[8,180,164,143,271],"uppercut":[7,180,164,143,271],"victory":[8,124,171,105,283],"jump":[7,160,148,126,245],"hit_light":[8,149,165,122,273],"hit_heavy":[12,149,165,122,273],"knockdown":[9,233,164,271,272],"knockdown_getup":[6,183,161,125,267],"defeat":[10,233,164,271,272]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- eagle:{s:0.6,anims:{"idle":[16,146,158,121,261],"walk_forward":[8,150,154,100,255],"walk_back":[8,150,154,100,255],"run":[8,150,154,100,255],"crouch":[3,204,144,179,237],"block":[6,145,156,108,258],"attack_light":[8,150,158,124,261],"bite":[8,151,157,125,260],"special_pounce":[6,151,157,125,260],"special_b":[6,150,158,124,261],"ultra_move":[10,150,158,124,261],"attack_heavy":[8,181,148,151,245],"uppercut":[7,181,148,151,245],"victory":[8,165,162,139,269],"jump":[7,204,144,179,237],"hit_light":[4,146,157,122,259],"hit_heavy":[6,146,157,122,259],"knockdown":[9,208,161,255,266],"knockdown_getup":[6,144,154,99,255],"defeat":[5,208,161,255,266]},
+ eagle:{s:0.6,anims:{"idle":[32,146,158,121,261],"walk_forward":[8,150,154,100,255],"walk_back":[8,150,154,100,255],"run":[8,150,154,100,255],"crouch":[6,204,144,179,237],"block":[12,145,156,108,258],"attack_light":[16,150,158,124,261],"bite":[16,151,157,125,260],"special_pounce":[12,151,157,125,260],"special_b":[12,150,158,124,261],"ultra_move":[20,150,158,124,261],"attack_heavy":[8,181,148,151,245],"uppercut":[7,181,148,151,245],"victory":[8,165,162,139,269],"jump":[7,204,144,179,237],"hit_light":[8,146,157,122,259],"hit_heavy":[12,146,157,122,259],"knockdown":[9,208,161,255,266],"knockdown_getup":[6,144,154,99,255],"defeat":[10,208,161,255,266]},
   double:['attack_light','attack_heavy','special_b'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- stag:{s:0.6,anims:{"idle":[16,102,171,85,283],"walk_forward":[8,135,171,111,282],"walk_back":[8,135,171,111,282],"run":[8,135,171,111,282],"crouch":[3,163,220,154,365],"block":[6,136,166,113,274],"attack_light":[8,162,162,118,268],"bite":[8,107,171,85,283],"special_pounce":[6,107,171,85,283],"special_b":[6,162,162,118,268],"special_c":[5,107,171,85,283],"special_d":[5,136,184,113,304],"ultra_move":[10,162,162,118,268],"attack_heavy":[8,136,184,113,304],"uppercut":[7,136,184,113,304],"victory":[8,154,169,127,280],"jump":[7,163,220,154,365],"hit_light":[4,102,171,85,282],"hit_heavy":[6,102,171,85,282],"knockdown":[9,220,175,285,290],"knockdown_getup":[6,152,167,164,277],"defeat":[5,220,175,285,290]},
+ stag:{s:0.6,anims:{"idle":[32,102,171,85,283],"walk_forward":[8,135,171,111,282],"walk_back":[8,135,171,111,282],"run":[8,135,171,111,282],"crouch":[6,163,220,154,365],"block":[12,136,166,113,274],"attack_light":[16,162,162,118,268],"bite":[16,107,171,85,283],"special_pounce":[12,107,171,85,283],"special_b":[12,162,162,118,268],"special_c":[10,107,171,85,283],"special_d":[5,136,184,113,304],"ultra_move":[20,162,162,118,268],"attack_heavy":[8,136,184,113,304],"uppercut":[7,136,184,113,304],"victory":[8,154,169,127,280],"jump":[7,163,220,154,365],"hit_light":[8,102,171,85,282],"hit_heavy":[12,102,171,85,282],"knockdown":[9,220,175,285,290],"knockdown_getup":[6,152,167,164,277],"defeat":[10,220,175,285,290]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- majic:{s:0.6,anims:{"idle":[16,222,240,187,396],"walk_forward":[8,245,241,185,399],"walk_back":[8,245,241,185,399],"run":[8,245,241,185,399],"dash":[4,245,241,185,399],"crouch":[3,235,211,200,348],"block":[6,222,238,62,393],"attack_light":[8,243,214,216,354],"bite":[8,232,239,193,396],"special_pounce":[6,232,239,193,396],"special_b":[6,243,214,216,354],"special_c":[5,232,239,193,396],"special_d":[5,225,229,180,379],"ultra_move":[10,243,214,216,354],"attack_heavy":[8,225,229,180,379],"uppercut":[7,225,229,180,379],"victory":[8,247,244,205,403],"jump":[7,235,211,200,348],"hit_light":[4,224,239,190,395],"hit_heavy":[6,224,239,190,395],"knockdown":[9,325,246,398,407],"knockdown_getup":[6,238,234,206,387],"defeat":[5,325,246,398,407]},
+ majic:{s:0.6,anims:{"idle":[32,222,240,187,396],"walk_forward":[8,245,241,185,399],"walk_back":[8,245,241,185,399],"run":[8,245,241,185,399],"dash":[4,245,241,185,399],"crouch":[6,235,211,200,348],"block":[12,222,238,62,393],"attack_light":[16,243,214,216,354],"bite":[16,232,239,193,396],"special_pounce":[12,232,239,193,396],"special_b":[12,243,214,216,354],"special_c":[10,232,239,193,396],"special_d":[5,225,229,180,379],"ultra_move":[20,243,214,216,354],"attack_heavy":[8,225,229,180,379],"uppercut":[7,225,229,180,379],"victory":[8,247,244,205,403],"jump":[7,235,211,200,348],"hit_light":[8,224,239,190,395],"hit_heavy":[12,224,239,190,395],"knockdown":[9,325,246,398,407],"knockdown_getup":[6,238,234,206,387],"defeat":[10,325,246,398,407]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_c','special_d','attack_heavy'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- badger:{s:0.6,anims:{"idle":[16,109,127,20,211],"walk_forward":[8,90,124,70,205],"walk_back":[8,90,124,70,205],"run":[8,90,124,70,205],"block":[6,112,128,21,212],"attack_light":[8,127,126,103,208],"bite":[8,109,127,92,210],"claw_swipe":[6,127,126,103,208],"attack_heavy":[8,113,155,92,257],"uppercut":[8,127,126,103,208],"pounce":[8,109,127,92,210],"special_earth_slam":[7,113,155,92,257],"shadow_rampage":[10,127,126,103,208],"victory":[8,85,143,70,236],"jump":[7,111,123,96,203],"crouch":[4,111,123,96,203],"hit_light":[4,109,127,20,210],"hit_heavy":[6,109,127,20,210],"knockdown":[9,176,125,85,207],"knockdown_getup":[6,102,124,86,205],"defeat":[5,176,125,85,207]},
+ badger:{s:0.6,anims:{"idle":[32,109,127,20,211],"walk_forward":[8,90,124,70,205],"walk_back":[8,90,124,70,205],"run":[8,90,124,70,205],"block":[12,112,128,21,212],"attack_light":[16,127,126,103,208],"bite":[16,109,127,92,210],"claw_swipe":[12,127,126,103,208],"attack_heavy":[8,113,155,92,257],"uppercut":[16,127,126,103,208],"pounce":[16,109,127,92,210],"special_earth_slam":[7,113,155,92,257],"shadow_rampage":[20,127,126,103,208],"victory":[8,85,143,70,236],"jump":[7,111,123,96,203],"crouch":[8,111,123,96,203],"hit_light":[8,109,127,20,210],"hit_heavy":[12,109,127,20,210],"knockdown":[9,176,125,85,207],"knockdown_getup":[6,102,124,86,205],"defeat":[10,176,125,85,207]},
   claw:'claw_swipe',double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'shadow_rampage',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- crocodile:{s:0.6,anims:{"idle":[16,197,160,187,264],"walk_forward":[8,182,159,178,263],"walk_back":[8,182,159,178,263],"run":[8,182,159,178,263],"block":[6,185,158,168,261],"attack_light":[8,225,158,215,261],"bite":[8,205,160,187,264],"special_pounce":[6,225,158,215,261],"attack_heavy":[8,254,170,214,281],"uppercut":[7,254,170,214,281],"victory":[8,168,166,150,274],"jump":[7,238,143,233,235],"hit_light":[4,196,159,187,263],"hit_heavy":[6,196,159,187,263],"knockdown":[9,292,159,141,263],"knockdown_getup":[6,402,154,355,254],"defeat":[5,292,159,141,263]},
+ crocodile:{s:0.6,anims:{"idle":[32,197,160,187,264],"walk_forward":[8,182,159,178,263],"walk_back":[8,182,159,178,263],"run":[8,182,159,178,263],"block":[12,185,158,168,261],"attack_light":[16,225,158,215,261],"bite":[16,205,160,187,264],"special_pounce":[12,225,158,215,261],"attack_heavy":[8,254,170,214,281],"uppercut":[7,254,170,214,281],"victory":[8,168,166,150,274],"jump":[7,238,143,233,235],"hit_light":[8,196,159,187,263],"hit_heavy":[12,196,159,187,263],"knockdown":[9,292,159,141,263],"knockdown_getup":[6,402,154,355,254],"defeat":[10,292,159,141,263]},
   double:['bite','attack_heavy'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- elephant:{s:0.6,anims:{"idle":[16,218,205,177,339],"walk_forward":[8,198,200,168,330],"walk_back":[8,198,200,168,330],"run":[8,198,200,168,330],"block":[6,215,209,179,344],"attack_light":[8,303,205,214,338],"bite":[8,230,205,185,338],"special_pounce":[6,303,205,214,338],"attack_heavy":[8,261,200,221,329],"uppercut":[7,261,200,221,329],"victory":[8,187,203,157,335],"jump":[7,229,195,183,321],"hit_light":[4,217,204,178,337],"hit_heavy":[6,217,204,178,337],"knockdown":[9,327,209,385,345],"knockdown_getup":[6,247,199,217,328],"defeat":[5,327,209,385,345]},
+ elephant:{s:0.6,anims:{"idle":[32,218,205,177,339],"walk_forward":[8,198,200,168,330],"walk_back":[8,198,200,168,330],"run":[8,198,200,168,330],"block":[12,215,209,179,344],"attack_light":[16,303,205,214,338],"bite":[16,230,205,185,338],"special_pounce":[12,303,205,214,338],"attack_heavy":[8,261,200,221,329],"uppercut":[7,261,200,221,329],"victory":[8,187,203,157,335],"jump":[7,229,195,183,321],"hit_light":[8,217,204,178,337],"hit_heavy":[12,217,204,178,337],"knockdown":[9,327,209,385,345],"knockdown_getup":[6,247,199,217,328],"defeat":[10,327,209,385,345]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- grizzly:{s:0.6,anims:{"idle":[16,145,190,126,314],"walk_forward":[8,159,186,141,307],"walk_back":[8,159,186,141,307],"run":[8,159,186,141,307],"block":[6,155,187,129,310],"attack_light":[8,176,189,161,313],"bite":[8,153,189,132,313],"special_pounce":[6,176,189,161,313],"attack_heavy":[8,258,185,203,306],"uppercut":[7,258,185,203,306],"victory":[8,165,192,138,318],"jump":[7,218,179,190,296],"hit_light":[4,145,189,127,312],"hit_heavy":[6,145,189,127,312],"knockdown":[9,241,190,94,315],"knockdown_getup":[6,243,185,204,306],"defeat":[5,241,190,94,315]},
+ grizzly:{s:0.6,anims:{"idle":[32,145,190,126,314],"walk_forward":[8,159,186,141,307],"walk_back":[8,159,186,141,307],"run":[8,159,186,141,307],"block":[12,155,187,129,310],"attack_light":[16,176,189,161,313],"bite":[16,153,189,132,313],"special_pounce":[12,176,189,161,313],"attack_heavy":[8,258,185,203,306],"uppercut":[7,258,185,203,306],"victory":[8,165,192,138,318],"jump":[7,218,179,190,296],"hit_light":[8,145,189,127,312],"hit_heavy":[12,145,189,127,312],"knockdown":[9,241,190,94,315],"knockdown_getup":[6,243,185,204,306],"defeat":[10,241,190,94,315]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- hippo:{s:0.6,anims:{"idle":[16,223,196,181,323],"walk_forward":[8,137,190,110,313],"walk_back":[8,137,190,110,313],"run":[8,137,190,110,313],"block":[6,205,192,170,316],"attack_light":[8,303,195,213,321],"bite":[8,236,196,189,323],"special_pounce":[6,303,195,213,321],"attack_heavy":[8,171,223,156,369],"uppercut":[7,171,223,156,369],"victory":[8,146,223,120,368],"jump":[7,160,194,126,320],"hit_light":[4,224,195,184,322],"hit_heavy":[6,224,195,184,322],"knockdown":[9,318,204,164,338],"knockdown_getup":[6,166,189,123,312],"defeat":[5,318,204,164,338]},
+ hippo:{s:0.6,anims:{"idle":[32,223,196,181,323],"walk_forward":[8,137,190,110,313],"walk_back":[8,137,190,110,313],"run":[8,137,190,110,313],"block":[12,205,192,170,316],"attack_light":[16,303,195,213,321],"bite":[16,236,196,189,323],"special_pounce":[12,303,195,213,321],"attack_heavy":[8,171,223,156,369],"uppercut":[7,171,223,156,369],"victory":[8,146,223,120,368],"jump":[7,160,194,126,320],"hit_light":[8,224,195,184,322],"hit_heavy":[12,224,195,184,322],"knockdown":[9,318,204,164,338],"knockdown_getup":[6,166,189,123,312],"defeat":[10,318,204,164,338]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- hyena:{s:0.6,anims:{"idle":[16,101,147,83,243],"walk_forward":[8,117,144,93,238],"walk_back":[8,117,144,93,238],"run":[8,117,144,93,238],"block":[6,120,146,100,241],"attack_light":[8,135,144,112,238],"bite":[8,107,147,87,243],"special_pounce":[6,107,147,87,243],"attack_heavy":[8,145,158,132,261],"uppercut":[7,135,144,112,238],"victory":[8,125,148,106,244],"jump":[7,144,156,121,257],"hit_light":[4,101,146,84,242],"hit_heavy":[6,101,146,84,242],"knockdown":[9,190,147,78,243],"knockdown_getup":[6,169,143,121,237],"defeat":[5,190,147,78,243]},
+ hyena:{s:0.6,anims:{"idle":[32,101,147,83,243],"walk_forward":[8,117,144,93,238],"walk_back":[8,117,144,93,238],"run":[8,117,144,93,238],"block":[12,120,146,100,241],"attack_light":[16,135,144,112,238],"bite":[16,107,147,87,243],"special_pounce":[12,107,147,87,243],"attack_heavy":[8,145,158,132,261],"uppercut":[14,135,144,112,238],"victory":[8,125,148,106,244],"jump":[7,144,156,121,257],"hit_light":[8,101,146,84,242],"hit_heavy":[12,101,146,84,242],"knockdown":[9,190,147,78,243],"knockdown_getup":[6,169,143,121,237],"defeat":[10,190,147,78,243]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','uppercut','attack_light'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- jaguar:{s:0.6,anims:{"idle":[16,162,152,129,251],"walk_forward":[8,132,151,115,250],"walk_back":[8,132,151,115,250],"run":[8,132,151,115,250],"block":[6,106,150,25,248],"attack_light":[8,145,147,131,242],"bite":[8,168,151,129,250],"special_pounce":[6,145,147,131,242],"attack_heavy":[8,198,153,150,254],"uppercut":[7,198,153,150,254],"victory":[8,133,156,112,257],"jump":[7,197,136,164,224],"hit_light":[4,161,151,128,250],"hit_heavy":[6,161,151,128,250],"knockdown":[9,216,155,244,257],"knockdown_getup":[6,184,148,170,245],"defeat":[5,216,155,244,257]},
+ jaguar:{s:0.6,anims:{"idle":[32,162,152,129,251],"walk_forward":[8,132,151,115,250],"walk_back":[8,132,151,115,250],"run":[8,132,151,115,250],"block":[12,106,150,25,248],"attack_light":[16,145,147,131,242],"bite":[16,168,151,129,250],"special_pounce":[12,145,147,131,242],"attack_heavy":[8,198,153,150,254],"uppercut":[7,198,153,150,254],"victory":[8,133,156,112,257],"jump":[7,197,136,164,224],"hit_light":[8,161,151,128,250],"hit_heavy":[12,161,151,128,250],"knockdown":[9,216,155,244,257],"knockdown_getup":[6,184,148,170,245],"defeat":[10,216,155,244,257]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- leopard:{s:0.6,anims:{"idle":[32,141,154,22,255],"walk_forward":[8,92,145,87,240],"walk_back":[8,92,145,87,240],"run":[8,92,145,87,240],"dash":[4,92,145,87,240],"crouch":[3,128,155,102,256],"block":[6,133,153,31,253],"attack_light":[8,144,148,122,245],"bite":[8,144,154,22,255],"special_pounce":[6,144,148,122,245],"special_b":[8,144,154,22,255],"special_c":[5,144,148,122,245],"special_d":[14,144,148,122,245],"ultra_move":[5,136,167,97,276],"attack_heavy":[8,136,167,97,276],"uppercut":[7,136,167,97,276],"victory":[8,113,163,102,269],"jump":[7,128,155,102,256],"hit_light":[4,141,154,22,255],"hit_heavy":[6,141,154,22,255],"knockdown":[9,260,167,240,276],"knockdown_getup":[6,130,135,101,223],"defeat":[5,260,167,240,276]},
+ leopard:{s:0.6,anims:{"idle":[32,141,154,22,255],"walk_forward":[8,92,145,87,240],"walk_back":[8,92,145,87,240],"run":[8,92,145,87,240],"dash":[4,92,145,87,240],"crouch":[6,128,155,102,256],"block":[12,133,153,31,253],"attack_light":[16,144,148,122,245],"bite":[16,144,154,22,255],"special_pounce":[12,144,148,122,245],"special_b":[16,144,154,22,255],"special_c":[10,144,148,122,245],"special_d":[28,144,148,122,245],"ultra_move":[5,136,167,97,276],"attack_heavy":[8,136,167,97,276],"uppercut":[7,136,167,97,276],"victory":[8,113,163,102,269],"jump":[7,128,155,102,256],"hit_light":[8,141,154,22,255],"hit_heavy":[12,141,154,22,255],"knockdown":[9,260,167,240,276],"knockdown_getup":[6,130,135,101,223],"defeat":[10,260,167,240,276]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_d','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- lion:{s:0.6,anims:{"idle":[16,116,169,98,271],"walk_forward":[8,105,157,100,261],"walk_back":[8,105,157,100,261],"run":[8,105,157,100,261],"block":[6,115,124,96,204],"attack_light":[8,222,141,151,234],"bite":[8,222,141,151,234],"special_pounce":[6,222,141,151,234],"attack_heavy":[8,140,178,101,295],"uppercut":[7,140,178,101,295],"victory":[8,129,179,105,296],"jump":[7,156,164,122,271],"hit_light":[4,110,160,94,265],"hit_heavy":[6,110,160,94,265],"knockdown":[9,208,161,268,267],"knockdown_getup":[6,140,157,132,261],"defeat":[5,208,161,268,267]},
+ lion:{s:0.6,anims:{"idle":[32,116,169,98,271],"walk_forward":[8,105,157,100,261],"walk_back":[8,105,157,100,261],"run":[8,105,157,100,261],"block":[12,115,124,96,204],"attack_light":[8,222,141,151,234],"bite":[8,222,141,151,234],"special_pounce":[6,222,141,151,234],"attack_heavy":[8,140,178,101,295],"uppercut":[7,140,178,101,295],"victory":[8,129,179,105,296],"jump":[7,156,164,122,271],"hit_light":[8,110,160,94,265],"hit_heavy":[12,110,160,94,265],"knockdown":[9,208,161,268,267],"knockdown_getup":[6,140,157,132,261],"defeat":[10,208,161,268,267]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- tiger:{s:0.6,anims:{"idle":[16,150,161,126,267],"walk_forward":[8,152,158,125,261],"walk_back":[8,152,158,125,261],"run":[8,152,158,125,261],"block":[6,145,159,120,263],"attack_light":[8,156,157,132,260],"bite":[8,155,161,127,266],"special_pounce":[6,156,157,132,260],"attack_heavy":[8,214,164,164,272],"uppercut":[7,214,164,164,272],"victory":[8,138,163,114,270],"jump":[7,187,176,160,292],"hit_light":[4,149,161,126,266],"hit_heavy":[6,149,161,126,266],"knockdown":[9,225,163,261,270],"knockdown_getup":[6,180,158,141,261],"defeat":[5,225,163,261,270]},
+ tiger:{s:0.6,anims:{"idle":[32,150,161,126,267],"walk_forward":[8,152,158,125,261],"walk_back":[8,152,158,125,261],"run":[8,152,158,125,261],"block":[12,145,159,120,263],"attack_light":[16,156,157,132,260],"bite":[16,155,161,127,266],"special_pounce":[12,156,157,132,260],"attack_heavy":[8,214,164,164,272],"uppercut":[7,214,164,164,272],"victory":[8,138,163,114,270],"jump":[7,187,176,160,292],"hit_light":[8,149,161,126,266],"hit_heavy":[12,149,161,126,266],"knockdown":[9,225,163,261,270],"knockdown_getup":[6,180,158,141,261],"defeat":[10,225,163,261,270]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','attack_light','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]},
- wolf:{s:0.6,anims:{"idle":[16,123,149,107,247],"walk_forward":[8,127,149,110,247],"walk_back":[8,127,149,110,247],"run":[8,127,149,110,247],"block":[6,121,147,104,244],"attack_light":[8,133,119,123,197],"bite":[8,134,102,119,168],"special_pounce":[6,134,102,119,168],"attack_heavy":[8,180,138,134,228],"uppercut":[7,180,138,134,228],"victory":[8,125,151,100,251],"jump":[7,169,125,136,206],"hit_light":[4,121,149,104,247],"hit_heavy":[6,121,149,104,247],"knockdown":[9,201,151,243,250],"knockdown_getup":[6,116,146,99,242],"defeat":[5,201,151,243,250]},
+ wolf:{s:0.6,anims:{"idle":[32,123,149,107,247],"walk_forward":[8,127,149,110,247],"walk_back":[8,127,149,110,247],"run":[8,127,149,110,247],"block":[12,121,147,104,244],"attack_light":[16,133,119,123,197],"bite":[16,134,102,119,168],"special_pounce":[12,134,102,119,168],"attack_heavy":[8,180,138,134,228],"uppercut":[7,180,138,134,228],"victory":[8,125,151,100,251],"jump":[7,169,125,136,206],"hit_light":[8,121,149,104,247],"hit_heavy":[12,121,149,104,247],"knockdown":[9,201,151,243,250],"knockdown_getup":[6,116,146,99,242],"defeat":[10,201,151,243,250]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_light','attack_heavy','uppercut','bite'],
   fall:['knockdown',[0,1,2,3,4,5]],getup:['knockdown_getup',[0,1,2,3,4,5]],ko:['knockdown',8]}
 };
+const SPRITE_X2={"lion":{"block":1,"idle":1,"hit_light":1,"hit_heavy":1,"defeat":1},"tiger":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"jaguar":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"wolf":{"idle":1,"block":1,"attack_light":1,"special_pounce":1,"bite":1,"hit_light":1,"hit_heavy":1,"defeat":1},"hyena":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"uppercut":1,"hit_light":1,"hit_heavy":1,"defeat":1},"badger":{"idle":1,"block":1,"attack_light":1,"bite":1,"claw_swipe":1,"uppercut":1,"pounce":1,"shadow_rampage":1,"crouch":1,"hit_light":1,"hit_heavy":1,"defeat":1},"grizzly":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"crocodile":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"hippo":{"block":1,"idle":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"elephant":{"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"hit_light":1,"hit_heavy":1,"defeat":1},"leopard":{"crouch":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"special_b":1,"special_c":1,"special_d":1,"hit_light":1,"hit_heavy":1,"defeat":1,"idle":1},"snake":{"idle":1,"crouch":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"special_b":1,"special_c":1,"ultra_move":1,"hit_light":1,"hit_heavy":1,"defeat":1},"eagle":{"crouch":1,"idle":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"special_b":1,"ultra_move":1,"hit_light":1,"hit_heavy":1,"defeat":1},"stag":{"idle":1,"crouch":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"special_c":1,"special_b":1,"ultra_move":1,"hit_light":1,"hit_heavy":1,"defeat":1},"majic":{"idle":1,"crouch":1,"block":1,"attack_light":1,"bite":1,"special_pounce":1,"special_b":1,"special_c":1,"ultra_move":1,"hit_light":1,"hit_heavy":1,"defeat":1}}; // sheets with generated in-between frames (2x)
 // Fighter frames load only when a fighter is first needed (highlighted on select, or in a fight), not all 15 at start-up.
-const spriteImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&SPRITES[id]){t[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=11.4';t[id][k]=im}}return t[id]}});
+const spriteImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&SPRITES[id]){t[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=11.5';t[id][k]=im}}return t[id]}});
 function spritesReady(id){const a=spriteImg[id];if(!a)return true;const idle=a.idle||a[Object.keys(a)[0]];return !!(idle&&idle.complete&&idle.naturalWidth)}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=11.4';spriteHD[id][k]=im}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=11.5';spriteHD[id][k]=im}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -2609,9 +2610,12 @@ function phase(f){return f.actionTotal>0?Math.min(.999,Math.max(0,1-f.actionTime
 function drawSprite(f){
  const S=SPRITES[f.data.id],A=S.anims,now=performance.now()/1000,p=phase(f),visualP=f.data.id==='leopard'&&['claw','double','bite'].includes(f.action)?Math.min(.999,p*1.12):p,ap=visualP*visualP*(3-2*visualP);let anim='idle',fr=0;
  const seq=(list,t)=>{const k=list[Math.min(list.length-1,Math.floor(t*list.length))];return k};
+ // V2: some sheets carry generated in-between frames (2x). Time-based playback keeps the same speed and lands on the in-betweens.
+ const X=a=>(SPRITE_X2[f.data.id]&&SPRITE_X2[f.data.id][a])?2:1;
+ const seqX=(a,list,t)=>{const L=list.length,pos=Math.max(0,t)*L,i=Math.min(L-1,Math.floor(pos)),k=list[i];return X(a)===2?k*2+((pos-i>=.5&&i<L-1)?1:0):k};
  switch(f.action){
-  case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2);break}
-  case'block':anim='block';fr=Math.min(3,Math.floor(f.blockTime*20));break;
+  case'walk':{const fwd=Math.sign(f.move||0)===f.dir;anim=fwd?'walk_forward':'walk_back';fr=Math.floor(f.walk*3.2*X(anim));break}
+  case'block':anim='block';fr=Math.min(3*X('block')+(X('block')-1),Math.floor(f.blockTime*20*X('block')));break;
   case'claw':anim=S.claw&&A[S.claw]?S.claw:'attack_light';fr=Math.floor(ap*A[anim][0]);break;
   case'double':anim=S.double[f.move_&&f.move_.eagleWingCombo?Math.min(S.double.length-1,f.hitsDone):f.chain%S.double.length];fr=1+Math.floor(ap*(A[anim][0]-1));break;
   case'attack_heavy':anim='attack_heavy';fr=Math.floor(ap*A.attack_heavy[0]);break;
@@ -2628,16 +2632,16 @@ function drawSprite(f){
    fr=Math.min(count-1,Math.floor((f.hitAnimTime||0)*Math.max(8,count*5)));
    break;
   }
-  case'down':if(f.down>.35){anim=S.fall[0];fr=seq(S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seq(S.getup[1],(.35-f.down)/.35)}break;
-  case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1],Math.floor(f.koTime*9));break;
-  case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
-  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:21,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate);f._ifr=now*idleRate-fr};
+  case'down':if(f.down>.35){anim=S.fall[0];fr=seqX(anim,S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seqX(anim,S.getup[1],(.35-f.down)/.35)}break;
+  case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1]*X(anim),Math.floor(f.koTime*9*X(anim)));break;
+  case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8*X('victory')));break;
+  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;const ir=idleRate*X('idle');fr=Math.floor(now*ir);f._ifr=now*ir-fr};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
  if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
  if(!img||!img.complete||!img.naturalWidth)return false;
- const [n,fw,fh,px,py]=meta;fr=((fr|0)%n+n)%n;
+ const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
  // Species-calibrated body presence: modestly enlarges the existing HD art
  // without stretching anatomy or changing the original fighter silhouettes.
  const bodyPresence=BODY_PRESENCE[f.data.id]||1;
@@ -2718,7 +2722,7 @@ function drawSprite(f){
   c.rotate(lean);
   c.scale(stretch,squash);
   c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);
   c.restore();
  }else if(f.action==='idle'||f.action==='breathing'){
   // Species-specific idle cadence: subtle breathing, balance shifts and
@@ -2735,40 +2739,40 @@ function drawSprite(f){
   const sx=1+breath*(.35+.65*Math.sin(cycle*.72)),sy=1-breath*(.35+.65*Math.sin(cycle*.72));
   const lean=wave*tilt*.22,shift=slow*sway*18;
   c.save();c.translate(shift,-py+6);c.rotate(lean);c.scale(sx,sy);c.translate(-shift,py-6);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);
   // V2: blend into the next idle frame so breathing flows instead of ticking
-  const ifr=f._ifr||0;if(ifr>.04){const ga=c.globalAlpha;c.globalAlpha=ga*ifr;c.drawImage(img,((fr+1)%n)*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.globalAlpha=ga}
+  const ifr=f._ifr||0;if(ifr>.04){const ga=c.globalAlpha;c.globalAlpha=ga*ifr;c.drawImage(img,(((fr+1)%n)%CC)*fw,Math.floor(((fr+1)%n)/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.globalAlpha=ga}
   c.restore();
  }else if(f.action==='hit'&&f.data.id==='lion'){
   // A lion absorbs impact through its shoulders, then recoils as a heavy cat.
   const hit=clamp((f.hitAnimTime||0)/.28,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(5+7*pulse),-145);c.rotate(-f.dir*(.035+.055*pulse));
   c.scale(1-.025*pulse,1+.018*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='tiger'){
   // The tiger gives ground in a quick springy recoil, then snaps back to guard.
   const hit=clamp((f.hitAnimTime||0)/.24,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(9+10*pulse),-145-pulse*3);c.rotate(-f.dir*(.06+.075*pulse));
   c.scale(1-.04*pulse,1+.025*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='eagle'){
   // Aerial predator recoil: the wings/body give way, then the bird regains lift.
   const hit=clamp((f.hitAnimTime||0)/.26,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(7+8*pulse),-145-pulse*5);c.rotate(-f.dir*(.075+.045*pulse));
   c.scale(1-.035*pulse,1+.045*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='majic'){
   // MAJIC absorbs impact through the forequarters, then recoils like a powerful cat.
   const hit=clamp((f.hitAnimTime||0)/.27,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(6+9*pulse),-145-pulse*2);c.rotate(-f.dir*(.045+.065*pulse));
   c.scale(1-.03*pulse,1+.022*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'&&f.data.id==='elephant'){
   // Heavy elephant recoil: the head and forequarters dip, then the body settles.
   const hit=clamp((f.hitAnimTime||0)/.34,0,1),pulse=Math.sin(hit*Math.PI);
   c.save();c.translate(-f.dir*(3+5*pulse),-145-pulse*7);c.rotate(-f.dir*(.018+.035*pulse));
   c.scale(1-.018*pulse,1+.032*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else if(f.action==='hit'){
   // Species-tuned recoil for the remaining roster: low animals compress,
   // agile hunters give ground sharply, and heavyweight bodies absorb impact.
@@ -2776,9 +2780,9 @@ function drawSprite(f){
   const recoil={badger:[5,.045,.025],wolf:[8,.060,.035],hyena:[10,.075,.040],leopard:[11,.070,.045],jaguar:[7,.055,.035],crocodile:[4,.025,.020],grizzly:[4,.030,.018],hippo:[3,.018,.015],stag:[7,.050,.030],snake:[5,.035,.025]}[f.data.id]||[6,.04,.025];
   c.save();c.translate(-f.dir*(recoil[0]+recoil[0]*.45*pulse),-145-pulse*(f.data.id==='snake'?2:4));c.rotate(-f.dir*(recoil[1]+recoil[2]*pulse));
   c.scale(1-.018*pulse,1+.022*pulse);c.translate(0,145);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);c.restore();
  }else{
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
+  c.drawImage(img,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,drawX,drawY,drawW,drawH);
  }
  c.filter='none';
  return true;
@@ -3024,6 +3028,7 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   if(f.ground&&f._air){f._land=t;if(f._air>.12){motionDust(fx,3+Math.round(M.w*5),M.w);if(M.w>.7)game.shake=Math.max(game.shake||0,.05+M.w*.06)}}
   f._air=f.ground?0:(f._air||0)+dt;
   const land=f._land?Math.max(0,1-(t-f._land)/.2):0;
+  if(act!=='knockdown'&&act!=='down')f._floored=0;
   if(act==='idle'||act==='breathing'){
    const b=Math.sin(t*M.hz+ph0),bb=Math.abs(Math.sin(t*M.hz*.5+ph0));
    sy=1+b*M.br;sx=1-b*M.br*.45;dy=-bb*M.bn;rot=Math.sin(t*M.hz*.45+ph0)*M.sw*f.dir;
@@ -3038,6 +3043,15 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   else if(act==='block'){rot=-.03*f.dir;sy=.985;dx=-f.dir*3}
   else if(act==='hit'){const k=Math.max(0,1-(f.hitAnimTime||0)/.35)*(f.hitHeavy?1.4:1);rot=-.09*k*f.dir;dx=-f.dir*10*k;sy=1-.03*k;sx=1+.02*k}
   else if(act==='victory'){const b=Math.abs(Math.sin(t*3.2));dy=-b*6;sy=1+b*.02}
+  else if((act==='knockdown'||act==='down')&&f.ground){
+   // Hitting the floor: impact squash, two bounces, a skid, a dust burst — then (KO) a slow heave and the odd twitch.
+   const S=SPRITES[f.data.id];let ti=-1;
+   if(act==='knockdown')ti=(f.koTime||0)-((S&&S.ko?S.ko[1]:8)/9)*.85;else ti=.9-(f.down||0)-.42;
+   if(ti>=0){if(!f._floored){f._floored=1;motionDust(fx,5+Math.round(M.w*6),M.w+.3);game.shake=Math.max(game.shake||0,.08+M.w*.1)}
+    const lift=(1-M.w*.45);dy=ti<.32?-Math.sin(ti/.32*Math.PI)*16*lift:ti<.52?-Math.sin((ti-.32)/.2*Math.PI)*5*lift:0;
+    if(ti<.09){const q=1-ti/.09;sy=1-q*.07;sx=1+q*.05}
+    dx=-f.dir*Math.min(1,ti/.5)*(26*(1-M.w*.5));
+    if(act==='knockdown'&&ti>.7){sy=1+Math.sin(t*1.7+ph0)*.012;sx=1-Math.sin(t*1.7+ph0)*.006;const tw=Math.sin(t*.63+ph0*2);if(tw>.985)rot=Math.sin(t*38)*.012}}}
   else if(act!=='down'&&act!=='knockdown'&&f.actionTotal>0){ // every strike: wind-up, lunge, recover
    const p=1-Math.max(0,f.actionTime||0)/f.actionTotal;const wind=p<.25?p/.25:0,hit=p>=.25&&p<.55?Math.sin((p-.25)/.3*Math.PI):0;
    rot=(-wind*.4+hit)*M.ln*.6*f.dir;dx=(-wind*5+hit*14)*f.dir;sx=1+hit*.025;sy=1-hit*.015+wind*.01}
