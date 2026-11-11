@@ -178,3 +178,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AcAK2JCUwMB-DtrJN2Ns5gfk3q4yyaORO1zYJe7EGoqqrQBKe9otgrarVjRiG7u248L-wxMA
 - victory AWgUYPTaJO5bPrOM4K1TiH1PZfFeigdUb9EsS6RDjKqefWnYPfk5TyfPX6Rca_UyDXWzGuw1
 - block AbfGlhQ85FURxeLvWolODC_ql-4lNdkkK9PpzwJBkBr-VGR4ZdnaGeKyLJ60NCnc4UfnTbiZ
+
+## Stag (side view) — auto_fighter.py
+- idle AY3rfXeXA_j1lzcNSNOZaodIYJ18EMzIZJ_qdh62JGgvJlCXVGcNMvOv-VkUw4xxu5WLDJbo
+- walk AT7eCbfwhoWXDTqReBAMCUL9mfOZv4vZZ7Ra9rRuaeSO0ktrBUz4eSjpZ8KY8Nxc5IkUj2H9
+- light AeoVh49pke3Yhif9u5yVqjDDET0UBFCe2lNDkJXbnljlQyduPgxrDL3eYovLUOXA3eLpIGMt
+- heavy Ab3oN4Uob7CTAeBfoAuQOG06Y6Jmm5hdMeqanGNY53H2WuXk9AwdPhcQytvhMtpQ3Mznqni1
+- jump AT68L2mfcJVJBvPaiTZeouHBrpp3rouK9C0XVKR_9q_O3QXxjbaYXHw5Z5mBKY5pHEdTjS-Y
+- special AaJN_bTU2ZjrXpF0nSyRSBYuTe-QAS6ahvgv5bvNUB73K_blRg6GS-4SmknGorIIK03CAiKs
+- hit AQ2HXPKU3N3OeDubqEcS3GwyhrlxI64oE_U1fdWjPLwJRMS789jdnvzVlYBgr7xuLSr2394u
+- knock AYfqHm4YEqIVEdU6TmOtSj4YrmU7h5P4JiROgmVgLp8W17CanUehCU1po4Mn7e7_zXlLYeVs
+- victory ARbdWzp3TJDrb7f3HagMF2BYNjxYfW3Br1gxEmQ0hlJPGeNLQf_ffVAv092050PID_uiX6Ni
+- block AccgrmC2IX-zaOJhhIk7LCKLwLbiVSAu-cnWLo_C8sKupM1MMs1k_xvoGTj5RUVcYMzn_INK
