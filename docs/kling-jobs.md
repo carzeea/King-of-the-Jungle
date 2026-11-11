@@ -190,3 +190,19 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AYfqHm4YEqIVEdU6TmOtSj4YrmU7h5P4JiROgmVgLp8W17CanUehCU1po4Mn7e7_zXlLYeVs
 - victory ARbdWzp3TJDrb7f3HagMF2BYNjxYfW3Br1gxEmQ0hlJPGeNLQf_ffVAv092050PID_uiX6Ni
 - block AccgrmC2IX-zaOJhhIk7LCKLwLbiVSAu-cnWLo_C8sKupM1MMs1k_xvoGTj5RUVcYMzn_INK
+
+## MAJIC (side view) — auto_fighter.py
+- idle AQ6qYbL0HP4iuNwWSdf_lH1r_NY0az0F406Q-IkEHYPd6nbXUzFC4ReuyVJk95XSUH5piQCi
+- walk AapsUfZyit48ZVKFABHananKIJEb8d4rv9DMWxah7XQYE-g3BOLLhbhZNoXejZlgzLc4oDhg
+- light Ac1-vRBZkwZQYrzEk792A56GMp48QRsQr_1tH_BJIapKh6fVZv7hH-pP7j-Cw4EzcxosBm96
+- heavy AY4ZCZQ5-Zd-uj9dXp1tB2YqzZlFNYQh-r3QUsG-2u4aRxTk82I0hxpODU1k_sWOWp_Xbmq7
+- jump AUB31oZhR6cuJtCNtF-psDNNoVCuPYKhOuuPjKGw1NP2vbKXe-8fixSu5_5putouZVAyph-x
+- special ATzP9ug7qrMArnerBxkeunDtMJYbJRB8Y6lGq1yRcDMSpkWrz4o4gip4GNrIYotmB0QSsW34
+- hit AVw-Bl46W8BLPD_XqXiW8HEPoUDDcmDrNewMvjed3g-_N5KANV3OIz7wAAORxJ-wmPTINfae
+- knock AUM9Kf7IEj4qtQbLeJTMQzSLr01SumeqzsnuSOvFFVxSqj92noDvQUaDhMZ9FewSj21Fiz_A
+- victory AZGZHKrmfEe0Jlfk0_OeXyq1aroLGFy1XGVvBkUpESlX17Tpb3DIwjV_lDY0Jl5OrCcluMIr
+- block AUpaQl2mc2ToHIpO9RjZkG448eRJR7URoQidLdfZUZ6QnX_d-mEj_Tx8YPBPvnmcenU5MHaE
+
+## Eagle extras (side view): block 0–34/2, victory 12–121/2; bite/ultra_move reuse attack_light/special_pounce
+- block AeZ2AwdKAI2pp2WPMueGa-hwOvJp2ZvedLTlMcbee_Fol46W3zqNsh_jlhjXqC4OrWO3nYS1
+- victory ARbRmVmEkZV4ScHd6CNy3RH_EGrQ3xNS9n4POWFyshrz9XmB6KYhnsG1FXC-fOSs3hO_LBAc
