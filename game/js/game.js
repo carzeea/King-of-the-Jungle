@@ -2638,7 +2638,7 @@ function drawSprite(f){
   }
   case'down':if(f.down>.35){anim=S.fall[0];fr=seqX(anim,S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seqX(anim,S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1]*X(anim),Math.floor(f.koTime*9*X(anim)));break;
-  case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8*X('victory')));break;
+  case'victory':{anim='victory';const n=A.victory[0],rate=8*X('victory'),intro=Math.min(n-1,Math.floor(f.winT*rate));const loopStart=Math.max(0,Math.floor(n*.55));fr=f.winT<(n/rate)?intro:loopStart+(Math.floor((f.winT-n/rate)*rate)%(n-loopStart));break;}
   default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;const ir=idleRate*X('idle');fr=Math.floor(now*ir);f._ifr=now*ir-fr};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
