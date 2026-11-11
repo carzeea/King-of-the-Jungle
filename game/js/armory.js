@@ -79,7 +79,7 @@ function shade(c,t,mat){
 }
 async function renderOutfit(canvas,fid,o){
  const look=o.look||'original';
- if(look==='original'){const img=await loadImg(outfitSrc(fid,'original'));canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const x=canvas.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,canvas.width,canvas.height);x.drawImage(img,0,0);const tg=origTargets(o);if(tg&&window.KOTJ_TINT){const d=x.getImageData(0,0,canvas.width,canvas.height);KOTJ_TINT.apply(d.data,fid,tg);x.putImageData(d,0,0)}return}
+ if(look==='original'){const img=await loadImg(outfitSrc(fid,'original'));canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const x=canvas.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,canvas.width,canvas.height);x.drawImage(img,0,0);const tg=origTargets(o);if(tg&&window.KOTJ_TINT){const d=x.getImageData(0,0,canvas.width,canvas.height);KOTJ_TINT.apply(d.data,fid,tg,canvas.width);x.putImageData(d,0,0)}return}
  const M=await loadMask(fid,look);canvas.width=M.w;canvas.height=M.h;const x=canvas.getContext('2d');
  const out=new ImageData(new Uint8ClampedArray(M.base.data),M.w,M.h),d=out.data,src=M.base.data;
  const act=CHANNELS.map(ch=>({n:ch.v/50,c:o.colors&&o.colors[ch.k]?hex2rgb(o.colors[ch.k]):null,m:(o.materials&&o.materials[ch.k])||'fabric',st:M.stats[ch.k]})).filter(a=>a.c&&a.st);

@@ -8,7 +8,7 @@ const ZONES={
  jaguar:{cloth:[138,196,.28,.1]},
  leopard:{cloth:[232,300,.22,.1]},
  wolf:{cloth:[192,256,.28,.08],metal:[32,62,.42,.42]},
- hyena:{cloth:[347,6,.74,.16]},
+ hyena:{cloth:[347,6,.74,.16],skipTop:.19},
  grizzly:{cloth:[346,8,.68,.14]},
  hippo:{cloth:[192,256,.28,.08],metal:[32,62,.48,.5]},
  badger:{metal:[28,62,.42,.38]},
@@ -22,11 +22,16 @@ const hex2hsv=h=>{h=h.replace('#','');const n=parseInt(h,16),r=((n>>16)&255)/255
 const sm=(x,a,b)=>{let t=(x-a)/(b-a);t=t<0?0:t>1?1:t;return t*t*(3-2*t)};
 function hueW(h,a,b){let d;if(a<=b)d=Math.max(a-h,h-b);else d=(h>=a||h<=b)?-1:Math.min(a-h,h-b);const w=1-d/10;return w<0?0:w>1?1:w}
 // recolour pixels in place. targets: {cloth:'#hex', metal:'#hex'}
-function apply(data,fid,targets){
+function apply(data,fid,targets,W){
  const Z=ZONES[fid];if(!Z||!targets)return false;
- const act=[];for(const k in Z)if(targets[k]){const [a,b,smin,vmin]=Z[k];act.push({a,b,smin,vmin,t:hex2hsv(targets[k])})}
+ // skipTop: leave the top part of the figure alone (e.g. Hyena's red mohawk matches its cloth exactly)
+ let yCut=-1;if(Z.skipTop&&W){let y0=-1,y1=-1;const H=data.length/4/W;for(let y=0;y<H&&y0<0;y++)for(let x=0;x<W;x+=3)if(data[(y*W+x)*4+3]>60){y0=y;break}
+  for(let y=H-1;y>=0&&y1<0;y--)for(let x=0;x<W;x+=3)if(data[(y*W+x)*4+3]>60){y1=y;break}
+  if(y0>=0&&y1>y0){const ht=y1-y0;if(ht>H*.45)yCut=y0+ht*Z.skipTop}}
+ const act=[];for(const k in Z)if(k!=='skipTop'&&targets[k]){const [a,b,smin,vmin]=Z[k];act.push({a,b,smin,vmin,t:hex2hsv(targets[k])})}
  if(!act.length)return false;
- for(let p=0;p<data.length;p+=4){
+ const startP=yCut>0?Math.floor(yCut)*W*4:0;
+ for(let p=startP;p<data.length;p+=4){
   if(data[p+3]<8)continue;
   const r=data[p]/255,g=data[p+1]/255,bl=data[p+2]/255,mx=r>g?(r>bl?r:bl):(g>bl?g:bl),mn=r<g?(r<bl?r:bl):(g<bl?g:bl),d=mx-mn;
   if(d<.03)continue;const s=d/mx;if(s<.06)continue;
@@ -47,7 +52,7 @@ function frame(fid,img,sx,sy,w,h,targets){
  const key=fid+'|'+img.src+'|'+sx+'|'+sy+'|'+sig(targets);let c=cache.get(key);
  if(c){cache.delete(key);cache.set(key,c);return c}
  c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,sx,sy,w,h,0,0,w,h);
- try{const id=x.getImageData(0,0,w,h);apply(id.data,fid,targets);x.putImageData(id,0,0)}catch(_){return null}
+ try{const id=x.getImageData(0,0,w,h);apply(id.data,fid,targets,w);x.putImageData(id,0,0)}catch(_){return null}
  cache.set(key,c);px+=w*h;
  while(px>BUDGET&&cache.size>1){const [k,v]=cache.entries().next().value;cache.delete(k);px-=v.width*v.height}
  return c;
@@ -62,7 +67,7 @@ function install(){
   return raw.apply(null,arguments);
  };
 }
-const zonesFor=fid=>Object.keys(ZONES[fid]||{});
+const zonesFor=fid=>Object.keys(ZONES[fid]||{}).filter(k=>k!=='skipTop');
 window.KOTJ_TINT={ZONES,zonesFor,apply,frame,install};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
