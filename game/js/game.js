@@ -1889,7 +1889,7 @@ function drawFx(){
   else if(p.kind==='mist'){c.globalAlpha=.35*k;c.fillStyle='#9c1015';c.beginPath();c.arc(p.x,p.y,p.r*(1+p.t*2.5),0,Math.PI*2);c.fill()}
   else if(p.kind==='ring'){c.strokeStyle=p.color;c.globalAlpha=k;c.lineWidth=5*k;c.beginPath();c.arc(p.x,p.y,20+p.t*420,0,Math.PI*2);c.stroke()}
   else if(p.kind==='titanWave'){const progress=Math.max(0,p.t/p.life),radius=30+progress*1160;c.globalAlpha=Math.max(0,k)*.9;c.strokeStyle=p.color;c.lineWidth=13*k+1;c.shadowColor=p.color;c.shadowBlur=24;c.beginPath();c.ellipse(p.x,400,radius,13+progress*18,0,0,Math.PI*2);c.stroke();c.shadowBlur=0}
-  else if(p.kind==='text'){c.globalAlpha=Math.min(1,k*2);c.font='900 30px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#000';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y)}
+  else if(p.kind==='text'){if(game.banner&&game.banner.text===p.text)continue;c.globalAlpha=Math.min(1,k*2);c.font='900 22px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.lineWidth=5;c.strokeStyle='#000';c.strokeText(p.text,p.x,p.y);c.fillStyle=p.color;c.fillText(p.text,p.x,p.y)}
  }c.globalAlpha=1;
 }
 function drawComboCounters(){
@@ -1904,7 +1904,8 @@ function drawComboCounters(){
 }
 function drawBanner(){
  const b=game.banner;if(!b)return;const k=b.t/b.life,s=k<.12?1.6-k/.12*.6:1,a=k>.8?(1-k)/.2:1;
- c.save();c.translate(550,235);c.scale(s,s);c.globalAlpha=a;c.textAlign='center';
+ const big=/^(ROUND|FIGHT|K\.O|TIME|DRAW|FINAL|PERFECT|ULTRA|FROST FATALITY|MAJIC$|.*WINS)/.test(b.text);
+ c.save();c.translate(550,big?235:118);c.scale(s*(big?1:.5),s*(big?1:.5));c.globalAlpha=a;c.textAlign='center';
  // Thin metallic rails and a moving glint give round/KO banners a compact
  // championship presentation without obscuring the action.
  const railW=Math.min(460,Math.max(170,b.text.length*19));
