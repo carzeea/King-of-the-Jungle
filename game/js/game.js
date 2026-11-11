@@ -62,10 +62,10 @@ function renderStages(){setBackdrop('assets/ui/select-bg.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
  ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(a.lair?' lair':'')+(stagePick===i?' selected':'');
   b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=7.5" alt=""><strong>${a.name}</strong></span>`;
-  b.onclick=()=>{ac();stagePick=i;renderStages()};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
+  b.onclick=()=>{ac();if(stagePick===i){$('stage-go').click();return}stagePick=i;renderStages()};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
  const r=document.createElement('button');r.className='stage-tile random'+(stagePick===RND()?' selected':'');
  r.innerHTML='<span class="sf"><img class="laurel" src="assets/ui/stage-random.webp?v=7.5" alt=""><strong>RANDOM</strong></span>';
- r.onclick=()=>{ac();stagePick=RND();renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
+ r.onclick=()=>{ac();if(stagePick===RND()){$('stage-go').click();return}stagePick=RND();renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
  const sel=$('stage-grid').querySelector('.selected');sel&&sel.scrollIntoView({block:'nearest'});
 }
 function openStage(){renderStages();$('stage-back').classList.toggle('hidden',mode==='online');show('stage')}
@@ -74,7 +74,11 @@ $('stage-back').onclick=()=>{if(mode==='online')return;step=mode==='versus'||mod
 // Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
 function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||LAIR;const n=tower.ladder.length;return tower.index===n-1?LAIR:FIGHT_ARENAS[tower.index%FIGHT_ARENAS.length]}
 
-const show=id=>{screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
+const show=id=>{try{guardTaps()}catch(_){}screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
+// Phones: the tap that opens a screen must not also hit a button that appears under the same finger.
+let tapGuard=0;const guardTaps=()=>{tapGuard=performance.now()};
+{const _show=show;window.__kotjShow=_show}
+document.addEventListener('click',e=>{if(e.isTrusted&&performance.now()-tapGuard<380&&e.target.closest&&e.target.closest('button,.fighter-tile,.stage-tile')){e.stopPropagation();e.preventDefault()}},true);
 /* ---------- Atmospheric backdrop behind every non-title screen ---------- */
 const BD={cur:'',flip:false};
 function setBackdrop(url){
@@ -100,7 +104,7 @@ setBackdrop('assets/arenas/cover-bg.webp');
 /* ---------- Cover / title screen ---------- */
 (function cover(){
  const faces=$('cover-faces');roster.forEach((f,i)=>{const im=document.createElement('img');im.src=portrait(f.id);im.alt=f.name;im.title=f.name;im.style.animationDelay=(1.1+i*.06)+'s';faces.append(im)});
- const startCover=()=>{const m=$('menu');if(m.classList.contains('started'))return;m.classList.add('started');try{ac()}catch(_){}
+ const startCover=()=>{const m=$('menu');if(m.classList.contains('started'))return;m.classList.add('started');guardTaps();try{ac()}catch(_){}
   if(window.KOTJAudio){KOTJAudio.unlock();KOTJAudio.music('music.menu');KOTJAudio.preload(['sfx.punch','sfx.heavyImpact','sfx.claw','sfx.bite','sfx.block','sfx.groundSlam']);KOTJAudio.ready.then(()=>KOTJAudio.preload(Object.keys(KOTJAudio.clips).filter(k=>k.startsWith('voice.'))))}
   setTimeout(()=>{const b=document.querySelector('.cover-menu button');if(b)b.focus({preventScroll:true})},60)};
  window.__startCover=startCover;
@@ -238,8 +242,8 @@ function render(){
   if(!f){if(NEW_FIGHTERS.some(n=>n.id===id)){const l=document.createElement('div');l.className='fighter-tile locked';l.title='Clear the Tower to unlock a hidden fighter';l.innerHTML='<span class="tf"><b class="q">?</b><i class="lock">🔒</i></span>';r.append(l)}return}
   if(mode==='forgotten'&&f.id==='majic')return;const i=roster.indexOf(f);
   const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');b.dataset.id=f.id;if(f.id==='majic')b.classList.add('titan');
-  b.innerHTML=`<span class="tf"><img src="assets/ui/cards/${f.id}.webp?v=10.16" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
-  b.onclick=()=>{chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
+  b.innerHTML=`<span class="tf"><img src="assets/ui/cards/${f.id}.webp?v=10.16" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+'<em class="tap-pick">TAP TO PICK</em>'+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
+  b.onclick=()=>{if(chosen===f&&b.classList.contains('selected')&&!b.classList.contains('locked')){$('confirm-fighter').click();return}chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
   b.ondblclick=()=>$('confirm-fighter').click();r.append(b)});$('roster').append(r)});
  card(chosen,roster.indexOf(chosen));selectWait();
  const sel=document.querySelector('.fighter-tile.selected');if(sel&&document.getElementById('select').contains(sel)&&!$('select').classList.contains('hidden'))sel.scrollIntoView({block:'nearest',behavior:'smooth'});

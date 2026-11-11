@@ -869,3 +869,36 @@ html.pad-nav button:focus,html.pad-nav input:focus,html.pad-nav .padfocus{outlin
  #result>button{padding:6px 16px!important;font-size:13px!important;min-width:160px}
  #result .winner-crown{width:34%!important}
 }
+/* ===== 1.2: easier on phones and tablets ===== */
+/* the chosen fighter says what to do next */
+#select.v2sel .fighter-tile .tap-pick{display:none}
+html.kotj-touch #select.v2sel .fighter-tile.selected:not(.locked) .tap-pick{display:block;position:absolute;left:50%;top:5px;transform:translateX(-50%);z-index:6;padding:2px 7px;border-radius:9px;background:#ffcf5a;color:#2a1500;font:900 9px/1.3 Inter,sans-serif;font-style:normal;letter-spacing:.06em;white-space:nowrap;box-shadow:0 2px 6px #000a;animation:tapPulse 1.1s ease-in-out infinite;pointer-events:none}
+@keyframes tapPulse{50%{transform:translateX(-50%) scale(1.08)}}
+html.kotj-touch #stage .stage-tile.selected::after{content:"TAP AGAIN TO FIGHT";position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:3;padding:3px 9px;border-radius:10px;background:#ffcf5a;color:#2a1500;font:900 10px Inter,sans-serif;letter-spacing:.08em;white-space:nowrap;box-shadow:0 2px 6px #000a;pointer-events:none}
+/* bigger, thumb-sized buttons along the bottom, lifted clear of the phone's own bars */
+html.kotj-touch #select.v2sel .select-hints{padding-bottom:calc(8px + env(safe-area-inset-bottom))!important}
+html.kotj-touch #select.v2sel .select-hints .hint{min-height:44px;padding:0 10px;border-radius:22px}
+html.kotj-touch #select.v2sel .select-hints .hint:first-child{background:linear-gradient(#ffd77a,#c8902a);color:#2a1500!important;padding:0 18px 0 8px;box-shadow:0 0 14px rgba(255,190,70,.6)}
+html.kotj-touch #select.v2sel .select-hints .hint:first-child b{background:#2a1500!important}
+@media (orientation:landscape) and (max-height:560px){
+ html.kotj-touch #select.v2sel .select-hints{gap:6px!important;justify-content:space-around!important}
+ html.kotj-touch #select.v2sel .select-hints .hint{min-height:40px;font-size:12px!important}
+ /* stage select fits on one screen: arenas in a swipeable row, big BACK / FIGHT! buttons */
+ #stage:not(.hidden){display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding:6px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;box-sizing:border-box}
+ #stage .stage-title{margin:0 auto 4px!important;padding:0!important}
+ #stage .stage-title .st-crown,#stage .stage-title .st-main,#stage .stage-title .st-eyebrow{display:none!important}
+ #stage .stage-title .st-big{font-size:clamp(20px,4vw,30px)!important;margin:0!important;line-height:1.05}
+ #stage #stage-vs{margin:2px 0 0!important;font-size:10px!important}
+ #stage .stage-grid{flex:1;min-height:0;display:flex!important;gap:10px!important;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;max-width:none!important;margin:4px 0!important;padding:8px 4px;align-items:center;-webkit-overflow-scrolling:touch}
+ #stage .stage-tile{flex:0 0 auto;height:100%;max-height:200px;width:auto;aspect-ratio:16/9;scroll-snap-align:center}
+ #stage .stage-actions{margin:0!important;gap:14px!important;flex:none}
+ #stage .stage-actions button{min-height:46px;min-width:150px;font-size:16px!important}
+}
+
+@media (orientation:landscape) and (max-height:380px){
+ #menu .title .t-big{font-size:clamp(40px,11vh,72px)!important}
+ #menu .tagline,#menu .credit{margin:2px 0!important;font-size:9px!important}
+ #menu .cover-menu{margin-top:4px!important;gap:5px 8px!important}
+ #menu .cover-menu button{padding:5px 12px!important}
+ #menu .cover-roster{display:none!important}
+}
