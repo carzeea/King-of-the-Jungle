@@ -37,20 +37,21 @@ function setBlood(v){blood=v;try{localStorage.setItem('kotj-blood',String(v))}ca
 // Dynamic resolution: full detail (up to 4K) when the device keeps up, lower render scale if frames drop.
 // Picks a render resolution during the first seconds of a fight, then holds it steady
 // (no flickering between sharp and soft). Only steps down again if the device really struggles.
-let savedScale=1;try{savedScale=Math.min(1,Math.max(.4,+localStorage.getItem('kotj-res')||1))}catch(_){}
+// Graphics: AUTO (default) or SHARP. Every fight starts at full sharpness; AUTO only softens if the
+// device stays slow after the opening seconds, and never below 75%. Nothing low is remembered between fights.
+let GFX='auto';try{GFX=localStorage.getItem('kotj-gfx')==='sharp'?'sharp':'auto';localStorage.removeItem('kotj-res')}catch(_){}
 let frameDt=1/60;
-const RES={scale:savedScale,acc:0,n:0,t:0,slow:0};
-function resStart(){RES.acc=0;RES.n=0;RES.t=0;RES.slow=0;if(RES.scale<1)RES.scale=Math.min(1,RES.scale*1.15)}
-function resTick(real){RES.t+=real;RES.acc+=real;RES.n++;
- if(RES.t<1.2)return;                                   // ignore loading hiccups at fight start
- if(RES.acc<1.5)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;
- if(RES.t<6){ // calibration window: settle quickly, downward only
-  if(avg>1/52&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*Math.max(.55,Math.min(.85,(1/55)/avg)));}
- }else{       // locked: only step down if it stays clearly slow
-  RES.slow=avg>1/40?RES.slow+1:0;if(RES.slow>=2&&RES.scale>.4){RES.scale=Math.max(.4,RES.scale*.8);RES.slow=0}
- }
- try{localStorage.setItem('kotj-res',RES.scale.toFixed(3))}catch(_){}
+const RES={scale:1,acc:0,n:0,t:0,slow:0,floor:.75};
+function resStart(){RES.acc=0;RES.n=0;RES.t=0;RES.slow=0;RES.scale=1}
+function resTick(real){RES.t+=real;
+ if(GFX==='sharp'){RES.scale=1;return}
+ if(RES.t<3.5)return;                                   // ignore art loading at fight start
+ RES.acc+=real;RES.n++;if(RES.acc<2)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;
+ RES.slow=avg>1/45?RES.slow+1:0;                         // must stay clearly slow (under ~45 fps) twice in a row
+ if(RES.slow>=2&&RES.scale>RES.floor){RES.scale=Math.max(RES.floor,RES.scale*.9);RES.slow=0}
 }
+function setGfx(v){GFX=v;try{localStorage.setItem('kotj-gfx',v)}catch(_){}RES.scale=1;document.querySelectorAll('.gfx-btn').forEach(b=>b.textContent='GRAPHICS: '+(v==='sharp'?'SHARP':'AUTO'))}
+
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
@@ -260,7 +261,7 @@ function selectHints(){const el=$('select-hints');if(!el)return;const pads=[...(
  el.innerHTML=[['SELECT',B[1],'ka'],['BACK',B[2],'kb'],['RANDOM',B[3],'ky'],['OPTIONS',kind==='kb'?'P':(B[4]||'⚙'),'kopt'],['TOWER MODE',kind==='kb'?'T':'🏰','ktower']].map(([t,k,c])=>`<span class="hint"><b class="${c}">${k}</b>${t}</span>`).join('');
  const H=el.querySelectorAll('.hint');H[0].onclick=()=>$('confirm-fighter').click();H[1].onclick=()=>selectBack();H[2].onclick=()=>randomPick();H[3].onclick=()=>selOpts();H[4].onclick=()=>selTower();H[4].classList.toggle('on',mode==='tower');H[4].style.display=mode==='online'?'none':''}
 const selOptsOpen=()=>!$('sel-opts').classList.contains('hidden');
-function selOpts(on){const o=$('sel-opts');const v=on===undefined?o.classList.contains('hidden'):on;o.classList.toggle('hidden',!v);if(v){$('so-sound').textContent=$('sound').textContent;$('so-blood').textContent=document.querySelector('.blood-btn').textContent}}
+function selOpts(on){const o=$('sel-opts');const v=on===undefined?o.classList.contains('hidden'):on;o.classList.toggle('hidden',!v);if(v){$('so-sound').textContent=$('sound').textContent;$('so-blood').textContent=document.querySelector('.blood-btn').textContent;if($('so-gfx'))$('so-gfx').textContent='GRAPHICS: '+(GFX==='sharp'?'SHARP':'AUTO')}}
 function selTower(){if(mode==='online'||mode==='tower')return;openSelect('tower')}
 function card(f,i){try{spriteImg[f.id]}catch(_){}$('confirm-fighter').disabled=false;setBackdrop('assets/arenas/jungle-temple.webp');$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=`assets/ui/hero/${f.id}.webp?v=10.16`;$('select').dataset.f=f.id;$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
@@ -1512,7 +1513,7 @@ $('champ-continue').onclick=()=>{cancelAnimationFrame(champRaf);if(tower&&tower.
 function clean(){cancelAnimationFrame(raf);game=null;document.body.classList.remove('fighting','paused','touch');pad.classList.add('hidden');for(const k in kb)kb[k]=false;if(window.speechSynthesis)speechSynthesis.cancel()}
 function menu(){if(mode==='online'&&window.KOTJNet){NET.send({t:'leave'});NET.leave();mode='versus'}clean();tower=null;show('menu');AU&&soundOn&&$('menu').classList.contains('started')&&AU.music('music.menu')}
 $('pause').onclick=togglePause;
-document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();setBlood((blood+1)%3)});setBlood(blood);
+document.querySelectorAll('.blood-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();setBlood((blood+1)%3)});setBlood(blood);document.querySelectorAll('.gfx-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();setGfx(GFX==='sharp'?'auto':'sharp')});setGfx(GFX);
 // Full screen (and sideways lock on phones that allow it)
 (function(){const b=$('fullscreen'),el=document.documentElement,can=!!(el.requestFullscreen||el.webkitRequestFullscreen);
  if(!can){b.style.display='none';return}
@@ -2879,7 +2880,7 @@ render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
 window.__kotj={rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 (()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
- w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
+ w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-gfx',()=>{setGfx(GFX==='sharp'?'auto':'sharp');selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
 /* ---------- V2 Power Moves & Effects (drawn, recognizable effects; no damage/timing changes) ---------- */
 const PFX={
  lion:{a:'#ff9a2a',b:'#ffe08a',sc:'#ff8a1a',start:['spirit:rise','flames','firewave','roar'],hit:['flameburst','gash','embers','shock'],gash:3,gc:'#ffd36b'},
