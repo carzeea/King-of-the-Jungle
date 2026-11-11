@@ -130,3 +130,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock ARhVj30I5LyrpBZDscGMSD15WY_2_kdkjLNcJLjnijlWbtZSGTRVP9s2vZjdXggs_g3wLsPs
 - victory AdBg4FwGZO35pQNjpt8dcbx_sckbA4FpzYpWF2_62U1xvQVkb-dHmNG1IYD6LuwlC3IFgiGt
 - block ATzVgZ_qXbyeDTvBBWArqxFiKWepE6HMQEpRQkdKSTSiHexxzdO4OUy2iJpYSmHLd6mxug9J
+
+## Crocodile (side view) — auto_fighter.py
+- idle AcdBk8-SG_L3zPFmNxCdqS7L8YOVnerhjJh-an81WgLiRcVZDlZZJdi5RTClxkfzzc8jnp_f
+- walk AU6PKt7DqTlq1G7VLidtPgC3aM0f4TMB6KhtuQC1y6JpyOb45NZ2NwPMX47e1atmIGRM4E6k
+- light Aca5olJwJD4n_fY2sXMgb_euPAsaFW3aMtc2AFmDYsZSFYggmohUw2tsl-4U_pPvJAmeO96_
+- heavy AbFBP8cDA2Amum3A2JdkOH7LmJi2OFAtINrQQvOTYqYs_DCoH1x_bK9UBIflLwhzs1Vsc-FQ
+- jump ASHKp7osy97VDWEGAPGDUDOsYe3NAab0QYLDL0Xx_2tD9yUnt8pYefLSW_ED25sdR1F2y_vY
+- special ATf_e6qufxI5PWlCM1A8g_ij7O-IFKrBO_aGURz-Es7ShS9ZsneMkUu7YkfWOCRBO9_ceNyc
+- hit AenaSbd2BnejW8fFaqywF1CzcjgUk37DYPZB7Q5IZSL_bpeYGZ5mX_HpQq6ay07h_yCZ4ERH
+- knock AePLzeHtDK3aMfNagvL3x0_1n2--uYyTPF-Db1HdHfyMj6bCPg4UWObvEBc0AaCBy8pM4o8v
+- victory AWlLRwYFgp1XO4DtqcfLMWFj59if21ZMWc1yN7AIJUUAs6FF8DmZBdKtPk2Yc68AXLn4hV-H
+- block AebnIt2JFC_jLbzvAfCHzlPXx6PHGjqnRDLAL8UOFmETMnRRm_KwiEy9HCaDSUl5eIXIHbxK
