@@ -2122,7 +2122,7 @@ function drawFighter(f,i,ghost){
   }
   // Fifteen distinct signatures: procedural accents follow actual attack phases.
   // These effects are intentionally screen-space modest and do not resize fighter art.
-  if(['earthslam','pounce','special_b','special_c','special_d','shadow','ultraseq','ultra_move','ender'].includes(f.action)){
+  if(['earthslam','pounce','special_b','special_c','special_d','shadow','ultraseq','ultra_move','ender'].includes(f.action)||(f.move_&&f.attack>0&&f.action==='attack_heavy'&&f.move_!==MOVES.double)){
    const signature={
     lion:['#f5c75d','roar'],tiger:['#ff9c48','slash'],jaguar:['#43d7c6','slash'],
     wolf:['#b9d9ff','wind'],hyena:['#e65c66','echo'],badger:['#bda57b','debris'],
@@ -2170,7 +2170,7 @@ function drawFighter(f,i,ghost){
    c.globalAlpha=.20*intensity;c.fillStyle='#e1faff';c.beginPath();c.ellipse(f.dir*36,-f.y-8,58+35*t,9+4*t,0,0,Math.PI*2);c.fill();c.restore();
   }
   // Cobra: a fast tongue flick and small venom droplets during biting and coil specials.
-  if(f.data.id==='snake'&&['bite','pounce','special_b','special_c','special_d','shadow'].includes(f.action)){
+  if(f.data.id==='snake'&&(['bite','pounce','special_b','special_c','special_d','shadow'].includes(f.action)||(f.action==='attack_heavy'&&f.move_&&f.attack>0))){
    const t=phase(f),flick=Math.max(0,1-Math.abs(t-.43)/.24),reach=25+45*flick;
    if(flick>0){c.save();c.globalAlpha=.9*flick;c.strokeStyle='#ed6574';c.lineWidth=2.5;c.lineCap='round';
     const sx=f.dir*38,sy=-f.y-173;c.beginPath();c.moveTo(sx,sy);c.quadraticCurveTo(sx+f.dir*reach*.6,sy-7,sx+f.dir*reach,sy+3);c.stroke();
