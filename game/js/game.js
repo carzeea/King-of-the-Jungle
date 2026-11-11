@@ -2862,6 +2862,24 @@ function pNormalize(){for(const p of game.fx){if(p._n)continue;p._n=1;if(p.kind!
   if(!ghost&&game&&f._after&&f._after.length&&f._pfxMove&&f.move_===f._pfxMove){const th=PFX[f.data.id];
    f._after.forEach((a,k)=>{if(k===0)return;c.save();c.globalAlpha=.42*(1-k/f._after.length);c.filter=th&&th.after||'none';_dF({...f,x:a.x,y:a.y,dir:a.dir,hitFlash:0,trail:[]},i,true);c.restore()})}
   return _dF.apply(this,arguments)}}
+// MAJIC's signature purple lightning glow: always on in every fight (CPU, versus, Tower), never touches damage/timing
+function mjBolt(x0,y0,x1,y1,rough,depth,out){const mx=(x0+x1)/2+(Math.random()-.5)*rough,my=(y0+y1)/2+(Math.random()-.5)*rough;
+ if(depth<=0){out.push([x0,y0,mx,my,x1,y1]);return}mjBolt(x0,y0,mx,my,rough/2,depth-1,out);mjBolt(mx,my,x1,y1,rough/2,depth-1,out);
+ if(depth>=2&&Math.random()<.35){const a=Math.atan2(y1-y0,x1-x0)+(Math.random()<.5?-1:1)*R(.5,1.1),l=Math.hypot(x1-x0,y1-y0)*.45;mjBolt(mx,my,mx+Math.cos(a)*l,my+Math.sin(a)*l,rough/3,depth-2,out)}}
+function mjAura(f,front){const now=performance.now()/1000,H=310,cx=f.x,cy=400+f.y-H*.48;
+ if(!front){const pulse=.8+Math.sin(now*5.2)*.12+Math.sin(now*13.7)*.06;c.save();c.globalCompositeOperation='lighter';
+  const g=c.createRadialGradient(cx,cy,10,cx,cy,H*.72);g.addColorStop(0,'rgba(190,110,255,'+(.42*pulse)+')');g.addColorStop(.45,'rgba(140,60,255,'+(.28*pulse)+')');g.addColorStop(1,'rgba(90,20,200,0)');
+  c.fillStyle=g;c.beginPath();c.ellipse(cx,cy,H*.62,H*.72,0,0,Math.PI*2);c.fill();
+  const fg=c.createRadialGradient(cx,402,4,cx,402,150);fg.addColorStop(0,'rgba(200,130,255,'+(.35*pulse)+')');fg.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=fg;c.beginPath();c.ellipse(cx,402,150,22,0,0,Math.PI*2);c.fill();c.restore();return}
+ if(!f._mjB||now-f._mjBt>R(.07,.13)){f._mjBt=now;f._mjB=[];const n=Math.random()<.25?3:2;
+  for(let i=0;i<n;i++){const side=Math.random()<.5?-1:1,a0=R(-2.6,-.5),r0=R(.25,.45)*H,x0=cx+Math.cos(a0)*r0*side*.8,y0=cy+Math.sin(a0)*r0*.9+R(-30,90),ang=R(-1.9,-1.2)+(side>0?R(0,.9):-R(0,.9)),l=R(70,150),segs=[];
+   mjBolt(x0,y0,x0+Math.cos(ang)*l*side,y0+Math.sin(ang)*l*(Math.random()<.4?-1:1),l*.45,4,segs);f._mjB.push({segs,col:Math.random()<.85?'#b65cff':'#9fe8ff',life:R(.6,1)})}}
+ c.save();c.lineCap='round';c.lineJoin='round';const flick=.55+Math.random()*.45;
+ for(const b of f._mjB){for(const [w,al,col] of [[12,.35*flick,'#8a2be2'],[5,.9*flick,b.col],[1.8,.95*flick*b.life,'#fbf3ff']]){c.strokeStyle=col;c.globalAlpha=al;c.lineWidth=w;c.shadowColor=b.col;c.shadowBlur=w>3?16:8;c.beginPath();for(const sg of b.segs){c.moveTo(sg[0],sg[1]);c.lineTo(sg[2],sg[3]);c.lineTo(sg[4],sg[5])}c.stroke()}}
+ c.restore()}
+{const _dF2=drawFighter;drawFighter=function(f,i,ghost){
+  const mj=!ghost&&game&&f&&f.data&&f.data.id==='majic'&&!(f.hp<=0&&game.over);
+  if(mj)mjAura(f,false);let r;if(mj){const pu=.75+Math.sin(performance.now()/190)*.25;c.save();c.shadowColor='rgba(170,70,255,'+pu+')';c.shadowBlur=26+pu*14;r=_dF2.apply(this,arguments);c.restore()}else r=_dF2.apply(this,arguments);if(mj)mjAura(f,true);return r}}
 function pLeaf(r,col){c.fillStyle=col;c.beginPath();c.moveTo(-r,0);c.quadraticCurveTo(-r*.2,-r*.62,r,0);c.quadraticCurveTo(-r*.2,r*.62,-r,0);c.fill();c.strokeStyle='rgba(30,60,15,.75)';c.lineWidth=1.2;c.beginPath();c.moveTo(-r*1.25,0);c.lineTo(r*.9,0);for(let s=-.5;s<=.5;s+=.33){c.moveTo(r*s,0);c.lineTo(r*(s+.25),-r*.3);c.moveTo(r*s,0);c.lineTo(r*(s+.25),r*.3)}c.stroke()}
 function pFlake(r){c.strokeStyle='#ffffff';c.lineWidth=Math.max(1.4,r*.16);c.lineCap='round';c.shadowColor='#8fe6ff';c.shadowBlur=8;c.beginPath();for(let a=0;a<6;a++){const ca=Math.cos(a*1.0472),sa=Math.sin(a*1.0472);c.moveTo(0,0);c.lineTo(ca*r,sa*r);for(const t of[.45,.72]){const bx=ca*r*t,by=sa*r*t,l=r*(t<.5?.36:.24);for(const s of[-1,1]){const aa=a*1.0472+s*.8;c.moveTo(bx,by);c.lineTo(bx+Math.cos(aa)*l,by+Math.sin(aa)*l)}}}c.stroke()}
 function pFeather(r,col){c.strokeStyle='#8a6a40';c.lineWidth=1.5;c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.stroke();c.fillStyle=col;c.beginPath();c.moveTo(-r*.6,0);c.quadraticCurveTo(0,-r*.45,r,0);c.quadraticCurveTo(0,r*.32,-r*.6,0);c.fill();c.strokeStyle='rgba(120,90,60,.5)';c.lineWidth=.8;c.beginPath();for(let s=-.5;s<.9;s+=.2){c.moveTo(r*s,0);c.lineTo(r*(s+.18),-r*.3);c.moveTo(r*s,0);c.lineTo(r*(s+.18),r*.22)}c.stroke()}

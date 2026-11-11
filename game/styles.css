@@ -746,7 +746,8 @@ body.fighting .majic-boss-hud.hidden{display:none}
 #select.v2sel .select-hints .hint b{font-family:Inter,sans-serif}
 #select.v2sel .fighter-tile.titan{transform:none;margin:0!important}
 #select.v2sel .fighter-tile.titan.selected{transform:translateY(-4px) scale(1.06)}
-#select.v2sel .fighter-tile .bolt{display:none}
+#select.v2sel .fighter-tile.titan .bolt{display:block;inset:-8%;z-index:4;filter:drop-shadow(0 0 6px #b46bff) drop-shadow(0 0 14px #8a3cff)}
+#select.v2sel .fighter-tile.titan .tf img{filter:drop-shadow(0 0 10px rgba(180,100,255,.85))}
 #select.v2sel .select-layout{min-height:calc(100vh - 260px);align-items:center}
 #select.v2sel .fighter-card{align-self:end}
 #select.v2sel #fighter-portrait{height:min(60vh,600px)!important;max-height:none!important;width:auto!important;max-width:none!important}
