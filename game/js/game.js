@@ -2120,6 +2120,44 @@ function drawFighter(f,i,ghost){
     c.beginPath();c.moveTo(Math.cos(a)*inner,-f.y+Math.sin(a)*inner*.22);c.lineTo(Math.cos(a)*outer,-f.y+Math.sin(a)*outer*.22);c.stroke();}
    c.restore();
   }
+  // Fifteen distinct signatures: procedural accents follow actual attack phases.
+  // These effects are intentionally screen-space modest and do not resize fighter art.
+  if(['earthslam','pounce','special_b','special_c','special_d','shadow','ultraseq','ultra_move','ender'].includes(f.action)){
+   const signature={
+    lion:['#f5c75d','roar'],tiger:['#ff9c48','slash'],jaguar:['#43d7c6','slash'],
+    wolf:['#b9d9ff','wind'],hyena:['#e65c66','echo'],badger:['#bda57b','debris'],
+    grizzly:['#d9ad79','impact'],crocodile:['#65c9a2','spray'],hippo:['#64e1e4','wave'],
+    elephant:['#c6b9a0','debris'],eagle:['#e3e9fc','wind'],stag:['#e9c477','antler'],
+    majic:['#bc83ff','adaptive']
+   }[f.data.id];
+   if(signature){
+    const [color,kind]=signature,t=phase(f),power=Math.sin(Math.PI*t),dir=f.dir||1;
+    const originX=dir*54,originY=-f.y-132;
+    c.save();c.strokeStyle=color;c.fillStyle=color;c.lineCap='round';c.lineJoin='round';
+    c.globalAlpha=.60*power;c.shadowColor=color;c.shadowBlur=kind==='adaptive'?14:6;
+    if(kind==='slash'||kind==='antler'){
+     c.lineWidth=kind==='antler'?3:4;
+     for(let j=0;j<3;j++){const y=originY+(j-1)*19;
+      c.beginPath();c.moveTo(dir*12,y+21);c.quadraticCurveTo(dir*(68+40*t),y-33,dir*(105+48*t),y-9);c.stroke();}
+     if(kind==='antler'){c.lineWidth=2;c.beginPath();c.moveTo(originX,originY);c.lineTo(dir*95,originY-76);c.moveTo(dir*68,originY-44);c.lineTo(dir*43,originY-85);c.moveTo(dir*82,originY-61);c.lineTo(dir*112,originY-94);c.stroke();}
+    }else if(kind==='roar'||kind==='impact'||kind==='wave'){
+     c.lineWidth=kind==='impact'?5:3;
+     for(let j=0;j<3;j++){const radius=25+t*(70+j*21);c.beginPath();c.ellipse(originX+dir*radius*.4,kind==='wave'?-f.y-14:originY,radius,kind==='wave'?10+j*4:radius*.65,0,-1.1,1.1);c.stroke();}
+    }else if(kind==='debris'||kind==='spray'){
+     for(let j=0;j<12;j++){const a=j*2.399,spread=15+90*t+(j%3)*7;
+      const x=dir*24+Math.cos(a)*spread,y=-f.y-(kind==='spray'?65:9)-Math.abs(Math.sin(a))*spread*.5;
+      c.beginPath();if(kind==='spray')c.ellipse(x,y,2.5,6,Math.cos(a),0,Math.PI*2);
+      else{c.moveTo(x,y-5);c.lineTo(x+5,y+4);c.lineTo(x-5,y+4);c.closePath();}c.fill();}
+    }else if(kind==='wind'||kind==='echo'||kind==='adaptive'){
+     for(let j=0;j<5;j++){const a=j*1.256+t*2,rad=33+25*t+j*7;
+      const x=originX+Math.cos(a)*rad,y=originY+Math.sin(a)*rad;
+      c.lineWidth=kind==='adaptive'?2.5:2;c.beginPath();c.arc(x,y,11+j*2,a,a+1.9);c.stroke();
+      if(kind==='adaptive'){c.beginPath();c.moveTo(x,y-10);c.lineTo(x+dir*9,y);c.lineTo(x,y+10);c.stroke();}
+     }
+    }
+    c.restore();
+   }
+  }
   // Species-specific special-move accents stay anchored to the fighter and preserve sprite scale.
   // Short-lived frost crystals and ground mist add physical texture without obscuring the opponent.
   if(f.data.id==='leopard'&&['pounce','special_b','special_c','special_d','shadow','ultraseq'].includes(f.action)){
