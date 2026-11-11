@@ -2820,7 +2820,7 @@ const PFX={
  lion:{a:'#ffb347',b:'#ffe08a',start:['flames','roar'],hit:['flameburst','gash','shock'],gash:3,gc:'#ffd36b'},
  tiger:{a:'#ff7a2a',b:'#ffd08a',start:['flames'],hit:['gash','flameburst'],gash:3,gc:'#ff9a3a'},
  jaguar:{a:'#2fc3a8',b:'#0f2422',start:['after','smoke'],hit:['gash','smoke'],gash:2,gc:'#7fffe6',after:'brightness(.45) sepia(1) hue-rotate(120deg) saturate(2.5)'},
- leopard:{a:'#9ce7ff',b:'#ffffff',start:['flakes','breath'],hit:['icicles','flakeburst','shards'],gash:0},
+ leopard:{a:'#9ce7ff',b:'#ffffff',start:['frostcone','frostpatch','flakes'],hit:['icecluster','freeze','shards','flakeburst'],gash:0},
  wolf:{a:'#7fb3ff',b:'#e8f2ff',start:['after','howl','spirit'],hit:['gash','spirit'],gash:3,gc:'#cfe3ff',after:'brightness(1.2) saturate(.2) sepia(1) hue-rotate(170deg) saturate(3)'},
  hyena:{a:'#ff5a3a',b:'#ffcf6b',start:['cackle','bolts'],hit:['gash','cackle','dust'],gash:2,gc:'#ff8a5a'},
  badger:{a:'#c9935a',b:'#6b4a2a',start:['clods'],hit:['cracks','rocks','dust'],gash:0},
@@ -2829,7 +2829,7 @@ const PFX={
  hippo:{a:'#4aa9e8',b:'#d6f1ff',start:['drops'],hit:['splash','wave','shock'],gash:0},
  elephant:{a:'#c6b7a0',b:'#8a7356',start:['dust'],hit:['cracks','rocks','dust','quake'],gash:0,big:1.4},
  eagle:{a:'#ffe08a',b:'#ffffff',start:['feathers','wind'],hit:['featherburst','gash'],gash:3,gc:'#ffffff'},
- snake:{a:'#8fe04a',b:'#2f6b1a',start:['cobra'],hit:['fangs','venom'],gash:0},
+ snake:{a:'#8fe04a',b:'#2f6b1a',start:['kcobra'],hit:['kstrike','venom','poison'],gash:0},
  stag:{a:'#9fd86a',b:'#ffe08a',start:['leafstorm'],hit:['leafburst','shock'],gash:0},
  majic:{a:'#b46bff',b:'#7fe6ff',start:['after','portal','bolts'],hit:['bolts','icicles','flakeburst','shock'],gash:0,after:'brightness(.7) saturate(2) hue-rotate(240deg)'}
 };
@@ -2868,9 +2868,82 @@ function pBurst(f,stage,x,y,big){
   else if(k==='venom'){for(let i=0;i<14;i++)P({kind:'pp',sh:'drop',x:x+R(-30,30),y:y+R(-20,20),vx:R(-260,260),vy:R(-380,-60),g:1200,r:R(4,8)*B,life:R(.6,1),color:i%2?'#a8ff4a':'#5fd22a',glow:1});for(let i=0;i<5;i++)P({kind:'pp',sh:'puff',x:x+R(-40,40),y:y+R(-20,30),vx:R(-60,60),vy:R(-40,0),r:R(12,18),grow:30,life:.7,color:'#7fd03a',alpha:.3})}
   else if(k==='leafstorm')for(let i=0;i<30;i++)P({kind:'pp',sh:'leaf',cx:f.x,cy:400+f.y-130,ang:R(0,6.28),rad:R(60,170),av:R(3,5.5),rise:R(-60,-20),rot:R(0,6),vr:R(-8,8),r:R(16,26),life:R(.7,1),orbit:1,color:['#5ea83a','#9fd86a','#d8b03a','#3f7f2a'][i%4]});
   else if(k==='leafburst')for(let i=0;i<20;i++){const an=R(0,6.28);P({kind:'pp',sh:'leaf',x,y,vx:Math.cos(an)*R(160,420),vy:Math.sin(an)*R(160,420)-120,g:200,drag:.95,rot:R(0,6),vr:R(-10,10),r:R(15,26)*B,life:R(.8,1.2),color:['#5ea83a','#9fd86a','#d8b03a','#3f7f2a'][i%4]})}
+  else if(k==='kcobra')P({kind:'pp',sh:'kcobra',x:f.x-d*90,y:398,dir:d,life:1.05,sz:1.1});
+  else if(k==='kstrike'){P({kind:'pp',sh:'kcobra',x:x-d*230,y:398,dir:d,life:.8,sz:1,strike:.1});P({kind:'pp',sh:'vbite',x,y:y-10,life:.9,delay:.24});
+   for(let i=0;i<3;i++)P({kind:'pp',sh:'vpuddle',x:x+R(-90,90),y:399,r:R(10,40),life:R(1.6,2.2),delay:.3+i*.08})}
+  else if(k==='poison'){const o=game.fighters[1-game.fighters.indexOf(f)];if(o){o._poisonT=1.8}}
+  else if(k==='frostpatch')P({kind:'pp',sh:'frostpatch',x:k==='frostpatch'&&stage==='start'?f.x:x,y:399,life:1.4,big:B,seed:Math.random()});
+  else if(k==='frostcone')P({kind:'pp',sh:'frostcone',x:f.x+d*70,y:400+f.y-205,dir:d,life:.55});
+  else if(k==='icecluster'){const xs=[];for(let i=0;i<7;i++){const o=(i-3);xs.push({x:o*24+R(-6,6),w:R(9,15),h:R(70,170)*(1-Math.abs(o)/5),lean:o*.13+R(-.08,.08)})}
+   P({kind:'pp',sh:'icecluster',x,y:399,life:.95,big:B,xs});P({kind:'pp',sh:'frostpatch',x,y:399,life:1.4,big:B*.8,seed:Math.random()})}
+  else if(k==='freeze'){const o=game.fighters[1-game.fighters.indexOf(f)];if(o){o._frozenT=.9;o._iceShatter=1}}
   else if(k==='portal')P({kind:'pp',sh:'portal',x:f.x,y:400+f.y-150,life:.8,color:th.a,c2:th.b});
  }
 }
+/* ---------- 1.3 signature effects: a real king cobra for Snake, real ice for Snow Leopard ---------- */
+// King cobra: scaled, banded body rising out of a burrow, flared hood with spectacle markings,
+// slit-pupil eyes, open mouth with dripping fangs and a flicking forked tongue. Sways, then strikes.
+const COBRA_HEAD=new Image();COBRA_HEAD.src='assets/fx/cobra-head.webp?v=13';const COBRA_SKIN=new Image();COBRA_SKIN.src='assets/fx/cobra-scales.webp?v=13';let cobraPat=null;
+function kCobra(p,k){if(!COBRA_HEAD.complete||!COBRA_HEAD.naturalWidth)return;
+ const e=Math.min(1,p.t/.3),es=e*e*(3-2*e),s=(p.sz||1),d=p.dir;
+ const st=p.strike!=null?Math.max(0,Math.min(1,(p.t-p.strike)/.13)):0,lunge=st*st*(3-2*st);
+ const sway=Math.sin(p.t*6.5)*(1-lunge)*9;c.translate(p.x,p.y);c.scale(d*s,s);c.globalAlpha=Math.min(1,k*2.4);
+ // burrow with broken earth
+ const hole=Math.min(1,p.t/.12);c.fillStyle='rgba(18,10,3,.9)';c.beginPath();c.ellipse(-20,3,62*hole,14*hole,0,0,7);c.fill();
+ c.fillStyle='#5a4128';for(let i=0;i<7;i++){const a=i/7*Math.PI*2;c.beginPath();c.ellipse(-20+Math.cos(a)*66*hole,2+Math.sin(a)*14*hole,9,5,a,0,7);c.fill()}
+ // body: a thick scaled tube rising out of the hole, swaying, then lunging at the target
+ const H=(p.strike!=null?200:175)*es,nx=40+lunge*170+sway,ny=-H+lunge*110;
+ const P0={x:-20,y:12},P1={x:-80,y:-H*.3},P2={x:20+sway*.6,y:-H*.62+lunge*40},P3={x:nx,y:ny};
+ const bz=t=>{const u=1-t;return{x:u*u*u*P0.x+3*u*u*t*P1.x+3*u*t*t*P2.x+t*t*t*P3.x,y:u*u*u*P0.y+3*u*u*t*P1.y+3*u*t*t*P2.y+t*t*t*P3.y}};
+ if(!cobraPat&&COBRA_SKIN.complete&&COBRA_SKIN.naturalWidth){cobraPat=c.createPattern(COBRA_SKIN,'repeat');try{cobraPat.setTransform(new DOMMatrix().scale(.32))}catch(_){}}
+ const N=48,pts=[];for(let i=0;i<=N;i++){const t=i/N;pts.push([bz(t),26-10*t])}
+ c.lineCap='round';c.lineJoin='round';
+ const tube=(col,wf,dx,dy)=>{for(let i=0;i<N;i++){const[q,r]=pts[i],[q2]=pts[i+1];c.strokeStyle=col;c.lineWidth=r*2*wf;c.beginPath();c.moveTo(q.x+dx*r,q.y+dy*r);c.lineTo(q2.x+dx*r,q2.y+dy*r);c.stroke()}};
+ tube('#1c1404',1.08,0,0);tube(cobraPat||'#8a7330',.96,0,0);tube('rgba(0,0,0,.35)',.42,.38,.38);tube('rgba(255,236,170,.28)',.28,-.42,-.42);
+ // pale belly scales along the inner edge
+ c.strokeStyle='rgba(245,230,170,.55)';c.lineWidth=2;for(let i=6;i<N-4;i+=2){const[q,r]=pts[i];c.beginPath();c.moveTo(q.x+r*.55,q.y+r*.2);c.lineTo(q.x+r*.95,q.y+r*.35);c.stroke()}
+ // the real cobra head from Snake's own art, hood flared, mouth open
+ const hw=215,hh=hw*COBRA_HEAD.naturalHeight/COBRA_HEAD.naturalWidth;
+ c.save();c.translate(P3.x,P3.y);c.rotate(-.08+lunge*.55+Math.sin(p.t*6.5)*.03*(1-lunge));const pulse=1+Math.sin(p.t*9)*.015;c.scale(pulse,pulse);
+ c.shadowColor='rgba(150,255,80,.55)';c.shadowBlur=18;c.drawImage(COBRA_HEAD,-hw*.49,-hh*.93,hw,hh);c.shadowBlur=0;
+ // venom drips from the fangs
+ c.fillStyle='#a8ff4a';c.shadowColor='#a8ff4a';c.shadowBlur=10;for(const fx of[.18,.27]){const y0=-hh*.2+((p.t*90+fx*200)%26);c.beginPath();c.arc(hw*fx,y0,3.2,0,7);c.fill()}
+ c.restore()}
+// Venom puddle on the floor: glossy green pool, bubbles popping, toxic vapour rising.
+function vPuddle(p,k){c.translate(p.x,p.y);const g=Math.min(1,p.t/.25),w=(34+p.r*.7)*g;c.globalAlpha=Math.min(1,k*1.5)*.85;
+ const pg=c.createRadialGradient(-w*.2,-3,2,0,0,w);pg.addColorStop(0,'rgba(200,255,120,.85)');pg.addColorStop(.35,'rgba(70,170,25,.75)');pg.addColorStop(1,'rgba(30,90,8,0)');
+ c.fillStyle=pg;c.beginPath();c.ellipse(0,0,w,w*.18,0,0,7);c.fill();
+ for(let i=0;i<5;i++){const ph=(p.t*1.8+i*.37)%1,bx=Math.sin(i*9.1)*w*.6,br=3+ph*7;c.strokeStyle='rgba(220,255,150,'+(1-ph)*.9+')';c.lineWidth=1.5;c.beginPath();c.arc(bx,-br*.6,br,0,7);c.stroke()}
+ c.globalAlpha=k*.35;for(let i=0;i<3;i++){const ph=(p.t*.9+i*.33)%1;c.fillStyle='#8fe04a';c.beginPath();c.ellipse(Math.sin(i*4+p.t)*w*.4,-20-ph*90,10+ph*18,7+ph*12,0,0,7);c.fill()}}
+// Two glowing puncture wounds where the fangs landed.
+function vBite(p,k){c.translate(p.x,p.y);c.globalAlpha=k;for(const s of[-1,1]){const g=c.createRadialGradient(s*14,0,1,s*14,0,14);g.addColorStop(0,'#ffffff');g.addColorStop(.35,'#b8ff5a');g.addColorStop(1,'rgba(80,200,30,0)');c.fillStyle=g;c.beginPath();c.arc(s*14,0,14,0,7);c.fill()}}
+// Ice crystal: faceted hexagonal prism — translucent body, bright front facet, glints and a frosty core.
+function iceCrystal(x,y,w,h,lean,a){c.save();c.translate(x,y);c.rotate(lean);c.globalAlpha*=a;
+ const tip=-h,sh=h*.22;
+ const body=c.createLinearGradient(-w,0,w,0);body.addColorStop(0,'rgba(120,200,240,.75)');body.addColorStop(.45,'rgba(225,248,255,.92)');body.addColorStop(.55,'rgba(170,225,250,.85)');body.addColorStop(1,'rgba(60,140,210,.8)');
+ c.fillStyle=body;c.beginPath();c.moveTo(-w,0);c.lineTo(-w,tip+sh);c.lineTo(0,tip);c.lineTo(w,tip+sh);c.lineTo(w,0);c.closePath();c.fill();
+ c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.moveTo(-w*.15,0);c.lineTo(-w*.15,tip+sh*.9);c.lineTo(0,tip);c.lineTo(w*.25,tip+sh);c.lineTo(w*.25,0);c.closePath();c.fill();
+ c.strokeStyle='rgba(255,255,255,.95)';c.lineWidth=1.6;c.beginPath();c.moveTo(-w,0);c.lineTo(-w,tip+sh);c.lineTo(0,tip);c.lineTo(w,tip+sh);c.lineTo(w,0);c.moveTo(0,tip);c.lineTo(0,0);c.stroke();
+ c.strokeStyle='rgba(90,170,230,.6)';c.lineWidth=1;for(let i=1;i<4;i++){c.beginPath();c.moveTo(-w*.8,-h*i*.2);c.lineTo(-w*.3,-h*i*.2-6);c.stroke()}
+ c.restore()}
+function iceCluster(p,k){const g=Math.min(1,p.t/.12),gg=1-Math.pow(1-g,3),shatter=p.t>p.life-.18;c.translate(p.x,p.y);
+ c.globalAlpha=shatter?k*4:1;const B=p.big||1;
+ const base=c.createRadialGradient(0,0,4,0,0,120*B);base.addColorStop(0,'rgba(230,250,255,.9)');base.addColorStop(1,'rgba(160,220,255,0)');c.fillStyle=base;c.beginPath();c.ellipse(0,0,120*B,18*B,0,0,7);c.fill();
+ for(const q of p.xs)iceCrystal(q.x*B,0,q.w*B,q.h*B*gg,q.lean,1);
+ // glints
+ c.globalCompositeOperation='lighter';for(let i=0;i<4;i++){const ph=(p.t*3+i*.27)%1;if(ph<.35){const q=p.xs[i%p.xs.length],gx=q.x*B,gy=-q.h*B*gg*.7,r=10*(1-Math.abs(ph-.17)/.17);c.strokeStyle='#ffffff';c.lineWidth=2;c.beginPath();c.moveTo(gx-r,gy);c.lineTo(gx+r,gy);c.moveTo(gx,gy-r);c.lineTo(gx,gy+r);c.stroke()}}}
+// Frost spreading across the floor: pale sheet + branching crystal cracks.
+function frostPatch(p,k){c.translate(p.x,p.y);const g=Math.min(1,p.t/.3),R0=(140*(p.big||1))*g;c.globalAlpha=Math.min(1,k*1.6);
+ const fg=c.createRadialGradient(0,0,4,0,0,R0);fg.addColorStop(0,'rgba(235,250,255,.75)');fg.addColorStop(.7,'rgba(180,230,255,.35)');fg.addColorStop(1,'rgba(180,230,255,0)');c.fillStyle=fg;c.beginPath();c.ellipse(0,0,R0,R0*.16,0,0,7);c.fill();
+ c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=1.4;let sd=p.seed*1e4;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
+ for(let i=0;i<10;i++){const a=rnd()*Math.PI*2,L=R0*(.5+rnd()*.5);let x=0,y=0;c.beginPath();c.moveTo(0,0);for(let j=1;j<=4;j++){x=Math.cos(a)*L*j/4;y=Math.sin(a)*L*j/4*.16;c.lineTo(x,y);
+   if(j===2){const b=a+(rnd()<.5?-.6:.6);c.moveTo(x,y);c.lineTo(x+Math.cos(b)*L*.25,y+Math.sin(b)*L*.25*.16);c.moveTo(x,y)}}c.stroke()}}
+// Frost breath: a cone of icy mist with glittering ice dust.
+function frostCone(p,k){c.translate(p.x,p.y);c.scale(p.dir,1);const g=Math.min(1,p.t/.15),L=260*g;c.globalAlpha=k*.75;
+ const cg=c.createLinearGradient(0,0,L,0);cg.addColorStop(0,'rgba(240,252,255,.85)');cg.addColorStop(1,'rgba(170,225,255,0)');c.fillStyle=cg;
+ c.beginPath();c.moveTo(0,-6);c.quadraticCurveTo(L*.6,-55,L,-40+Math.sin(p.t*20)*6);c.lineTo(L,40);c.quadraticCurveTo(L*.6,55,0,6);c.closePath();c.fill();
+ c.globalCompositeOperation='lighter';for(let i=0;i<22;i++){const ph=((p.t*1.6)+i/22)%1,x=ph*L,y=Math.sin(i*7.3+p.t*3)*ph*40;c.fillStyle='rgba(255,255,255,'+(1-ph)+')';c.fillRect(x,y,2.2,2.2)}}
+
 function pNormalize(){for(const p of game.fx){if(p._n)continue;p._n=1;if(p.kind!=='titanWave'&&typeof p.y==='number'&&p.y<=40)p.y+=400}}
 {const _doMove=doMove;doMove=function(f,name){const r=_doMove.apply(this,arguments);
   if(game&&f&&!PFX_NORMAL.has(name)&&f.move_){f._pfxMove=f.move_;f._pfxAge=0;f._after=[];pBurst(f,'start',f.x,400+f.y-150,1)}return r}}
@@ -2968,6 +3041,12 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
    case'gust':{c.globalAlpha=k*.75;c.strokeStyle='#ffffff';c.lineWidth=2.5;c.lineCap='round';const x0=p.x-p.dir*pr*220;c.beginPath();c.moveTo(x0,p.y);c.bezierCurveTo(x0-p.dir*p.len*.4,p.y-14,x0-p.dir*p.len*.7,p.y+12,x0-p.dir*p.len,p.y-4);c.stroke();c.beginPath();c.arc(x0-p.dir*p.len,p.y-12,8,0,4.5);c.stroke();break}
    case'ha':c.globalAlpha=Math.min(1,k*2);c.translate(p.x,p.y);c.rotate(Math.sin(p.t*30)*.12);c.font='900 30px Impact,"Barlow Condensed",sans-serif';c.textAlign='center';c.lineWidth=6;c.strokeStyle='#3a0a00';c.strokeText(p.text,0,0);c.fillStyle=p.color;c.fillText(p.text,0,0);break;
    case'cobra':pCobra(p,k);break;
+   case'kcobra':kCobra(p,k);break;
+   case'vpuddle':vPuddle(p,k);break;
+   case'vbite':vBite(p,k);break;
+   case'icecluster':iceCluster(p,k);break;
+   case'frostpatch':frostPatch(p,k);break;
+   case'frostcone':frostCone(p,k);break;
    case'fangs':{c.translate(p.x,p.y);c.scale(p.dir,1);const bite=Math.min(1,p.t/.1);c.globalAlpha=k;c.fillStyle=p.color;c.shadowColor='#a8ff4a';c.shadowBlur=12;for(const s of[-1,1]){c.save();c.translate(0,s*(34-bite*22));c.scale(1,s);c.beginPath();c.moveTo(-14,-30);c.quadraticCurveTo(-4,-6,4,10);c.quadraticCurveTo(2,-12,10,-30);c.closePath();c.fill();c.translate(18,0);c.beginPath();c.moveTo(-14,-30);c.quadraticCurveTo(-4,-6,4,10);c.quadraticCurveTo(2,-12,10,-30);c.closePath();c.fill();c.restore()}break}
    case'portal':{c.globalCompositeOperation='lighter';c.translate(p.x,p.y);c.rotate(p.t*5);c.globalAlpha=k*.8;for(let s=0;s<4;s++){c.strokeStyle=s%2?p.color:p.c2;c.shadowColor=p.color;c.shadowBlur=16;c.lineWidth=4;c.beginPath();for(let a=0;a<9;a+=.15){const r=a*14*(.5+pr);const x=Math.cos(a+s*1.57)*r,y=Math.sin(a+s*1.57)*r*.55;a?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()}break}
    }
@@ -3063,4 +3142,24 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   if(sx===1&&sy===1&&!rot&&!dy&&!dx)return _dF4.apply(this,arguments);
   c.save();c.translate(fx+dx,fy+dy);c.rotate(rot);c.scale(sx,sy);c.translate(-fx,-fy);
   try{return _dF4.apply(this,arguments)}finally{c.restore()}}}
+
+// Status looks: poisoned (green, sickly, bubbling) and frozen (icy blue, sparkling) — visual only.
+{const _dF5=drawFighter;drawFighter=function(f,i,ghost){
+  if(game&&!ghost&&f&&f._iceShatter&&!((f._frozenT||0)>0)){f._iceShatter=0;const top=f._top!=null?f._top:400+f.y-300;
+   for(let n=0;n<16;n++)game.fx.push({kind:'pp',sh:'shard',x:f.x+R(-80,80),y:R(top,400+f.y),vx:R(-520,520),vy:R(-520,80),g:900,r:R(10,20),rot:R(0,6),vr:R(-12,12),life:R(.5,.8),color:n%2?'#bff4ff':'#ffffff',t:0,_n:1});game.shake=Math.max(game.shake||0,.12)}
+  if(!game||ghost||!f||!((f._poisonT||0)>0||(f._frozenT||0)>0))return _dF5.apply(this,arguments);
+  const dt=Math.min(.05,frameDt||.016);let r;
+  if(f._frozenT>0){f._frozenT-=dt;c.save();c.filter='saturate(.35) brightness(1.25) sepia(.35) hue-rotate(160deg) saturate(2.2)';try{r=_dF5.apply(this,arguments)}finally{c.restore()}
+   {const top=f._top!=null?f._top:400+f.y-300,bot=400+f.y+6,hgt=bot-top,w=Math.max(130,hgt*.42),cx=f.x,grow=Math.min(1,(.9-f._frozenT)/.12),a=Math.min(1,f._frozenT/.15);
+    c.save();c.globalAlpha=a*.9;const yT=bot-hgt*grow*1.04;
+    const g=c.createLinearGradient(cx-w,0,cx+w,0);g.addColorStop(0,'rgba(140,210,245,.45)');g.addColorStop(.4,'rgba(230,250,255,.28)');g.addColorStop(.6,'rgba(190,235,255,.22)');g.addColorStop(1,'rgba(90,170,225,.45)');
+    c.fillStyle=g;c.beginPath();c.moveTo(cx-w,bot);c.lineTo(cx-w*1.04,yT+hgt*.12);c.lineTo(cx-w*.55,yT);c.lineTo(cx+w*.3,yT-hgt*.03);c.lineTo(cx+w*1.02,yT+hgt*.1);c.lineTo(cx+w,bot);c.closePath();c.fill();
+    c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=2.5;c.stroke();
+    c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1.5;c.beginPath();c.moveTo(cx-w*.55,yT);c.lineTo(cx-w*.35,bot);c.moveTo(cx+w*.3,yT-hgt*.03);c.lineTo(cx+w*.45,bot);c.moveTo(cx-w*1.04,yT+hgt*.12);c.lineTo(cx+w*1.02,yT+hgt*.1);c.stroke();
+    c.globalCompositeOperation='lighter';c.fillStyle='rgba(255,255,255,.35)';c.beginPath();c.moveTo(cx-w*.8,yT+hgt*.18);c.lineTo(cx-w*.62,yT+hgt*.12);c.lineTo(cx-w*.5,bot-hgt*.1);c.lineTo(cx-w*.7,bot-hgt*.05);c.fill();
+    c.restore()}
+   if(Math.random()<.5)game.fx.push({kind:'pp',sh:'flake',x:f.x+R(-60,60),y:400+f.y-R(20,260),vx:R(-20,20),vy:R(-30,10),r:R(4,8),rot:R(0,6),vr:R(-3,3),life:.5,t:0,_n:1});return r}
+  f._poisonT-=dt;c.save();c.filter='sepia(.55) hue-rotate(45deg) saturate(1.7) brightness(.92)';try{r=_dF5.apply(this,arguments)}finally{c.restore()}
+  if(Math.random()<.35)game.fx.push({kind:'pp',sh:'drop',x:f.x+R(-50,50),y:400+f.y-R(60,240),vx:R(-30,30),vy:R(-60,-10),g:300,r:R(3,5),life:.6,color:Math.random()<.5?'#a8ff4a':'#5fd22a',glow:1,t:0,_n:1});
+  return r}}
 })();
