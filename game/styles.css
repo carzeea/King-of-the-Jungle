@@ -850,3 +850,22 @@ html.pad-nav button:focus,html.pad-nav input:focus,html.pad-nav .padfocus{outlin
 #fighter-loading i{width:min(320px,60vw);height:4px;border-radius:2px;background:linear-gradient(90deg,transparent,#e9b44c,transparent);background-size:50% 100%;background-repeat:no-repeat;animation:flBar 1.1s linear infinite}
 @keyframes flPulse{50%{transform:scale(1.08);filter:drop-shadow(0 0 14px rgba(255,190,70,.8))}}
 @keyframes flBar{from{background-position:-50% 0}to{background-position:150% 0}}
+/* result / win screen on sideways phones: art on the left, words and buttons on the right, all on one screen */
+@media (orientation:landscape) and (max-height:560px){
+ #result.result-screen:not(.hidden){display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-auto-rows:min-content;column-gap:clamp(14px,3vw,34px);row-gap:4px;align-content:center;align-items:center;min-height:100dvh;padding:10px max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))!important;box-sizing:border-box;text-align:center}
+ #result .winner-art{grid-column:1;grid-row:1/span 12;width:auto!important;height:min(76dvh,330px);margin:18px 0 0!important;align-self:center}
+ #result>*:not(.winner-art){grid-column:2;margin-top:0!important;margin-bottom:0!important}
+ #result h2{font-size:clamp(30px,5.4vw,46px)!important}
+ #result .eyebrow,#result #winner-copy{font-size:11px!important}
+ #result .tower-ladder{transform:scale(.8);transform-origin:50% 50%}
+ #result .result-achievements{max-height:32dvh;overflow:auto;font-size:11px}
+ #result>button{justify-self:center;padding:8px 18px!important;min-width:180px}
+}
+@media (orientation:landscape) and (max-height:560px){
+ #result .winner-art{position:sticky;top:8px}
+ #result h2{font-size:clamp(26px,4.6vw,40px)!important;line-height:1}
+ #result .tower-ladder{transform:none;zoom:.62;margin:2px 0!important}
+ #result .result-achievements{max-width:100%;box-sizing:border-box;max-height:24dvh;zoom:.8}
+ #result>button{padding:6px 16px!important;font-size:13px!important;min-width:160px}
+ #result .winner-crown{width:34%!important}
+}

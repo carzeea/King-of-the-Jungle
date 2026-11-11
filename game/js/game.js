@@ -25,7 +25,7 @@ const DOJO_SIGNATURE_TRIALS={
 };
 // Online play state (see js/net.js). side 0 = host = Player 1, side 1 = guest = Player 2.
 const ON={side:0,mine:null,theirs:null,inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1,code:''};
-const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=7.0';
+const portrait=id=>'assets/characters/portraits/'+id+'.jpg?v=11.0';
 let mode='versus',step=1,picks=[roster[6],roster[1]],chosen=picks[0],game=null,raf=0,paused=false,last=0,time=99;
 let tower=null;
 const cam={x:0,y:0,z:1,snap:true};
@@ -3002,4 +3002,19 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
   if(top<1e9){const m0=c.getTransform();const sc=m0.d||1;// world y = (device y - camera offset)/scale
    f._top=(top-m0.f)/sc}
   return r}}
+
+// MAJIC feels alive: heavy breathing and a slow menacing sway when standing, a weighty stride bob and lean when walking,
+// and ground-shaking footfalls. Visual only — hitboxes, damage and timing are unchanged.
+{const _dF4=drawFighter;drawFighter=function(f,i,ghost){
+  if(!f||!f.data||f.data.id!=='majic'||!game||f.hp<=0&&game.ko)return _dF4.apply(this,arguments);
+  const t=performance.now()/1000,fx=f.x,fy=400+f.y,act=f.action;let sx=1,sy=1,rot=0,dy=0;
+  if(act==='idle'||act==='breathing'){const b=Math.sin(t*2.1);sy=1+b*.022;sx=1-b*.010;rot=Math.sin(t*1.05)*.016*f.dir;dy=-Math.max(0,b)*3}
+  else if(act==='walk'){const ph=(f.walk||0)*3.2*Math.PI/4,step=Math.abs(Math.sin(ph));dy=-step*9;sy=1+(step-.5)*.02;
+   const fwd=Math.sign(f.move||0)===f.dir;rot=(fwd?.035:-.025)*f.dir+Math.sin(ph)*.012;
+   if(!ghost&&f.ground){const k=Math.floor(((f.walk||0)*3.2)/4);if(k!==f._mjStep){f._mjStep=k;game.shake=Math.max(game.shake||0,.06);
+    for(let n=0;n<5;n++)game.fx.push({kind:'pp',sh:'puff',x:fx+(Math.random()-.5)*120,y:398,vx:(Math.random()-.5)*60,vy:-20-Math.random()*25,r:10+Math.random()*10,grow:50,life:.45,color:'#a88c6e',alpha:.4,_n:1,t:0})}}}
+  else if(act==='block'){rot=-.03*f.dir;sy=.985}
+  if(sx===1&&sy===1&&!rot&&!dy)return _dF4.apply(this,arguments);
+  c.save();c.translate(fx,fy+dy);c.rotate(rot);c.scale(sx,sy);c.translate(-fx,-fy);
+  try{return _dF4.apply(this,arguments)}finally{c.restore()}}}
 })();
