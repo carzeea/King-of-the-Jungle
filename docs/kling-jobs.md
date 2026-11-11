@@ -106,3 +106,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AfNksBvU1TBG55Khkd5fCfGWW6u5Qr0Iezvtga-t0a9DkTRSBFnjdO3hblxJPGYfyj2V0_Q2
 - victory Aan3wZCzB1m30-dbAd9iEneiZK__gIv_sKNzcvD9c3Qj0SCRPR8RUIbK22WDpGm-a0wrAW5h
 - block AYHT95EFFy3_O3fKId-Ip2WFu-H3WT-ezHf7g-0OnwJCjvhqvyg_Zuedkd-6zOXGOFVEguBo
+
+## Badger (side view) — auto_fighter.py
+- idle AfwHIxUFCRj_FY_UZkBXMx85wm_Qk-MmpysrMbD5euAfrAbQo7-iJHQtm3zifoaWqx9Cgpvv
+- walk ARmPtHUm8CMM4WTrUrgj0q5HzOkr_Hemv7cvqS3R-tsw8TM1P_n2YGn_MZT8_22Mm0iaemkL
+- light AcEcUt82r45IQ9_dnfCi6HjirVP4c8O9Ehs6UEGnD3r9Mr58ZSTNoya321sTXGfAlfLaklGJ
+- heavy AZyuNZZchit8952VGyLmDiErdvTdcYlm_zPm9dZ-u5EuL0BvqqRLkHN-hOTDl1-Q-W43y6Ls
+- jump AYpeZmBejY2AG08QImA-nYuOReIFdNzhMO3iKsChfSQR4PuJwD3vj40cawIsrRJ4hAqjwNCL
+- special AZfCQaGm9MfAP8ceWnYKjQANlRLv7L2ie5SbaKAgYi2B8qqxScchiOOmzE44xziIwG3aMX3D
+- hit AW-GK8nFJJKyI5TMAKIxQhf4T1O9lZUcFZaUH9MQjVEAfHo4F5FG7dyXezj2bbCGlJJrQBON
+- knock ATc_NqdFak35MuN20crj2UcXho4F0zBxk9erAr4bCsljJXBWaHPwRy9EeU00eZW5B7Nd3FJr
+- victory AWa4714k1WHitxOd-9SCZpZaTC5NFU-pvbMyMaqdyZ67L2q35ElTAxr2D3btTP18zrBiT3Fm
+- block AT-pLJMdiFqAyzvHupWc2uaIJ7b7yFKuikK95j3dP15SWlQZkuC2DDhp-XqDY6A6jv4_Bahq
