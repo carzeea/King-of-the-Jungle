@@ -3706,4 +3706,58 @@ sxOptsInstall();sxTouchInstall();
   if(id==='leopard'&&Math.random()<rate)P({kind:'pp',sh:'flake',cx:f.x,cy:400+f.y-140,ang:R(0,6.28),rad:R(50,110),av:R(3,5)*(Math.random()<.5?1:-1),rise:-25,rot:R(0,6),vr:R(-3,3),r:R(5,9),life:R(.5,.8),orbit:1});
   if(id==='stag'&&Math.random()<rate)P({kind:'pp',sh:'leaf',x:f.x-f.dir*R(20,80),y:398-R(0,40),vx:-f.dir*R(40,140),vy:R(-260,-120),g:420,drag:.97,rot:R(0,6),vr:R(-8,8),r:R(10,16),life:R(.7,1.1),color:['#5ea83a','#9fd86a','#d8b03a'][Math.floor(R(0,3))]})}
  return r}}
+
+/* ================= DEVICE PICKER + DOJO MOVE GUIDE =================
+   Asks what the player is using (phone/tablet, keyboard, Xbox, PlayStation, Switch), remembers it,
+   and shows every available fighter's moves written for that device in the Dojo (and the pause-menu move list). */
+const DEV_LIST=[['touch','PHONE / TABLET','Touch screen','📱'],['keyboard','KEYBOARD','Computer keys','⌨️'],['xbox','XBOX CONTROLLER','Or most PC pads','🎮'],['ps','PLAYSTATION CONTROLLER','PS4 / PS5','🎮'],['switch','SWITCH CONTROLLER','Pro Controller / Joy-Con','🎮']];
+const DEV_NAME=Object.fromEntries(DEV_LIST.map(d=>[d[0],d[1]]));
+let DEVICE=null;try{DEVICE=localStorage.getItem('kotj-device')}catch(_){}
+function devGuess(){const pads=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);
+ if(pads.length){const id=(pads[0].id||'').toLowerCase();if(/057e|nintendo|switch|pro controller|joy-con/.test(id))return'switch';return padKind(pads[0])}
+ return isTouch()?'touch':'keyboard'}
+function devNow(){return DEVICE||devGuess()}
+const DEV_BTN={keyboard:{at:'F',sp:'G',j:'W',bl:'S',ins:'H',pause:'ESC',mv:'A / D'},xbox:{at:'X',sp:'Y',j:'A',bl:'B',ins:'RB',pause:'MENU',mv:'STICK / D-PAD'},ps:{at:'□',sp:'△',j:'✕',bl:'○',ins:'R1',pause:'OPTIONS',mv:'STICK / D-PAD'},switch:{at:'Y',sp:'X',j:'B',bl:'A',ins:'R',pause:'+',mv:'STICK / D-PAD'},touch:{at:'ATK',sp:'SPC',j:'▲',bl:'BLOCK',ins:'INS',pause:'PAUSE',mv:'◀ ▶'}};
+const DEV_SEQ={'236':[2,3,6],'214':[2,1,4],'46':[4,6],'623':[6,2,3],'41236':[4,1,2,3,6],'63214':[6,3,2,1,4]};
+const ARROW={1:'↙',2:'↓',3:'↘',4:'←',6:'→'},KEYK={1:'S+A',2:'S',3:'S+D',4:'A',6:'D'};
+function devHow(code,dev,name){const B=DEV_BTN[dev];
+ if(dev==='touch')return code==='U'?`Fill the meter · tap <b>★</b> then <b>★ ${name}</b>`:`Tap <b>★</b> then <b>${name}</b>`;
+ if(code==='U')return dev==='keyboard'?`Full meter · <b>S</b>, let go, <b>S</b> + <b>${B.sp}</b>`:`Full meter · <b>↓</b>, let go, <b>↓</b> + <b>${B.sp}</b>`;
+ const mo=code.slice(0,-1),btn=code.slice(-1)==='A'?B.at:B.sp,seq=DEV_SEQ[mo]||[];
+ return dev==='keyboard'?seq.map(n=>`<b>${KEYK[n]}</b>`).join(' → ')+` then <b>${btn}</b>`:seq.map(n=>`<b>${ARROW[n]}</b>`).join(' ')+` + <b>${btn}</b>`}
+function devBasics(dev){const B=DEV_BTN[dev];
+ return [['MOVE',B.mv],['JUMP',B.j],['BLOCK',B.bl],['ATTACK',B.at],['SPECIAL',B.sp],['INSTINCT',B.ins],['PAUSE',B.pause]].map(([a,b])=>`<span><i>${a}</i><b>${b}</b></span>`).join('')}
+// ---- the "what are you playing on?" question ----
+function devAsk(after){let el=document.getElementById('dev-ask');if(!el){el=document.createElement('div');el.id='dev-ask';el.className='dev-ask';document.body.appendChild(el)}
+ const g=devGuess();
+ el.innerHTML=`<div class="dev-card"><h3>WHAT ARE YOU PLAYING ON?</h3><p>We'll show every fighter's moves with the buttons on your device.</p><div class="dev-opts">${DEV_LIST.map(([k,n,s,ic])=>`<button class="dev-opt${k===(DEVICE||g)?' sel':''}" data-dev="${k}"><em>${ic}</em><b>${n}</b><small>${s}${k===g&&!DEVICE?' · detected':''}</small></button>`).join('')}</div></div>`;
+ el.querySelectorAll('.dev-opt').forEach(b=>b.onclick=()=>{ac();DEVICE=b.dataset.dev;try{localStorage.setItem('kotj-device',DEVICE)}catch(_){}el.classList.remove('on');devRefresh();after&&after()});
+ el.classList.add('on');setTimeout(()=>{const s=el.querySelector('.dev-opt.sel')||el.querySelector('.dev-opt');s&&s.focus()},50)}
+// ---- Dojo: device line + full move guide for every fighter the player has ----
+let devPick=null;
+function devDojo(){const d=$('dojo');if(!d)return;let box=$('dojo-moves');
+ if(!box){box=document.createElement('div');box.id='dojo-moves';box.className='dojo-moves';const act=d.querySelector('.dojo-actions');d.insertBefore(box,act)}
+ const dev=devNow(),list=roster.filter(r=>SX[r.id]);if(!devPick||!list.find(r=>r.id===devPick))devPick=list[0]&&list[0].id;const D=SX[devPick],F=list.find(r=>r.id===devPick)||{name:''};
+ const ctl=d.querySelector('.dojo-controls');if(ctl)ctl.innerHTML=`<strong>YOUR CONTROLS · ${DEV_NAME[dev]}</strong><span class="dev-basics">${devBasics(dev)}</span>`;
+ box.innerHTML=`<div class="dm-head"><b>MOVE GUIDE</b><button class="secondary dm-dev">PLAYING ON: ${DEV_NAME[dev]} ▸ CHANGE</button></div>
+  <div class="dm-fighters">${list.map(r=>`<button class="dm-f${r.id===devPick?' sel':''}" data-f="${r.id}"><img src="${portrait(r.id)}" alt=""><span>${r.name}</span></button>`).join('')}</div>
+  ${D?`<div class="dm-list"><h4>${F.name}</h4>${D.m.map((m,i)=>`<div class="dm-row"><div><b>${m.n}</b><i>${m.d||''}</i></div><div class="dm-how">${devHow(SX_IN[i],dev,m.n)}</div></div>`).join('')}
+   <div class="dm-row dm-ult"><div><b>ULTIMATE · ${D.u.n}</b><i>Cinematic finisher · costs the whole meter · can be blocked</i></div><div class="dm-how">${devHow('U',dev,D.u.n)}</div></div></div>`:''}
+  ${dev!=='touch'?'<p class="dm-note">Arrows are shown with your fighter facing right — swap ← and → when you face left. Moves still come out with a slightly loose input.</p>':'<p class="dm-note">The ★ button sits next to INS / SPC / ATK during a fight. The ultimate button lights up when your meter is full.</p>'}`;
+ box.querySelector('.dm-dev').onclick=()=>devAsk(devDojo);
+ box.querySelectorAll('.dm-f').forEach(b=>b.onclick=()=>{devPick=b.dataset.f;devDojo()})}
+function devRefresh(){devDojo();try{updateGuide()}catch(_){}}
+// pause-menu / select-screen move list follows the chosen device too
+{const _ml=sxMoveList;sxMoveList=function(id){_ml(id);const el=document.getElementById('sx-movelist');if(!el)return;const dev=devNow(),D=SX[id];if(!D)return;
+ el.querySelectorAll('.sx-ml-card li').forEach((li,i)=>{const s=li.querySelector('.in');if(s)s.innerHTML=devHow(SX_IN[i],dev,D.m[i].n)});
+ const u=el.querySelector('.sx-ult .in');if(u)u.innerHTML=devHow('U',dev,D.u.n);
+ const tip=el.querySelector('.sx-tip');if(tip)tip.innerHTML=`Shown for <b>${DEV_NAME[dev]}</b> · <a href="#" class="dm-chg">change device</a>`;
+ const a=el.querySelector('.dm-chg');if(a)a.onclick=e=>{e.preventDefault();devAsk(()=>sxMoveList(id))}}}
+// first visit to the Dojo asks; afterwards it just shows the guide
+{const ob=$('open-dojo');if(ob){const prev=ob.onclick;ob.onclick=e=>{prev&&prev(e);devDojo();if(!DEVICE)devAsk(devDojo)}}}
+// a newly plugged-in controller offers to switch the guide
+addEventListener('gamepadconnected',()=>{if(DEVICE&&DEVICE!=='xbox'&&DEVICE!=='ps'&&DEVICE!=='switch'&&!game&&!$('dojo').classList.contains('hidden'))devAsk(devDojo)});
+// device choice in Options too
+{const so=$('sel-opts');if(so&&!so.querySelector('.dev-btn')){const b=document.createElement('button');b.className='secondary dev-btn';b.textContent='DEVICE / CONTROLS';so.insertBefore(b,$('so-close'));b.onclick=()=>devAsk()}}
+window.KOTJ_DEVICE={ask:devAsk,get:devNow};
 })();
