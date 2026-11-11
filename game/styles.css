@@ -833,3 +833,13 @@ html.kotj-touch.kotj-portrait body{overflow:hidden}
  #select.v2sel .fighter-tile strong,#select.v2sel .fighter-tile .tf strong{font-size:min(10px,1.45vw)!important}
  #select.v2sel .fighter-tile strong.long{font-size:min(8px,1.15vw)!important}
 }
+/* iPhone full-screen tip */
+#ios-tip{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:99999;display:flex;align-items:center;gap:10px;max-width:min(92vw,560px);padding:10px 40px 10px 14px;background:rgba(14,9,6,.94);border:1px solid #e9b44c;border-radius:10px;box-shadow:0 10px 30px #000a;color:#f3e6c6;font:600 12px/1.35 Inter,sans-serif;transition:transform .35s}
+#ios-tip.on{transform:translate(-50%,0)}
+#ios-tip b{color:#ffd36b;font:900 13px 'Barlow Condensed',Inter,sans-serif;letter-spacing:.1em;white-space:nowrap}
+#ios-tip i{font-style:normal;color:#ffd36b;font-weight:800}
+#ios-tip button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:14px;background:none;border:1px solid rgba(233,180,76,.5);color:#ffd36b;clip-path:none}
+/* controller focus: the highlighted button is obvious from the couch */
+html.pad-nav button:focus,html.pad-nav input:focus,html.pad-nav .padfocus{outline:3px solid #ffd36b!important;outline-offset:2px;box-shadow:0 0 0 2px #000,0 0 18px 4px rgba(255,190,70,.75)!important;position:relative;z-index:3}
+#fs-tip{position:fixed;left:50%;bottom:18px;transform:translate(-50%,160%);z-index:99998;padding:9px 18px;background:rgba(14,9,6,.92);border:1px solid #e9b44c;border-radius:20px;color:#ffd36b;font:800 12px Inter,sans-serif;letter-spacing:.14em;transition:transform .35s;pointer-events:none}
+#fs-tip.on{transform:translate(-50%,0)}

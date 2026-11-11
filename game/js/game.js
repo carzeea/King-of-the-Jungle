@@ -295,10 +295,17 @@ pad.querySelectorAll('button').forEach(b=>{const k=b.dataset.k;
  b.addEventListener('contextmenu',e=>e.preventDefault());});
 window.addEventListener('touchstart',()=>{if(game)pad.classList.remove('hidden')},{passive:true});
 let padPrev=[{},{}];
-function readPad(n){
- const list=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const g=list[n];if(!g)return null;
+function padState(g){
  const B=i=>!!(g.buttons[i]&&g.buttons[i].pressed),ax=g.axes[0]||0,ay=g.axes[1]||0;
- return{up:B(12)||ay<-.6,dn:B(13)||ay>.6,l:B(14)||ax<-.45,r:B(15)||ax>.45,j:B(0)||B(12)||ay<-.7,bl:B(1)||B(6)||B(4)||B(13)||ay>.7,at:B(2),sp:B(3),ins:B(5)||B(7),start:B(9),back:B(1),a:B(0)};
+ return{up:B(12)||ay<-.6,dn:B(13)||ay>.6,l:B(14)||ax<-.45,r:B(15)||ax>.45,j:B(0)||B(12)||ay<-.7,bl:B(1)||B(6)||B(4)||B(13)||ay>.7,at:B(2),sp:B(3),ins:B(5)||B(7),start:B(9)||B(8),back:B(1),a:B(0)};
+}
+// any connected controller (menus, and P1 whenever only one person is playing)
+function readPadAny(){const list=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);if(!list.length)return null;
+ const o={};for(const g of list){const s=padState(g);for(const k in s)o[k]=o[k]||s[k]}return o}
+function readPad(n){
+ if(n===0&&mode!=='versus')return readPadAny();
+ const list=[...(navigator.getGamepads?navigator.getGamepads():[])].filter(Boolean);const g=list[n];if(!g)return null;
+ return padState(g);
 }
 function inputFor(i){
  const m=KEYS[i],k={};
@@ -307,7 +314,8 @@ function inputFor(i){
  const g=readPad(i);if(g){for(const n in k)k[n]=k[n]||g[n];if(g.start&&!padPrev[i].start)togglePause();padPrev[i]=g}
  return k;
 }
-let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;const p=menuPrev;menuPrev=g;
+let menuPrev={};setInterval(()=>{if(game)return;const g=readPadAny();if(!g)return;const p=menuPrev;menuPrev=g;
+ if(Object.keys(g).some(k=>g[k]&&!p[k]))document.documentElement.classList.add('pad-nav');
  const vis=screens.find(s=>!$(s).classList.contains('hidden'));
  if(vis==='menu'){const m=$('menu');
   if(!m.classList.contains('started')){if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))window.__startCover()}
@@ -315,13 +323,12 @@ let menuPrev={};setInterval(()=>{if(game)return;const g=readPad(0);if(!g)return;
    if((g.l&&!p.l)||(g.up&&!p.up))bs[(i-1+bs.length)%bs.length].focus();
    if((g.r&&!p.r)||(g.dn&&!p.dn))bs[(i+1)%bs.length].focus();
    if((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start))(document.activeElement&&bs.includes(document.activeElement)?document.activeElement:bs[0]).click()}}
- if(vis==='select'){if(g.r&&!p.r)selMove(1,0);if(g.l&&!p.l)selMove(-1,0);if(g.dn&&!p.dn)selMove(0,1);if(g.up&&!p.up)selMove(0,-1);
+ if(vis==='select'&&selOptsOpen()){if(g.start&&!p.start)selOpts(false)}
+ else if(vis==='select'){if(g.r&&!p.r)selMove(1,0);if(g.l&&!p.l)selMove(-1,0);if(g.dn&&!p.dn)selMove(0,1);if(g.up&&!p.up)selMove(0,-1);
   if(g.start&&!p.start)selOpts();else if((g.a&&!p.a)||(g.at&&!p.at)){if(selOptsOpen())selOpts(false);else $('confirm-fighter').click()}if(g.back&&!p.back){if(selOptsOpen())selOpts(false);else selectBack()}if(g.sp&&!p.sp)randomPick()}
  if(vis==='stage'){let n=stagePick;const N=RND()+1;if(g.r&&!p.r)n=(n+1)%N;if(g.l&&!p.l)n=(n+N-1)%N;if(g.dn&&!p.dn)n=Math.min(N-1,n+3);if(g.up&&!p.up)n=Math.max(0,n-3);if(n!==stagePick){stagePick=n;renderStages()}if((g.at&&!p.at)||(g.start&&!p.start))$('stage-go').click();if(g.bl&&!p.bl)$('stage-back').click()}
- if(vis==='online'&&g.back&&!p.back)$('ol-back').click();
  if(vis==='story'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('story-next').click();
  if(vis==='champion'&&((g.j&&!p.j)||(g.at&&!p.at)||(g.start&&!p.start)))$('champ-continue').click();
- if(vis==='result'&&g.j&&!p.j)(!$('tower-next').classList.contains('hidden')?$('tower-next'):$('rematch')).click();
 },60);
 
 /* ---------- CPU ---------- */
@@ -2937,4 +2944,33 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
    c.restore()}
  }}
 
+
+/* ---------- V2 controllers on every screen: D-pad/stick moves the highlight, A/✕ presses it, B/○ goes back ---------- */
+{let gp={},held=0,pausedSince=0;
+ addEventListener('mousemove',()=>document.documentElement.classList.remove('pad-nav'));addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.isTrusted)document.documentElement.classList.remove('pad-nav')});
+ const vis=()=>screens.find(s=>!$(s).classList.contains('hidden'));
+ const usable=root=>[...root.querySelectorAll('button,input:not([type=hidden]),select,a[href]')].filter(b=>b.offsetParent&&!b.disabled&&getComputedStyle(b).visibility!=='hidden');
+ function step(bs,cur,dx,dy){if(!cur)return bs[0];const a=cur.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;let best=null,bd=1e9;
+  for(const b of bs){if(b===cur)continue;const r=b.getBoundingClientRect(),x=r.left+r.width/2-ax,y=r.top+r.height/2-ay;
+   const along=dx?x*dx:y*dy,side=dx?Math.abs(y):Math.abs(x);if(along<=4)continue;const sc=along+side*2.2;if(sc<bd){bd=sc;best=b}}
+  if(best)return best;const i=bs.indexOf(cur);return (dx>0||dy>0)?bs[(i+1)%bs.length]:bs[(i-1+bs.length)%bs.length]}
+ setInterval(()=>{const g=readPadAny();if(!g){gp={};return}const p=gp;gp=g;const e=n=>g[n]&&!p[n];
+  const dirs=['l','r','up','dn'];const anyDir=dirs.some(n=>g[n]);held=anyDir?held+1:0;const rep=held>8&&held%3===0;const pr=n=>e(n)||(rep&&g[n]);
+  let root=null,back=null;const v=vis();
+  if(game){if(!paused){pausedSince=0;return}if(!pausedSince)pausedSince=performance.now();if(performance.now()-pausedSince<300)return;root=document.querySelector('.fight-actions');back=$('pause');if(e('start')){togglePause();return}}
+  else if(v==='select'&&selOptsOpen()){root=$('sel-opts');back=$('so-close')}
+  else if(v==='dojo'){root=$('dojo');back=$('dojo-back')}
+  else if(v==='achievement-gallery'){root=$('achievement-gallery');back=$('achievement-gallery-back')}
+  else if(v==='online'){root=$('online');back=$('ol-back')}
+  else if(v==='result'){root=$('result');back=$('result-menu')}
+  else if(v==='menu'&&$('menu').classList.contains('started')&&e('back')){const bs=[...document.querySelectorAll('.cover-menu button')].filter(b=>b.offsetParent);if(bs[0])bs[0].focus();return}
+  else return;
+  if(!root)return;const bs=usable(root);if(!bs.length)return;
+  if(Object.keys(g).some(k=>e(k)))document.documentElement.classList.add('pad-nav');
+  let cur=bs.includes(document.activeElement)?document.activeElement:null;
+  if(!cur&&(pr('l')||pr('r')||pr('up')||pr('dn'))){bs[0].focus();return}
+  if(pr('l'))step(bs,cur,-1,0).focus();else if(pr('r'))step(bs,cur,1,0).focus();else if(pr('up'))step(bs,cur,0,-1).focus();else if(pr('dn'))step(bs,cur,0,1).focus();
+  if(e('a')){const t=cur||(v==='result'?(!$('tower-next').classList.contains('hidden')?$('tower-next'):$('rematch')):bs[0]);if(t&&t.tagName!=='INPUT')t.click();else if(t)t.focus()}
+  else if(e('back')&&back&&back.offsetParent){back.click()}
+ },60)}
 })();
