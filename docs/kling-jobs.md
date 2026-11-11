@@ -118,3 +118,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock ATc_NqdFak35MuN20crj2UcXho4F0zBxk9erAr4bCsljJXBWaHPwRy9EeU00eZW5B7Nd3FJr
 - victory AWa4714k1WHitxOd-9SCZpZaTC5NFU-pvbMyMaqdyZ67L2q35ElTAxr2D3btTP18zrBiT3Fm
 - block AT-pLJMdiFqAyzvHupWc2uaIJ7b7yFKuikK95j3dP15SWlQZkuC2DDhp-XqDY6A6jv4_Bahq
+
+## Hyena (side view) — auto_fighter.py
+- idle AREklDo2_k0yWYfSwjlDhDvHvyMC_CM5mVaCms74TaC0Usft91ogrcmvRiiuSWY4upgKdnPT
+- walk AaDvHGK7xbMtEb6IXZlAY0HYHavrU5_RhYktdQh5EnFVdAkjehpnaWyyl-c7Xi2csJAfcwHq
+- light AZWa21O-IbnHFbTc9EwM_1GyuIpuk29NX4f5UxfKQzX0MqBcoombyjoDqrFpVotI-neyc_QX
+- heavy AcAoLP2seA-lbX8GZNq-vFWgwHkQ4WbVxMMfmjRdUcWo78jgz_QTeIQYP0ct5Mv3o4xOjsf5
+- jump AW_9cJXIQG0Ymz-7fI-zjldxYI1-evzyJpPCKpgLVdyJPKbFTrCzDn8AYB4CnXWMs4mwQrl7
+- special ATrUBVQC3EAOshs6Wz-ApI2GW_5vqKGyzZUib7qpFcNkoIMUXPK1bUj4cy6AekI2CByu2wkg
+- hit AeAATLiCW0Xgcmi3KUMhsqKlgAs2W27c0uKxHP0tB1kGtVN0S6iiogC5Cf6qMs7mIEY-Uwr7
+- knock ARhVj30I5LyrpBZDscGMSD15WY_2_kdkjLNcJLjnijlWbtZSGTRVP9s2vZjdXggs_g3wLsPs
+- victory AdBg4FwGZO35pQNjpt8dcbx_sckbA4FpzYpWF2_62U1xvQVkb-dHmNG1IYD6LuwlC3IFgiGt
+- block ATzVgZ_qXbyeDTvBBWArqxFiKWepE6HMQEpRQkdKSTSiHexxzdO4OUy2iJpYSmHLd6mxug9J
