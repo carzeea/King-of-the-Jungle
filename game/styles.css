@@ -912,3 +912,21 @@ html.kotj-touch #select.v2sel .select-hints .hint:first-child b{background:#2a15
 .hud-spirit img{position:relative;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 10px var(--sp))}
 .hud-spirit.on{animation:hudSpirit 1.25s cubic-bezier(.2,1.3,.4,1) both}
 @keyframes hudSpirit{0%{opacity:0;transform:scale(.55) translateY(-6px)}14%{opacity:1;transform:scale(1.08)}24%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.92) translateY(-4px)}}
+
+/* Special moves 2.0: move list, touch ★ panel */
+.sx-movelist{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(4,3,8,.72);backdrop-filter:blur(3px)}
+.sx-movelist.on{display:flex}
+.sx-ml-card{width:min(720px,94vw);max-height:90vh;overflow:auto;background:linear-gradient(#1b1410,#0d0a08);border:2px solid #c9a24a;border-radius:14px;padding:18px 20px;color:#f4e6c4;font-family:"Barlow Condensed",sans-serif;box-shadow:0 12px 50px rgba(0,0,0,.6)}
+.sx-ml-card h3{margin:0 0 10px;font-size:26px;letter-spacing:.06em;color:#ffd36b}
+.sx-ml-card ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.sx-ml-card li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;border-left:3px solid #c9a24a}
+.sx-ml-card li b{font-size:19px;letter-spacing:.04em}.sx-ml-card .in{font-weight:700;color:#9fe0ff;white-space:nowrap}
+.sx-ml-card li i{grid-column:1/-1;font-style:normal;opacity:.75;font-size:15px}
+.sx-ult{margin-top:12px;padding:10px;border-radius:8px;background:linear-gradient(90deg,rgba(255,90,216,.18),rgba(255,211,107,.12));display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:19px}
+.sx-tip{opacity:.7;font-size:14px;margin:10px 0}
+.sx-close{width:100%}
+.touch-pad .sx-star{background:radial-gradient(circle,#ffe7a0,#c98a1c);color:#3a2200;font-size:22px}
+.sx-panel{position:absolute;right:8px;bottom:calc(100% + 6px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(360px,72vw);pointer-events:auto;z-index:40}
+.sx-panel.hidden{display:none}
+.sx-panel button{padding:9px 6px;border-radius:10px;border:1px solid rgba(255,211,107,.6);background:rgba(20,14,8,.86);color:#ffe7b0;font:700 13px "Barlow Condensed",sans-serif;letter-spacing:.04em}
+.sx-panel .sx-u{grid-column:1/-1;opacity:.55}.sx-panel .sx-u.ready{opacity:1;background:linear-gradient(90deg,#7a1f6a,#c98a1c);color:#fff}

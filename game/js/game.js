@@ -533,7 +533,8 @@ function update(dt){
   f.wasAttack=inp.at;f.wasSpecial=inp.sp;f.wasIns=inp.ins;
   // Input buffer: a press up to 0.15 s early still comes out at the first legal moment.
   f.bufA=rawAtk?.15:Math.max(0,(f.bufA||0)-dt);f.bufS=rawSp?.15:Math.max(0,(f.bufS||0)-dt);
-  const atkEdge=f.bufA>0,spEdge=f.bufS>0;
+  let atkEdge=f.bufA>0,spEdge=f.bufS>0;
+  if(sxInput(f,o,inp,atkEdge,spEdge,dt,frozen)){atkEdge=false;spEdge=false;f.bufA=0;f.bufS=0}
   const elephantGrab=f.data.id==='elephant'&&(inp.dn||inp.bl)&&atkEdge&&f.ground;
   const elephantStomp=f.data.id==='elephant'&&(inp.dn||inp.bl)&&spEdge&&f.ground;
   const elephantCharge=f.data.id==='elephant'&&spEdge&&f.ground&&((inp.r&&f.dir===1)||(inp.l&&f.dir===-1));
@@ -841,7 +842,7 @@ function resolveHit(i,mv){
  const big=Math.max(0,bodyFront(o)-90); // big opponents (Elephant, Hippo, MAJIC) are reached at their front edge
  if(mv.jaguarBite&&d>245+big)return;
  if(mv.grab&&Math.abs(f.x-o.x)>255+big)return;
- if(mv.lionRoar){if(!(d<=440&&Math.abs(f.y-o.y)<145))return;}
+ if(mv.sx){if(!sxReach(f,o,mv,d,big,facing))return;}else if(mv.lionRoar){if(!(d<=440&&Math.abs(f.y-o.y)<145))return;}
  else if(mv.eagleSkyfall){if(!(d<=365&&Math.abs(f.y-o.y)<230&&facing))return;}
  else if(!(d<=hitDist(f,o,anim,mv.shadow?40:0)&&Math.abs(f.y-o.y)<130&&facing))return;
  // where the strike lands: the defender's front edge, at the height of the fist/claw/jaws
@@ -911,7 +912,7 @@ function resolveHit(i,mv){
   game.shake=Math.max(game.shake,.32);game.flash=Math.max(game.flash||0,.045);sfx('heavy');
  }
  // Blocked: openers are stopped cold (specials chip a little).
- if(o.block&&o.ground&&!comboing){
+ if(o.block&&o.ground&&!comboing&&!(mv.sx&&mv.sx.grab)){
   const majicBoss=o.data.id==='majic'&&o.ai&&tower&&tower.boss,phase=majicBoss?(o.bossPhase||1):0;
   if(mv===MOVES.special||mv.shadow){const chip=phase===1?0:(mv.shadow?1:2);if(chip)o.hp=Math.max(1,o.hp-chip)}
   if(f.data.id==='majic'&&f.ai&&tower&&tower.boss&&(f.bossPhase||1)>=3&&mv.majicEclipse){f.hp=Math.max(1,f.hp-7);f.stun=Math.max(f.stun,.72);f.attack=0;f.move_=null;f.vx=-f.dir*205;o.meter=Math.min(100,o.meter+14);game.fx.push({x:f.x,y:f.y-150,t:0,life:.72,color:'#e8d8ff',kind:'ring'});spark(f.x,f.y-150,'#e8d8ff',28);floatText(o.x,o.y-285,'VOID REBOUND','#baf6ff');banner('VOID REBOUND','THE TITAN’S ECLIPSE IS TURNED AGAINST HIM',.95,'#baf6ff');game.shake=Math.max(game.shake,.38);game.flash=Math.max(game.flash||0,.16);sfx('frostCrack');hud();return}
@@ -1689,7 +1690,7 @@ const SPRITES={
  eagle:{s:0.6,anims:{"idle":[76,156,149,113,247],"walk_forward":[34,150,156,97,259],"walk_back":[34,150,156,97,259],"run":[34,150,156,97,259],"crouch":[6,204,144,179,237],"block":[17,157,157,119,259],"attack_light":[20,192,157,176,259],"bite":[40,196,160,179,266],"special_pounce":[60,293,161,193,266,54],"special_b":[70,289,160,193,266,55],"ultra_move":[70,289,160,193,266,55],"attack_heavy":[48,183,152,160,251],"uppercut":[48,183,152,160,251],"victory":[55,286,160,193,266],"jump":[21,265,161,193,266],"hit_light":[18,254,161,193,266],"hit_heavy":[18,254,161,193,266],"knockdown":[42,293,161,193,266],"knockdown_getup":[25,213,153,193,252],"defeat":[42,293,161,193,266],"finisher":[61,293,161,193,266,54]},
   double:['attack_light','attack_heavy','special_b'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],ko:['knockdown',41]},
- stag:{s:0.6,anims:{"idle":[40,117,171,80,283],"walk_forward":[28,123,174,115,286],"walk_back":[28,123,174,115,286],"run":[28,123,174,115,286],"crouch":[6,163,220,154,365],"block":[17,127,172,100,284],"attack_light":[37,131,171,80,282],"bite":[36,116,169,80,280],"special_pounce":[68,242,176,189,283,66],"special_b":[70,166,186,127,307],"special_c":[68,242,176,189,283,66],"special_d":[56,140,168,94,278],"ultra_move":[70,166,186,127,307],"attack_heavy":[56,140,168,94,278],"uppercut":[56,140,168,94,278],"victory":[61,113,176,84,291],"jump":[54,115,180,80,298],"hit_light":[20,230,174,100,289],"hit_heavy":[20,230,174,100,289],"knockdown":[45,318,173,246,287],"knockdown_getup":[26,146,160,222,265],"defeat":[45,318,173,246,287],"finisher":[61,250,190,198,307]},
+ stag:{s:0.6,anims:{"idle":[40,117,171,80,283],"walk_forward":[28,123,174,115,286],"walk_back":[28,123,174,115,286],"run":[28,123,174,115,286],"crouch":[6,163,220,154,365],"block":[17,127,172,100,284],"attack_light":[37,131,171,80,282],"bite":[36,116,169,80,280],"special_pounce":[68,242,176,189,283,66],"special_b":[70,166,186,127,307],"special_c":[68,242,176,189,283,66],"special_d":[56,140,168,94,278],"ultra_move":[70,166,186,127,307],"attack_heavy":[56,140,168,94,278],"uppercut":[56,140,168,94,278],"victory":[61,113,176,84,291],"jump":[54,115,180,80,298],"hit_light":[20,230,174,100,289],"hit_heavy":[20,230,174,100,289],"knockdown":[45,318,173,246,287],"knockdown_getup":[26,146,160,222,265],"defeat":[45,318,173,246,287],"finisher":[61,250,190,198,307],"sx2":[51,130,170,99,281],"sx1":[76,295,186,288,307,54]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]],ko:['knockdown',44]},
  majic:{s:0.6,anims:{"idle":[26,231,236,171,390],"walk_forward":[25,238,237,173,391],"walk_back":[25,238,237,173,391],"run":[25,238,237,173,391],"dash":[25,238,237,173,391],"crouch":[6,235,211,200,348],"block":[17,230,236,171,390],"attack_light":[50,293,235,195,388],"bite":[26,240,246,162,408],"special_pounce":[55,383,259,352,429,41],"special_b":[70,406,256,228,407,39],"special_c":[55,383,259,352,429,41],"special_d":[56,312,253,243,419,51],"ultra_move":[70,406,256,228,407,39],"attack_heavy":[56,312,253,243,419,51],"uppercut":[56,312,253,243,419,51],"victory":[60,466,254,352,418,34],"jump":[19,322,254,311,420],"hit_light":[20,410,259,235,429],"hit_heavy":[20,410,259,235,429],"knockdown":[35,435,238,277,393],"knockdown_getup":[32,348,245,269,406],"defeat":[35,435,238,277,393],"finisher":[61,480,259,352,429,33]},
@@ -1698,7 +1699,7 @@ const SPRITES={
  badger:{s:0.6,anims:{"idle":[29,107,128,92,212],"walk_forward":[24,120,129,97,213],"walk_back":[24,120,129,97,213],"run":[24,120,129,97,213],"block":[17,119,127,99,211],"attack_light":[30,137,126,92,209],"bite":[40,157,123,103,204],"claw_swipe":[40,133,126,96,209],"attack_heavy":[56,144,144,97,238],"uppercut":[56,144,144,97,238],"pounce":[56,259,140,210,232],"special_earth_slam":[56,259,140,210,232],"shadow_rampage":[56,259,140,210,232],"victory":[50,120,145,92,240],"jump":[29,132,131,92,216],"crouch":[8,111,123,96,203],"hit_light":[20,139,129,113,213],"hit_heavy":[20,139,129,113,213],"knockdown":[37,269,142,226,234],"knockdown_getup":[28,165,132,172,219],"defeat":[37,269,142,226,234],"special_pounce":[56,259,140,210,232],"special_b":[64,149,142,97,235],"finisher":[61,175,144,102,236],"ultra_move":[64,149,142,97,235]},
   claw:'claw_swipe',double:['attack_heavy','claw_swipe'],special:'special_earth_slam',shadow:'special_b',ultra:['attack_light','attack_heavy','uppercut','claw_swipe'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]],ko:['knockdown',36]},
- crocodile:{s:0.6,anims:{"idle":[25,210,156,221,259],"walk_forward":[26,223,160,233,263],"walk_back":[26,223,160,233,263],"run":[26,223,160,233,263],"block":[17,217,160,224,265],"attack_light":[36,257,159,253,263],"bite":[40,287,164,225,270],"special_pounce":[59,262,166,283,275],"attack_heavy":[56,294,158,296,261,54],"uppercut":[56,294,158,296,261,54],"victory":[59,240,182,258,301],"jump":[27,241,161,232,266],"hit_light":[20,219,161,230,267],"hit_heavy":[20,219,161,230,267],"knockdown":[37,307,182,257,301],"knockdown_getup":[30,266,159,307,262],"defeat":[37,307,182,257,301],"special_b":[61,310,182,263,301,51],"finisher":[61,336,184,307,298,47],"ultra_move":[61,310,182,263,301,51]},
+ crocodile:{s:0.6,anims:{"idle":[25,210,156,221,259],"walk_forward":[26,223,160,233,263],"walk_back":[26,223,160,233,263],"run":[26,223,160,233,263],"block":[17,217,160,224,265],"attack_light":[36,257,159,253,263],"bite":[40,287,164,225,270],"special_pounce":[59,262,166,283,275],"attack_heavy":[56,294,158,296,261,54],"uppercut":[56,294,158,296,261,54],"victory":[59,240,182,258,301],"jump":[27,241,161,232,266],"hit_light":[20,219,161,230,267],"hit_heavy":[20,219,161,230,267],"knockdown":[37,307,182,257,301],"knockdown_getup":[30,266,159,307,262],"defeat":[37,307,182,257,301],"special_b":[61,310,182,263,301,51],"finisher":[61,336,184,307,298,47],"ultra_move":[61,310,182,263,301,51],"sx2":[67,259,182,239,301,61],"sx1":[76,311,159,307,264,51]},
   double:['bite','attack_heavy'],special:'special_pounce',shadow:null,ultra:['bite','attack_heavy','bite','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]],ko:['knockdown',36]},
  elephant:{s:0.6,anims:{"idle":[23,211,206,193,342],"walk_forward":[37,192,213,197,351],"walk_back":[37,192,213,197,351],"run":[37,192,213,197,351],"block":[17,215,196,198,324],"attack_light":[22,206,207,197,343],"bite":[40,271,210,238,348],"special_pounce":[72,302,221,203,363,52],"attack_heavy":[56,273,199,231,330],"uppercut":[56,273,199,231,330],"victory":[54,247,219,239,363],"jump":[24,213,215,184,355],"hit_light":[20,251,220,198,363],"hit_heavy":[20,251,220,198,363],"knockdown":[32,386,220,342,363],"knockdown_getup":[30,290,200,251,324],"defeat":[32,386,220,342,363],"special_b":[70,340,200,374,332,47],"finisher":[61,304,220,294,363,52],"ultra_move":[70,340,200,374,332,47]},
@@ -1716,7 +1717,7 @@ const SPRITES={
  jaguar:{s:0.6,anims:{"idle":[26,164,153,117,252],"walk_forward":[25,163,155,112,256],"walk_back":[25,163,155,112,256],"run":[25,163,155,112,256],"block":[17,262,167,148,276],"attack_light":[50,207,151,112,250],"bite":[33,244,151,118,250],"special_pounce":[68,235,154,125,252],"attack_heavy":[56,230,165,124,273],"uppercut":[56,230,165,124,273],"victory":[39,171,172,120,285],"jump":[28,174,169,126,279],"hit_light":[20,290,166,196,276],"hit_heavy":[20,290,166,196,276],"knockdown":[39,309,156,227,252],"knockdown_getup":[28,232,158,226,256],"defeat":[39,309,156,227,252],"special_b":[70,218,172,157,285],"finisher":[61,305,178,221,285,52],"ultra_move":[70,218,172,157,285]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]],ko:['knockdown',38]},
- leopard:{s:0.6,anims:{"idle":[32,165,157,119,261],"walk_forward":[24,171,163,136,270],"walk_back":[24,171,163,136,270],"run":[24,171,163,136,270],"dash":[24,171,163,136,270],"crouch":[6,128,155,102,256],"block":[17,169,160,122,265],"attack_light":[50,180,153,108,254],"bite":[35,195,153,100,254],"special_pounce":[72,263,175,133,287,60],"special_b":[70,228,163,134,270],"special_c":[72,263,175,133,287,60],"special_d":[56,199,164,89,273],"ultra_move":[70,228,163,134,270],"attack_heavy":[56,199,164,89,273],"uppercut":[56,199,164,89,273],"victory":[60,160,173,115,287],"jump":[27,196,173,153,284],"hit_light":[20,161,162,117,269],"hit_heavy":[20,161,162,117,269],"knockdown":[46,291,158,180,252],"knockdown_getup":[25,193,162,170,267],"defeat":[46,291,158,180,252],"finisher":[61,275,166,153,264,58]},
+ leopard:{s:0.6,anims:{"idle":[32,165,157,119,261],"walk_forward":[24,171,163,136,270],"walk_back":[24,171,163,136,270],"run":[24,171,163,136,270],"dash":[24,171,163,136,270],"crouch":[6,128,155,102,256],"block":[17,169,160,122,265],"attack_light":[50,180,153,108,254],"bite":[35,195,153,100,254],"special_pounce":[72,263,175,133,287,60],"special_b":[70,228,163,134,270],"special_c":[72,263,175,133,287,60],"special_d":[56,199,164,89,273],"ultra_move":[70,228,163,134,270],"attack_heavy":[56,199,164,89,273],"uppercut":[56,199,164,89,273],"victory":[60,160,173,115,287],"jump":[27,196,173,153,284],"hit_light":[20,161,162,117,269],"hit_heavy":[20,161,162,117,269],"knockdown":[46,291,158,180,252],"knockdown_getup":[25,193,162,170,267],"defeat":[46,291,158,180,252],"finisher":[61,275,166,153,264,58],"sx2":[76,202,173,105,287],"sx3":[76,248,152,107,252,64],"sx1":[44,245,158,119,261]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_d','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],ko:['knockdown',45]},
  lion:{s:0.6,anims:{"idle":[29,124,162,110,268],"walk_forward":[23,130,166,97,275],"walk_back":[23,130,166,97,275],"run":[23,130,166,97,275],"block":[17,137,162,104,267],"attack_light":[50,159,160,95,265],"bite":[40,147,158,95,261],"special_pounce":[62,292,161,239,259,54],"attack_heavy":[42,164,170,84,282],"uppercut":[42,164,170,84,282],"victory":[61,124,164,88,271],"jump":[29,131,181,95,299],"hit_light":[20,244,182,190,302],"hit_heavy":[20,244,182,190,302],"knockdown":[36,307,183,219,302],"knockdown_getup":[26,186,164,213,267],"defeat":[36,307,183,219,302],"special_b":[70,211,182,111,302],"finisher":[61,247,183,134,298],"ultra_move":[70,211,182,111,302]},
@@ -2691,6 +2692,7 @@ function drawSprite(f){
   case'bite':anim='bite';fr=Math.min(A.bite[0]-1,Math.floor(W('bite','bite')*A.bite[0]));break;
   case'earthslam':case'pounce':anim=S.special;fr=Math.min(A[anim][0]-1,Math.floor(W(anim,'special')*A[anim][0]));break;
   case'special_b':case'special_c':case'special_d':case'ultra_move':anim=A[f.action]?f.action:S.special;fr=Math.floor(ap*A[anim][0]);break;
+  case'sx':if(f.move_&&f.move_.sx){const _r=sxFrame(f,A);anim=_r[0];fr=_r[1]}else{anim='idle';fr=0}break;
   case'ender':anim='uppercut';fr=Math.min(A.uppercut[0]-1,Math.floor(W('uppercut','ender')*A.uppercut[0]));break;
   case'shadow':{const signature=[S.shadow,'shadow_rampage','ultra_move','special_d','special_c','special_b',S.special].find(a=>a&&A[a]);if(signature){anim=signature;fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}else{anim=S.double[Math.min(S.double.length-1,Math.floor(p*S.double.length))];fr=Math.min(A[anim][0]-1,Math.floor(ap*A[anim][0]));}break;}
   case'ultraseq':{const options=(S.ultra||[]).filter(a=>A[a]);anim=options.length?options[Math.floor(now*4)%options.length]:(A.ultra_move?'ultra_move':S.special);fr=Math.floor(now*24)%A[anim][0];break;}
@@ -2925,7 +2927,7 @@ function rtFx(p,k,pr){let im;
  case'flame':if(!(im=rtPick(p,'fire')))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5)*.95;c.translate(p.x,p.y-p.r*.8);c.rotate(Math.sin(p.t*14+p._ti)*.08);rtDraw(im,p.r*3.4*(.65+.35*k),p._tf);return true;
  case'flake':if(!(im=rtPick(p,'snow')))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.6);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.5,1);return true;
  case'shard':if(!(im=rtPick(p,'ice')))return false;c.globalAlpha=Math.min(1,k*1.4);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.8,p._tf);c.globalCompositeOperation='lighter';c.globalAlpha*=.35;rtDraw(im,p.r*2.8,1);return true;
- case'leaf':if(!(im=rtPick(p,'leaf')))return false;c.globalAlpha=Math.min(1,k*1.8);c.translate(p.x,p.y);c.rotate(p.rot||0);c.scale(1,.35+.65*Math.abs(Math.cos((p.rot||0)*1.7)));rtDraw(im,p.r*2.3,p._tf);return true;
+ case'leaf':if(!(im=rtPick(p,'leaf',p.color==='#5ea83a'?[0,1,2]:null)))return false;c.globalAlpha=Math.min(1,k*1.8);c.translate(p.x,p.y);c.rotate(p.rot||0);c.scale(1,.35+.65*Math.abs(Math.cos((p.rot||0)*1.7)));rtDraw(im,p.r*2.3,p._tf);return true;
  case'feather':if(!(im=rtPick(p,'feather',p.color==='#ffffff'?[0,1,2,6,7,8]:[3,4,5])))return false;c.globalAlpha=Math.min(1,k*1.8);c.translate(p.x+Math.sin(p.sway||0)*8,p.y);c.rotate((p.rot||0)+Math.sin(p.sway||0)*.5);rtDraw(im,p.r*2.7,p._tf);return true;
  case'rock':if(!(im=rtPick(p,'rock')))return false;c.globalAlpha=Math.min(1,k*2);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.7,p._tf);return true;
  case'puff':{if(!(im=rtPick(p,'smoke')))return false;c.globalAlpha=Math.min(1,k*(p.alpha||.35)*2.4);c.translate(p.x,p.y);c.rotate(p._ti*.7);rtDrawC(rtTinted(im,p.color||'#ffffff'),p.r*2.9,p._tf);return true}
@@ -2938,7 +2940,14 @@ function rtFx(p,k,pr){let im;
  case'vortex':{const a=RT.water;if(!_rtOk(a[3])||!_rtOk(a[4]))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5);c.translate(p.x,p.y);c.scale(1,.55);
   for(let s=0;s<3;s++){const an=pr*7+s*2.09+(p._sd||(p._sd=Math.random()*6)),rad=(40+pr*70)*p.big;c.save();c.translate(Math.cos(an)*rad,Math.sin(an)*rad);c.rotate(an+1.57);rtDraw(a[3+s],(120+pr*60)*p.big,1);c.restore()}return true}
  case'wave':{const im=RT.water[[3,4,5][(p._wi??(p._wi=Math.floor(Math.random()*3)))]];if(!_rtOk(im))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5);c.translate(p.x+p.dir*pr*260*p.big,p.y-50*p.big);c.scale(p.dir,1);c.rotate(-.35);rtDraw(im,(170-pr*50)*p.big,1);return true}
- case'rt':{if(!(im=rtPick(p,p.tex,p.idx)))return false;c.globalCompositeOperation=p.add?'lighter':'source-over';c.globalAlpha=Math.min(1,k*1.6)*(p.alpha||1);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*(1+(p.grow||0)*pr),p._tf);return true}
+ case'rt':{if(!(im=rtPick(p,p.tex,p.idx)))return false;c.globalCompositeOperation=p.add&&!p.tint?'lighter':'source-over';c.globalAlpha=Math.min(1,k*1.6)*(p.alpha||1);c.translate(p.x,p.y);c.rotate(p.rot||0);if(p.tint)rtDrawC(rtTinted(im,p.tint),p.r*(1+(p.grow||0)*pr),p._tf);else rtDraw(im,p.r*(1+(p.grow||0)*pr),p._tf);return true}
+ case'proj':{const T={venom:['venom',[0,4,7]],wind:['smoke',null],ice:['ice',null],fire:['fire',null],water:['water',[3,4,5]]}[p.tex]||['smoke',null];if(!(im=rtPick(p,T[0],T[1])))return false;
+  const e=pr<1?1-Math.pow(1-pr,2):1,x=p.x+(p.tx-p.x)*e,y=p.y+(p.ty-p.y)*e-Math.sin(e*3.14)*(p.tex==='venom'?50:0);c.globalCompositeOperation='lighter';
+  for(let s=4;s>=0;s--){const ee=Math.max(0,e-s*.06),xx=p.x+(p.tx-p.x)*ee,yy=p.y+(p.ty-p.y)*ee-Math.sin(ee*3.14)*(p.tex==='venom'?50:0);c.save();c.globalAlpha=Math.min(1,k*2)*(s?.18:.95);c.translate(xx,yy);c.rotate(p.tex==='wind'?0:Math.atan2(p.ty-p.y,p.tx-p.x));c.scale(p.tex==='wind'?2.4*p.dir:1,p.tex==='wind'?.45:1);
+   if(p.tex==='wind')rtDrawC(rtTinted(im,'#e8f6ff'),90,1);else rtDraw(im,p.tex==='venom'?70:80,1);c.restore()}return true}
+ case'goldaura':{const f=game.fighters[p.fi];if(!f)return true;const H=f._top!=null?400+f.y-f._top:300,cx=f.x,cy=400+f.y-H*.48,a=Math.sin(Math.min(1,pr)*3.14);c.globalCompositeOperation='lighter';
+  const gr=c.createRadialGradient(cx,cy,H*.15,cx,cy,H*.7);gr.addColorStop(0,'rgba(255,214,110,0)');gr.addColorStop(.55,'rgba(255,200,80,'+(.35*a)+')');gr.addColorStop(1,'rgba(255,160,40,0)');c.fillStyle=gr;c.beginPath();c.ellipse(cx,cy,H*.55,H*.7,0,0,7);c.fill();
+  for(let s=0;s<3;s++)if(Math.random()<.5)P({kind:'pp',sh:'drop',x:cx+R(-H*.4,H*.4),y:cy+R(-H*.4,H*.5),vx:R(-30,30),vy:R(-160,-60),g:-40,r:R(2,4),life:R(.5,.9),color:'#ffd36b',glow:1});return true}
  case'bearhug':{im=RT.paw;if(!_rtOk(im))return true;const close=Math.min(1,p.t/.22),sq=p.t>.22?Math.sin((p.t-.22)*38)*Math.max(0,1-(p.t-.22)*2.2):0;
   const W=245*p.big,H=W*im.naturalHeight/im.naturalWidth,gap=(215-close*170)*p.big-sq*8;c.globalAlpha=Math.min(1,k*2.2,p.t*8);
   for(const s of[-1,1]){c.save();c.translate(p.x+s*gap,p.y+(s<0?-18:16)*p.big);c.scale(-s,1);c.rotate(s<0?.06:-.05);c.drawImage(im,-W,-H/2,W,H);c.restore()}return true}
@@ -2950,8 +2959,13 @@ function rtFx(p,k,pr){let im;
  for(let i=0;i<6;i++){const im=W[[3,4,5,0,1,2][i]];if(!_rtOk(im))continue;c.save();c.translate(front-p.dir*i*48,398-H*(.9-i*.11));c.scale(p.dir,1);c.rotate(-.25-i*.05);rtDraw(im,H*(1.05-i*.1)+40,1);c.restore()}
  c.restore()}}
 function pBurst(f,stage,x,y,big){
- const th=PFX[f.data.id];if(!th||!game)return;const d=f.dir,B=big*(th.big||1);
+ const th0=PFX[f.data.id];if(!th0||!game)return;const _sx=f.move_&&f.move_.sx;const th=_sx&&(_sx.fs||_sx.fh)?{...th0,start:_sx.fs||[],hit:_sx.fh||th0.hit}:th0;const d=f.dir,B=big*(th.big||1);
  for(const k of (stage==='start'?th.start:th.hit)){
+  if(k==='goldaura'){P({kind:'pp',sh:'goldaura',fi:game.fighters.indexOf(f),life:1.1,color:th.a});continue}
+  if(k.startsWith('proj:')){const o=game.fighters[1-game.fighters.indexOf(f)],tex=k.slice(5);P({kind:'pp',sh:'proj',tex,x:f.x+d*90,y:400+f.y-175,tx:o?o.x-d*40:f.x+d*500,ty:o?400+o.y-160:400+f.y-160,dir:d,life:.46});continue}
+  if(k==='dustwave'){const o=game.fighters[1-game.fighters.indexOf(f)],x1=o?o.x:f.x+d*420;for(let s=0;s<7;s++){const xx=f.x+(x1-f.x)*(s+1)/7;P({kind:'pp',sh:'puff',x:xx,y:394,vx:d*40,vy:R(-50,-15),r:R(16,24)*B,grow:50,life:.7,delay:s*.05,color:'#b89a70',alpha:.4});P({kind:'pp',sh:'rock',x:xx,y:396,vx:R(-120,120),vy:R(-420,-200),g:1700,r:R(6,10),rot:R(0,6),vr:R(-9,9),life:.8,delay:s*.05,color:'#6b5440'})}continue}
+  if(k==='mud'){for(let s=0;s<3;s++)P({kind:'pp',sh:'rt',tex:'water',idx:[0,1,2,3,4,5],tint:'#6b4a2a',x:x+R(-60,60),y:y+R(-40,30),rot:R(-.5,.5),r:R(140,200)*B,grow:.3,life:.55,delay:s*.04});for(let s=0;s<6;s++)P({kind:'pp',sh:'puff',x:x+R(-60,60),y:396,vx:R(-160,160),vy:R(-140,-40),r:R(14,22),grow:40,life:.6,color:'#5a3f24',alpha:.45});continue}
+  if(k==='grass'){const o=game.fighters[1-game.fighters.indexOf(f)];for(let s=0;s<16;s++){const gx=(o&&stage==='hit'?o.x:f.x)+R(-160,160);P({kind:'pp',sh:'leaf',x:gx,y:398,vx:R(-90,90),vy:R(-520,-260),g:900,drag:.97,rot:R(-1.9,-1.2),vr:R(-3,3),r:R(14,22),life:R(.8,1.1),delay:s*.02,color:'#5ea83a'})}continue}
   if(k==='bearhug'){const now=performance.now();if(now-(f._bhT||0)>900){f._bhT=now;P({kind:'pp',sh:'bearhug',x,y:y+10,life:.85,big:B});game.shake=Math.max(game.shake,.22);for(let i=0;i<5;i++)P({kind:'pp',sh:'puff',x:x+R(-70,70),y:y+R(-30,40),vx:R(-90,90),vy:R(-50,0),r:R(14,22),grow:40,life:.7,delay:.2,color:'#b89a70',alpha:.35})}continue}
   if(k==='venom')for(let i=0;i<3;i++)P({kind:'pp',sh:'rt',tex:'venom',idx:[1,5,6,8,2],add:1,x:x+R(-40,40),y:y+R(-30,20),rot:R(0,6.28),r:R(70,110)*B,grow:.4,life:.5,delay:i*.04});
   if(k==='splash')for(let i=0;i<2;i++)P({kind:'pp',sh:'rt',tex:'water',idx:[3,4,5],add:1,x:x+R(-50,50),y:y-R(30,80),rot:R(-.4,.4),r:R(150,210)*B,grow:.35,life:.45,delay:i*.05});
@@ -3381,4 +3395,308 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   if(air&&Math.random()<.4)game.fx.push({kind:'pp',sh:'puff',x:fx+R(-90,90),y:398,vx:R(-120,120),vy:-10,r:R(10,16),grow:60,life:.4,color:'#c8bfae',alpha:.3,t:0,_n:1});
   if(Math.random()<(air?.25:.04))game.fx.push({kind:'pp',sh:'feather',x:fx+R(-150,150),y:top+H*R(.2,.5),vx:R(-40,40),vy:R(10,40),g:60,drag:.98,rot:R(0,6),sway:R(0,6),r:R(10,16),life:R(1,1.6),color:Math.random()<.6?'#ffffff':'#8a6a40',t:0,_n:1});
   }}
+
+/* ================= SPECIAL MOVES 2.0 (docs/SPECIAL_MOVES_SPEC.md) =================
+   Every fighter: 5 special moves + 1 ultimate finisher (MAJIC: 10 + 1).
+   Inputs (relative to facing): S1 ↓↘→+ATTACK · S2 ↓↙←+ATTACK · S3 ↓↘→+SPECIAL · S4 ↓↙←+SPECIAL · S5 ←→+SPECIAL
+   MAJIC extra: S6 →↓↘+ATTACK · S7 →↓↘+SPECIAL · S8 ←↙↓↘→+SPECIAL · S9 →↘↓↙←+SPECIAL · S10 ←→+ATTACK
+   Ultimate: full meter + ↓↓+SPECIAL (or ↓↘→↓↘→+SPECIAL). Touch: the ★ MOVES button opens one-tap buttons. */
+const SX_IN=['236A','214A','236S','214S','46S','623A','623S','41236S','63214S','46A'];
+const SX_GLYPH={'236A':'↓↘→ + ATK','214A':'↓↙← + ATK','236S':'↓↘→ + SPC','214S':'↓↙← + SPC','46S':'←→ + SPC','623A':'→↓↘ + ATK','623S':'→↓↘ + SPC','41236S':'←↙↓↘→ + SPC','63214S':'→↘↓↙← + SPC','46A':'←→ + ATK','U':'↓↓ + SPC (FULL METER)'};
+// a: animation (first one this fighter has is used) · t: length · h: hit times · dm: base damage · r: reach · st: hitstun · pu: knockback
+// fs / fh: effects on start / on hit · use: an existing move · grab / launch / down / root / slow / venom / freeze / tele / parry / proj / cost / cd
+const SX={
+ lion:{m:[
+  {n:'ROYAL ROAR',d:'Thunderous roar · golden shockwave pushes the foe back',use:'lionRoar'},
+  {n:"KING'S CLAW",d:'Three-claw combination with golden slash trails',a:['sx1','attack_light'],t:.72,h:[.2,.36,.52],dm:4.6,st:.5,pu:120,r:300,vx:220,fh:['gash','embers'],col:'#ffd36b'},
+  {n:'SAVANNAH QUAKE',d:'Fists into the ground · dust, stones and a ground shockwave',a:['sx2','attack_heavy'],t:.86,h:[.5],dm:11,st:.8,pu:300,r:540,ry:60,fs:['dust'],fh:['dustwave','quake','rocks','cracks'],col:'#e9c27a'},
+  {n:"PREDATOR'S POUNCE",d:'Leaping claw strike · dust on landing',use:'special'},
+  {n:'GOLDEN DOMINION',d:'Golden aura power attack (25% meter)',a:['special_b','attack_heavy'],t:.95,h:[.45,.7],dm:7,st:.75,pu:330,r:330,cost:25,fs:['goldaura','flames'],fh:['flameburst','shock'],aura:4,col:'#ffd36b'}],
+  u:{n:"KING'S WRATH",s:'THE KING HAS SPOKEN',col:'#ffd36b',seq:[['attack_heavy',.55,['roar','shock'],6],['uppercut',.45,['gash','embers'],7,'up'],['special_pounce',.55,['gash','flameburst'],8,'air'],['attack_heavy',.6,['quake','dustwave','rocks','shock','goldaura'],14,'crash']]}},
+ tiger:{m:[
+  {n:'TIGER BLITZ',d:'Rapid claw flurry with orange motion trails',a:['sx1','attack_light'],t:.7,h:[.12,.24,.36,.48],dm:3.3,st:.45,pu:80,r:290,vx:170,fh:['gash','embers'],col:'#ff9a3a'},
+  {n:'STRIPED FURY',d:'Lunge with alternating claws',use:'tigerPounce'},
+  {n:'PREDATOR RUSH',d:'Charging tackle that knocks the foe back',a:['sx2','attack_heavy'],t:.7,h:[.32],dm:12,st:.7,pu:430,r:300,vx:700,fs:['dust'],fh:['shock','dust'],col:'#ff9a3a'},
+  {n:'BURNING CLAWS',d:'Claws ignite with fiery energy trails',a:['attack_heavy'],t:.62,h:[.3],dm:11,st:.7,pu:260,r:290,vx:200,fs:['flames'],fh:['flameburst','gash','embers'],col:'#ff7a2a'},
+  {n:'SAVAGE UPPERCUT',d:'Rising claw that launches the foe',a:['sx3','uppercut'],t:.66,h:[.26],dm:12,st:.9,pu:150,r:270,vy:-380,launch:1,fh:['gash','embers','shock'],col:'#ff9a3a'}],
+  u:{n:"TIGER'S FURY",s:'STRIPES OF FIRE',col:'#ff8a2a',seq:[['attack_light',.3,['gash'],4],['attack_heavy',.3,['gash','embers'],4],['sx1',.45,['gash','embers'],6],['jump',.4,['flames'],0,'up'],['special_pounce',.6,['flameburst','embers','shock','dustwave'],15,'crash']]}},
+ jaguar:{m:[
+  {n:'SHADOW POUNCE',d:'Fast, low-profile lunge',use:'jaguarAmbush'},
+  {n:'JUNGLE AMBUSH',d:'Vanish into dark mist · reappear behind with a claw',a:['attack_light'],t:.66,h:[.42],dm:10,st:.7,pu:220,r:270,tele:'behind',fs:['smoke'],fh:['gash','smoke'],col:'#2fc3a8'},
+  {n:'EMERALD CLAWS',d:'Glowing teal double slash',a:['sx1','attack_heavy'],t:.6,h:[.2,.38],dm:6,st:.6,pu:200,r:300,vx:200,fh:['gash','leafburst'],col:'#2fffd0'},
+  {n:"PREDATOR'S GRIP",d:'Grab and wrestling takedown (beats block)',a:['sx2','bite'],t:.85,h:[.45],dm:13,st:1,pu:120,r:235,grab:1,down:1,fh:['dust','smoke'],col:'#2fc3a8'},
+  {n:'PHANTOM RUSH',d:'Close-range flurry with shadow afterimages (25% meter)',a:['special_b','attack_heavy'],t:.9,h:[.15,.3,.45,.6,.75],dm:2.7,st:.4,pu:60,r:320,vx:420,cost:25,fs:['after','smoke'],fh:['gash'],col:'#2fffd0'}],
+  u:{n:'JUNGLE EXECUTION',s:'THE SHADOW STRIKES',col:'#2fffd0',dark:1,seq:[['attack_light',.35,['smoke','gash'],5,'side'],['attack_heavy',.35,['gash'],5,'side'],['sx1',.4,['gash','leafburst'],6,'side'],['special_pounce',.65,['leafburst','smoke','shock','gash'],15,'crash']]}},
+ leopard:{m:[
+  {n:'FROST CLAWS',d:'Icy claw slashes that scatter snowflakes',a:['sx1','attack_light'],t:.66,h:[.16,.3,.44],dm:4.1,st:.5,pu:100,r:290,vx:200,fs:['flakes'],fh:['shards','flakeburst'],col:'#9ce7ff'},
+  {n:'BLIZZARD DASH',d:'Dash through the arena on swirling snow',a:['dash','run'],t:.45,h:[.2],dm:8,st:.55,pu:160,r:230,vx:900,fs:['flakes','frostpatch'],fh:['flakeburst'],col:'#bff4ff'},
+  {n:'FROZEN POUNCE',d:'High-speed aerial attack · ice crystals on impact',use:'special'},
+  {n:'SNOWSTORM SPIN',d:'Spinning kick wrapped in snow and icy wind',a:['sx2','attack_heavy'],t:.7,h:[.3,.46],dm:6.2,st:.6,pu:260,r:310,fs:['flakes'],fh:['flakeburst','shards'],swirl:1,col:'#9ce7ff'},
+  {n:'ARCTIC BREATH',d:'Cold mist that slows the foe',a:['sx3','bite'],t:.85,h:[.5],dm:7,st:.6,pu:120,r:430,slow:3,fs:['frostcone','breath'],fh:['frostpatch','flakeburst'],col:'#bff4ff'}],
+  u:{n:'ABSOLUTE ZERO',s:'THE JUNGLE FREEZES',col:'#9ce7ff',dark:1,seq:[['sx2',.45,['flakes','flakeburst'],5,'side'],['sx1',.45,['shards','flakeburst'],5,'side'],['attack_light',.35,['shards'],4,'side'],['bite',.55,['freeze','icecluster'],4],['sx2',.6,['shards','flakeburst','shock'],14,'crash']]}},
+ wolf:{m:[
+  {n:'LUNAR HOWL',d:'Howl that releases a silver shockwave',a:['sx1','attack_heavy'],t:.85,h:[.45],dm:7,st:.6,pu:430,r:430,fs:['moon','howl'],fh:['shock'],col:'#cfe3ff'},
+  {n:'MOON CLAWS',d:'Glowing blue-white claw slashes',a:['attack_heavy'],t:.56,h:[.18,.32],dm:6,st:.55,pu:180,r:300,vx:200,fh:['gash','spirit'],col:'#cfe3ff'},
+  {n:'PACK RUSH',d:'Rapid combination with spectral wolves',use:'wolfFrenzy'},
+  {n:'NIGHT POUNCE',d:'Leaping attack wrapped in swirling mist',a:['special_pounce'],t:.7,h:[.4],dm:11,st:.7,pu:250,r:300,vx:520,vy:-300,fs:['smoke'],fh:['gash','smoke'],col:'#9fc4ff'},
+  {n:'MOONLIGHT COUNTER',d:'Guard stance · strike back the moment you are hit',a:['block'],t:.55,h:[],parry:.5,counter:{a:['sx2','attack_heavy'],t:.5,h:[.18],dm:13,st:.8,pu:340,r:330,fh:['gash','shock']},col:'#cfe3ff'}],
+  u:{n:'FULL MOON FURY',s:'THE MOON HUNTS',col:'#cfe3ff',dark:1,moon:1,seq:[['attack_light',.32,['gash'],4],['attack_heavy',.32,['gash','spirit'],5],['sx2',.4,['gash'],5],['attack_light',.3,['gash'],4],['uppercut',.6,['shock','spirit','gash'],14,'up']]}},
+ hyena:{m:[
+  {n:'SAVAGE LAUGH',d:'Terrifying laugh · disruptive soundwave',a:['sx1','attack_heavy'],t:.8,h:[.4],dm:5,st:.95,pu:200,r:390,fs:['cackle'],fh:['shock','cackle'],col:'#ff8a5a'},
+  {n:'BONE CRUSHER',d:'Close grab and crushing bite (beats block)',a:['bite'],t:.75,h:[.4],dm:13,st:.9,pu:150,r:235,grab:1,down:1,fh:['dust','embers'],col:'#ff5a3a'},
+  {n:'SCAVENGER RUSH',d:'Unpredictable feint and lunge',use:'hyenaFeint'},
+  {n:'WILD FRENZY',d:'Five wild claws with red motion trails',a:['sx2','attack_light'],t:.8,h:[.12,.26,.4,.54,.68],dm:2.7,st:.4,pu:60,r:300,vx:250,fh:['gash'],col:'#ff5a3a'},
+  {n:'SAVAGE LEAP',d:'Lunging leap into a brutal ground slam',a:['special_pounce'],t:.85,h:[.6],dm:12,st:.8,pu:300,r:320,vx:480,vy:-420,fh:['dust','rocks','shock'],col:'#ff8a5a'}],
+  u:{n:'MADNESS UNLEASHED',s:'HA HA HA HA!',col:'#ff4a2a',seq:[['sx1',.45,['cackle'],0],['attack_light',.28,['gash'],4],['bite',.3,['gash'],5],['sx2',.45,['gash','embers'],6],['special_pounce',.65,['dust','rocks','shock','flameburst'],15,'crash']]}},
+ badger:{m:[
+  {n:'BURROW STRIKE',d:'Dig underground · erupt beneath the foe',a:['sx1','special_earth_slam'],t:1,h:[.72],dm:13,st:.8,pu:120,r:1400,tele:'under',launch:1,fs:['dust','clods'],fh:['rocks','dust','cracks'],col:'#e0a060'},
+  {n:'EARTH CLAWS',d:'Claws that throw dirt and stones',a:['attack_light'],t:.5,h:[.22],dm:8,st:.55,pu:150,r:280,vx:150,fh:['clods','dust'],col:'#c9935a'},
+  {n:'TUNNEL RUSH',d:'Fast, low charging attack',a:['sx2','run'],t:.6,h:[.3],dm:10,st:.6,pu:280,r:260,vx:780,fs:['dust'],fh:['dust','rocks'],col:'#c9935a'},
+  {n:'STONE BREAKER',d:'Ground strike · short-range shockwave',use:'badgerBreaker'},
+  {n:'IRON DEFENSE',d:'Brace · counter the next strike',a:['block'],t:.55,h:[],parry:.5,counter:{a:['attack_heavy'],t:.5,h:[.2],dm:12,st:.8,pu:320,r:320,fh:['rocks','shock']},col:'#c6a77a'}],
+  u:{n:'EARTH SHATTER',s:'THE GROUND GIVES WAY',col:'#e0a060',seq:[['special_earth_slam',.45,['cracks','rocks','dust'],5],['special_earth_slam',.45,['cracks','rocks','dust'],5],['special_earth_slam',.45,['quake','rocks','dustwave'],5],['uppercut',.6,['rocks','dust','shock'],14,'up']]}},
+ grizzly:{m:[
+  {n:'GRIZZLY SLAM',d:'Two-handed ground smash',a:['sx1','attack_heavy'],t:.85,h:[.5],dm:13,st:.8,pu:300,r:320,fh:['quake','rocks','cracks','dust'],col:'#ff6a3a'},
+  {n:'MOUNTAIN CHARGE',d:'Rush forward with tremendous force',use:'grizzlyMaul'},
+  {n:'TITAN GRIP',d:'Crushing bear hug and throw (beats block)',a:['sx2','bite'],t:1,h:[.4,.75],dm:7,st:1,pu:380,r:240,grab:1,down:1,fh:['bearhug','dust'],col:'#c99a70'},
+  {n:'EARTHQUAKE STOMP',d:'Stomp that sends shockwaves outward',a:['sx3','attack_heavy'],t:.8,h:[.42],dm:9,st:.6,pu:260,r:530,ry:50,fs:['dust'],fh:['quake','dustwave','cracks'],col:'#c99a70'},
+  {n:'SAVAGE MAUL',d:'Heavy three-claw combination',a:['attack_heavy'],t:.85,h:[.25,.45,.65],dm:5,st:.55,pu:200,r:300,vx:220,fh:['gash','rocks'],col:'#ff6a3a'}],
+  u:{n:'MOUNTAIN COLLAPSE',s:'THE MOUNTAIN FALLS',col:'#ff6a3a',seq:[['sx2',.75,['bearhug','dust'],8],['uppercut',.45,['dust','shock'],5,'up'],['sx1',.75,['quake','rocks','dustwave','cracks','dust'],16,'crash']]}},
+ crocodile:{m:[
+  {n:'TIDAL TAIL',d:'Massive tail swing with a burst of water',a:['sx1','attack_heavy'],t:.75,h:[.38],dm:11,st:.7,pu:320,r:340,fs:['drops'],fh:['splash','drops'],col:'#3fd2b0'},
+  {n:'SWAMP SURGE',d:'A wave of muddy water rushes the foe',a:['sx2','attack_heavy'],t:.95,h:[.6],dm:10,st:.7,pu:340,r:620,ry:70,fs:['tidal'],fh:['splash','mud'],col:'#7fae6a'},
+  {n:'DEATH ROLL',d:'Signature grab-and-roll',use:'crocodileRoll'},
+  {n:'AQUA SLAM',d:'Ground smash · huge splash and shockwave',a:['attack_heavy'],t:.7,h:[.36],dm:12,st:.75,pu:300,r:300,fh:['splash','wave','quake'],col:'#3fd2b0'},
+  {n:'PREDATOR AMBUSH',d:'Lunge through a burst of swamp water and mist',a:['special_pounce'],t:.7,h:[.38],dm:12,st:.7,pu:280,r:310,vx:640,fs:['splash','smoke'],fh:['splash','drops'],col:'#3fd2b0'}],
+  u:{n:'DEATH ROLL TSUNAMI',s:'THE SWAMP RISES',col:'#3fd2b0',flood:1,seq:[['sx2',.6,['tidal','splash'],5],['attack_heavy',.4,['splash'],5],['sx1',.5,['vortex','splash','drops'],5],['sx1',.5,['vortex','splash','drops'],5],['special_pounce',.65,['splash','wave','drops','shock'],13,'up']]}},
+ hippo:{m:[
+  {n:'RIVER CHARGE',d:'Charge forward through splashing water',use:'hippoRush'},
+  {n:'TITAN BITE',d:'Powerful close-range jaw attack',a:['bite'],t:.65,h:[.32],dm:13,st:.8,pu:250,r:255,fh:['splash','gash'],col:'#4aa9e8'},
+  {n:'MUDQUAKE',d:'Stomp that sends a muddy shockwave',a:['sx1','attack_heavy'],t:.85,h:[.48],dm:10,st:.65,pu:280,r:530,ry:55,fs:['mud'],fh:['quake','mud','dustwave'],col:'#8a7356'},
+  {n:'RIVER SLAM',d:'Grab and slam into a burst of water (beats block)',a:['sx2','attack_heavy'],t:.95,h:[.55],dm:15,st:1,pu:200,r:245,grab:1,down:1,fh:['splash','quake'],col:'#4aa9e8'},
+  {n:'TERRITORIAL ROAR',d:'Enormous roar · powerful shockwave',a:['sx3','bite'],t:.85,h:[.45],dm:6,st:.7,pu:460,r:440,fs:['roar'],fh:['shock'],col:'#d6f1ff'}],
+  u:{n:'RIVER RAMPAGE',s:'THE RIVER TITAN',col:'#4aa9e8',flood:1,seq:[['run',.55,['tidal','splash'],6],['uppercut',.45,['splash','shock'],6,'up'],['sx2',.7,['splash','mud','quake','wave','drops'],16,'crash']]}},
+ elephant:{m:[
+  {n:'THUNDER STOMP',d:'Stomp · massive shockwave',use:'stomp'},
+  {n:'TUSK CHARGE',d:'Powerful forward charge',use:'charge'},
+  {n:'TRUNK WHIP',d:'Swinging trunk strike',a:['sx1','attack_light'],t:.6,h:[.3],dm:10,st:.65,pu:300,r:340,fh:['gash','dust'],col:'#e4d7bd'},
+  {n:'SAVANNAH STORM',d:'Swirling dust storm',a:['sx2','attack_heavy'],t:1,h:[.3,.5,.7],dm:4.6,st:.55,pu:150,r:370,fs:['tornado','dust'],fh:['dust','bolts'],col:'#c6b7a0'},
+  {n:'TITAN TOSS',d:'Trunk grab and throw',use:'grab'}],
+  u:{n:'THUNDERING TITAN',s:'THE EARTH TREMBLES',col:'#ffe2b0',seq:[['victory',.6,['trumpet','dust'],0],['run',.5,['stampede','dust'],6],['uppercut',.45,['shock','bolts'],7,'up'],['attack_heavy',.75,['quake','dustwave','bolts','rocks','cracks'],15,'crash']]}},
+ eagle:{m:[
+  {n:'RAZOR WINGS',d:'Wing sweep sends cutting wind blades',a:['sx1','attack_heavy'],t:.7,h:[.44],dm:9,st:.6,pu:220,r:640,ry:90,fs:['wind','proj:wind'],fh:['featherburst'],col:'#ffffff'},
+  {n:'SKY DIVE',d:'Rise and dive onto the foe',use:'eagleSkyfall'},
+  {n:'FEATHER STORM',d:'Feathers and swirling wind engulf the foe',a:['sx2','attack_heavy'],t:.9,h:[.4,.6,.8],dm:4,st:.55,pu:80,r:470,fs:['feathers','wind'],fh:['featherburst'],col:'#ffe9a0'},
+  {n:'THUNDER TALONS',d:'Talon strike crackling with golden energy',a:['attack_heavy'],t:.6,h:[.3],dm:12,st:.7,pu:280,r:300,vx:250,fh:['bolts','gash'],col:'#ffe08a'},
+  {n:'CYCLONE WINGS',d:'Wing beats unleash a powerful gust',a:['special_b'],t:.8,h:[.4],dm:6,st:.5,pu:540,r:490,fs:['tornado','wind'],fh:['wind','feathers'],col:'#ffffff'}],
+  u:{n:'STORM OF THE SKIES',s:'THE SKY EMPEROR',col:'#ffe9a0',dark:1,seq:[['special_b',.55,['tornado','wind','feathers'],6,'up'],['jump',.45,['featherburst','wind'],0,'air'],['special_pounce',.7,['featherburst','bolts','shock','wind'],17,'crash']]}},
+ stag:{m:[
+  {n:'FOREST AWAKENING',d:'Grass and leaves erupt around the Stag',a:['sx1','special_b'],t:.9,h:[.5],dm:8,st:.7,pu:300,r:410,fs:['leafstorm','grass'],fh:['leafburst'],col:'#9fd86a'},
+  {n:'ANTLER CHARGE',d:'Powerful antler strike',use:'stagAntler'},
+  {n:"NATURE'S GRASP",d:'Roots rise and restrain the foe',a:['sx2','attack_heavy'],t:.9,h:[.55],dm:7,st:1.3,pu:20,r:570,ry:60,root:1.2,fs:['grass'],fh:['vines','grass'],col:'#7fcf3a'},
+  {n:'LEAF CYCLONE',d:'Wings whip up a storm of leaves',a:['special_c','special_b'],t:.9,h:[.35,.55,.75],dm:4,st:.5,pu:120,r:430,fs:['leafstorm'],fh:['leafburst'],col:'#9fd86a'},
+  {n:'EMERALD STRIKE',d:'Green-energy strike with flying leaves',a:['attack_heavy'],t:.62,h:[.3],dm:12,st:.7,pu:290,r:310,vx:250,fh:['leafburst','shock'],col:'#a8ff6a'}],
+  u:{n:'WRATH OF THE FOREST',s:'THE FOREST ANSWERS',col:'#a8ff6a',seq:[['sx2',.75,['vines','grass'],5],['special_pounce',.55,['leafstorm','dust'],7],['sx1',.75,['leafburst','leafstorm','grass','shock'],15,'up']]}},
+ snake:{m:[
+  {n:'VENOM SPIT',d:'Glowing green venom projectile (poisons)',a:['sx1','bite'],t:.7,h:[.46],dm:7,st:.55,pu:120,r:660,ry:90,venom:3,fs:['proj:venom'],fh:['venom'],col:'#8fe04a'},
+  {n:'SERPENT STRIKE',d:'Lightning-fast forward bite',use:'snakeVenom'},
+  {n:'VENOM CLOUD',d:'Green mist that poisons',a:['sx2','special_c'],t:.9,h:[.5],dm:5,st:.5,pu:60,r:390,venom:4,fs:['poison'],fh:['venom'],col:'#8fe04a'},
+  {n:'COILED CRUSHER',d:'Grab and constrict',use:'snakeCoil'},
+  {n:'FANG UPPERCUT',d:'Rising strike with emerald energy',a:['uppercut'],t:.6,h:[.24],dm:12,st:.9,pu:150,r:270,vy:-300,launch:1,fh:['venom','fangs'],col:'#a8ff4a'}],
+  u:{n:'VENOMOUS NIGHTMARE',s:'THE VENOM KING',col:'#8fe04a',dark:1,seq:[['sx2',.55,['poison'],3],['bite',.28,['venom'],4,'side'],['bite',.28,['venom'],4,'side'],['attack_light',.28,['venom'],4,'side'],['bite',.7,['kstrike','venom','shock'],14]]}},
+ majic:{m:[
+  {n:'ELEMENTAL CHAOS',d:'Water, fire, ice, lightning and wind in one blast (25%)',a:['ultra_move','special_b'],t:1,h:[.4,.65],dm:8,st:.7,pu:320,r:430,cost:25,fs:['splash','flames','flakes','wind'],fh:['flameburst','shards','bolts','splash'],col:'#b46bff'},
+  {n:"PREDATOR'S ARSENAL",d:'Lion, Tiger, Jaguar and Wolf claws in one flurry',a:['sx2','attack_light'],t:.9,h:[.12,.28,.44,.6,.76],dm:3,st:.45,pu:70,r:320,vx:250,fh:['gash','embers'],col:'#ffd36b'},
+  {n:'FROZEN SWAMP',d:'Icy water surge that freezes the foe',a:['special_c'],t:.9,h:[.55],dm:10,st:.8,pu:200,r:570,ry:70,fs:['tidal'],fh:['freeze','splash','shards'],col:'#9ce7ff'},
+  {n:'EARTH DESTROYER',d:'Grizzly slam + Elephant stomp + Badger eruption',a:['sx3','special_d'],t:.95,h:[.55],dm:12,st:.8,pu:340,r:520,ry:60,fs:['dust'],fh:['quake','rocks','cracks','dustwave'],col:'#e0a060'},
+  {n:'VENOM STORM',d:'Venom mist spun up in a wind vortex',a:['special_b'],t:.9,h:[.5],dm:7,st:.6,pu:180,r:470,venom:3,fs:['poison','tornado'],fh:['venom'],col:'#8fe04a'},
+  {n:'FOREST CATACLYSM',d:'Roots and leaves ride a water surge',a:['attack_heavy'],t:.9,h:[.5],dm:8,st:1.1,pu:60,r:530,ry:60,root:1,fs:['grass'],fh:['vines','leafburst','splash'],col:'#9fd86a'},
+  {n:'HYBRID TRANSFORMATION',d:'Absorbed traits surge · power up for 6 s',a:['special_d','special_b'],t:.8,h:[],buff:6,fs:['portal','after'],col:'#b46bff'},
+  {n:'ROYAL DEVASTATION',d:"Lion's roar, Tiger's claws, Eagle's dive",a:['special_pounce'],t:.9,h:[.3,.6],dm:7,st:.7,pu:300,r:330,vx:500,vy:-250,fs:['roar'],fh:['gash','featherburst','shock'],col:'#ffd36b'},
+  {n:'TITAN CRUSHER',d:'Hippo power, Grizzly grip, Elephant strength (beats block)',a:['bite'],t:1,h:[.5],dm:15,st:1,pu:300,r:250,grab:1,down:1,fh:['bearhug','splash','quake'],col:'#c99a70'},
+  {n:'ULTIMATE PREDATOR',d:'Signature strikes of many fallen fighters (50%)',a:['ultra_move','special_b'],t:1.1,h:[.15,.32,.5,.68,.86],dm:3.6,st:.45,pu:80,r:340,vx:300,cost:50,fh:['gash','embers','flakeburst','leafburst','featherburst'],col:'#b46bff'}],
+  u:{n:"THE KINGDOM'S END",s:'ALL BEASTS · ONE KING',col:'#b46bff',dark:1,storm:1,seq:[['sx1',.8,['portal','tornado','flakes','leafstorm','poison'],0],['ultra_move',.5,['bolts','flameburst','splash'],7,'up'],['special_c',.45,['shards','venom','featherburst'],7,'air'],['special_d',.75,['quake','rocks','bolts','splash','flameburst','leafburst','shock','dustwave'],18,'crash']]}}
+};
+const SXK=['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','su'];
+BTN.push(...SXK);
+// ---------- effects quality, screen shake & flash ----------
+let FXQ='high',RSHAKE=false,RFLASH=false;
+try{FXQ=localStorage.getItem('kotj-fxq')||(matchMedia('(pointer:coarse)').matches?'medium':'high');RSHAKE=localStorage.getItem('kotj-rshake')==='1';RFLASH=localStorage.getItem('kotj-rflash')==='1'}catch(_){}
+const FXQ_KEEP={low:.35,medium:.65,high:1},FXQ_ALWAYS=new Set(['spirit','bearhug','proj','cracks','fissure','pool','tidal','aftermark','gash','ring','gring','cobra','kcobra','vbite','vpuddle','icecluster','frostcone','frostpatch','dark','eyes','moon','tornado','vines','portal','skybolt','ha','roar','sheet','wave','vortex','goldaura','fog']);
+{const _P=P;P=function(o){if(FXQ!=='high'&&!FXQ_ALWAYS.has(o.sh)&&Math.random()>FXQ_KEEP[FXQ])return;return _P(o)}}
+{const _fu=fxUpdate;fxUpdate=function(dt){const r=_fu.apply(this,arguments);if(game){if(RSHAKE)game.shake=Math.min(game.shake||0,.05);if(RFLASH)game.flash=Math.min(game.flash||0,.12)}return r}}
+function sxOptLabel(){return{fxq:'EFFECTS: '+FXQ.toUpperCase(),shake:'SCREEN SHAKE: '+(RSHAKE?'LOW':'FULL'),flash:'FLASHES: '+(RFLASH?'LOW':'FULL')}}
+function sxOptsRefresh(){const L=sxOptLabel();document.querySelectorAll('.fxq-btn').forEach(b=>b.textContent=L.fxq);document.querySelectorAll('.rshake-btn').forEach(b=>b.textContent=L.shake);document.querySelectorAll('.rflash-btn').forEach(b=>b.textContent=L.flash)}
+function sxOptsInstall(){
+ const mk=(cls,parentSel,before)=>document.querySelectorAll(parentSel).forEach(p=>{if(p.querySelector('.'+cls))return;const b=document.createElement('button');b.className='secondary '+cls+(p.classList.contains('cover-menu')?' cover-setting':'');const ref=before?p.querySelector(before):null;ref?p.insertBefore(b,ref):p.appendChild(b)});
+ for(const c of['fxq-btn','rshake-btn','rflash-btn']){mk(c,'.fight-actions');mk(c,'#sel-opts','#so-close')}
+ mk('sx-moves-btn','.fight-actions');mk('sx-moves-btn','#sel-opts','#so-close');
+ document.querySelectorAll('.sx-moves-btn').forEach(b=>b.textContent='MOVE LIST');
+ sxOptsRefresh()}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b)return;
+ if(b.classList.contains('fxq-btn')){FXQ={high:'low',low:'medium',medium:'high'}[FXQ];try{localStorage.setItem('kotj-fxq',FXQ)}catch(_){}sxOptsRefresh()}
+ else if(b.classList.contains('rshake-btn')){RSHAKE=!RSHAKE;try{localStorage.setItem('kotj-rshake',RSHAKE?'1':'0')}catch(_){}sxOptsRefresh()}
+ else if(b.classList.contains('rflash-btn')){RFLASH=!RFLASH;try{localStorage.setItem('kotj-rflash',RFLASH?'1':'0')}catch(_){}sxOptsRefresh()}
+ else if(b.classList.contains('sx-moves-btn')){const id=game&&game.fighters?game.fighters[0].data.id:(document.getElementById('select')&&document.getElementById('select').dataset.f)||'lion';sxMoveList(id)}});
+// ---------- move list ----------
+function sxMoveList(id){let el=document.getElementById('sx-movelist');if(!el){el=document.createElement('div');el.id='sx-movelist';el.className='sx-movelist';document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('.sx-close'))el.classList.remove('on')})}
+ const D=SX[id];if(!D){return}const fd=roster.find(r=>r.id===id)||{name:id.toUpperCase()};
+ const row=(k,m)=>`<li><b>${m.n}</b><span class="in">${SX_GLYPH[k]}</span><i>${m.d||''}</i></li>`;
+ el.innerHTML=`<div class="sx-ml-card"><h3>${fd.name} · SPECIAL MOVES</h3><ol>${D.m.map((m,i)=>row(SX_IN[i],m)).join('')}</ol><div class="sx-ult"><b>ULTIMATE · ${D.u.n}</b><span class="in">${SX_GLYPH.U}</span></div><p class="sx-tip">On a phone or tablet, tap ★ MOVES during a fight for one-tap buttons.</p><button class="primary sx-close">CLOSE</button></div>`;
+ el.classList.add('on')}
+// ---------- touch: ★ MOVES panel ----------
+function sxTouchInstall(){const pad=document.getElementById('touch-pad');if(!pad||pad.querySelector('.sx-star'))return;
+ const right=pad.querySelector('.pad-right');const star=document.createElement('button');star.className='sx-star';star.textContent='★';star.setAttribute('aria-label','Special moves');right.insertBefore(star,right.firstChild);
+ const panel=document.createElement('div');panel.className='sx-panel hidden';pad.appendChild(panel);
+ const build=()=>{const id=game&&game.fighters&&game.fighters[0].data.id;const D=SX[id];if(!D)return;
+  panel.innerHTML=D.m.map((m,i)=>`<button data-sx="s${i+1}">${m.n}</button>`).join('')+`<button data-sx="su" class="sx-u">★ ${D.u.n}</button>`;
+  panel.querySelectorAll('button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();ac();touch[b.dataset.sx]=0;touchTap[b.dataset.sx]=1;panel.classList.add('hidden')}))};
+ star.addEventListener('pointerdown',e=>{e.preventDefault();if(panel.classList.contains('hidden'))build();panel.classList.toggle('hidden')});
+ setInterval(()=>{if(!game)panel.classList.add('hidden');const u=panel.querySelector('.sx-u');if(u&&game&&game.fighters)u.classList.toggle('ready',game.fighters[0].meter>=100)},300)}
+// ---------- motion input reading ----------
+function sxDirCode(f,inp){const fw=(inp.r&&f.dir===1)||(inp.l&&f.dir===-1),bk=(inp.r&&f.dir===-1)||(inp.l&&f.dir===1),dn=inp.dn||inp.bl,up=inp.j;return dn?(fw?3:bk?1:2):up?(fw?9:bk?7:8):fw?6:bk?4:5}
+const SXM={'236':[[1,2,3],[6,9]],'214':[[1,2,3],[4,7]],'46':[[4,7,1],[6,9,3]],'22':[[2],[5],[2]],'623':[[6],[2,1],[3]],'41236':[[4,7],[1,2],[3],[6,9]],'63214':[[6,9],[3,2],[1],[4,7]],'236236':[[2,1],[3],[6],[2,1],[3],[6,9]]};
+function sxMatch(hist,now,motion){const toks=SXM[motion];if(!toks)return false;let ti=toks.length-1,first=now;const win=toks.length>=4?.9:.5;
+ for(let i=hist.length-1;i>=0&&ti>=0;i--){const h=hist[i];if(now-h.t>win)break;if(toks[ti].includes(h.c)){if(ti===toks.length-1&&(i<hist.length-2||(now-h.t>.25&&i!==hist.length-1)))return false;first=h.t;ti--}}
+ return ti<0&&now-first<=win}
+function sxRead(f,inp,atkE,spE){const now=game.sxClock||0;
+ for(const k of SXK)if(inp[k])return k==='su'?'u':(+k.slice(1)-1);
+ if(!atkE&&!spE)return null;const H=f.sxHist||[],D=SX[f.data.id];if(!D)return null;
+ 
+ const order=['41236S','63214S','623A','623S','236A','214A','236S','214S','46S','46A'];
+ for(const code of order){const btn=code.slice(-1),mo=code.slice(0,-1),idx=SX_IN.indexOf(code);if(idx<0||idx>=D.m.length)continue;if((btn==='A'&&atkE)||(btn==='S'&&spE)){if(sxMatch(H,now,mo))return idx}}
+ if(spE&&(sxMatch(H,now,'236236')||sxMatch(H,now,'22'))&&f.meter>=100)return'u';
+ return null}
+function sxInput(f,o,inp,atkE,spE,dt,frozen){
+ const c=sxDirCode(f,inp);f.sxHist=f.sxHist||[];const H=f.sxHist;if(!H.length||H[H.length-1].c!==c){H.push({c,t:game.sxClock});if(H.length>14)H.shift()}
+ f.sxCd=f.sxCd||{};for(const k in f.sxCd)f.sxCd[k]=Math.max(0,f.sxCd[k]-dt);
+ f.sxParryT=Math.max(0,(f.sxParryT||0)-dt);f.sxAuraT=Math.max(0,(f.sxAuraT||0)-dt);f.sxBuffT=Math.max(0,(f.sxBuffT||0)-dt);f.sxSlowT=Math.max(0,(f.sxSlowT||0)-dt);f.sxRootT=Math.max(0,(f.sxRootT||0)-dt);
+ if(frozen||game.ko||game.sxu||f.stun>0||f.down>0||!SX[f.data.id])return false;
+ const pick=sxRead(f,inp,atkE,spE);if(pick===null||pick===undefined)return false;
+ // free to act, or cancelling a normal strike that just connected
+ const cancel=f.attack>0&&f.move_&&!f.move_.sx&&(f.move_===MOVES.claw||f.move_===MOVES.bite||(f.move_.base||f.move_)===MOVES.double)&&o.stun>0&&f.hitsDone>0;
+ if(f.attack>0&&!cancel)return false;
+ if(pick==='u'){if(f.meter<100||!f.ground)return false;sxUltStart(f,o);return true}
+ const def=SX[f.data.id].m[pick];if(!def)return false;
+ if((f.sxCd[pick]||0)>0){floatText(f.x,f.y-300,'RECHARGING','#9aa3ad');return true}
+ if(def.cost&&f.meter<def.cost){floatText(f.x,f.y-300,'NEED METER','#9aa3ad');return true}
+ if(cancel){f.attack=0;f.move_=null}
+ doMove(f,'sx:'+pick);return true}
+// ---------- performing a special ----------
+function sxAnimName(f,m){const A=(SPRITES[f.data.id]||{}).anims||{},list=(m&&m.sxAnim)||['attack_heavy'];for(const a of list)if(A[a])return a;return'attack_heavy'}
+function sxBuild(f,def){const p=f.data.power;const mv={t:def.t,hits:def.h||[],dmg:q=>(def.dm||0)+q*(def.dk!=null?def.dk:.6)*((def.h||[]).length>2?.4:1)*((f.sxBuffT||0)>0?1.15:1)*((f.sxAuraT||0)>0?1.1:1),range:def.r||300,stun:def.st||.6,push:def.pu||200,sx:def,sxAnim:def.a||['attack_heavy']};return mv}
+{const _dm=doMove;doMove=function(f,name){
+ if(typeof name!=='string'||!name.startsWith('sx:'))return _dm.apply(this,arguments);
+ const D=SX[f.data.id];let def;if(name.endsWith('c')){def=D.m[+name.slice(3,-1)].counter;def={...def,n:'COUNTER',col:D.m[+name.slice(3,-1)].col}}else def=D.m[+name.slice(3)];if(!def)return;
+ const idx=parseInt(name.slice(3));
+ if(def.use){_dm(f,def.use);f.sxCd=f.sxCd||{};f.sxCd[idx]=.3;return}
+ if(def.cost)f.meter=Math.max(0,f.meter-def.cost);
+ f.sxCd=f.sxCd||{};if(!name.endsWith('c'))f.sxCd[idx]=def.cd!=null?def.cd:(def.h&&def.h.length?.6:2.5);
+ f.bufA=0;f.bufS=0;const mv=sxBuild(f,def),o=game.fighters.find(x=>x!==f);
+ f.move_=mv;f.attack=mv.t;f.hitsDone=0;f.elapsed=0;f.chain=(f.chain||0)+1;f.comboLinked=o.stun>0&&f.combo>0;
+ setAction(f,'sx',mv.t);
+ if(def.vx)f.vx=f.dir*def.vx;if(def.vy){f.vy=def.vy;f.ground=false}
+ if(def.parry){f.sxParryT=def.parry;f.sxParryIdx=idx}
+ if(def.aura)f.sxAuraT=def.aura;if(def.buff){f.sxBuffT=def.buff;banner(def.n,'POWER SURGES',.9,def.col)}
+ if(def.tele){f.sxTele={kind:def.tele,at:Math.min(.4,(def.h[0]||.4)*.55),done:0}}
+ f.dojoMoveName=name;f.dojoMoveSpecial=true;
+ floatText(f.x,f.y-310,def.n,def.col||'#ffd36b');sfx(def.grab?'heavy':'whiff');if(def.st>=.8||def.cost)game.shake=Math.max(game.shake,.12);
+ f._pfxMove=mv;f._pfxAge=0;f._after=[];pBurst(f,'start',f.x,400+f.y-150,1)}}
+{const _ma=moveAnim;moveAnim=function(f,mv){if(mv&&mv.sx)return sxAnimName(f,mv);return _ma.apply(this,arguments)}}
+// teleports / burrow, during the move
+{const _up=update;update=function(dt){const r=_up.apply(this,arguments);if(!game||!game.fighters)return r;
+ for(const f of game.fighters){const T=f.sxTele;if(!T||T.done||!f.move_||!f.move_.sx){if(T&&(!f.move_||!f.move_.sx))f.sxTele=null;continue}
+  const o=game.fighters.find(x=>x!==f);if(f.elapsed>=T.at){T.done=1;
+   if(T.kind==='behind'){const nx=Math.max(80,Math.min(1020,o.x+o.dir*-1*0+(o.x>f.x?140:-140)));pBurst(f,'start',f.x,400+f.y-150,1);f.x=nx;f.dir=o.x>f.x?1:-1;for(let k=0;k<6;k++)P({kind:'pp',sh:'puff',x:f.x+R(-60,60),y:400+f.y-R(40,240),vx:R(-60,60),vy:R(-40,0),r:R(18,26),grow:40,life:.6,color:'#0f2422',alpha:.55})}
+   else if(T.kind==='under'){f.x=o.x-f.dir*60;for(let k=0;k<10;k++)P({kind:'pp',sh:'rock',x:o.x+R(-50,50),y:396,vx:R(-260,260),vy:R(-640,-300),g:1700,r:R(7,13),rot:R(0,6),vr:R(-9,9),life:R(.7,1),color:'#6b5440'});game.shake=Math.max(game.shake,.2)}}
+  if(T.kind==='under'&&f.elapsed<T.at)f._sxHide=1;else f._sxHide=0}
+ return r}}
+// hide the badger while he is underground
+{const _dF=drawFighter;drawFighter=function(f,i,ghost){if(f&&f._sxHide&&f.move_&&f.move_.sx){const a=c.globalAlpha;c.globalAlpha=.0;const r=_dF.apply(this,arguments);c.globalAlpha=a;return r}return _dF.apply(this,arguments)}}
+// reach + extra on-hit results (grab beats block, launch, roots, slow, venom, freeze) + parry counters
+function sxReach(f,o,mv,d,big,facing){const def=mv.sx;if(def.tele==='under')return Math.abs(f.y-o.y)<200;
+ const r=def.r*(def.r>400?1:artScale(f))+big;return d<=r&&Math.abs(f.y-o.y)<(def.ry||150)&&(facing||def.r>400||def.tele)}
+{const _rh=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i];
+ if((o.sxParryT||0)>0&&!(mv.sx&&mv.sx.grab)&&o.attack>0){o.sxParryT=0;o.attack=0;o.move_=null;spark(o.x+o.dir*30,o.y-170,'#ffffff',16);game.hitstop=Math.max(game.hitstop||0,.08);f.stun=Math.max(f.stun||0,.35);doMove(o,'sx:'+o.sxParryIdx+'c');return}
+ const hp0=o.hp+(o.bars||0)*1000,st0=o.stun||0,blk=o.block;
+ if(mv.sx&&mv.sx.grab&&o.ground)o.block=false;
+ const r=_rh.apply(this,arguments);
+ const landed=o.hp+(o.bars||0)*1000<hp0||(o.stun||0)>st0;
+ if(mv.sx&&landed&&!game.ko){const D=mv.sx;
+  if(D.launch||D.down){o.down=Math.max(o.down||0,D.down?.7:.55);o.vy=D.launch?-520:-260;o.vx=f.dir*(D.launch?160:240);o.ground=false}
+  if(D.root){o.sxRootT=D.root;o.coilT=Math.max(o.coilT||0,D.root)}
+  if(D.slow){o.sxSlowT=D.slow;o.venomT=o.venomT||0;floatText(o.x,o.y-290,'CHILLED','#bff4ff')}
+  if(D.venom){o.venomT=Math.max(o.venomT||0,D.venom);o.venomBy=i}
+  if(D.freeze){o._frozenT=.9;o._iceShatter=1}}
+ if(mv.sx&&mv.sx.grab)o.block=o.block&&blk;
+ return r}}
+// slowed (Arctic Breath) fighters move at 70%
+{const _ph=physics;physics=function(f,dt){if((f.sxSlowT||0)>0&&f.ground&&f.attack<=0)f.vx*=.7;return _ph.apply(this,arguments)}}
+// ---------- the ultimate finisher ----------
+function sxFx(f,kinds,x,y,big){const save=PFX[f.data.id],mv=f.move_;f.move_=null;PFX[f.data.id]={...save,start:kinds,hit:kinds};try{pBurst(f,'hit',x,y,big||1)}finally{PFX[f.data.id]=save;f.move_=mv}}
+function sxUltStart(f,o){const D=SX[f.data.id].u,i=game.fighters.indexOf(f);f.meter=0;hud();
+ const d=Math.abs(o.x-f.x),reach=380+Math.max(0,bodyFront(o)-90);
+ floatText(f.x,f.y-330,D.n,D.col);game.flash=Math.max(game.flash||0,.35);sfx('instinct');
+ if(d>reach||(o.block&&o.ground)||o.down>0||(o.hp<=0&&o.bars<=1)){ // blocked or out of reach: the meter is spent, short recovery
+  f.move_=sxBuild(f,{t:.7,h:[],r:0});f.attack=.7;setAction(f,'sx',.7);f.move_.sxAnim=[D.seq[0][0],'attack_heavy'];
+  if(o.block&&d<=reach){spark(o.x-o.dir*20,o.y-170,'#9fd9ff',14);floatText(o.x,o.y-260,'ULTIMATE BLOCKED','#9fd9ff')}return}
+ game.sxu={i,D,step:-1,t:0,st:0,start:o.hp,ox:o.x,dmg:0};f.attack=99;o.stun=99;o.attack=0;o.move_=null;o.block=false;
+ banner(D.n,D.s,1.6,D.col);say('Ultimate');AU&&AU.duckMusic&&AU.duckMusic(.35);
+ if(D.dark)game.sxDark=1;if(D.flood)sxFx(f,['tidal','splash'],o.x,400+o.y-120,1.3);
+ if(D.moon)P({kind:'pp',sh:'moon',x:(f.x+o.x)/2,y:120,life:3.5});
+ if(D.storm)game.sxStorm=1;
+ sxUltNext()}
+function sxUltNext(){const u=game.sxu,f=game.fighters[u.i],o=game.fighters[1-u.i];u.step++;u.st=0;
+ if(u.step>=u.D.seq.length){return sxUltEnd()}
+ const [a,dur,fx,dm,mode]=u.D.seq[u.step];u.cur={a,dur,fx,dm,mode,hit:0};
+ f.move_={t:dur,hits:[],dmg:()=>0,range:0,stun:0,push:0,sx:{n:u.D.n},sxAnim:[a,'attack_heavy','attack_light']};f.attack=dur;f.elapsed=0;setAction(f,'sx',dur);
+ if(mode==='side'){const s=u.step%2?1:-1;f.x=Math.max(70,Math.min(1030,o.x+s*(120+bodyFront(o)+bodyFront(f)*.6)));f.dir=o.x>f.x?1:-1;for(let k=0;k<4;k++)P({kind:'pp',sh:'puff',x:f.x+R(-40,40),y:400+f.y-R(40,220),vx:R(-50,50),vy:-20,r:R(14,22),grow:40,life:.4,color:u.D.col,alpha:.35})}}
+function sxUltStep(dt){const u=game.sxu,f=game.fighters[u.i],o=game.fighters[1-u.i],C=u.cur;u.t+=dt;u.st+=dt;
+ f.attack=Math.max(.01,C.dur-u.st);f.actionTime=f.attack;f.elapsed=u.st;
+ // choreography: keep the pair together; lift / fly / crash
+ const tx=o.x-f.dir*(C.mode==='side'?-0:120);if(C.mode!=='side')f.x+=(tx-f.x)*Math.min(1,dt*10);
+ const lift=C.mode==='up'||C.mode==='air'?Math.min(1,u.st/C.dur):0;
+ if(C.mode==='up'){o.y+=(-200*lift-o.y)*Math.min(1,dt*8);o.ground=false}
+ else if(C.mode==='air'){o.y+=(-220-o.y)*Math.min(1,dt*8);f.y+=(-240-f.y)*Math.min(1,dt*8);f.ground=false;o.ground=false}
+ else if(C.mode==='crash'){const k=Math.min(1,u.st/(C.dur*.45));o.y=o.y*(1-k);f.y=f.y*(1-k)}
+ else{o.y+=(0-o.y)*Math.min(1,dt*8);f.y+=(0-f.y)*Math.min(1,dt*8)}
+ o.vx=0;o.vy=0;f.vx=0;f.vy=0;o.stun=99;
+ if(!C.hit&&u.st>=C.dur*.42){C.hit=1;const cx=o.x-f.dir*bodyFront(o)*.6,cy=400+o.y-150;
+  sxFx(f,C.fx,cx,cy,C.mode==='crash'?1.35:1.05);
+  if(C.dm>0){const dmg=C.dm*(1-(o.data.defense-7)*.03)*(mode==='training'?0:1);u.dmg+=dmg;o.hp-=dmg;o.hitFlash=.09;f.combo=(f.combo||0)+1;
+   spark(cx,o.y-150,u.D.col,C.mode==='crash'?34:16);snd(C.mode==='crash'?'sfx.groundSlam':'sfx.punch',C.mode==='crash'?'boom':'heavy');
+   game.shake=Math.max(game.shake,C.mode==='crash'?.45:.18);game.flash=Math.max(game.flash||0,C.mode==='crash'?.4:.12);game.hitstop=.05;
+   $('p'+(u.i+1)+'-combo').textContent=f.combo+' HITS';$('p'+(u.i+1)+'-combo').classList.add('active');
+   if(C.mode==='crash'){game.slow=.35;game.slowT=.55}}
+  if(o.hp<=0&&o.bars>1){o.bars--;o.hp+=BAR;floatText(o.x,o.y-320,'BAR BROKEN','#ff9a4a');majicBossPhase(o)}
+  hud()}
+ if(u.st>=C.dur)sxUltNext()}
+function sxUltEnd(){const u=game.sxu,f=game.fighters[u.i],o=game.fighters[1-u.i];game.sxu=null;game.sxDark=0;game.sxStorm=0;
+ f.attack=0;f.move_=null;f.action='idle';f.y=0;f.ground=true;o.stun=.4;o.y=Math.min(0,o.y);
+ banner(u.D.n,Math.round(u.dmg)+' DAMAGE',1.2,u.D.col);endCombo(u.i,true);
+ if(o.hp<=0){o.hp=0;o.potential=0;koFinish(o,f,false)}else{o.down=.8;o.vx=f.dir*420;o.vy=-300;o.ground=false}
+ hud()}
+// run the ultimate in place of the normal update
+{const _up=update;update=function(dt){if(game)game.sxClock=(game.sxClock||0)+dt;if(game&&game.sxu){sxUltStep(dt);for(const f of game.fighters)if(f!==game.fighters[game.sxu?game.sxu.i:0]){f.hitFlash=Math.max(0,(f.hitFlash||0)-dt)}return}return _up.apply(this,arguments)}}
+// darken the arena during cinematic ultimates; MAJIC's elemental storm
+{const _df=drawFx;drawFx=function(){if(game&&(game.sxDark||game.sxDarkA>0)){game.sxDarkA=Math.max(0,Math.min(1,(game.sxDarkA||0)+(game.sxDark?.06:-.05)));c.save();c.setTransform(1,0,0,1,0,0);c.globalAlpha=.5*game.sxDarkA;c.fillStyle='#05030a';c.fillRect(0,0,c.canvas.width,c.canvas.height);c.restore()}
+ if(game&&game.sxStorm&&Math.random()<.6){const kinds=[['flake','#ffffff'],['leaf','#5ea83a'],['drop','#d8fbff'],['puff','#8fe04a']],k=kinds[Math.floor(Math.random()*4)],f=game.fighters[game.sxu?game.sxu.i:0];P({kind:'pp',sh:k[0],cx:f.x,cy:400+f.y-170,ang:R(0,6.28),rad:R(80,220),av:R(3,5),rise:-30,rot:R(0,6),vr:R(-6,6),r:k[0]==='puff'?R(16,24):R(8,16),life:.9,orbit:1,color:k[1],alpha:.3,grow:20})}
+ return _df.apply(this,arguments)}}
+// ---------- sprite: play the special's animation, timed so its strike frame lands on the hit ----------
+function sxFrame(f,A){const m=f.move_;const an=sxAnimName(f,m);const n=A[an][0];const p=phase(f);
+ const q0=typeof SPRITE_PEAK!=='undefined'&&SPRITE_PEAK[f.data.id]&&SPRITE_PEAK[f.data.id][an];const h=m&&m.hits&&m.hits.length?m.hits[0]/m.t:0;
+ let ap=p*p*(3-2*p);if(q0&&h){const q=Math.max(.25,Math.min(.85,q0));ap=p<h?p/h*q:q+(p-h)/(1-h)*(1-q)}
+ if(an==='block')return[an,Math.min(n-1,Math.floor(p*n*1.6))];
+ if(an==='run'||an==='dash')return[an,Math.floor(p*n*2)%n];
+ return[an,Math.min(n-1,Math.floor(ap*n))]}
+// ---------- CPU fighters use specials and ultimates too ----------
+{const _ci=cpuInput;cpuInput=function(i){const k=_ci.apply(this,arguments);const f=game.fighters[i],o=game.fighters[1-i],D=SX[f.data.id];
+ if(!D||mode==='training'||!f.ai||f.stun>0||f.attack>0||!f.ground||game.ko)return k;const lvl=f.ai.level,dt=game.dt,d=Math.abs(o.x-f.x);
+ if(f.meter>=100&&d<360&&!o.block&&Math.random()<dt*(.25+lvl*.6)){k.su=true;return k}
+ if(Math.random()<dt*(.18+lvl*.5)){const opts=D.m.map((m,j)=>[m,j]).filter(([m,j])=>!m.parry&&!(m.cost&&f.meter<m.cost)&&!((f.sxCd||{})[j]>0)&&(m.use||d<=(m.r||300)*1.05+40));
+  if(opts.length){const [m,j]=opts[Math.floor(Math.random()*opts.length)];k['s'+(j+1)]=true}}
+ else if(o.attack>0&&d<330&&Math.random()<dt*lvl*.6){const j=D.m.findIndex(m=>m.parry);if(j>=0)k['s'+(j+1)]=true}
+ return k}}
+sxOptsInstall();sxTouchInstall();
+
 })();

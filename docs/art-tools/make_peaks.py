@@ -4,7 +4,7 @@ import json,numpy as np
 from PIL import Image
 G='/home/claude/king-of-the-jungle/game'
 d=json.loads(open(G+'/js/sprites-hd.js').read().split('=',1)[1].strip().rstrip(';'))
-ATT=['attack_light','bite','claw_swipe','attack_heavy','uppercut','special_pounce','special_b','pounce','special_earth_slam']
+ATT=['attack_light','bite','claw_swipe','attack_heavy','uppercut','special_pounce','special_b','pounce','special_earth_slam','sx1','sx2','sx3']
 out={}
 for fid,v in d.items():
   out[fid]={}

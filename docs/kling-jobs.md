@@ -359,3 +359,12 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - feather green Ac6_zFoD31cLF8rfCs-FWKyKd_Wn_5qeUMRAEQ2ODgiGoV-OFM_HT8rPC6vaIXUCFEo-FVjI
 - rock green AftxqDXqb3Q4tg8uk2cj8KtCLmvc6aKX25t420yM3R7uhGzqeP9l07t8UMAF-alovpE_mTqK
 - paw green AXdnACalPVIdFCzS5San5ZOl1xKkXvzJXJwMv2wWuiK7uWkAPLJhABLan9Li2m_M9NJJWaL1
+
+## Special-move spec animations (kling-video-v3_0_turbo, 1080p, 5 s, side starters) — 2026-11-11
+- crocodile sx1 AUOihdqjqDQ2wDszlg_BBQp7ytI4ohSma07umB_1zipfv_tqNGsonT_m8SPCMzSQvcXRBfD6
+- crocodile sx2 AVXfSZSjQ61qrCTvrady8lx9TXByPtYayPTp-asG0-1atY274_Lms2w14433VplK9zBRFZBB
+- leopard sx1 AcpGScJd_Q2iOOoIteFLC40aKUHxUCD8SrQHzh20w8m8VwjI7khp6144RvKauGgEnHlgGJoA
+- leopard sx2 AaQCzgpTlpxhP9uVTPyD_ryVo0vqp--HhHjnb5aoq9pdxu2-6fWoNV0vO4Bjxol4iZlp247Q
+- leopard sx3 Aek-UVE0G0J9nieyLgSTq9oh9dCIigvjGMm3EzUxX_OnF4z8XseMjFFqBFikVdkxAkmpk7j8
+- stag sx1 Adiq5d5X6DePwyzYyjGdSQhTCSTx6yCZyBYX0vJQxyaOg2Xf8I_AOcePTwHpiuHQW_VUCV_A
+- stag sx2 AUMYvLa5svLcpW-FCyJ6ZQhBc1iSy4UdH3pD_uJ7_TLYD_LrApNzbf5BYy8jUR7bkX37Lo_Y
