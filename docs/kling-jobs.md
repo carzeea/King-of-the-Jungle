@@ -346,3 +346,16 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - majic street AZKATSW3MIcXzerI66yGD4mfST6ly6mUUtVwwmWNWbHAIz953qSgCwiZrvXQXUG5_JSfgYR0
 - majic hybrid Afp_6CxD9uIUIuuZ9bPh5zaj10DYLhMCui-wbLWaqD30CBIa46A6qcA8CTuKCxbVZpL13U_-
 - lion hybrid AWDJ6LlZsZlMm671xamZ3m7K101H5WuuqJD2KL6ry_N5BKxkRSMGdpqcjFKF4b3oZpE-p-Uf
+
+## Realistic effect textures (gemini-3.1-flash-image, 10 cr each) — 2026-11-11
+- fire black AYiWGQNdwwo3kBZO4sJw4vqm9gYEcHAEuItDTgXnDzq7_A8KT8qWe8EFdsx5NQOEZk8R2qdS
+- snow black AdDbzMpW-hDuRy2yXnEcPpmDvodFLzsL-y9dwbq5KC8yOgilC0Iet7ZBjEXFA1KXAWXpSW9a
+- ice black AWO5xzn69Wuf2McF3kepwBE1vzffG3c-9LvJnhk7etxIvYMtedf9xjvkUvg3HcWOpzUMl9vx
+- water black ASMItebNEyRYBA9dwWI7uqtgWnjZqZT2_tEoRHrv_Os6qYjLLMMjdzLCA8t8H6NGyP0nTz0q
+- ember black Afvr8O5Y_m_QjtWoEJ-3R9R5Idp3H_sQ2777yi2RT6k3DEWa5kCO5G2etiCcZsBWg4vn6yu6
+- smoke black Abbgi7gUxFRCi8U_TrZ0Xa0Fm2kikWQ6pcAXHYOoZK42PXc8cuHDrQnxUhOe4mWtbaGcw_tp
+- venom black AUD_OCz59C5pk2-j1BHO3CiRcKgkXm-5BKHTGvrnlVSy0Em-kglFdNJ9STxOKjJGl0Z9KODG
+- leaf magenta AShhq57Zewkl9IipfsuyPy8iMtEQZDiDi0g25qKA4JFVFVIjPSqU-airxe-WUuqwMQbWFx7c
+- feather green Ac6_zFoD31cLF8rfCs-FWKyKd_Wn_5qeUMRAEQ2ODgiGoV-OFM_HT8rPC6vaIXUCFEo-FVjI
+- rock green AftxqDXqb3Q4tg8uk2cj8KtCLmvc6aKX25t420yM3R7uhGzqeP9l07t8UMAF-alovpE_mTqK
+- paw green AXdnACalPVIdFCzS5San5ZOl1xKkXvzJXJwMv2wWuiK7uWkAPLJhABLan9Li2m_M9NJJWaL1

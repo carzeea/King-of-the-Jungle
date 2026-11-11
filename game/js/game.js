@@ -2878,7 +2878,7 @@ addUnlocked();if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
-window.__kotj={fx:(i,st)=>{const f=game&&game.fighters[i];if(f)pBurst(f,st||'start',f.x,300,1)},rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={fx:(i,st)=>{const f=game&&game.fighters[i],o=game&&game.fighters[1-i];if(f)pBurst(f,st||'start',st==='hit'&&o?o.x-f.dir*20:f.x,st==='hit'&&o?400+o.y-160:300,1)},rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 (()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
  w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-gfx',()=>{setGfx(GFX==='sharp'?'auto':'sharp');selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
 /* ---------- V2 Power Moves & Effects (drawn, recognizable effects; no damage/timing changes) ---------- */
@@ -2890,7 +2890,7 @@ const PFX={
  wolf:{a:'#7fb3ff',b:'#e8f2ff',sc:'#8fc8ff',start:['moon','spirit:rise','howl','ghostpack'],hit:['gash','spirit'],gash:3,gc:'#cfe3ff',after:'brightness(1.2) saturate(.2) sepia(1) hue-rotate(170deg) saturate(3)'},
  hyena:{a:'#ff5a3a',b:'#ffcf6b',sc:'#ff4a2a',start:['pack','cackle'],hit:['gash','cackle','dust','embers'],gash:3,gc:'#ff8a5a'},
  badger:{a:'#c9935a',b:'#6b4a2a',sc:'#e0a060',start:['eruption'],hit:['cracks','rocks','dust'],gash:0},
- grizzly:{a:'#c0442e',b:'#c99a70',sc:'#ff6a3a',start:['spirit:rise','dust'],hit:['gash','fissure','rocks','cracks'],gash:4,gc:'#ff6a4a'},
+ grizzly:{a:'#c0442e',b:'#c99a70',sc:'#ff6a3a',start:['spirit:rise','dust'],hit:['bearhug','fissure','rocks','cracks'],gash:4,gc:'#ff6a4a'},
  crocodile:{a:'#3fd2b0',b:'#d8fbff',sc:'#3fe0c0',start:['pool'],hit:['vortex','splash'],gash:0},
  hippo:{a:'#4aa9e8',b:'#d6f1ff',sc:'#5ab9f8',start:['spirit:rise','tidal'],hit:['splash','wave','shock'],gash:0},
  elephant:{a:'#c6b7a0',b:'#8a7356',sc:'#ffe2b0',start:['spirit:rise','trumpet','stampede'],hit:['fissure','cracks','rocks','quake'],gash:0,big:1.4,sh2:300},
@@ -2909,9 +2909,53 @@ function HS(f,o){const side=game.fighters.indexOf(f);if(side<0)return;const now=
  let el=hud.querySelector('.hud-spirit');if(!el){el=document.createElement('div');el.className='hud-spirit';el.innerHTML='<img alt="">';hud.appendChild(el)}
  const img=el.firstChild;img.src='assets/fx/spirit-'+id+'.webp?v=13';img.style.filter=o.filter||'none';el.style.setProperty('--sp',col);
  el.classList.remove('on');void el.offsetWidth;setTimeout(()=>el.classList.add('on'),Math.round((o.delay||0)*1000));}
+// ---- Realistic effect images (assets/fx/real): real fire, snow, ice, water, embers, smoke, venom, leaves, feathers, rocks, bear arm ----
+const RT={};{const V='?v=1';for(const n of['fire','snow','ice','water','ember','smoke','venom','leaf','feather','rock']){RT[n]=[];for(let i=0;i<9;i++){const im=new Image();im.decoding='async';im.src='assets/fx/real/'+n+'-'+i+'.webp'+V;RT[n].push(im)}}
+ RT.paw=new Image();RT.paw.src='assets/fx/real/paw.webp'+V}
+const _rtOk=im=>im&&im.complete&&im.naturalWidth>0;
+function rtPick(p,n,idx){if(p._tn!==n){p._tn=n;p._ti=idx?idx[Math.floor(Math.random()*idx.length)]:Math.floor(Math.random()*9);p._tf=Math.random()<.5?-1:1}const im=RT[n][p._ti];return _rtOk(im)?im:null}
+function rtDraw(im,size,flip){const s=size/Math.max(im.naturalWidth,im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;if(flip<0)c.scale(-1,1);c.drawImage(im,-w/2,-h/2,w,h)}
+const _rtTint=new Map();
+function rtTinted(im,col){const key=im.src+col;let cv=_rtTint.get(key);if(cv)return cv;cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;const x=cv.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='source-atop';x.globalAlpha=.78;x.fillStyle=col;x.fillRect(0,0,cv.width,cv.height);_rtTint.set(key,cv);if(_rtTint.size>160)_rtTint.delete(_rtTint.keys().next().value);return cv}
+function rtDrawC(cv,size,flip){const s=size/Math.max(cv.width,cv.height),w=cv.width*s,h=cv.height*s;if(flip<0)c.scale(-1,1);c.drawImage(cv,-w/2,-h/2,w,h)}
+const _isFire=col=>/^#ff[7-9a-f]/i.test(col||'');
+// draws a particle with a real image; returns false to fall back to the drawn shape
+function rtFx(p,k,pr){let im;
+ switch(p.sh){
+ case'flame':if(!(im=rtPick(p,'fire')))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5)*.95;c.translate(p.x,p.y-p.r*.8);c.rotate(Math.sin(p.t*14+p._ti)*.08);rtDraw(im,p.r*3.4*(.65+.35*k),p._tf);return true;
+ case'flake':if(!(im=rtPick(p,'snow')))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.6);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.5,1);return true;
+ case'shard':if(!(im=rtPick(p,'ice')))return false;c.globalAlpha=Math.min(1,k*1.4);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.8,p._tf);c.globalCompositeOperation='lighter';c.globalAlpha*=.35;rtDraw(im,p.r*2.8,1);return true;
+ case'leaf':if(!(im=rtPick(p,'leaf')))return false;c.globalAlpha=Math.min(1,k*1.8);c.translate(p.x,p.y);c.rotate(p.rot||0);c.scale(1,.35+.65*Math.abs(Math.cos((p.rot||0)*1.7)));rtDraw(im,p.r*2.3,p._tf);return true;
+ case'feather':if(!(im=rtPick(p,'feather',p.color==='#ffffff'?[0,1,2,6,7,8]:[3,4,5])))return false;c.globalAlpha=Math.min(1,k*1.8);c.translate(p.x+Math.sin(p.sway||0)*8,p.y);c.rotate((p.rot||0)+Math.sin(p.sway||0)*.5);rtDraw(im,p.r*2.7,p._tf);return true;
+ case'rock':if(!(im=rtPick(p,'rock')))return false;c.globalAlpha=Math.min(1,k*2);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*2.7,p._tf);return true;
+ case'puff':{if(!(im=rtPick(p,'smoke')))return false;c.globalAlpha=Math.min(1,k*(p.alpha||.35)*2.4);c.translate(p.x,p.y);c.rotate(p._ti*.7);rtDrawC(rtTinted(im,p.color||'#ffffff'),p.r*2.9,p._tf);return true}
+ case'wisp':{if(!(im=rtPick(p,'smoke')))return false;c.globalCompositeOperation='lighter';c.globalAlpha=k*.6;c.translate(p.x,p.y);rtDrawC(rtTinted(im,p.color||'#ffffff'),p.r*2.6,p._tf);return true}
+ case'drop':{const ember=p.glow&&_isFire(p.color),ven=p.glow&&!ember;
+  if(!(im=ember?rtPick(p,'ember',[3,4,5,6,8,0,2]):ven?rtPick(p,'venom',[0,4,7,8,3]):rtPick(p,'water',[6,7,8])))return false;
+  c.translate(p.x,p.y);if(ember){c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.4);c.rotate(p._ti);rtDraw(im,p.r*11,p._tf);return true}
+  c.globalAlpha=Math.min(1,k*1.5);if(ven)c.globalCompositeOperation='lighter';c.rotate(Math.atan2(p.vy||1,p.vx||0)-1.5708);rtDraw(im,p.r*(ven?3.6:3.4),1);return true}
+ case'sheet':{if(!(im=rtPick(p,'water',[0,1,2])))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.6);c.translate(p.x,p.y);const w=(110+pr*170)*p.big,s=w/im.naturalWidth;c.scale(p._tf,1+pr*.3);c.drawImage(im,-w/2,-im.naturalHeight*s,w,im.naturalHeight*s);return true}
+ case'vortex':{const a=RT.water;if(!_rtOk(a[3])||!_rtOk(a[4]))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5);c.translate(p.x,p.y);c.scale(1,.55);
+  for(let s=0;s<3;s++){const an=pr*7+s*2.09+(p._sd||(p._sd=Math.random()*6)),rad=(40+pr*70)*p.big;c.save();c.translate(Math.cos(an)*rad,Math.sin(an)*rad);c.rotate(an+1.57);rtDraw(a[3+s],(120+pr*60)*p.big,1);c.restore()}return true}
+ case'wave':{const im=RT.water[[3,4,5][(p._wi??(p._wi=Math.floor(Math.random()*3)))]];if(!_rtOk(im))return false;c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.5);c.translate(p.x+p.dir*pr*260*p.big,p.y-50*p.big);c.scale(p.dir,1);c.rotate(-.35);rtDraw(im,(170-pr*50)*p.big,1);return true}
+ case'rt':{if(!(im=rtPick(p,p.tex,p.idx)))return false;c.globalCompositeOperation=p.add?'lighter':'source-over';c.globalAlpha=Math.min(1,k*1.6)*(p.alpha||1);c.translate(p.x,p.y);c.rotate(p.rot||0);rtDraw(im,p.r*(1+(p.grow||0)*pr),p._tf);return true}
+ case'bearhug':{im=RT.paw;if(!_rtOk(im))return true;const close=Math.min(1,p.t/.22),sq=p.t>.22?Math.sin((p.t-.22)*38)*Math.max(0,1-(p.t-.22)*2.2):0;
+  const W=245*p.big,H=W*im.naturalHeight/im.naturalWidth,gap=(215-close*170)*p.big-sq*8;c.globalAlpha=Math.min(1,k*2.2,p.t*8);
+  for(const s of[-1,1]){c.save();c.translate(p.x+s*gap,p.y+(s<0?-18:16)*p.big);c.scale(-s,1);c.rotate(s<0?.06:-.05);c.drawImage(im,-W,-H/2,W,H);c.restore()}return true}
+ }return false}
+// Hippo's tidal wave: real breaking water along the crest over the drawn wave
+{const _dT=dTidal;dTidal=function(p,k){c.save();c.globalAlpha*=.55;_dT(p,k);c.restore();const W=RT.water;
+ const m=Math.min(1,p.t/(p.life*.7)),mm=m*m*(3-2*m),front=p.x+(p.x1-p.x)*mm,H=230*Math.min(1,p.t/.15)*(1-Math.max(0,(p.t-p.life*.75)/(p.life*.25))*.85);
+ c.save();c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,k*1.6);
+ for(let i=0;i<6;i++){const im=W[[3,4,5,0,1,2][i]];if(!_rtOk(im))continue;c.save();c.translate(front-p.dir*i*48,398-H*(.9-i*.11));c.scale(p.dir,1);c.rotate(-.25-i*.05);rtDraw(im,H*(1.05-i*.1)+40,1);c.restore()}
+ c.restore()}}
 function pBurst(f,stage,x,y,big){
  const th=PFX[f.data.id];if(!th||!game)return;const d=f.dir,B=big*(th.big||1);
  for(const k of (stage==='start'?th.start:th.hit)){
+  if(k==='bearhug'){const now=performance.now();if(now-(f._bhT||0)>900){f._bhT=now;P({kind:'pp',sh:'bearhug',x,y:y+10,life:.85,big:B});game.shake=Math.max(game.shake,.22);for(let i=0;i<5;i++)P({kind:'pp',sh:'puff',x:x+R(-70,70),y:y+R(-30,40),vx:R(-90,90),vy:R(-50,0),r:R(14,22),grow:40,life:.7,delay:.2,color:'#b89a70',alpha:.35})}continue}
+  if(k==='venom')for(let i=0;i<3;i++)P({kind:'pp',sh:'rt',tex:'venom',idx:[1,5,6,8,2],add:1,x:x+R(-40,40),y:y+R(-30,20),rot:R(0,6.28),r:R(70,110)*B,grow:.4,life:.5,delay:i*.04});
+  if(k==='splash')for(let i=0;i<2;i++)P({kind:'pp',sh:'rt',tex:'water',idx:[3,4,5],add:1,x:x+R(-50,50),y:y-R(30,80),rot:R(-.4,.4),r:R(150,210)*B,grow:.35,life:.45,delay:i*.05});
+  if(k==='shards'||k==='icecluster')for(let i=0;i<4;i++)P({kind:'pp',sh:'rt',tex:'snow',add:1,x:x+R(-60,60),y:y+R(-60,40),rot:R(0,6.28),r:R(26,40)*B,grow:.3,life:.6,delay:i*.03});
   if(k==='flames')for(let i=0;i<14;i++)P({kind:'pp',sh:'flame',x:f.x+R(-70,70),y:400+f.y-R(0,160),vx:R(-20,20),vy:R(-170,-80),r:R(14,26),life:R(.45,.8),delay:i*.02,a:th.a,b:th.b});
   else if(k==='flameburst')for(let i=0;i<16;i++){const an=R(0,6.28);P({kind:'pp',sh:'flame',x,y,vx:Math.cos(an)*R(120,320),vy:Math.sin(an)*R(120,320)-120,r:R(14,24)*B,life:R(.35,.6),a:th.a,b:th.b})}
   else if(k==='roar')for(let i=0;i<3;i++)P({kind:'pp',sh:'roar',x:f.x+d*60,y:400+f.y-190,dir:d,delay:i*.09,life:.55,color:i%2?th.b:th.a,big:B});
@@ -3158,7 +3202,7 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
   if(game&&game.fighters)for(const f of game.fighters){if(!(f._pfxMove&&f.move_===f._pfxMove))continue;const th=PFX[f.data.id];if(!th)continue;
    const a=Math.min(1,(f._pfxAge||0)*5);c.save();c.globalAlpha=.55*a;c.strokeStyle=th.a;c.lineWidth=3;c.shadowColor=th.a;c.shadowBlur=14;c.beginPath();c.ellipse(f.x,402,95+Math.sin(performance.now()/90)*8,15,0,0,Math.PI*2);c.stroke();c.restore()}
   _df.apply(this,arguments);
-  for(const p of game.fx){if(p.kind!=='pp'||p.delay>0||p.sh==='aftermark')continue;const k=Math.max(0,1-p.t/p.life),pr=Math.min(1,p.t/p.life);c.save();
+  for(const p of game.fx){if(p.kind!=='pp'||p.delay>0||p.sh==='aftermark')continue;const k=Math.max(0,1-p.t/p.life),pr=Math.min(1,p.t/p.life);c.save();if(rtFx(p,k,pr)){c.restore();continue}
    switch(p.sh){
    case'flame':c.globalCompositeOperation='lighter';c.translate(p.x,p.y);c.scale(.8+Math.sin(p.t*30)*.08,1.25);pFlame(p.r*(.6+.4*k),p.a,p.b,k);break;
    case'flake':c.globalAlpha=Math.min(1,k*1.6);c.translate(p.x,p.y);c.rotate(p.rot||0);pFlake(p.r);break;
@@ -3307,13 +3351,18 @@ function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puf
   const dt=Math.min(.05,frameDt||.016);let r;
   if(f._frozenT>0){f._frozenT-=dt;c.save();c.filter='saturate(.35) brightness(1.25) sepia(.35) hue-rotate(160deg) saturate(2.2)';try{r=_dF5.apply(this,arguments)}finally{c.restore()}
    {const top=f._top!=null?f._top:400+f.y-300,bot=400+f.y+6,hgt=bot-top,w=Math.max(130,hgt*.42),cx=f.x,grow=Math.min(1,(.9-f._frozenT)/.12),a=Math.min(1,f._frozenT/.15);
+    if(_rtOk(RT.ice[0])&&_rtOk(RT.ice[8])){c.save();// real ice chunks encase the body from the feet up
+     const IC=[[-.62,.12,1.0,0],[.6,.14,1.05,6],[0,.08,1.2,8],[-.5,.42,.95,1],[.52,.45,.95,5],[0,.36,1.1,3],[-.32,.7,.9,2],[.36,.72,.9,4],[0,.9,.85,7]];
+     for(const [ox,oy,sc,ti] of IC){if(oy>grow*1.02)continue;const im=RT.ice[ti];if(!_rtOk(im))continue;const S=w*sc*1.25,s2=S/Math.max(im.naturalWidth,im.naturalHeight),iw=im.naturalWidth*s2,ih=im.naturalHeight*s2,x=cx+ox*w,y=bot-hgt*oy;
+      c.globalCompositeOperation='source-over';c.globalAlpha=a*.6;c.drawImage(im,x-iw/2,y-ih/2,iw,ih);c.globalCompositeOperation='lighter';c.globalAlpha=a*.32;c.drawImage(im,x-iw/2,y-ih/2,iw,ih)}
+     c.restore()}else{
     c.save();c.globalAlpha=a*.9;const yT=bot-hgt*grow*1.04;
     const g=c.createLinearGradient(cx-w,0,cx+w,0);g.addColorStop(0,'rgba(140,210,245,.45)');g.addColorStop(.4,'rgba(230,250,255,.28)');g.addColorStop(.6,'rgba(190,235,255,.22)');g.addColorStop(1,'rgba(90,170,225,.45)');
     c.fillStyle=g;c.beginPath();c.moveTo(cx-w,bot);c.lineTo(cx-w*1.04,yT+hgt*.12);c.lineTo(cx-w*.55,yT);c.lineTo(cx+w*.3,yT-hgt*.03);c.lineTo(cx+w*1.02,yT+hgt*.1);c.lineTo(cx+w,bot);c.closePath();c.fill();
     c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=2.5;c.stroke();
     c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1.5;c.beginPath();c.moveTo(cx-w*.55,yT);c.lineTo(cx-w*.35,bot);c.moveTo(cx+w*.3,yT-hgt*.03);c.lineTo(cx+w*.45,bot);c.moveTo(cx-w*1.04,yT+hgt*.12);c.lineTo(cx+w*1.02,yT+hgt*.1);c.stroke();
     c.globalCompositeOperation='lighter';c.fillStyle='rgba(255,255,255,.35)';c.beginPath();c.moveTo(cx-w*.8,yT+hgt*.18);c.lineTo(cx-w*.62,yT+hgt*.12);c.lineTo(cx-w*.5,bot-hgt*.1);c.lineTo(cx-w*.7,bot-hgt*.05);c.fill();
-    c.restore()}
+    c.restore()}}
    if(Math.random()<.5)game.fx.push({kind:'pp',sh:'flake',x:f.x+R(-60,60),y:400+f.y-R(20,260),vx:R(-20,20),vy:R(-30,10),r:R(4,8),rot:R(0,6),vr:R(-3,3),life:.5,t:0,_n:1});return r}
   f._poisonT-=dt;c.save();c.filter='sepia(.55) hue-rotate(45deg) saturate(1.7) brightness(.92)';try{r=_dF5.apply(this,arguments)}finally{c.restore()}
   if(Math.random()<.35)game.fx.push({kind:'pp',sh:'drop',x:f.x+R(-50,50),y:400+f.y-R(60,240),vx:R(-30,30),vy:R(-60,-10),g:300,r:R(3,5),life:.6,color:Math.random()<.5?'#a8ff4a':'#5fd22a',glow:1,t:0,_n:1});
