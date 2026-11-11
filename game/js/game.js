@@ -2878,7 +2878,7 @@ addUnlocked();if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
-window.__kotj={rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={fx:(i,st)=>{const f=game&&game.fighters[i];if(f)pBurst(f,st||'start',f.x,300,1)},rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 (()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
  w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-gfx',()=>{setGfx(GFX==='sharp'?'auto':'sharp');selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
 /* ---------- V2 Power Moves & Effects (drawn, recognizable effects; no damage/timing changes) ---------- */
@@ -2902,6 +2902,13 @@ const PFX={
 const PFX_NORMAL=new Set(['claw','double','bite','block','grab','throw']);
 const R=(a,b)=>a+Math.random()*(b-a);
 function P(o){o.t=0;o._n=1;game.fx.push(o)}
+// Spirit heads now appear as a badge by the attacker's health bar instead of rising out of the fighter.
+const _hsLast=[0,0];
+function HS(f,o){const side=game.fighters.indexOf(f);if(side<0)return;const now=performance.now();if(now-_hsLast[side]<700)return;_hsLast[side]=now;
+ const id=o.id||f.data.id,col=o.color||'#ffd36b';const hud=document.querySelectorAll('#fight .player-hud')[side];if(!hud)return;
+ let el=hud.querySelector('.hud-spirit');if(!el){el=document.createElement('div');el.className='hud-spirit';el.innerHTML='<img alt="">';hud.appendChild(el)}
+ const img=el.firstChild;img.src='assets/fx/spirit-'+id+'.webp?v=13';img.style.filter=o.filter||'none';el.style.setProperty('--sp',col);
+ el.classList.remove('on');void el.offsetWidth;setTimeout(()=>el.classList.add('on'),Math.round((o.delay||0)*1000));}
 function pBurst(f,stage,x,y,big){
  const th=PFX[f.data.id];if(!th||!game)return;const d=f.dir,B=big*(th.big||1);
  for(const k of (stage==='start'?th.start:th.hit)){
@@ -2935,20 +2942,20 @@ function pBurst(f,stage,x,y,big){
   else if(k==='leafstorm')for(let i=0;i<30;i++)P({kind:'pp',sh:'leaf',cx:f.x,cy:400+f.y-130,ang:R(0,6.28),rad:R(60,170),av:R(3,5.5),rise:R(-60,-20),rot:R(0,6),vr:R(-8,8),r:R(16,26),life:R(.7,1),orbit:1,color:['#5ea83a','#9fd86a','#d8b03a','#3f7f2a'][i%4]});
   else if(k==='leafburst')for(let i=0;i<20;i++){const an=R(0,6.28);P({kind:'pp',sh:'leaf',x,y,vx:Math.cos(an)*R(160,420),vy:Math.sin(an)*R(160,420)-120,g:200,drag:.95,rot:R(0,6),vr:R(-10,10),r:R(15,26)*B,life:R(.8,1.2),color:['#5ea83a','#9fd86a','#d8b03a','#3f7f2a'][i%4]})}
   else if(k.startsWith('spirit:')){const mode=k.slice(7),o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300,col=th.sc||th.a,id=f.data.id,h=th.sh2||260;
-   if(mode==='rise')P({kind:'pp',sh:'spirit',id,mode,x:f.x-d*40,y:400+f.y-120,h,dir:d,color:col,life:1.0,filter:th.sf});
-   else if(mode==='charge')P({kind:'pp',sh:'spirit',id,mode,x:f.x-d*30,y:400+f.y-110,x1:ox-d*10,h:h*.85,dir:d,color:col,life:.7,travel:.28,filter:th.sf});
-   else if(mode==='dive')P({kind:'pp',sh:'spirit',id,mode,x:x-d*320,y:-80,x1:x,y1:y+60,h:h*.9,dir:d,color:col,life:.65,travel:.22,filter:th.sf});
-   else if(mode==='emerge')P({kind:'pp',sh:'spirit',id,mode,x,y:398,h:h,dir:d,color:col,life:.9,filter:th.sf})}
+   if(mode==='rise')HS(f,{kind:'pp',sh:'spirit',id,mode,x:f.x-d*40,y:400+f.y-120,h,dir:d,color:col,life:1.0,filter:th.sf});
+   else if(mode==='charge')HS(f,{kind:'pp',sh:'spirit',id,mode,x:f.x-d*30,y:400+f.y-110,x1:ox-d*10,h:h*.85,dir:d,color:col,life:.7,travel:.28,filter:th.sf});
+   else if(mode==='dive')HS(f,{kind:'pp',sh:'spirit',id,mode,x:x-d*320,y:-80,x1:x,y1:y+60,h:h*.9,dir:d,color:col,life:.65,travel:.22,filter:th.sf});
+   else if(mode==='emerge')HS(f,{kind:'pp',sh:'spirit',id,mode,x,y:398,h:h,dir:d,color:col,life:.9,filter:th.sf})}
   else if(k==='firewave'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;for(let i=0;i<22;i++){const t=i/21;P({kind:'pp',sh:'flame',x:f.x+(ox-f.x)*t+R(-12,12),y:398-R(0,20),vx:0,vy:R(-150,-60),r:R(20,34)*(1-t*.3),life:R(.45,.7),delay:.12+t*.35,a:th.a,b:th.b})}}
   else if(k==='embers')for(let i=0;i<18;i++)P({kind:'pp',sh:'drop',x:x+R(-60,60),y:y+R(-40,40),vx:R(-160,160),vy:R(-420,-120),g:-60,r:R(2,4),life:R(.7,1.2),color:i%2?'#ffd36b':'#ff7a1a',glow:1});
   else if(k==='dark')P({kind:'pp',sh:'dark',x:f.x,y:400+f.y-150,life:1.1});
   else if(k==='eyes'){const o=game.fighters[1-game.fighters.indexOf(f)];P({kind:'pp',sh:'eyes',x:(o?o.x:f.x)+d*R(140,220),y:400+(o?o.y:0)-R(250,300),life:1})}
   else if(k==='moon')P({kind:'pp',sh:'moon',x:f.x-d*140,y:120,life:1.4});
-  else if(k==='ghostpack'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;for(let i=0;i<3;i++)P({kind:'pp',sh:'spirit',id:'wolf',mode:'charge',x:f.x-d*R(150,260),y:400-R(10,80),x1:ox+d*R(40,140),h:R(120,160),dir:d,color:'#8fc8ff',life:.75,travel:.45,delay:.15+i*.12,alpha:.7,filter:'saturate(.2) brightness(1.3) sepia(.4) hue-rotate(170deg) saturate(2.5)'})}
-  else if(k==='pack')for(let i=0;i<3;i++)P({kind:'pp',sh:'spirit',id:'hyena',mode:'rise',x:f.x+d*(i-1)*140,y:400+f.y-160-(i===1?60:0),h:150,dir:i===0?-d:d,color:'#ff5a3a',life:.9,delay:i*.1,alpha:.75});
-  else if(k==='eruption'){const eo=game.fighters[1-game.fighters.indexOf(f)],ex=eo?eo.x:f.x+d*200;P({kind:'pp',sh:'fissure',x:f.x+d*30,x1:ex,y:399,life:.9,seed:Math.random()});P({kind:'pp',sh:'spirit',id:f.data.id,mode:'emerge',x:ex,delay:.2,y:398,h:230,dir:d,color:th.sc||th.a,life:.9});for(let i=0;i<16;i++)P({kind:'pp',sh:'rock',delay:.2,x:ex+R(-40,40),y:396,vx:R(-260,260),vy:R(-900,-450),g:1700,r:R(7,15),rot:R(0,6),vr:R(-9,9),life:R(.9,1.3),color:i%3?'#6b5440':'#8a7356'});for(let i=0;i<8;i++)P({kind:'pp',sh:'puff',delay:.2,x:ex+R(-50,50),y:396-R(0,120),vx:R(-40,40),vy:R(-160,-60),r:R(18,30),grow:60,life:R(.7,1),color:'#8a7356',alpha:.5})}
+  else if(k==='ghostpack'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;for(let i=0;i<3;i++)HS(f,{kind:'pp',sh:'spirit',id:'wolf',mode:'charge',x:f.x-d*R(150,260),y:400-R(10,80),x1:ox+d*R(40,140),h:R(120,160),dir:d,color:'#8fc8ff',life:.75,travel:.45,delay:.15+i*.12,alpha:.7,filter:'saturate(.2) brightness(1.3) sepia(.4) hue-rotate(170deg) saturate(2.5)'})}
+  else if(k==='pack')for(let i=0;i<3;i++)HS(f,{kind:'pp',sh:'spirit',id:'hyena',mode:'rise',x:f.x+d*(i-1)*140,y:400+f.y-160-(i===1?60:0),h:150,dir:i===0?-d:d,color:'#ff5a3a',life:.9,delay:i*.1,alpha:.75});
+  else if(k==='eruption'){const eo=game.fighters[1-game.fighters.indexOf(f)],ex=eo?eo.x:f.x+d*200;P({kind:'pp',sh:'fissure',x:f.x+d*30,x1:ex,y:399,life:.9,seed:Math.random()});HS(f,{kind:'pp',sh:'spirit',id:f.data.id,mode:'emerge',x:ex,delay:.2,y:398,h:230,dir:d,color:th.sc||th.a,life:.9});for(let i=0;i<16;i++)P({kind:'pp',sh:'rock',delay:.2,x:ex+R(-40,40),y:396,vx:R(-260,260),vy:R(-900,-450),g:1700,r:R(7,15),rot:R(0,6),vr:R(-9,9),life:R(.9,1.3),color:i%3?'#6b5440':'#8a7356'});for(let i=0;i<8;i++)P({kind:'pp',sh:'puff',delay:.2,x:ex+R(-50,50),y:396-R(0,120),vx:R(-40,40),vy:R(-160,-60),r:R(18,30),grow:60,life:R(.7,1),color:'#8a7356',alpha:.5})}
   else if(k==='fissure'){const o=game.fighters[1-game.fighters.indexOf(f)];P({kind:'pp',sh:'fissure',x:f.x+d*40,x1:(o?o.x:f.x+d*300)+d*60,y:399,life:1.2,seed:Math.random()})}
-  else if(k==='pool'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;P({kind:'pp',sh:'pool',x:ox,y:399,life:1.1});P({kind:'pp',sh:'spirit',id:'crocodile',mode:'emerge',x:ox-d*10,y:398,h:240,dir:d,color:th.sc||th.a,life:.85,delay:.15});P({kind:'pp',sh:'sheet',x:ox,y:398,life:.55,big:1.1,color:th.a,delay:.18})}
+  else if(k==='pool'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;P({kind:'pp',sh:'pool',x:ox,y:399,life:1.1});HS(f,{kind:'pp',sh:'spirit',id:'crocodile',mode:'emerge',x:ox-d*10,y:398,h:240,dir:d,color:th.sc||th.a,life:.85,delay:.15});P({kind:'pp',sh:'sheet',x:ox,y:398,life:.55,big:1.1,color:th.a,delay:.18})}
   else if(k==='tidal'){const o=game.fighters[1-game.fighters.indexOf(f)];P({kind:'pp',sh:'tidal',x:f.x+d*40,x1:(o?o.x:f.x+d*300)+d*50,dir:d,y:399,life:.9})}
   else if(k==='trumpet')for(let i=0;i<4;i++)P({kind:'pp',sh:'roar',x:f.x+d*90,y:400+f.y-230,dir:d,delay:i*.08,life:.6,color:i%2?'#fff3d6':'#c6b7a0',big:1.4});
   else if(k==='stampede'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;for(let i=0;i<24;i++){const t=i/23;P({kind:'pp',sh:'puff',x:f.x+(ox-f.x)*t+R(-20,20),y:396-R(0,60),vx:d*R(60,160),vy:R(-80,-20),r:R(22,38),grow:70,life:R(.7,1),color:'#9a8466',alpha:.55,delay:t*.35})}game.shake=Math.max(game.shake,.25)}
