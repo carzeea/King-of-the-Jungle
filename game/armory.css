@@ -104,3 +104,7 @@
 .v2sel .sel-outfit{width:auto;margin:4px 0 0;padding:6px 14px!important;font-size:12px!important;border:1px solid #e8b95b!important;border-radius:16px;background:rgba(30,18,6,.85)!important;color:#ffd76a!important;position:relative;z-index:3}
 @media (max-height:520px){.arm-title h2{font-size:28px}.arm-title p{font-size:11px}.arm-tabs{margin:4px auto 8px}.arm-tabs button{padding:7px 6px;font-size:13px}
  .arm-body{grid-template-columns:110px 190px 1fr}.arm-fighters,.arm-styles{max-height:none}.arm-stage{min-height:300px}#arm-canvas,#arm-sprite{max-height:270px}.arm-panel{grid-column:1/-1}}
+
+.arm-look .soon{font:800 9px Inter;letter-spacing:.06em;color:#ffb36b;border:1px solid #ffb36b88;border-radius:10px;padding:2px 6px;white-space:nowrap}
+.arm-grid.soon .arm-item{cursor:default;opacity:.8}.arm-grid.soon .arm-item span{color:#ffb36b}
+.arm-chans.two{grid-template-columns:repeat(2,1fr)}

@@ -17,6 +17,7 @@ const LOOKS=[
  {id:'royal',name:'ROYAL KING',tag:'WARRIOR',price:1500},
  {id:'street',name:'STREET KING',tag:'MODERN',price:1200},
  {id:'hybrid',name:'HYBRID CHAMPION',tag:'HYBRID',price:1800}];
+const ON_HOLD=new Set(['royal','street','hybrid']);
 const lookName=(fid,l)=>{const n=(LOOKS.find(x=>x.id===l)||LOOKS[0]).name;return QUEEN.has(fid)?n.replace('KING','QUEEN'):n};
 const AURAS=[
  {id:'gold',name:'GOLDEN CROWN AURA',color:'#ffcf5a',price:800},
@@ -34,10 +35,13 @@ const PACKS=[{id:'starter',name:'STARTER',coins:500,price:4.99},{id:'fighter',na
 const blank=()=>({coins:12750,owned:{},equipped:{},saved:{},presets:[],receipts:[],v:1});
 let S=(()=>{try{return Object.assign(blank(),JSON.parse(localStorage.getItem(STORE_KEY)||'{}'))}catch(_){return blank()}})();
 const save=()=>{try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(_){}};
-const owns=key=>key.endsWith('.original')||!!S.owned[key];
+const owns=key=>key.endsWith('.original')||(!ON_HOLD.has(key.split('.')[1])&&!!S.owned[key]);
 const fmt=n=>n.toLocaleString('en-US');
 const freshOutfit=look=>({look:look||'original',colors:{},materials:{},aura:null});
-const equippedFor=fid=>S.equipped[fid]||freshOutfit();
+const equippedFor=fid=>{const o=S.equipped[fid];return o&&!ON_HOLD.has(o.look)?o:Object.assign(freshOutfit(),o&&o.look==='original'?o:{aura:o&&o.aura||null})};
+const FIGHT_CH={cloth:'ARMOR CLOTH',metal:'ARMOR METAL'};
+function fightColors(fid){const o=S.equipped[fid];if(!o||o.look!=='original'||!o.colors)return null;const z=window.KOTJ_TINT?KOTJ_TINT.zonesFor(fid):[];const t={};z.forEach(k=>{if(o.colors[k])t[k]=o.colors[k]});return Object.keys(t).length?t:null}
+const origTargets=o=>{const t={};for(const k of ['cloth','metal'])if(o.colors&&o.colors[k])t[k]=o.colors[k];return Object.keys(t).length?t:null};
 
 // ---------- image cache + recolour ----------
 const IMG={},MASK={},MRES={};
@@ -75,7 +79,7 @@ function shade(c,t,mat){
 }
 async function renderOutfit(canvas,fid,o){
  const look=o.look||'original';
- if(look==='original'){const img=await loadImg(outfitSrc(fid,'original'));canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const x=canvas.getContext('2d');x.clearRect(0,0,canvas.width,canvas.height);x.drawImage(img,0,0);return}
+ if(look==='original'){const img=await loadImg(outfitSrc(fid,'original'));canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const x=canvas.getContext('2d',{willReadFrequently:true});x.clearRect(0,0,canvas.width,canvas.height);x.drawImage(img,0,0);const tg=origTargets(o);if(tg&&window.KOTJ_TINT){const d=x.getImageData(0,0,canvas.width,canvas.height);KOTJ_TINT.apply(d.data,fid,tg);x.putImageData(d,0,0)}return}
  const M=await loadMask(fid,look);canvas.width=M.w;canvas.height=M.h;const x=canvas.getContext('2d');
  const out=new ImageData(new Uint8ClampedArray(M.base.data),M.w,M.h),d=out.data,src=M.base.data;
  const act=CHANNELS.map(ch=>({n:ch.v/50,c:o.colors&&o.colors[ch.k]?hex2rgb(o.colors[ch.k]):null,m:(o.materials&&o.materials[ch.k])||'fabric',st:M.stats[ch.k]})).filter(a=>a.c&&a.st);
@@ -136,8 +140,8 @@ function renderFighters(){
 }
 async function renderLooks(){
  const box=$('arm-looks');
- box.innerHTML=LOOKS.map(l=>{const key=fid+'.'+l.id,own=owns(key),on=cur.look===l.id;return`<button class="arm-look${on?' on':''}" data-look="${l.id}"><span class="arm-look-img"><img data-thumb="${l.id}" alt=""></span><span class="arm-look-t"><b>${lookName(fid,l.id)}</b><small>${l.tag}</small></span>${own?(on?'<i class="ok">✔</i>':''):`<i class="price">${fmt(l.price)} JC</i>`}</button>`}).join('');
- box.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>{const l=b.dataset.look;S.lookColors=S.lookColors||{};if(cur.look!=='original')S.lookColors[fid+'.'+cur.look]={colors:cur.colors,materials:cur.materials};cur.look=l;const kept=S.lookColors[fid+'.'+l]||{colors:{},materials:{}};cur.colors=JSON.parse(JSON.stringify(kept.colors));cur.materials=JSON.parse(JSON.stringify(kept.materials));stopSprite();drawStage();renderLooks();renderPanel();if(!owns(fid+'.'+l))toast('Preview — buy it in the Wardrobe or Store to equip')});
+ box.innerHTML=LOOKS.map(l=>{const key=fid+'.'+l.id,own=owns(key),on=cur.look===l.id;return`<button class="arm-look${on?' on':''}" data-look="${l.id}"><span class="arm-look-img"><img data-thumb="${l.id}" alt=""></span><span class="arm-look-t"><b>${lookName(fid,l.id)}</b><small>${l.tag}</small></span>${ON_HOLD.has(l.id)?'<i class="soon">COMING SOON</i>':own?(on?'<i class="ok">✔</i>':''):`<i class="price">${fmt(l.price)} JC</i>`}</button>`}).join('');
+ box.querySelectorAll('[data-look]').forEach(b=>b.onclick=()=>{const l=b.dataset.look;S.lookColors=S.lookColors||{};if(cur.look!=='original')S.lookColors[fid+'.'+cur.look]={colors:cur.colors,materials:cur.materials};cur.look=l;const kept=S.lookColors[fid+'.'+l]||{colors:{},materials:{}};cur.colors=JSON.parse(JSON.stringify(kept.colors));cur.materials=JSON.parse(JSON.stringify(kept.materials));stopSprite();drawStage();renderLooks();renderPanel();if(ON_HOLD.has(l))toast('Coming soon — preview only for now');else if(!owns(fid+'.'+l))toast('Preview — buy it in the Wardrobe or Store to equip')});
  for(const l of LOOKS){const im=box.querySelector(`[data-thumb="${l.id}"]`);if(im)im.src=l.id==='original'?outfitSrc(fid,'original'):`assets/armory/${fid}/${l.id}.webp?v=${V}`}
 }
 function renderSaved(){
@@ -150,12 +154,14 @@ function renderSaved(){
  list.forEach((o,i)=>{if(!o)return;outfitURL(fid,o,160).then(u=>{const im=$('arm-saved').querySelector(`[data-slot-img="${i}"]`);if(im)im.src=u})});
 }
 function saveOutfit(){
+ if(ON_HOLD.has(cur.look)){toast('Coming soon — save an ORIGINAL colorway instead');return}
  if(!owns(fid+'.'+cur.look)){toast('Buy this outfit before saving it');return}
  const list=S.saved[fid]||[];let i=list.findIndex(x=>!x);if(i<0)i=list.length<5?list.length:-1;
  if(i<0){toast('All 5 slots are full — delete one first');return}
  list[i]=Object.assign(JSON.parse(JSON.stringify(cur)),{name:'OUTFIT '+(i+1)});S.saved[fid]=list;save();renderSaved();toast('Saved to slot '+(i+1));
 }
 function equip(){
+ if(ON_HOLD.has(cur.look)){toast('This outfit is coming soon — pick ORIGINAL to equip colors');return}
  if(!owns(fid+'.'+cur.look)){openBuy({type:'look',fid,look:cur.look});return}
  if(cur.aura&&!S.owned['aura.'+cur.aura]){toast('Buy the aura first');return}
  S.equipped[fid]=JSON.parse(JSON.stringify(cur));S.lookColors=S.lookColors||{};if(cur.look!=='original')S.lookColors[fid+'.'+cur.look]={colors:cur.colors,materials:cur.materials};save();for(const k in thumbCache)if(k.startsWith(fid))delete thumbCache[k];
@@ -172,8 +178,8 @@ async function drawStage(){
 }
 function updateNote(){
  const own=owns(fid+'.'+cur.look);const l=LOOKS.find(x=>x.id===cur.look);
- $('arm-note').innerHTML=cur.look==='original'?'Original design · plays in every fight':own?'Owned · shows on menus, select and victory screens · fight animations coming next':`${fmt(l.price)} JC · preview only until you buy it`;
- $('arm-equip').textContent=own?'✔ EQUIP':`BUY ${fmt(l.price)} JC`;
+ $('arm-note').innerHTML=ON_HOLD.has(cur.look)?'Coming soon · preview only':cur.look==='original'?'Original design · your colors show in every fight':'';
+ $('arm-equip').textContent=ON_HOLD.has(cur.look)?'COMING SOON':own?'✔ EQUIP':`BUY ${fmt(l.price)} JC`;
 }
 function stopSprite(){if(spriteAnim){cancelAnimationFrame(spriteAnim);spriteAnim=null}$('arm-sprite')&&$('arm-sprite').classList.add('hidden');$('arm-canvas')&&$('arm-canvas').classList.remove('hidden','a-attack','a-special','a-victory')}
 function playAnim(){
@@ -185,7 +191,7 @@ function playAnim(){
   const e=HD[fid].anims[map[anim]],[n,w,h]=e,sc=$('arm-sprite');loadImg(`assets/characters/${fid}/frames-hd/${map[anim]}.webp`).then(img=>{
    const cols=Math.max(1,Math.floor(img.naturalWidth/w));sc.width=w;sc.height=h;const x=sc.getContext('2d');c.classList.add('hidden');sc.classList.remove('hidden');
    let t0=performance.now();const fps=anim==='idle'?12:18;
-   const step=now=>{const k=Math.floor((now-t0)/1000*fps)%n;x.clearRect(0,0,w,h);x.drawImage(img,(k%cols)*w,Math.floor(k/cols)*h,w,h,0,0,w,h);spriteAnim=requestAnimationFrame(step)};spriteAnim=requestAnimationFrame(step);
+   const step=now=>{const k=Math.floor((now-t0)/1000*fps)%n;x.clearRect(0,0,w,h);const tg=origTargets(cur),sx=(k%cols)*w,sy=Math.floor(k/cols)*h,fc=tg&&window.KOTJ_TINT?KOTJ_TINT.frame(fid,img,sx,sy,w,h,tg):null;if(fc)x.drawImage(fc,0,0);else x.drawImage(img,sx,sy,w,h,0,0,w,h);spriteAnim=requestAnimationFrame(step)};spriteAnim=requestAnimationFrame(step);
   }).catch(()=>{});
   return;
  }
@@ -214,31 +220,35 @@ function bindItems(p){p.querySelectorAll('[data-item]').forEach(el=>el.onclick=(
  if(it.type==='look'){if(it.fid!==fid){fid=it.fid}cur.look=it.look;drawStage();renderFighters();renderLooks();if(!owns(it.fid+'.'+it.look))openBuy(it);else toast('Owned — press EQUIP to wear it')}
  else{cur.aura=it.aura;drawStage();if(!S.owned['aura.'+it.aura])openBuy(it);else toast('Aura previewing — press EQUIP to wear it')}})}
 function panelWardrobe(p){
- p.innerHTML=`<h3>${fname(fid)} WARDROBE</h3><p class="arm-sub">Complete looks for ${fname(fid)}. Every look's colors are free to change in COLORS.</p><div class="arm-grid">${LOOKS.filter(l=>l.id!=='original').map(l=>itemCard({type:'look',fid,look:l.id})).join('')}</div>
- <h3>COLORWAYS <small>FREE</small></h3><div class="arm-colorways">${[['GOLD RUSH',{primary:'#151515',trim:'#ffd700',shoes:'#151515',metal:'#ffd700'}],['CRIMSON KING',{primary:'#8e1020',trim:'#ffd700',shoes:'#1a1a1a',metal:'#ffcf5a'}],['ROYAL BLUE',{primary:'#1f3fa8',trim:'#f4f4f4',shoes:'#f4f4f4',metal:'#c0c0c0'}],['VIOLET REIGN',{primary:'#4b1f8f',trim:'#ffd700',shoes:'#151515',metal:'#ffd700'}],['JUNGLE GREEN',{primary:'#1f6e34',trim:'#ffd700',shoes:'#f4f4f4',metal:'#ffcf5a'}],['ARCTIC',{primary:'#eef4f8',trim:'#7fd8ff',shoes:'#ffffff',metal:'#c0c0c0'}]].map(([n,c])=>`<button class="arm-cw" data-cw='${JSON.stringify(c)}'><i style="background:linear-gradient(135deg,${c.primary} 50%,${c.trim} 50%)"></i>${n}</button>`).join('')}</div>`;
+ p.innerHTML=`<h3>${fname(fid)} WARDROBE</h3><p class="arm-sub">Free colorways recolor ${fname(fid)}'s battle armor in every fight. New outfits are coming soon.</p>
+ <h3>COLORWAYS <small>FREE · IN FIGHTS</small></h3><div class="arm-colorways">${[['GOLD RUSH',{primary:'#151515',trim:'#ffd700',shoes:'#151515',metal:'#ffd700'}],['CRIMSON KING',{primary:'#8e1020',trim:'#ffd700',shoes:'#1a1a1a',metal:'#ffcf5a'}],['ROYAL BLUE',{primary:'#1f3fa8',trim:'#f4f4f4',shoes:'#f4f4f4',metal:'#c0c0c0'}],['VIOLET REIGN',{primary:'#4b1f8f',trim:'#ffd700',shoes:'#151515',metal:'#ffd700'}],['JUNGLE GREEN',{primary:'#1f6e34',trim:'#ffd700',shoes:'#f4f4f4',metal:'#ffcf5a'}],['ARCTIC',{primary:'#eef4f8',trim:'#7fd8ff',shoes:'#ffffff',metal:'#c0c0c0'}]].map(([n,c])=>(c={cloth:c.primary,metal:c.metal},[n,c])).map(([n,c])=>`<button class="arm-cw" data-cw='${JSON.stringify(c)}'><i style="background:linear-gradient(135deg,${c.cloth} 50%,${c.metal} 50%)"></i>${n}</button>`).join('')}</div>`;
  bindItems(p);
- p.querySelectorAll('[data-cw]').forEach(b=>b.onclick=()=>{if(cur.look==='original'){toast('Pick a Royal, Street or Hybrid look to recolor');return}cur.colors=JSON.parse(b.dataset.cw);drawStage();toast('Colorway applied — press EQUIP to keep it')});
+ p.insertAdjacentHTML('beforeend',`<h3>OUTFITS <small style="color:#ffb36b">COMING SOON</small></h3><div class="arm-grid soon">${LOOKS.filter(l=>l.id!=='original').map(l=>`<div class="arm-item"><img src="assets/armory/${fid}/${l.id}.webp?v=${V}" alt=""><b>${lookName(fid,l.id)}</b><span>COMING SOON</span></div>`).join('')}</div>`);
+ p.querySelectorAll('[data-cw]').forEach(b=>b.onclick=()=>{cur.look='original';const z=window.KOTJ_TINT?KOTJ_TINT.zonesFor(fid):[];const c=JSON.parse(b.dataset.cw);cur.colors={};z.forEach(k=>cur.colors[k]=c[k]);cur.materials={};drawStage();renderLooks();playAnim();toast('Colorway applied — press EQUIP to fight in it')});
 }
 let wheelHSV=[45,1,1];
 function panelColors(p){
- if(cur.look==='original'){p.innerHTML=`<h3>COLOR CUSTOMIZATION</h3><p class="arm-sub">The original battle design keeps its approved colors. Pick ROYAL, STREET or HYBRID in Outfit Style to recolor it — free, as often as you like.</p>`;return}
- const M=MRES[fid+'.'+cur.look];
+ if(ON_HOLD.has(cur.look)){cur.look='original';cur.colors={};drawStage();renderLooks()}
+ const ORIG=cur.look==='original',Z=ORIG&&window.KOTJ_TINT?KOTJ_TINT.zonesFor(fid):[];
+ const CH=ORIG?['cloth','metal'].map(k=>({k,label:FIGHT_CH[k]})):CHANNELS;
+ const M=ORIG?null:MRES[fid+'.'+cur.look];
  p.innerHTML=`<h3>COLOR CUSTOMIZATION <small>FREE</small></h3>
- <div class="arm-chans">${CHANNELS.map(c=>`<button data-ch="${c.k}">${c.label}</button>`).join('')}</div>
+ ${ORIG?`<p class="arm-sub">Recolors ${fname(fid)}'s battle armor — shows in every fight. Fur and skin keep their colors.</p>`:''}<div class="arm-chans${ORIG?' two':''}">${CH.map(c=>`<button data-ch="${c.k}">${c.label}</button>`).join('')}</div>
  <div class="arm-colorrow"><canvas id="arm-wheel" width="200" height="200"></canvas><div class="arm-sliders">
   <label>Hue<input type="range" id="arm-h" min="0" max="360"></label><label>Saturation<input type="range" id="arm-s" min="0" max="100"></label><label>Brightness<input type="range" id="arm-v" min="0" max="100"></label>
   <label class="hex">HEX<input id="arm-hex" maxlength="7" spellcheck="false"></label><button id="arm-orig" class="arm-mini">ORIGINAL COLOR</button></div></div>
  <h4>PRESETS</h4><div class="arm-presets">${[...PRESETS,...S.presets].map(c=>`<button data-pre="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}<button id="arm-addpre" class="arm-addpre" title="Save this color as a preset">+</button></div>
- <h4>MATERIAL</h4><div class="arm-mats">${MATERIALS.map(m=>`<button data-mat="${m}"><i class="mat-${m}"></i>${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div>`;
- const chOK=k=>!M||!!M.stats[k];
+ ${ORIG?'':`<h4>MATERIAL</h4><div class="arm-mats">${MATERIALS.map(m=>`<button data-mat="${m}"><i class="mat-${m}"></i>${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div>`}`;
+ const chOK=k=>ORIG?Z.includes(k):(!M||!!M.stats[k]);
  p.querySelectorAll('[data-ch]').forEach(b=>{b.disabled=!chOK(b.dataset.ch);b.onclick=()=>{chan=b.dataset.ch;syncColorUI()}});
- if(!chOK(chan))chan=(CHANNELS.find(c=>chOK(c.k))||CHANNELS[0]).k;
+ if(!chOK(chan))chan=(CH.find(c=>chOK(c.k))||CH[0]).k;
  drawWheel();
  const wheel=$('arm-wheel');const pick=e=>{const r=wheel.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*2-1,y=(e.clientY-r.top)/r.height*2-1,d=Math.hypot(x,y);if(d>1)return;wheelHSV=[(Math.atan2(y,x)*180/Math.PI+360)%360,d,wheelHSV[2]||1];applyHSV()};
  wheel.onpointerdown=e=>{wheel.setPointerCapture(e.pointerId);pick(e);wheel.onpointermove=pick};wheel.onpointerup=()=>wheel.onpointermove=null;
  $('arm-h').oninput=$('arm-s').oninput=$('arm-v').oninput=()=>{wheelHSV=[+$('arm-h').value,$('arm-s').value/100,$('arm-v').value/100];applyHSV()};
  $('arm-hex').onchange=()=>{const v=$('arm-hex').value.trim();if(/^#?[0-9a-f]{6}$/i.test(v)){setColor(v[0]==='#'?v:'#'+v)}else toast('Use a 6-digit HEX like #FFD700')};
  $('arm-orig').onclick=()=>{delete cur.colors[chan];delete cur.materials[chan];drawStage();syncColorUI()};
+ $('arm-orig').textContent=ORIG?'ORIGINAL ARMOR COLOR':'ORIGINAL COLOR';
  p.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>setColor(b.dataset.pre));
  $('arm-addpre').onclick=()=>{const c=cur.colors[chan];if(!c){toast('Pick a color first');return}if(!S.presets.includes(c)){S.presets=[...S.presets,c].slice(-8);save();panelColors(p)}};
  p.querySelectorAll('[data-mat]').forEach(b=>b.onclick=()=>{cur.materials[chan]=b.dataset.mat;if(!cur.colors[chan]){const st=M&&M.stats[chan];cur.colors[chan]=PRESETS[0]}drawStage();syncColorUI()});
@@ -248,7 +258,8 @@ function drawWheel(){const c=$('arm-wheel');if(!c)return;const x=c.getContext('2
  const [h,s]=wheelHSV,a=h*Math.PI/180;x.strokeStyle='#fff';x.lineWidth=3;x.beginPath();x.arc(R+Math.cos(a)*s*R,R+Math.sin(a)*s*R,7,0,7);x.stroke();x.strokeStyle='#000';x.lineWidth=1;x.stroke()}
 function applyHSV(){setColor(rgb2hex(...hsv2rgb(...wheelHSV)),true)}
 let stageTimer=0;
-function setColor(hex,fromWheel){cur.colors[chan]=hex.toLowerCase();if(!fromWheel)wheelHSV=rgb2hsv(...hex2rgb(hex));clearTimeout(stageTimer);stageTimer=setTimeout(drawStage,40);syncColorUI()}
+function setColor(hex,fromWheel){cur.colors[chan]=hex.toLowerCase();if(!fromWheel)wheelHSV=rgb2hsv(...hex2rgb(hex));clearTimeout(stageTimer);stageTimer=setTimeout(()=>{drawStage();if(cur.look==='original')tintCacheBust++},60);syncColorUI()}
+let tintCacheBust=0;
 function syncColorUI(){
  document.querySelectorAll('[data-ch]').forEach(b=>b.classList.toggle('on',b.dataset.ch===chan));
  const c=cur.colors[chan];if(c&&document.activeElement!==$('arm-h')&&document.activeElement!==$('arm-s')&&document.activeElement!==$('arm-v'))wheelHSV=rgb2hsv(...hex2rgb(c));
@@ -262,20 +273,20 @@ function panelEffects(p){
 // rotating shop: fixed by the calendar day/week, no countdowns
 function seeded(seed){let s=seed%2147483647||1;return()=>(s=s*16807%2147483647)/2147483647}
 function rotation(){
- const pool=[];FIGHTERS.filter(f=>isOpen(f.id)).forEach(f=>['royal','street','hybrid'].forEach(l=>pool.push({type:'look',fid:f.id,look:l})));AURAS.forEach(a=>pool.push({type:'aura',aura:a.id}));
+ const pool=[];FIGHTERS.filter(f=>isOpen(f.id)).forEach(f=>['royal','street','hybrid'].filter(l=>!ON_HOLD.has(l)).forEach(l=>pool.push({type:'look',fid:f.id,look:l})));AURAS.forEach(a=>pool.push({type:'aura',aura:a.id}));
  const day=Math.floor(Date.now()/864e5),wk=Math.floor((day+3)/7);
  const pickN=(seed,n)=>{const r=seeded(seed),a=[...pool];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,n)};
- return{daily:pickN(day*7919,4),weekly:pickN(wk*104729+17,6)};
+ return{daily:pickN(day*7919,3),weekly:pickN(wk*104729+17,3)};
 }
 function panelStore(p){
  const r=rotation();
- p.innerHTML=`<h3>ITEM SHOP</h3><p class="arm-sub">Featured items change each day; the collection changes each week. Prices and ownership shown on every item.</p><h4>FEATURED TODAY</h4><div class="arm-grid">${r.daily.map(itemCard).join('')}</div><h4>THIS WEEK'S COLLECTION</h4><div class="arm-grid">${r.weekly.map(itemCard).join('')}</div>`;bindItems(p);
+ p.innerHTML=`<h3>ITEM SHOP</h3><p class="arm-sub">Featured items change each day; the collection changes each week. Prices and ownership shown on every item. New outfits are coming soon.</p><h4>FEATURED TODAY</h4><div class="arm-grid">${r.daily.map(itemCard).join('')}</div><h4>THIS WEEK'S COLLECTION</h4><div class="arm-grid">${r.weekly.map(itemCard).join('')}</div>`;bindItems(p);
 }
 function panelLocker(p){
- const eq=Object.entries(S.equipped).filter(([k,v])=>v&&v.look!=='original'||v&&v.aura);
- const ownedLooks=Object.keys(S.owned).filter(k=>!k.startsWith('aura.'));
+ const eq=Object.entries(S.equipped).filter(([k,v])=>v&&(fightColors(k)||(v.aura&&S.owned['aura.'+v.aura])));
+ const ownedLooks=Object.keys(S.owned).filter(k=>!k.startsWith('aura.')&&owns(k));
  p.innerHTML=`<h3>PLAYER LOCKER</h3><p class="arm-sub">Everything you own, saved on this device. Up to 5 saved outfits per fighter — rename a slot by tapping its name.</p>
- <h4>EQUIPPED</h4><div class="arm-lockrow">${eq.length?eq.map(([f,o])=>`<span>${fname(f)} · ${lookName(f,o.look)}${o.aura?' · '+AURAS.find(a=>a.id===o.aura).name:''}</span>`).join(''):'<span>All fighters wear their original design.</span>'}</div>
+ <h4>EQUIPPED</h4><div class="arm-lockrow">${eq.length?eq.map(([f,o])=>`<span>${fname(f)}${fightColors(f)?' · CUSTOM COLORWAY':''}${o.aura?' · '+AURAS.find(a=>a.id===o.aura).name:''}</span>`).join(''):'<span>All fighters wear their original design.</span>'}</div>
  <h4>OWNED OUTFITS (${ownedLooks.length})</h4><div class="arm-grid">${ownedLooks.map(k=>{const[f,l]=k.split('.');return itemCard({type:'look',fid:f,look:l})}).join('')||'<p class="arm-sub">None yet — visit the Store or Wardrobe.</p>'}</div>
  <button id="arm-restore" class="arm-mini">RESTORE ${fname(fid)}'S ORIGINAL DESIGN</button>`;
  bindItems(p);$('arm-restore').onclick=()=>{delete S.equipped[fid];save();loadCurrent();drawStage();renderLooks();toast(fname(fid)+' is back in the original design')};
@@ -315,10 +326,10 @@ function render(){renderFighters();renderLooks();renderSaved();drawStage().then(
 
 // ---------- hooks into the rest of the game ----------
 function open(startFid){buildScreen();if(startFid&&isOpen(startFid))fid=startFid;loadCurrent();tab='wardrobe';(window.__kotjShow||(()=>{}))('armory');render()}
-function heroInto(id,img){const o=S.equipped[id];if(!o||o.look==='original'||!owns(id+'.'+o.look))return;outfitURL(id,o,600).then(u=>{if(img.dataset.armFor===id)img.src=u}).catch(()=>{})}
+function heroInto(id,img){const o=S.equipped[id];if(!o||(o.look==='original'?!origTargets(o):!owns(id+'.'+o.look)))return;outfitURL(id,o,600).then(u=>{if(img.dataset.armFor===id)img.src=u}).catch(()=>{})}
 function auraFor(id){const o=S.equipped[id];return o&&o.aura&&S.owned['aura.'+o.aura]?(AURAS.find(a=>a.id===o.aura)||{}).color:null}
-function cycleOutfit(id){const owned=['original',...['royal','street','hybrid'].filter(l=>owns(id+'.'+l))];if(owned.length<2)return false;const o=S.equipped[id]||freshOutfit();S.lookColors=S.lookColors||{};if(o.look!=='original')S.lookColors[id+'.'+o.look]={colors:o.colors||{},materials:o.materials||{}};const i=owned.indexOf(o.look);o.look=owned[(i+1)%owned.length];const kept=S.lookColors[id+'.'+o.look]||{colors:{},materials:{}};o.colors=JSON.parse(JSON.stringify(kept.colors));o.materials=JSON.parse(JSON.stringify(kept.materials));S.equipped[id]=o;save();return lookName(id,o.look)}
-window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
+function cycleOutfit(id){return false;const owned=['original',...['royal','street','hybrid'].filter(l=>owns(id+'.'+l))];if(owned.length<2)return false;const o=S.equipped[id]||freshOutfit();S.lookColors=S.lookColors||{};if(o.look!=='original')S.lookColors[id+'.'+o.look]={colors:o.colors||{},materials:o.materials||{}};const i=owned.indexOf(o.look);o.look=owned[(i+1)%owned.length];const kept=S.lookColors[id+'.'+o.look]||{colors:{},materials:{}};o.colors=JSON.parse(JSON.stringify(kept.colors));o.materials=JSON.parse(JSON.stringify(kept.materials));S.equipped[id]=o;save();return lookName(id,o.look)}
+window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,fightColors,lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
 
 function addEntryPoints(){
  buildScreen();
@@ -327,13 +338,13 @@ function addEntryPoints(){
  const top=document.querySelector('.topbar');
  if(top&&!$('jc-top')){const w=document.createElement('button');w.id='jc-top';w.className='jc-top';w.title='Jungle Coins (test)';w.innerHTML='<img src="assets/ui/crown.webp" alt=""><b class="jc-balance">0</b><small>JC</small>';top.appendChild(w);w.onclick=()=>{open();tab='coins';renderPanel()}}
  const card=document.querySelector('#select .fighter-card');
- if(card&&!$('sel-outfit')){const b=document.createElement('button');b.id='sel-outfit';b.className='secondary sel-outfit';b.textContent='OUTFIT: ORIGINAL';const conf=$('confirm-fighter');card.insertBefore(b,conf);
+ if(card&&!$('sel-outfit')){const b=document.createElement('button');b.id='sel-outfit';b.className='secondary sel-outfit';b.textContent='CUSTOMIZE ▸';const conf=$('confirm-fighter');card.insertBefore(b,conf);
   b.onclick=e=>{e.stopPropagation();const id=$('select').dataset.f;if(!id)return;const r=cycleOutfit(id);if(!r){open(id);return}syncSelect(id)}}
  coinPills();
 }
 function syncSelect(id){const img=$('fighter-portrait');if(!img)return;img.dataset.armFor=id;const o=S.equipped[id];const b=$('sel-outfit');
- if(b)b.textContent='OUTFIT: '+(o&&o.look!=='original'&&owns(id+'.'+o.look)?lookName(id,o.look):'ORIGINAL')+' ▸';
- if(o&&o.look!=='original')heroInto(id,img);else img.src=`assets/ui/hero/${id}.webp?v=10.16`}
+ if(b)b.textContent=(fightColors(id)?'COLORS: CUSTOM':'COLORS: ORIGINAL')+' · CUSTOMIZE ▸';
+ if(o&&fightColors(id))heroInto(id,img)}
 // watch the select card so the equipped outfit shows whenever a fighter is highlighted
 function watchSelect(){const sel=$('select');if(!sel)return;new MutationObserver(()=>{const id=sel.dataset.f;if(id)syncSelect(id)}).observe(sel,{attributes:true,attributeFilter:['data-f']})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{addEntryPoints();watchSelect()});else{addEntryPoints();watchSelect()}

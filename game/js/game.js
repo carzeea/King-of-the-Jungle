@@ -2664,6 +2664,7 @@ function drawFighter(f,i,ghost){
  if(f.instinct&&!ghost){c.shadowColor='#5fe3ff';c.shadowBlur=26;}f._aura=(!ghost&&!f.ai&&!f.instinct&&window.KOTJ_ARMORY)?KOTJ_ARMORY.auraFor(f.data.id):null;if(f._aura){const t=performance.now()/1000,pu=.5+.5*Math.sin(t*3.2);c.save();c.globalCompositeOperation='lighter';c.save();c.translate(0,-150);c.scale(1,1.75);const R=(118+10*pu)*sizeScale/.88,gr=c.createRadialGradient(0,0,R*.35,0,0,R);gr.addColorStop(0,f._aura+'00');gr.addColorStop(.6,f._aura+(pu>.5?'ee':'bb'));gr.addColorStop(.8,f._aura+'66');gr.addColorStop(1,f._aura+'00');c.fillStyle=gr;c.beginPath();c.arc(0,0,R,0,Math.PI*2);c.fill();c.restore();c.fillStyle=f._aura;c.shadowColor=f._aura;c.shadowBlur=8;for(let k=0;k<14;k++){const ph=(t*.5+k/14)%1,ax=Math.sin(k*2.3+t*1.3)*(70+k*3)*sizeScale/.88;c.globalAlpha=Math.sin(ph*Math.PI);c.beginPath();c.arc(ax,-20-ph*300,3.5+(k%3)*1.5,0,Math.PI*2);c.fill()}c.restore();}
  if(SPRITES[f.data.id]&&drawSprite(f)){}
  else{c.scale(sizeScale,sizeScale);drawGeneric(f,i);}
+ window.__tintSrc=null;
  c.shadowBlur=0;c.restore();
  if(ghost)return;
  
@@ -2707,7 +2708,7 @@ function drawSprite(f){
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
  if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
- if(!img||!img.complete||!img.naturalWidth)return false;
+ if(!img||!img.complete||!img.naturalWidth)return false;{const tg=(!f.ai&&window.KOTJ_ARMORY&&window.KOTJ_TINT)?KOTJ_ARMORY.fightColors(f.data.id):null;window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
  const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
  // Species-calibrated body presence: modestly enlarges the existing HD art
  // without stretching anatomy or changing the original fighter silhouettes.
