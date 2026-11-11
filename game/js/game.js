@@ -2631,7 +2631,7 @@ function drawSprite(f){
   case'down':if(f.down>.35){anim=S.fall[0];fr=seq(S.fall[1],(.9-f.down)/.55)}else{anim=S.getup[0];fr=seq(S.getup[1],(.35-f.down)/.35)}break;
   case'knockdown':anim=S.ko[0];fr=Math.min(S.ko[1],Math.floor(f.koTime*9));break;
   case'victory':anim='victory';fr=Math.min(A.victory[0]-1,Math.floor(f.winT*8));break;
-  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate)};
+  default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;fr=Math.floor(now*idleRate);f._ifr=now*idleRate-fr};
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
@@ -2735,7 +2735,10 @@ function drawSprite(f){
   const sx=1+breath*(.35+.65*Math.sin(cycle*.72)),sy=1-breath*(.35+.65*Math.sin(cycle*.72));
   const lean=wave*tilt*.22,shift=slow*sway*18;
   c.save();c.translate(shift,-py+6);c.rotate(lean);c.scale(sx,sy);c.translate(-shift,py-6);
-  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.restore();
+  c.drawImage(img,fr*fw,0,fw,fh,drawX,drawY,drawW,drawH);
+  // V2: blend into the next idle frame so breathing flows instead of ticking
+  const ifr=f._ifr||0;if(ifr>.04){const ga=c.globalAlpha;c.globalAlpha=ga*ifr;c.drawImage(img,((fr+1)%n)*fw,0,fw,fh,drawX,drawY,drawW,drawH);c.globalAlpha=ga}
+  c.restore();
  }else if(f.action==='hit'&&f.data.id==='lion'){
   // A lion absorbs impact through its shoulders, then recoils as a heavy cat.
   const hit=clamp((f.hitAnimTime||0)/.28,0,1),pulse=Math.sin(hit*Math.PI);
@@ -3003,18 +3006,43 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
    f._top=(top-m0.f)/sc}
   return r}}
 
-// MAJIC feels alive: heavy breathing and a slow menacing sway when standing, a weighty stride bob and lean when walking,
-// and ground-shaking footfalls. Visual only — hitboxes, damage and timing are unchanged.
+// Living motion for every fighter (visual only — hitboxes, damage and timing are unchanged):
+// breathing + fighting-stance bounce when standing, stride bob and lean when walking, stretch on take-off,
+// squash + dust on landing, lunge into every strike, recoil when hit, and heavy footfalls for the big beasts.
+const MOTION={ // w: weight (0 light .. 1 huge), br: breath, bn: stance bounce px, sw: sway, hz: idle speed, ln: strike lean
+ lion:{w:.55,br:.016,bn:3,sw:.012,hz:2.4,ln:.07}, tiger:{w:.5,br:.014,bn:5,sw:.012,hz:2.9,ln:.08}, jaguar:{w:.35,br:.012,bn:6,sw:.014,hz:3.4,ln:.09},
+ leopard:{w:.3,br:.012,bn:6,sw:.015,hz:3.3,ln:.09}, wolf:{w:.4,br:.013,bn:5,sw:.012,hz:3.1,ln:.08}, hyena:{w:.35,br:.014,bn:6,sw:.02,hz:3.6,ln:.08},
+ badger:{w:.45,br:.016,bn:4,sw:.01,hz:3.2,ln:.09}, grizzly:{w:.85,br:.022,bn:2,sw:.014,hz:1.9,ln:.06}, crocodile:{w:.75,br:.016,bn:2,sw:.018,hz:1.8,ln:.06},
+ hippo:{w:.9,br:.024,bn:2,sw:.012,hz:1.7,ln:.05}, elephant:{w:1,br:.022,bn:1,sw:.012,hz:1.5,ln:.05}, eagle:{w:.3,br:.012,bn:7,sw:.016,hz:3.2,ln:.09},
+ snake:{w:.4,br:.012,bn:2,sw:.04,hz:2.2,ln:.1,snake:1}, stag:{w:.6,br:.016,bn:4,sw:.012,hz:2.4,ln:.07}, majic:{w:1,br:.022,bn:3,sw:.016,hz:2.1,ln:.06}};
+function motionDust(x,n,big){for(let k=0;k<n;k++)game.fx.push({kind:'pp',sh:'puff',x:x+(Math.random()-.5)*(60+big*80),y:398,vx:(Math.random()-.5)*(50+big*60),vy:-15-Math.random()*25,r:7+Math.random()*7+big*6,grow:40+big*25,life:.4+big*.15,color:'#a88c6e',alpha:.35,_n:1,t:0})}
 {const _dF4=drawFighter;drawFighter=function(f,i,ghost){
-  if(!f||!f.data||f.data.id!=='majic'||!game||f.hp<=0&&game.ko)return _dF4.apply(this,arguments);
-  const t=performance.now()/1000,fx=f.x,fy=400+f.y,act=f.action;let sx=1,sy=1,rot=0,dy=0;
-  if(act==='idle'||act==='breathing'){const b=Math.sin(t*2.1);sy=1+b*.022;sx=1-b*.010;rot=Math.sin(t*1.05)*.016*f.dir;dy=-Math.max(0,b)*3}
-  else if(act==='walk'){const ph=(f.walk||0)*3.2*Math.PI/4,step=Math.abs(Math.sin(ph));dy=-step*9;sy=1+(step-.5)*.02;
-   const fwd=Math.sign(f.move||0)===f.dir;rot=(fwd?.035:-.025)*f.dir+Math.sin(ph)*.012;
-   if(!ghost&&f.ground){const k=Math.floor(((f.walk||0)*3.2)/4);if(k!==f._mjStep){f._mjStep=k;game.shake=Math.max(game.shake||0,.06);
-    for(let n=0;n<5;n++)game.fx.push({kind:'pp',sh:'puff',x:fx+(Math.random()-.5)*120,y:398,vx:(Math.random()-.5)*60,vy:-20-Math.random()*25,r:10+Math.random()*10,grow:50,life:.45,color:'#a88c6e',alpha:.4,_n:1,t:0})}}}
-  else if(act==='block'){rot=-.03*f.dir;sy=.985}
-  if(sx===1&&sy===1&&!rot&&!dy)return _dF4.apply(this,arguments);
-  c.save();c.translate(fx,fy+dy);c.rotate(rot);c.scale(sx,sy);c.translate(-fx,-fy);
+  const M=f&&f.data&&MOTION[f.data.id];if(!M||!game||ghost)return _dF4.apply(this,arguments);
+  const t=performance.now()/1000,dt=Math.min(.05,game.dt||frameDt||.016),fx=f.x,fy=400+f.y,act=f.action,ph0=(i||0)*1.7;
+  let sx=1,sy=1,rot=0,dy=0,dx=0;
+  // landing: squash + dust (heavier = bigger)
+  if(f.ground&&f._air){f._land=t;if(f._air>.12){motionDust(fx,3+Math.round(M.w*5),M.w);if(M.w>.7)game.shake=Math.max(game.shake||0,.05+M.w*.06)}}
+  f._air=f.ground?0:(f._air||0)+dt;
+  const land=f._land?Math.max(0,1-(t-f._land)/.2):0;
+  if(act==='idle'||act==='breathing'){
+   const b=Math.sin(t*M.hz+ph0),bb=Math.abs(Math.sin(t*M.hz*.5+ph0));
+   sy=1+b*M.br;sx=1-b*M.br*.45;dy=-bb*M.bn;rot=Math.sin(t*M.hz*.45+ph0)*M.sw*f.dir;
+   if(M.snake){dx=Math.sin(t*1.6+ph0)*6;rot=Math.sin(t*1.6+ph0)*M.sw*f.dir}}
+  else if(act==='walk'){
+   const ph=(f.walk||0)*3.2*Math.PI/4,step=Math.abs(Math.sin(ph)),fwd=Math.sign(f.move||0)===f.dir;
+   dy=-step*(4+M.w*6+(1-M.w)*4);sy=1+(step-.5)*.02;rot=(fwd?1:-.7)*(.03+(1-M.w)*.02)*f.dir+Math.sin(ph)*.01;
+   if(M.snake){dx=Math.sin(ph)*8;dy*=.3}
+   if(f.ground&&M.w>=.55){const k=Math.floor(((f.walk||0)*3.2)/4);if(k!==f._step){f._step=k;motionDust(fx,2+Math.round(M.w*3),M.w);if(M.w>.8)game.shake=Math.max(game.shake||0,.03+M.w*.03)}}}
+  else if(act==='jump'||!f.ground){
+   const v=f.vy||0;const st=Math.max(-1,Math.min(1,-v/600));sy=1+st*.06;sx=1-st*.04;rot=(f.vx||0)/900*.12*f.dir}
+  else if(act==='block'){rot=-.03*f.dir;sy=.985;dx=-f.dir*3}
+  else if(act==='hit'){const k=Math.max(0,1-(f.hitAnimTime||0)/.35)*(f.hitHeavy?1.4:1);rot=-.09*k*f.dir;dx=-f.dir*10*k;sy=1-.03*k;sx=1+.02*k}
+  else if(act==='victory'){const b=Math.abs(Math.sin(t*3.2));dy=-b*6;sy=1+b*.02}
+  else if(act!=='down'&&act!=='knockdown'&&f.actionTotal>0){ // every strike: wind-up, lunge, recover
+   const p=1-Math.max(0,f.actionTime||0)/f.actionTotal;const wind=p<.25?p/.25:0,hit=p>=.25&&p<.55?Math.sin((p-.25)/.3*Math.PI):0;
+   rot=(-wind*.4+hit)*M.ln*.6*f.dir;dx=(-wind*5+hit*14)*f.dir;sx=1+hit*.025;sy=1-hit*.015+wind*.01}
+  if(land>0){sy*=1-land*(.05+M.w*.05);sx*=1+land*(.04+M.w*.04)}
+  if(sx===1&&sy===1&&!rot&&!dy&&!dx)return _dF4.apply(this,arguments);
+  c.save();c.translate(fx+dx,fy+dy);c.rotate(rot);c.scale(sx,sy);c.translate(-fx,-fy);
   try{return _dF4.apply(this,arguments)}finally{c.restore()}}}
 })();
