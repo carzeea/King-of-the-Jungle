@@ -32,6 +32,15 @@ def key(p):
     # despill: cap green at the brighter of red/blue on semi-green pixels
     a[..., 1] = np.where(spill > 0, np.maximum(r, b) + np.clip(spill, 0, 6), g)
     al[al < 0.06] = 0
+    # drop stray specks / vignette corners: keep only what is joined to the main figure
+    import cv2
+    m = (al > 0.4).astype(np.uint8)
+    if m.any():
+        dm = cv2.dilate(m, np.ones((41, 41), np.uint8))
+        nl, lab, st, _ = cv2.connectedComponentsWithStats(dm)
+        if nl > 2:
+            big = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+            al[lab != big] = 0
     return np.dstack([a, al * 255]).astype(np.uint8)
 
 def solid(arr):

@@ -206,3 +206,20 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 ## Eagle extras (side view): block 0–34/2, victory 12–121/2; bite/ultra_move reuse attack_light/special_pounce
 - block AeZ2AwdKAI2pp2WPMueGa-hwOvJp2ZvedLTlMcbee_Fol46W3zqNsh_jlhjXqC4OrWO3nYS1
 - victory ARbRmVmEkZV4ScHd6CNy3RH_EGrQ3xNS9n4POWFyshrz9XmB6KYhnsG1FXC-fOSs3hO_LBAc
+
+## Finishers (side view, 0–121/2, played on the match-winning KO)
+- lion AfXxPfjSf857Btp5jsE93BbaLU6jBjAhZR7e5e1afAl_Wlm-jaXyKx6PiMbvXSa98ebgWnc1
+- tiger AYet3dRJmWWnNTNEogtSzDpEY5TCdbJ0mAGAdLRNWVRqT6YAq2MTuSjnQjXZ9_z4EDCW0GI-
+- jaguar AXBXQ4tvBti_9g2jWegBLhYL2-ZuvgUAbOZMvinXMTcl8cocirc54oZNSbNKYQuvCdQzwUbk
+- leopard ATP35z-Xowts25vb2xJKP545UrdGXH3V8RGLUkoIwBnaX0cB_cRcbLjNFrx_a49JW_a0W631
+- wolf AX4WtheS0zycqiZYlMx541FAYxwYQIVR2lDLZ75_7tkyLAJ7mETxWknolIR4L-J5aZVRp03H
+- hyena AR2TyM3cRpiSfA4gJ_NtiVaVZ1OnqWtenRSKzs5aBDly2vx5k_lgQY1FNQj2Ph8G80sYpYZy
+- badger AWBc8jB_FwNICIgT_A5gqW4i0MqeccKsXfymUM_xXmcnZhlwPhSH7CjfQC_TWsDriqMqU-Jt
+- grizzly AUX_HWiO3VbNxaYpMzdSfYhVup9aS3RwsbO1IZbRwbFIPeh7cwFit9nKQyW7jJzfuUuMP_md
+- crocodile ARFtJTIR_vbE5J8KEj9SleGH0wJJDfzwluEFddvr693WaLKnqxg64XPuaRk1duEqA2xusqeE
+- elephant AVc6IaiE3-tWCyjLu2FqDpBdRt1XoZ6_xUhDikQvkct3sHuep6PgK24jC0KVxxoFQnQF3jPx
+- hippo ASGUu7u5MW1WWph5ciT6B2vng2IzQdWw-4Iqn-21E_CouORYc6rD7FqqPq-C1X2RucCxlPiP
+- snake AREMYRbLmVwLzNThLCctsRoIImahVMjoNXJ7bCfKzb8tc2ZickfPO9qwpI9RgJdWDhLZK9c7
+- stag AWMcqI5Xt_ItLwp7rz4ZijqRGeLOUuV32s6OcEMgBoBVTiWYKmDMkEeFat3-EJbnY0dqSem-
+- eagle AeIbT_3Svd8MJvffCF3AorygBmmDVvza6CVX6-QQ5xiTa2tscrCA7Jf-CJTHtdWdotWZHd8j
+- majic AZ98B02Q-NnDRye0rUzfIRVqWKl2-bM3EhAzx6SGumeUcLu9UvwIPfnW7sm1X0t_KvUs9_S6
