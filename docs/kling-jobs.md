@@ -142,3 +142,15 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - knock AePLzeHtDK3aMfNagvL3x0_1n2--uYyTPF-Db1HdHfyMj6bCPg4UWObvEBc0AaCBy8pM4o8v
 - victory AWlLRwYFgp1XO4DtqcfLMWFj59if21ZMWc1yN7AIJUUAs6FF8DmZBdKtPk2Yc68AXLn4hV-H
 - block AebnIt2JFC_jLbzvAfCHzlPXx6PHGjqnRDLAL8UOFmETMnRRm_KwiEy9HCaDSUl5eIXIHbxK
+
+## Elephant (side view) — auto_fighter.py
+- idle Ae-HU50080VMZfiz0Mkui-pWfPrkbM9kxG_g4MvdA4_Va8xrQ3nFrVqsv-ldT4FsTmdGS4oe
+- walk Afs8LTXTEQp0ppeqhOlqWAAWfQjQ5TVs2lvCkEgM1GZULJJSnNfFjdOPfo8OLmEbsg5ydrpK
+- light Ac9QMuLvFu68rDUkfz6cDzL1HF4hKamBwK5v7dGDRPfOks1-vV0HeasVF6W_V-eQ7BUxiXzt
+- heavy ATRxRQY-FdD-AKs3sFS6QDK9OUNOqA1CxfK775-TwReT5-wSN6_A7ULPTN8mLSu2ELTVpuqN
+- jump AWWSaXD1IHNz2G5gVf-HTpw8VMl2vHX2ReOzVeyelKr1_PsiPcQmz90xoAZgMVgWKgxzjYiD
+- special AfZ3FN67U5gRI0uFQox7NPVTnEgkXmQ_vulikUi-xy1lEgCLAT1qia_PrylUEs5mobuXin26
+- hit ASClNPQOl8x52yzbfIXNZJ-y2wrmxlmj5467MlB5IhRfOBP4FUnR-QLE4XSQjMU-AOjPIuQg
+- knock AU9ZtGS9iX1t4na0E5euamaF30Dkj7Tx3yVd4K65toXGp4P7flMhDDXiiv0N1LtF3Hs3XSc4
+- victory AfsJuIRRIZL83xZQ0BNnzX4zKK28NI9Um7OM4vVMBRljZ3agExEU7n5LIVTCwt4mZG-jR6nQ
+- block AbFjzK4P27TQ5NZEz1AGpp4UlB7e8uIx0eJj9od0P8dEFpRJCezmayZ_7v7MgmWP9gHgPw-3
