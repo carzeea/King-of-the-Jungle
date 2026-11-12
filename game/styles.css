@@ -969,3 +969,23 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
 .fxq-btn{display:none!important}
 
 #menu .cover-menu .quick-btn{grid-column:1/-1}
+
+/* ===== 1.5: phones — everything on one screen, bigger targets, no scrolling ===== */
+@media (orientation:landscape) and (max-height:560px){
+ /* fighter select: two even rows that use the full width */
+ #select.v2sel .select-layout{grid-template-columns:19vw 1fr!important}
+ #select.v2sel #fighter-portrait{max-width:19vw!important}
+ #select.v2sel #roster{display:grid!important;grid-template-columns:repeat(var(--cols,7),minmax(0,1fr))!important;gap:8px 7px!important;align-content:center;width:100%;max-width:none!important}
+ #select.v2sel .sel-row{display:contents!important}
+ #select.v2sel .fighter-tile{width:min(100%,calc((100dvh - 128px) / 2 * .8))!important;max-height:none!important;justify-self:center;aspect-ratio:4/5}
+ #select.v2sel .fighter-tile strong,#select.v2sel .fighter-tile .tf strong{font-size:11px!important}
+ #select.v2sel .fighter-tile strong.long{font-size:8px!important;letter-spacing:0!important}
+ html.kotj-touch #select.v2sel .fighter-tile .tap-pick{display:none!important}
+ /* arena select: all arenas at once in a 4 x 2 grid, one tap starts the fight */
+ #stage .stage-grid{display:grid!important;width:100%;box-sizing:border-box;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;overflow:hidden!important;scroll-snap-type:none!important;gap:10px 12px!important;padding:6px 6px!important;align-items:stretch}
+ #stage .stage-tile,#stage .stage-tile:nth-child(7),#stage .stage-tile:nth-child(8){grid-column:auto!important;height:auto!important;max-height:none!important;width:auto!important;aspect-ratio:auto!important;min-height:0}
+ #stage .stage-tile .sf strong{font-size:12px!important;padding:3px 2px!important;bottom:6%!important}
+ html.kotj-touch #stage .stage-tile.selected::after{content:none}
+ html.kotj-touch #stage #stage-go{display:none!important}
+ #stage .stage-actions button{min-height:40px!important}
+}
