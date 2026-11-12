@@ -3845,7 +3845,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.57`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.58`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3983,7 +3983,7 @@ function fightTint(f){const mine=ownTint(f);if(!game)return mine;const F=game.fi
 
 // ---------- Dolphin King unlock: win any match in THE TIDAL KINGDOM ----------
 {const _fin=finish;finish=function(){const was=game&&game.over;const r=_fin.apply(this,arguments);
- try{if(!was&&game&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&!unlockedNew().includes('dolphin')){
+ try{if(!was&&game&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&!unlockedNew().includes('dolphin')&&game.fighters[1].data.id==='dolphin'){
   const [p,q]=game.fighters,tp=total(p),tq=total(q);if(Math.abs(tp-tq)>=.01){const w=tp>tq?p:q;
    const human=mode==='versus'||(mode==='online'?((tp>tq?0:1)===ON.side):!w.ai);
    if(human){SAVE.set('unlocked',[...unlockedNew(),'dolphin']);if(!roster.includes(DOLPHIN)){const i=roster.indexOf(MAJIC);i>=0?roster.splice(i,0,DOLPHIN):roster.push(DOLPHIN)}
@@ -4013,15 +4013,15 @@ function animalCall(f,kind,vol){try{if(!AU||!soundOn||!f)return;const id=f.data.
 // if a player wins, the Dolphin King rises from the water at the end of the bout ----------
 function tideHuman(w){return mode==='versus'||(mode==='online'?(game.fighters.indexOf(w)===ON.side):!w.ai)}
 function tideStart(){const F=game.fighters,w=total(F[0])>=total(F[1])?F[0]:F[1],cx=(F[0].x+F[1].x)/2,d=Math.random()<.5?1:-1;
- const T={t:0,d,cx,S:560,R:360,leap:1.6,unlock:tideHuman(w)&&mode!=='training',w,splashIn:0,splashOut:0,king:0};game.tide=T;
+ const T={t:0,d,cx,S:560,R:360,leap:1.6,unlock:tideHuman(w)&&(mode==='cpu'||mode==='versus'),w,splashIn:0,splashOut:0,king:0};game.tide=T;
  if(T.unlock){game.ko+=3.2;try{loadHD('dolphin')}catch(_){}}
  const splash=x=>{try{sxFx(F[0],['splash','drops'],x,400,1.4)}catch(_){}try{AU&&soundOn&&AU.now('sfx.splash',.9)}catch(_){}};T.splash=splash;
  splash(cx-d*T.S*.5);try{AU&&soundOn&&AU.now('cry.dolphin',.75)}catch(_){}}
 {const _fuT=fxUpdate;fxUpdate=function(dt){const r=_fuT.apply(this,arguments);try{
- if(game&&game.ko>0&&game.ko<2.15&&!game.tide&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&!unlockedNew().includes('dolphin'))tideStart();
+ if(game&&game.ko>0&&game.ko<2.15&&!game.tide&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&mode!=='online'&&!tower&&!unlockedNew().includes('dolphin')&&game.fighters[1].data.id!=='dolphin')tideStart();
  const T=game&&game.tide;if(T){T.t+=dt;
   if(!T.splashOut&&T.t>=T.leap*.95){T.splashOut=1;T.splash(T.cx+T.d*T.S*.5)}
-  if(T.unlock&&!T.king&&T.t>=T.leap+.25){T.king=1;T.kx=tideKingX();T.splash(T.kx);try{AU&&soundOn&&AU.now('roar.dolphin',.9)}catch(_){}tideBanner()}}}catch(_){}return r}}
+  if(T.unlock&&!T.king&&T.t>=T.leap+.25){T.king=1;T.kx=tideKingX();T.splash(T.kx);try{AU&&soundOn&&AU.now('roar.dolphin',.9)}catch(_){}tideBanner('🌊 A NEW CHALLENGER RISES','DOLPHIN KING')}}}catch(_){}return r}}
 function tideKingX(){const F=game.fighters,cv=$('game-canvas'),vw=(cam.vx||570)*(cv.width/Math.max(1,cv.height)),L=cam.x+vw*.1,Rr=cam.x+vw*.9;
  const lo=Math.min(...F.map(f=>f.x))-130,hi=Math.max(...F.map(f=>f.x))+(F.some(f=>f.hp<=0&&f.x>=Math.max(...F.map(q=>q.x))-1)?200:130);
  return (lo-L)>(Rr-hi)?(L+Math.max(L,lo))/2:(Math.min(Rr,hi)+Rr)/2}
@@ -4036,7 +4036,20 @@ function tideKingDraw(){const T=game.tide;if(!T.king)return;const k=T.t-(T.leap+
  c.save();c.beginPath();c.rect(-5000,-5000,10000,5372);c.clip();c.translate(T.kx,372+(1-ease)*300);c.scale(dir*.84,.84);
  c.shadowColor='#6fdcff';c.shadowBlur=(typeof LITE==='function'&&LITE())?0:24;c.globalAlpha=Math.min(1,k/.25);
  c.drawImage(im,(fr%CC)*fw,Math.floor(fr/CC)*fh,fw,fh,-px,-py+6,fw/sc,fh/sc);c.restore()}
-function tideBanner(){let el=document.getElementById('tide-unlock');if(!el){el=document.createElement('div');el.id='tide-unlock';document.body.appendChild(el)}
- el.innerHTML='<small>🌊 NEW PLAYABLE CHARACTER UNLOCKED</small><b>DOLPHIN KING</b>';el.classList.remove('on');void el.offsetWidth;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),3400)}
+function tideBanner(top,big){let el=document.getElementById('tide-unlock');if(!el){el=document.createElement('div');el.id='tide-unlock';document.body.appendChild(el)}
+ el.innerHTML='<small>'+(top||'🌊 NEW PLAYABLE CHARACTER UNLOCKED')+'</small><b>'+(big||'DOLPHIN KING')+'</b>';el.classList.remove('on');void el.offsetWidth;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),3400)}
 {const _stT=start;start=function(){const r=_stT.apply(this,arguments);try{if(game)game.tide=null;if(arena&&arena.id==='tidal-kingdom'&&!unlockedNew().includes('dolphin'))setTimeout(()=>{try{loadHD('dolphin')}catch(_){}},1500)}catch(_){}return r}}
+
+// ---------- Tidal Kingdom challenge: win there (first time) and the Dolphin King steps in for a second bout ----------
+// Your fighter is fully healed; beat him to unlock him. Lose and he's waiting next time you win there.
+{const _fnT=finish;finish=function(){
+ try{if(game&&!game.over&&game.tide&&game.tide.unlock&&game.fighters[1].data.id!=='dolphin'&&!unlockedNew().includes('dolphin')){
+  const w=game.tide.w;game.over=true;window.__tideFrom={mode,picks:picks.slice()};
+  mode='cpu';picks=[w.data,DOLPHIN];step=2;
+  setTimeout(()=>{start();setTimeout(()=>tideBanner('🌊 ROUND 2 · FULL HEALTH','BEAT THE DOLPHIN KING'),900)},250);return}}catch(_){}
+ const r=_fnT.apply(this,arguments);
+ try{if(window.__tideFrom&&game&&game.fighters[1].data.id==='dolphin'&&unlockedNew().includes('dolphin')){setTimeout(()=>tideBanner(),300)}}catch(_){}
+ return r}}
+// leaving the challenge restores the original mode for menus
+$('result-menu').addEventListener('click',()=>{const f=window.__tideFrom;if(f){mode=f.mode;window.__tideFrom=null}},true);
 })();
