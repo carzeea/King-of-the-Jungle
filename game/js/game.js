@@ -822,7 +822,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 // Fighter art is drawn slightly bigger/wider than the measured sprites (build 9.22–9.23); hit ranges scale to match.
-const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:1.32},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
+const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:1.55},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
 const artScale=f=>(BODY_PRESENCE[f.data.id]||1)*(BODY_WIDTH[f.data.id]||1);
 const bodyFront=f=>((HB[f.data.id]&&HB[f.data.id].body[0])||85)*artScale(f);
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury||mv.majicEclipse)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
@@ -3542,7 +3542,11 @@ const SX={
   {n:'ULTIMATE PREDATOR',d:'A storm of signature strikes (50% meter)',a:['ultra_move','special_b'],t:1.1,h:[.15,.32,.5,.68,.86],dm:3.6,st:.45,pu:80,r:340,vx:300,cost:50,fh:['gash','embers','flakeburst','leafburst','featherburst'],col:'#b46bff'}],
   u:{n:"THE KINGDOM'S END",s:'THE KINGDOM FALLS',col:'#b46bff',dark:1,storm:1,seq:[['sx1',.8,['portal','tornado','flakes','leafstorm','poison'],0],['ultra_move',.5,['bolts','flameburst','splash'],7,'up'],['special_c',.45,['shards','venom','featherburst'],7,'air'],['special_d',.75,['quake','rocks','bolts','splash','flameburst','leafburst','shock','dustwave'],18,'crash']]}}
 };
-for(const id in SX){if(SX[id].m.length>3)SX[id].m=SX[id].m.slice(0,3)} // less is more: 3 specials + the Ultimate
+// less is more: each fighter's 3 best specials on ★1 ★2 ★3 (+ the Ultimate on ★U). MAJIC's CPU keeps his whole arsenal.
+const SX3={dolphin:[0,1,2],lion:[0,1,3],tiger:[1,0,4],jaguar:[0,2,3],leopard:[0,1,4],wolf:[0,2,3],hyena:[0,2,3],badger:[0,2,3],
+ grizzly:[1,0,2],crocodile:[2,0,1],hippo:[0,2,4],elephant:[0,1,4],eagle:[1,0,2],stag:[1,0,2],snake:[1,0,3],majic:[1,3,7]};
+for(const id in SX){const D=SX[id],pick=(SX3[id]||[0,1,2]).map(i=>D.m[i]).filter(Boolean);D.m=id==='majic'?[...pick,...D.m.filter(m=>!pick.includes(m))]:pick}
+const SX_SHOW=3;
 const SXK=['s1','s2','s3','su'];
 BTN.push(...SXK);
 // ---------- effects quality, screen shake & flash ----------
@@ -3570,7 +3574,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 function sxMoveList(id){let el=document.getElementById('sx-movelist');if(!el){el=document.createElement('div');el.id='sx-movelist';el.className='sx-movelist';document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('.sx-close'))el.classList.remove('on')})}
  const D=SX[id];if(!D){return}const fd=roster.find(r=>r.id===id)||{name:id.toUpperCase()};
  const dv=typeof devNow==='function'?devNow():'keyboard',row=(k,m,i)=>`<li><b>★${i+1} · ${m.n}</b><span class="in">${starHow(i,dv)}</span><i>${m.d||''}</i></li>`;
- el.innerHTML=`<div class="sx-ml-card"><h3>${fd.name} · SPECIAL MOVES</h3><ol>${D.m.map((m,i)=>row(SX_IN[i],m,i)).join('')}</ol><div class="sx-ult"><b>★U · ULTIMATE · ${D.u.n}</b><span class="in">${starHow('U',dv)}</span></div><p class="sx-tip">One button per special move, no combos to remember.</p><button class="primary sx-close">CLOSE</button></div>`;
+ el.innerHTML=`<div class="sx-ml-card"><h3>${fd.name} · SPECIAL MOVES</h3><ol>${D.m.slice(0,SX_SHOW).map((m,i)=>row(SX_IN[i],m,i)).join('')}</ol><div class="sx-ult"><b>★U · ULTIMATE · ${D.u.n}</b><span class="in">${starHow('U',dv)}</span></div><p class="sx-tip">One button per special move, no combos to remember.</p><button class="primary sx-close">CLOSE</button></div>`;
  el.classList.add('on')}
 // ---------- touch: ★ MOVES panel ----------
 function sxTouchInstall(){const pad=document.getElementById('touch-pad');if(!pad||pad.querySelector('.pad-stars'))return;
@@ -3589,7 +3593,8 @@ function sxMatch(hist,now,motion){const toks=SXM[motion];if(!toks)return false;l
  return ti<0&&now-first<=win}
 function sxRead(f,inp,atkE,spE){const now=game.sxClock||0;
  {const pv=f.sxBtnPrev||{};f.sxBtnPrev={};let hit=null;for(const k of SXK){f.sxBtnPrev[k]=!!inp[k];if(inp[k]&&!pv[k]&&hit===null)hit=k==='su'?'u':(+k.slice(1)-1)}if(hit!==null)return hit}
- if(!atkE&&!spE)return null;const H=f.sxHist||[],D=SX[f.data.id];if(!D)return null;
+ return null; // specials are buttons only now (no motion inputs)
+ const H=f.sxHist||[],D=SX[f.data.id];if(!D)return null;
  
  const order=['41236S','63214S','623A','623S','236A','214A','236S','214S','46S','46A'];
  for(const code of order){const btn=code.slice(-1),mo=code.slice(0,-1),idx=SX_IN.indexOf(code);if(idx<0||idx>=D.m.length)continue;if((btn==='A'&&atkE)||(btn==='S'&&spE)){if(sxMatch(H,now,mo))return idx}}
@@ -3771,7 +3776,7 @@ function devDojo(){const d=$('dojo');if(!d)return;let box=$('dojo-moves');
  const ctl=d.querySelector('.dojo-controls');if(ctl)ctl.innerHTML=`<strong>YOUR CONTROLS · ${DEV_NAME[dev]}</strong><span class="dev-basics">${devBasics(dev)}</span>`;
  box.innerHTML=`<div class="dm-head"><b>MOVE GUIDE</b><button class="secondary dm-dev">PLAYING ON: ${DEV_NAME[dev]} ▸ CHANGE</button></div>
   <div class="dm-fighters">${list.map(r=>`<button class="dm-f${r.id===devPick?' sel':''}" data-f="${r.id}"><img src="${portrait(r.id)}" alt=""><span>${r.name}</span></button>`).join('')}</div>
-  ${D?`<div class="dm-list"><h4>${F.name}</h4>${D.m.map((m,i)=>`<div class="dm-row"><div><b>${m.n}</b><i>${m.d||''}</i></div><div class="dm-how">${devHow(SX_IN[i],dev,m.n)}</div></div>`).join('')}
+  ${D?`<div class="dm-list"><h4>${F.name}</h4>${D.m.slice(0,SX_SHOW).map((m,i)=>`<div class="dm-row"><div><b>${m.n}</b><i>${m.d||''}</i></div><div class="dm-how">${devHow(SX_IN[i],dev,m.n)}</div></div>`).join('')}
    <div class="dm-row dm-ult"><div><b>ULTIMATE · ${D.u.n}</b><i>Cinematic finisher · costs the whole meter · can be blocked</i></div><div class="dm-how">${devHow('U',dev,D.u.n)}</div></div></div>`:''}
   ${dev!=='touch'?'<p class="dm-note">Arrows are shown with your fighter facing right — swap ← and → when you face left. Moves still come out with a slightly loose input.</p>':'<p class="dm-note">The ★ button sits next to INS / SPC / ATK during a fight. The ultimate button lights up when your meter is full.</p>'}`;
  box.querySelector('.dm-dev').onclick=()=>devAsk(devDojo);
@@ -3779,7 +3784,7 @@ function devDojo(){const d=$('dojo');if(!d)return;let box=$('dojo-moves');
 function devRefresh(){devDojo();try{updateGuide()}catch(_){}}
 // pause-menu / select-screen move list follows the chosen device too
 {const _ml=sxMoveList;sxMoveList=function(id){_ml(id);const el=document.getElementById('sx-movelist');if(!el)return;const dev=devNow(),D=SX[id];if(!D)return;
- el.querySelectorAll('.sx-ml-card li').forEach((li,i)=>{const s=li.querySelector('.in');if(s)s.innerHTML=devHow(SX_IN[i],dev,D.m[i].n)});
+ el.querySelectorAll('.sx-ml-card li').forEach((li,i)=>{const s=li.querySelector('.in');if(s&&D.m[i])s.innerHTML=devHow(SX_IN[i],dev,D.m[i].n)});
  const u=el.querySelector('.sx-ult .in');if(u)u.innerHTML=devHow('U',dev,D.u.n);
  const tip=el.querySelector('.sx-tip');if(tip)tip.innerHTML=`Shown for <b>${DEV_NAME[dev]}</b> · <a href="#" class="dm-chg">change device</a>`;
  const a=el.querySelector('.dm-chg');if(a)a.onclick=e=>{e.preventDefault();devAsk(()=>sxMoveList(id))}}}
@@ -3848,7 +3853,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.63`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.0`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -4073,7 +4078,7 @@ function tideChallenge(wData){const from={mode,tower,picks:picks.slice()};window
 $('result-menu').addEventListener('click',()=>{const f=window.__tideFrom;if(f){mode=f.mode==='online'?'versus':f.mode;window.__tideFrom=null}},true);
 $('tower-next').addEventListener('click',()=>$('rematch').classList.remove('hidden'),true);
 
-// ---------- MAJIC: the final boss soaks hits (3 full health bars, takes 25% less damage from players) ----------
+// ---------- MAJIC: the final boss soaks hits (3 full health bars, takes 40% less damage from players) ----------
 {const _rhM=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i];const h0=o.hp,b0=o.bars;const r=_rhM.apply(this,arguments);
- try{if(o.data.id==='majic'&&o.ai&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.25)}}catch(_){}return r}}
+ try{if(o.data.id==='majic'&&o.ai&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.4)}}catch(_){}return r}}
 })();
