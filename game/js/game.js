@@ -2720,7 +2720,7 @@ function drawSprite(f){
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
  if(hi&&hi.complete&&hi.naturalWidth){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1);f._lg={img,meta,sc,fr}}
  else if(f._lg&&f._lg.img.complete&&f._lg.img.naturalWidth){img=f._lg.img;meta=f._lg.meta;sc=f._lg.sc;fr=f._lg.fr} // sheet still loading: hold the last frame instead of blinking
- if(!img||!img.complete||!img.naturalWidth)return false;{const tg=(!f.ai&&window.KOTJ_ARMORY&&window.KOTJ_TINT)?KOTJ_ARMORY.fightColors(f.data.id):null;window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
+ if(!img||!img.complete||!img.naturalWidth)return false;{const tg=fightTint(f);window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
  const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
  // Species-calibrated body presence: modestly enlarges the existing HD art
  // without stretching anatomy or changing the original fighter silhouettes.
@@ -3828,7 +3828,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.44`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.45`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3942,4 +3942,18 @@ function qfLabel(){const b=document.getElementById('quick-fight');if(!b)return;c
 if(document.getElementById('splash'))['pointerup','keyup'].forEach(ev=>window.addEventListener(ev,function h(){window.removeEventListener('pointerup',h,true);window.removeEventListener('keyup',h,true);setTimeout(()=>{const m=document.getElementById('menu');if(m&&!m.classList.contains('started')&&!m.classList.contains('hidden'))document.getElementById('press-start').click()},120)},true));
 (function(){const m=document.getElementById('cover-menu');if(!m||document.getElementById('quick-fight'))return;const b=document.createElement('button');b.id='quick-fight';b.className='primary quick-btn';b.innerHTML='<b>⚡ QUICK FIGHT</b><small></small>';b.onclick=quickFight;m.insertBefore(b,m.firstChild);
  const t=m.querySelector('[data-mode=tower]');if(t){t.classList.remove('primary');t.classList.add('secondary')}qfLabel()})();
+
+// ---------- mirror matches: the second fighter wears a contrasting colorway so you can tell who's who ----------
+function ownTint(f){return(!f.ai&&window.KOTJ_ARMORY&&window.KOTJ_TINT)?KOTJ_ARMORY.fightColors(f.data.id):null}
+function hueOf(hex){const n=parseInt(String(hex).replace('#',''),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d||d/mx<.15)return null;let h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;return h<0?h+360:h}
+const hueGap=(a,b)=>{const d=Math.abs(a-b)%360;return d>180?360-d:d};
+function mirrorTint(fid,other){if(!window.KOTJ_TINT)return null;const Z=KOTJ_TINT.ZONES[fid];if(!Z)return null;const t={};
+ if(Z.cloth){const c=Z.cloth,h0=other&&other.cloth?hueOf(other.cloth):((c[0]<=c[1]?(c[0]+c[1])/2:((c[0]+c[1]+360)/2)%360));
+  const C=[['#1f3fa8',225],['#a8142a',352],['#1d8a3a',140],['#5a1f9a',268]];let best=C[0],bd=-1;for(const k of C){const d=h0==null?90:hueGap(h0,k[1]);if(d>bd){bd=d;best=k}}t.cloth=best[0]}
+ if(Z.metal){const h=other&&other.metal?hueOf(other.metal):45,gold=h!=null&&hueGap(h,45)<40;t.metal=!gold?'#ffd04a':(!Z.cloth&&fid!=='elephant')?'#b81c30':'#c9ccd6'} // badger & stag only have metal to recolour, so go bold red
+ return t}
+function fightTint(f){const mine=ownTint(f);if(!game)return mine;const F=game.fighters,i=F.indexOf(f),o=F[1-i];
+ if(i!==1||!o||o.data.id!==f.data.id)return mine;                  // only the second fighter in a mirror match changes
+ const theirs=ownTint(o);if(mine&&JSON.stringify(mine)!==JSON.stringify(theirs))return mine; // already wearing something different
+ return mirrorTint(f.data.id,theirs)}
 })();
