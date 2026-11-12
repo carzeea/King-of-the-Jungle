@@ -825,6 +825,8 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 // Fighter art is drawn slightly bigger/wider than the measured sprites (build 9.22–9.23); hit ranges scale to match.
+// v16.9 balance pass (from 1,920 CPU-vs-CPU test fights): damage dealt and toughness per fighter. MAJIC untouched.
+const BAL_DMG={jaguar:.73,crocodile:.82,grizzly:.76,tiger:.84,elephant:.9,eagle:1.4,dolphin:1.35,leopard:1.28,hyena:1.2,badger:1.18,snake:1.12,stag:1.1,hippo:1.07,wolf:1.06},BAL_TOUGH={eagle:1.22,leopard:1.06,dolphin:1.08,badger:1.04,hyena:1.03};
 const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:0.985},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
 const artScale=f=>(BODY_PRESENCE[f.data.id]||1)*(BODY_WIDTH[f.data.id]||1);
 const bodyFront=f=>((HB[f.data.id]&&HB[f.data.id].body[0])||85)*artScale(f);
@@ -1134,7 +1136,7 @@ function resolveHit(i,mv){
  if(mv.snakeCoil){o.coilT=1.05;o.coilBy=i;o.vx=f.dir*58;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*16,y:cy+(k%2)*9,t:0,life:.72+k*.06,color:k===1?'#c8ed82':'#83bd50',kind:'ring'});spark(cx,cy,'#a8d66d',22);floatText(cx,cy-100,'CONSTRICTED','#a8d66d');banner('CONSTRICTED','MOVEMENT REDUCED',.72,'#a8d66d');game.shake=Math.max(game.shake,.22)}
  if(mv.snakeVenom){o.venomT=2.4;o.venomTick=.78;o.venomBy=i;for(let k=0;k<3;k++)game.fx.push({x:cx+(k-1)*20,y:cy+(k%2)*12,t:0,life:.52+k*.06,color:k===1?'#b8e986':'#78b84f',kind:'ring'});spark(cx,cy,'#a8d66d',24);floatText(cx,cy-94,'VENOMED','#a8d66d');game.shake=Math.max(game.shake,.24);game.flash=Math.max(game.flash||0,.045)}
  const chargeArmor=o.data.id==='elephant'&&(o.elephantChargeT||0)>.12;
- const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1)*(mode==='training'?0:1);
+ const majicPower=f.data.id==='majic'?((f.bossPhase||1)>=3?1.2:(f.bossPhase||1)>=2?1.12:Math.max((f.jungleRageT||0)>0?1.18:1,(f.ascendantT||0)>0?1.2:1)):1;const majicGuard=o.data.id==='majic'?((o.majicVoidGuardT||0)>.025?.45:((o.bossPhase||1)>=2?.88:((o.jungleRageT||0)>0||(o.ascendantT||0)>0)?.88:1)):1;const dmg=mv.dmg(f.data.power)*(f.instinct?1.25:1)*majicPower*(1-(o.data.defense-7)*.03)*majicGuard*(chargeArmor?.38:1)*(game.bane===i+1&&o.data.id==='majic'?1.5:1)*(BAL_DMG[f.data.id]||1)/(BAL_TOUGH[o.data.id]||1)*(mode==='training'?0:1);
  f.combo=comboing?f.combo+1:1;f.bestCombo=Math.max(f.bestCombo||0,f.combo);dojoChallengeHit(f,mv);
  if(mv.potential&&comboing){const real=Math.min(dmg,Math.max(0,o.hp-.5));o.hp-=real;o.potential+=real;}
  else{o.hp-=dmg;}
@@ -3871,7 +3873,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.8`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.9`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
