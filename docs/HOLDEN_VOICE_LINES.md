@@ -13,9 +13,10 @@ Voice: **Holden** (voice ID `3c9d6053-6334-592c-8997-4e325286af3f`)
 | **Shadow attack!** | `holden-shadow-attack.mp3` | Any fighter uses a Shadow move |
 | **Ultra!** | `holden-ultra.mp3` | An Ultra Combo starts |
 | **Finish him!** | `holden-finish-him.mp3` | A fighter drops into DANGER (Ultra Combo now possible) |
-| **Flawless victory!** | `holden-flawless-victory.mp3` | Win without losing any health |
+| ~~Flawless victory!~~ | `holden-flawless-victory.mp3` | Retired 2026-11-12, replaced by "You can't be king!" |
 
-## Still to record (36)
+## Still to record (37)
+| **You can't be king!** | `holden-you-cant-be-king.mp3` | After a flawless win (no health lost), in place of "Flawless victory!" | Nothing (silent until recorded) |
 
 These already work without a recording: the general Holden call or the browser voice covers them. Recording them gives each moment its own line. Save as .mp3 with the exact name shown and send them over.
 

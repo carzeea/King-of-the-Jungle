@@ -1314,10 +1314,10 @@ function finish(){
  if(tower&&tower.boss&&!draw_){if(resultChampId==='majic'){title='THE JUNGLE TITAN';copy='“I AM THE LAW OF THIS WILD. THE CROWN WAS ALWAYS MINE.” · MAJIC HOLDS THE SUMMIT';}else{title='THE TITAN FALLS';copy='“IMPOSSIBLE... THE JUNGLE HAS CHOSEN YOU.” · MAJIC’S TRUE FORM IS DEFEATED';}}
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=resultChampId;
-  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
+  const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless&&AU.has('voice.cant-be-king')?'voice.cant-be-king':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
   // Holden names the winner after every decided match; falls back to the old call until that line is recorded
   const winLine=!draw_&&champId&&mode!=='training'&&title!=='KING OF THE JUNGLE'?'voice.'+champId+'-wins':null;
-  setTimeout(()=>{const named=winLine&&AU.now(winLine,1);if(!named&&line&&title!=='KING OF THE JUNGLE')AU.now(line);if(named&&flawless)setTimeout(()=>AU.now('voice.flawless-victory'),1500)},450)}
+  setTimeout(()=>{const named=winLine&&AU.now(winLine,1);if(!named&&line&&title!=='KING OF THE JUNGLE')AU.now(line);if(named&&flawless)setTimeout(()=>AU.now('voice.cant-be-king'),1500)},450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=winArt(champ.id);$('winner-portrait').alt=champ.name;const champRec=SAVE.get('fighterAchievements',{})[champ.id]||{},champMastery=masteryFor(champRec),champReward=MASTERY_REWARDS[champ.id]||{title:'JUNGLE ELITE',aura:'#e8b95b'};$('winner-portrait').classList.toggle('mastery-legend-portrait',champMastery.level>=5);$('winner-portrait').style.setProperty('--mastery-aura',champReward.aura);$('winner-portrait').title=champMastery.level>=2?champReward.title:'';
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
@@ -3853,7 +3853,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.2`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.3`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
