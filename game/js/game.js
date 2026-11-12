@@ -822,7 +822,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 // Fighter art is drawn slightly bigger/wider than the measured sprites (build 9.22–9.23); hit ranges scale to match.
-const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:.93,majic:1.0},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
+const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:1.0},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
 const artScale=f=>(BODY_PRESENCE[f.data.id]||1)*(BODY_WIDTH[f.data.id]||1);
 const bodyFront=f=>((HB[f.data.id]&&HB[f.data.id].body[0])||85)*artScale(f);
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury||mv.majicEclipse)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
@@ -3845,7 +3845,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.59`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.60`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3991,12 +3991,12 @@ function fightTint(f){const mine=ownTint(f);if(!game)return mine;const F=game.fi
  return r}}
 
 // ---------- Dolphin King: a real dolphin leaps out of the water behind him (like the Wolf's moon) ----------
-const LEAP_IMG=new Image();LEAP_IMG.src='assets/fx/dolphin-leap.webp?v=15.51';try{FXQ_ALWAYS.add('leap')}catch(_){}
+const LEAP_IMG=new Image();LEAP_IMG.src='assets/fx/dolphin-leap.webp?v=15.60';try{FXQ_ALWAYS.add('leap')}catch(_){}
 function dLeap(p){if(!LEAP_IMG.complete||!LEAP_IMG.naturalWidth)return;const u=Math.min(1,p.t/p.life),d=p.dir||1;
  const S=p.span||520,Rz=p.rise||300,x=p.x0+d*(-.44*S+S*u),y=(p.y0||392)-Rz*4*u*(1-u),ang=Math.atan2(-Rz*4*(1-2*u),S*d)*.6;
- const w=p.w||330,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
+ const w=(p.w||330)*.72,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
  c.globalAlpha=Math.min(1,p.t/.18)*Math.min(1,(p.life-p.t)/.25)*.95;c.translate(x,y);c.rotate(ang);if(d===1)c.scale(-1,1);
- c.drawImage(LEAP_IMG,-w*.5,-h*.38,w,h)}
+ c.drawImage(LEAP_IMG,-w*.5,-h*.5,w,h)}
 
 // every fighter's own Ultra sound also plays when their cinematic Ultimate starts
 {const _us=sxUltStart;sxUltStart=function(f,o){const r=_us.apply(this,arguments);try{if(game&&game.sxu&&AU&&soundOn&&AU.has('ultra.'+f.data.id)){AU.duckMusic(.3);AU.ultra(f.data.id)}}catch(_){}return r}}
@@ -4028,8 +4028,8 @@ function tideKingX(){const F=game.fighters,cv=$('game-canvas'),vw=(cam.vx||570)*
 // the leaping dolphin is drawn behind the fighters so it never covers them
 {const _dfT=drawFighter;drawFighter=function(f,i,ghost){try{if(i===0&&!ghost&&game&&game.tide){tideLeapDraw();tideKingDraw()}}catch(_){}return _dfT.apply(this,arguments)}}
 function tideLeapDraw(){const T=game.tide;if(T.t>T.leap||!LEAP_IMG.complete||!LEAP_IMG.naturalWidth)return;const u=T.t/T.leap,d=T.d;
- const x=T.cx+d*(-.5*T.S+T.S*u),y=405-T.R*4*u*(1-u),ang=Math.atan2(-T.R*4*(1-2*u),T.S*d)*.75,w=420,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
- c.save();c.beginPath();c.rect(-5000,-5000,10000,5407);c.clip();c.translate(x,y);c.rotate(ang);if(d===1)c.scale(-1,1);c.drawImage(LEAP_IMG,-w*.5,-h*.35,w,h);c.restore()}
+ const x=T.cx+d*(-.5*T.S+T.S*u),y=405-T.R*4*u*(1-u),ang=Math.atan2(-T.R*4*(1-2*u),T.S*d)*.75,w=310,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
+ c.save();c.beginPath();c.rect(-5000,-5000,10000,5407);c.clip();c.translate(x,y);c.rotate(ang);if(d===1)c.scale(-1,1);c.drawImage(LEAP_IMG,-w*.5,-h*.5,w,h);c.restore()}
 function tideKingDraw(){const T=game.tide;if(!T.king)return;const k=T.t-(T.leap+.25),im=spriteHD.dolphin&&spriteHD.dolphin.victory,Tb=HDT.dolphin;
  if(!im||!im.complete||!im.naturalWidth||!Tb)return;const m=Tb.anims.victory,[n,fw,fh,px,py,cols]=m,sc=Tb.s*(m[6]||1),CC=cols||1e9;
  const rise=Math.min(1,k/.55),ease=1-Math.pow(1-rise,3),fr=Math.min(n-1,Math.floor(Math.max(0,k-.35)*12)),dir=game.tide.w.x<T.kx?-1:1;
