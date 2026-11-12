@@ -3760,4 +3760,49 @@ addEventListener('gamepadconnected',()=>{if(DEVICE&&DEVICE!=='xbox'&&DEVICE!=='p
 // device choice in Options too
 {const so=$('sel-opts');if(so&&!so.querySelector('.dev-btn')){const b=document.createElement('button');b.className='secondary dev-btn';b.textContent='DEVICE / CONTROLS';so.insertBefore(b,$('so-close'));b.onclick=()=>devAsk()}}
 window.KOTJ_DEVICE={ask:devAsk,get:devNow};
+
+/* ================= BLOOD THAT REACTS TO THE ATTACK (only when BLOOD is LIGHT or HEAVY) =================
+   slash (claws): a fan of droplets thrown along the swipe · bite: a tight burst plus heavy drips
+   blunt (heavy hits, slams, uppercuts): a wide spray and a fine mist · crush (grabs, bear hug, coils, death roll): blood squeezed out both sides and dripping down
+   projectile (venom, wind blades): only a few drops · launched fighters leave a trail; wounded fighters keep dripping for a moment, and drip slowly while in DANGER. */
+let BLEED_CTX=null;
+function bleedType(f,mv){if(!mv)return'slash';const D=mv.sx,anim=moveAnim(f,mv)||'';
+ if((D&&D.grab)||mv.grab||mv.snakeCoil||mv.crocodileRoll||mv.elephantGrab)return'crush';
+ if(D&&(D.fs||[]).some(k=>k.startsWith('proj:')))return'proj';
+ if(anim==='bite'||mv===MOVES.bite||mv.jaguarBite||mv.snakeVenom||mv.hyenaFeint)return'bite';
+ if(/attack_heavy|uppercut|slam|earth|stomp/.test(anim)||mv.ender||(mv.push||0)>=280)return'blunt';
+ return'slash'}
+function bDrop(x,y,vx,vy,r,shade){game.fx.push({kind:'blood',x,y,vx,vy,r,t:0,life:2.4,shade:shade==null?Math.random():shade})}
+bleed=function(x,y,dir,power,type){if(!blood||!game)return;type=type||BLEED_CTX||'slash';
+ const H=blood===2,q=FXQ==='low'?.55:1,n=Math.max(1,Math.round(power*(H?2.2:1)*q)),R=()=>Math.random();
+ if(type==='slash'){// droplets thrown in a fan along the claw's path (down-forward diagonal), long and fast
+  for(let k=0;k<n+2;k++){const t=R()*2-1,sx=x+dir*t*34,sy=y-t*26;bDrop(sx,sy,dir*(120+R()*(H?380:260))+t*60,-(40+R()*(H?220:150))-t*80,1.3+R()*(H?3:2))}}
+ else if(type==='bite'){// tight burst at the jaws, then a few heavy drips that fall almost straight down
+  for(let k=0;k<n;k++){const a=R()*Math.PI*2,s=60+R()*(H?260:170);bDrop(x+(R()-.5)*10,y+(R()-.5)*10,Math.cos(a)*s*.7+dir*60,Math.sin(a)*s-60,1.5+R()*(H?3.2:2.2))}
+  for(let k=0;k<(H?5:3);k++)bDrop(x+(R()-.5)*26,y+R()*14,dir*(R()*30),20+R()*40,2.6+R()*2.4,.2)}
+ else if(type==='blunt'){// wide spray out the far side plus a fine mist
+  for(let k=0;k<n+2;k++)bDrop(x+(R()-.5)*20,y+(R()-.5)*30,dir*(60+R()*(H?340:240)),-(80+R()*(H?300:200)),1.2+R()*(H?3.4:2.4));
+  for(let k=0;k<(H?5:2);k++)game.fx.push({kind:'mist',x:x+(R()-.5)*24,y:y+(R()-.5)*24,vx:dir*(50+R()*90),vy:-20-R()*40,r:9+R()*(H?16:10),t:0,life:.45})}
+ else if(type==='crush'){// squeezed out to both sides, then dripping down
+  for(let k=0;k<n;k++){const s=R()<.5?-1:1;bDrop(x+s*(10+R()*20),y+(R()-.5)*40,s*(60+R()*160),-(30+R()*120),1.4+R()*(H?3:2))}
+  for(let k=0;k<(H?7:4);k++)bDrop(x+(R()-.5)*50,y+R()*40,(R()-.5)*20,30+R()*50,2.2+R()*2.6,.3)}
+ else{// projectile
+  for(let k=0;k<Math.max(1,Math.round(n*.4));k++)bDrop(x,y,dir*(60+R()*160),-(30+R()*120),1.2+R()*1.8)}
+ if(type!=='proj'&&H&&power>=8)for(let k=0;k<4;k++)game.fx.push({kind:'mist',x:x+(R()-.5)*20,y:y+(R()-.5)*20,vx:dir*(40+R()*80),vy:-20-R()*40,r:10+R()*14,t:0,life:.45})};
+// classify every hit, and remember where the wound is so the fighter keeps dripping
+{const _rh=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i],hp0=o.hp+(o.bars||0)*1000;
+ BLEED_CTX=blood?bleedType(f,mv):null;let r;try{r=_rh.apply(this,arguments)}finally{BLEED_CTX=null}
+ if(blood&&o.hp+(o.bars||0)*1000<hp0){const t=bleedType(f,mv);o.bleedT=Math.max(o.bleedT||0,(t==='crush'||t==='bite'?1.6:t==='blunt'?.9:1.1)*(blood===2?1.8:1));o.woundH=110+Math.random()*90;o.woundSide=-o.dir}
+ return r}}
+// drips after a hit, a trail while launched, and a slow drip in DANGER
+{const _fu3=fxUpdate;fxUpdate=function(dt){const r=_fu3.apply(this,arguments);if(!blood||!game||!game.fighters)return r;
+ for(const f of game.fighters){f.bleedT=Math.max(0,(f.bleedT||0)-dt);const air=!f.ground&&(f.down>0||f.stun>0);
+  const rate=(f.bleedT>0?(blood===2?9:4):0)+(air&&f.bleedT>0?(blood===2?14:6):0)+(inDanger(f)&&f.hp>0?(blood===2?1.6:.7):0);
+  if(rate>0&&Math.random()<rate*dt*(FXQ==='low'?.5:1)){const wy=f.y-(f.woundH||150),wx=f.x+(f.woundSide||0)*(20+Math.random()*25);
+   bDrop(wx,wy,(Math.random()-.5)*30+(air?f.vx*.2:0),air?Math.random()*60:10+Math.random()*30,1.4+Math.random()*(blood===2?2.6:1.6))}}
+ return r}}
+// ultimates bleed by their strike type too
+{const _us=sxUltStep;sxUltStep=function(dt){const u=game.sxu,C=u&&u.cur,before=C&&C.hit;const r=_us.apply(this,arguments);
+ if(blood&&u&&C&&!before&&C.hit&&C.dm>0){const f=game.fighters[u.i],o=game.fighters[1-u.i];bleed(o.x-f.dir*bodyFront(o)*.5,o.y-150+(Math.random()-.5)*40,f.dir,C.mode==='crash'?14:7,C.mode==='crash'||C.mode==='up'?'blunt':/bite/.test(C.a)?'bite':/sx2/.test(C.a)&&C.fx.includes('bearhug')?'crush':'slash');o.bleedT=Math.max(o.bleedT||0,1.4);o.woundH=140}
+ return r}}
 })();
