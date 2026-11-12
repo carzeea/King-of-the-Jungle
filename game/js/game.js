@@ -63,10 +63,10 @@ function renderStages(){setBackdrop('assets/ui/select-bg.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
  ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(a.lair?' lair':'')+(stagePick===i?' selected':'');
   b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=7.5" alt=""><strong>${a.name}</strong></span>`;
-  b.onclick=()=>{ac();if(stagePick===i){$('stage-go').click();return}stagePick=i;renderStages()};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
+  b.onclick=()=>{ac();if(performance.now()<(window.__pickLock||0))return;window.__pickLock=performance.now()+600;stagePick=i;renderStages();setTimeout(()=>$('stage-go').click(),170)};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
  const r=document.createElement('button');r.className='stage-tile random'+(stagePick===RND()?' selected':'');
  r.innerHTML='<span class="sf"><img class="laurel" src="assets/ui/stage-random.webp?v=7.5" alt=""><strong>RANDOM</strong></span>';
- r.onclick=()=>{ac();if(stagePick===RND()){$('stage-go').click();return}stagePick=RND();renderStages()};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
+ r.onclick=()=>{ac();if(performance.now()<(window.__pickLock||0))return;window.__pickLock=performance.now()+600;stagePick=RND();renderStages();setTimeout(()=>$('stage-go').click(),170)};r.ondblclick=()=>$('stage-go').click();$('stage-grid').append(r);
  const sel=$('stage-grid').querySelector('.selected');sel&&sel.scrollIntoView({block:'nearest'});
 }
 function openStage(){renderStages();$('stage-back').classList.toggle('hidden',mode==='online');show('stage')}
@@ -244,7 +244,7 @@ function render(){
   if(mode==='forgotten'&&f.id==='majic')return;const i=roster.indexOf(f);
   const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');b.dataset.id=f.id;if(f.id==='majic')b.classList.add('titan');
   b.innerHTML=`<span class="tf"><img src="assets/ui/cards/${f.id}.webp?v=10.16" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+'<em class="tap-pick">TAP TO PICK</em>'+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
-  b.onclick=()=>{if(chosen===f&&b.classList.contains('selected')&&!b.classList.contains('locked')){$('confirm-fighter').click();return}chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i)};
+  b.onclick=()=>{if(b.classList.contains('locked'))return;if(performance.now()<(window.__pickLock||0))return;chosen=f;document.querySelectorAll('.fighter-tile').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');card(f,i);window.__pickLock=performance.now()+420;setTimeout(()=>$('confirm-fighter').click(),170)}; // one tap picks
   b.ondblclick=()=>$('confirm-fighter').click();r.append(b)});$('roster').append(r)});
  card(chosen,roster.indexOf(chosen));selectWait();
  const sel=document.querySelector('.fighter-tile.selected');if(sel&&document.getElementById('select').contains(sel)&&!$('select').classList.contains('hidden'))sel.scrollIntoView({block:'nearest',behavior:'smooth'});
@@ -3828,7 +3828,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.43`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.44`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3930,4 +3930,16 @@ function camTilt(vw,vh){const dt=Math.min(.05,frameDt||.016),D=Math.PI/180;let t
 {const _rh=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i],h0=o.hp+(o.bars||0)*1000,s0=o.stun||0;const r=_rh.apply(this,arguments);
  try{const d=h0-(o.hp+(o.bars||0)*1000);if(CAMTILT&&d>0&&(o.hitHeavy||(mv&&mv.sx)||(o.stun||0)>s0+.35)){const D=Math.PI/180,k=(o.hitHeavy?1.8:1.2)*(RSHAKE?.5:1)*(game.sxu?.6:1);TILT.kick=Math.max(-3*D,Math.min(3*D,TILT.kick+(f.dir||1)*k*D))}}catch(_){}
  return r}}
+
+// ---------- quicker start: remember your fighter, QUICK FIGHT button ----------
+function lastFighter(){try{const id=localStorage.getItem('kotj-last');return roster.find(f=>f.id===id)||null}catch(_){return null}}
+{const _st=start;start=function(){try{if(picks&&picks[0]&&mode!=='online'&&mode!=='training')localStorage.setItem('kotj-last',picks[0].id)}catch(_){}qfLabel();return _st.apply(this,arguments)}}
+{const _os=openSelect;openSelect=function(m){_os.apply(this,arguments);const L=lastFighter();if(L&&step===1&&m!=='forgotten'){chosen=L;render()}}}
+function quickFight(){ac();const me=lastFighter()||roster.find(f=>f.id==='lion')||roster[0],pool=roster.filter(f=>f.id!==me.id);
+ const ar=ARENAS.filter(a=>!a.lair);mode='cpu';step=2;tower=null;picks=[me,pool[Math.floor(Math.random()*pool.length)]];arena=ar[Math.floor(Math.random()*ar.length)]||ARENAS[0];start()}
+function qfLabel(){const b=document.getElementById('quick-fight');if(!b)return;const me=lastFighter()||roster.find(f=>f.id==='lion')||roster[0];b.querySelector('small').textContent=me.name+' vs a random fighter · random arena'}
+// closing the cover splash goes straight to the menu (no separate PRESS START)
+if(document.getElementById('splash'))['pointerup','keyup'].forEach(ev=>window.addEventListener(ev,function h(){window.removeEventListener('pointerup',h,true);window.removeEventListener('keyup',h,true);setTimeout(()=>{const m=document.getElementById('menu');if(m&&!m.classList.contains('started')&&!m.classList.contains('hidden'))document.getElementById('press-start').click()},120)},true));
+(function(){const m=document.getElementById('cover-menu');if(!m||document.getElementById('quick-fight'))return;const b=document.createElement('button');b.id='quick-fight';b.className='primary quick-btn';b.innerHTML='<b>⚡ QUICK FIGHT</b><small></small>';b.onclick=quickFight;m.insertBefore(b,m.firstChild);
+ const t=m.querySelector('[data-mode=tower]');if(t){t.classList.remove('primary');t.classList.add('secondary')}qfLabel()})();
 })();

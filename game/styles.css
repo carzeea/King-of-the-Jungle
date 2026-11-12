@@ -967,3 +967,5 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
 .sx-ml-card .in b{padding:1px 6px;border-radius:5px;background:#9fe0ff22;border:1px solid #9fe0ff55;color:#fff}
 .sx-tip a{color:#ffd36b}
 .fxq-btn{display:none!important}
+
+#menu .cover-menu .quick-btn{grid-column:1/-1}
