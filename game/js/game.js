@@ -55,7 +55,7 @@ function setGfx(v){GFX=v;try{localStorage.setItem('kotj-gfx',v)}catch(_){}RES.sc
 
 /* ---------- Arenas ---------- */
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
- {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
+ {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'tidal-kingdom',name:'THE TIDAL KINGDOM'},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
 const LAIR=ARENAS.find(a=>a.lair),FIGHT_ARENAS=ARENAS.filter(a=>!a.lair);
 const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp';arenaImg[a.id]=im});
 let arena=ARENAS[0],stagePick=0; // stagePick: index into ARENAS, ARENAS.length = random
@@ -241,7 +241,7 @@ function render(){
  $('roster').innerHTML='';
  const ORDER=[['lion','tiger','jaguar','wolf','hyena','badger','dolphin','majic'],['grizzly','crocodile','hippo','elephant','leopard','snake','eagle','stag']];
  ORDER.forEach(row=>{const r=document.createElement('div');r.className='sel-row';row.forEach(id=>{const f=roster.find(x=>x.id===id);
-  if(!f){if(NEW_FIGHTERS.some(n=>n.id===id)){const l=document.createElement('div');l.className='fighter-tile locked';l.title='Clear the Tower to unlock a hidden fighter';l.innerHTML='<span class="tf"><b class="q">?</b><i class="lock">🔒</i></span>';r.append(l)}return}
+  if(!f){if(id==='dolphin'){const l=document.createElement('div');l.className='fighter-tile locked tidal-lock';l.title='Win a match in THE TIDAL KINGDOM to unlock';l.innerHTML='<span class="tf"><b class="q">?</b><i class="lock">🌊</i></span>';l.onclick=()=>gmToast('🌊 A KING SLEEPS BENEATH THE WAVES','Win a match in THE TIDAL KINGDOM to unlock him');r.append(l);return}if(NEW_FIGHTERS.some(n=>n.id===id)){const l=document.createElement('div');l.className='fighter-tile locked';l.title='Clear the Tower to unlock a hidden fighter';l.innerHTML='<span class="tf"><b class="q">?</b><i class="lock">🔒</i></span>';r.append(l)}return}
   if(mode==='forgotten'&&f.id==='majic')return;const i=roster.indexOf(f);
   const b=document.createElement('button');b.className='fighter-tile'+(chosen.id===f.id?' selected':'');b.dataset.id=f.id;if(f.id==='majic')b.classList.add('titan');
   b.innerHTML=`<span class="tf"><img src="assets/ui/cards/${f.id}.webp?v=10.16" alt="${f.name}"><strong${f.name.length>9?' class="long"':''}>${f.name}</strong></span>`+(f.id==='majic'?'<i class="bolt b0"></i><i class="bolt b1"></i><i class="bolt b2"></i>':'')+'<em class="tap-pick">TAP TO PICK</em>'+(crowns().includes(f.id)?'<img class="tile-crown" src="assets/ui/crown.webp" alt="Tower champion" title="Conquered the Tower">':'');
@@ -1411,6 +1411,7 @@ const NEW_FIGHTERS=[
  {id:'stag',name:'STAG',icon:'🦌',style:'THE IRON HORN',bio:'An unstoppable charger with iron antlers, crushing kicks and an earth-shaking stomp.',power:9,speed:6,defense:8,color:'#9a6a34'}];
 const unlockedNew=()=>SAVE.get('unlocked',[]);
 function addUnlocked(){for(const f of NEW_FIGHTERS)if(unlockedNew().includes(f.id)&&!roster.includes(f)){const i=roster.indexOf(MAJIC);i>=0?roster.splice(i,0,f):roster.push(f)}}
+const DOLPHIN={id:'dolphin',name:'DOLPHIN KING',icon:'🐬',style:'LORD OF THE TIDES · SPEED & WATER',bio:'A crowned king of the deep. Lightning-fast rushes, water control and agility: Riptide Rush, Whirlpool, Sonar Blast, Breach Slam and the Wrath of the Deep Ultimate.',power:7,speed:9,defense:7,color:'#3f7fc4'}; // unlocked by winning a match in THE TIDAL KINGDOM
 const MAJIC={id:'majic',name:'MAJIC',icon:'👑',style:'THE JUNGLE TITAN · SECRET BOSS',bio:'All 11 beasts in one: lion mane, elephant tusks, eagle wings, serpents, a crocodile tail, tiger stripes and the frost-white fur of a snow leopard. Frost Strike, Jungle Rage, True Titan Form and the Titan Fury Ultra.',power:13,speed:6,defense:14,color:'#d9a43a'};
 const secretUnlocked=()=>!!SAVE.get('secret',false);
 const LOCK_SVG='<svg viewBox="0 0 24 24" width="44%" fill="none" stroke="#e8b95b" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -1821,7 +1822,7 @@ function draw(){
  // Subtle atmospheric depth: slow drifting motes at staggered depths sit
  // between the arena artwork and fighters. They remain cosmetic and cheap.
  {
-  const atmosphere=arena.id==='royal-colosseum'?'#b58cff':arena.id==='frozen-kingdom'?'#c9efff':'#e7c78a';
+  const atmosphere=arena.id==='royal-colosseum'?'#b58cff':arena.id==='tidal-kingdom'?'#9fe8ff':arena.id==='frozen-kingdom'?'#c9efff':'#e7c78a';
   for(let n=0;n<24;n++){
    const depth=.35+(n%5)*.13;
    const x=((n*173+t*(8+(n%4)*3)*depth)%1220)-60;
@@ -2888,7 +2889,7 @@ function drawGeneric(f,i){
  if(f.hitFlash>0){c.globalAlpha=.4;c.fillStyle='#fff';c.beginPath();c.ellipse(0,-150,70,120,0,0,7);c.fill();c.globalAlpha=1;}
 }
 
-addUnlocked();if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
+addUnlocked();if(unlockedNew().includes('dolphin')&&!roster.includes(DOLPHIN)){const i=roster.indexOf(MAJIC);i>=0?roster.splice(i,0,DOLPHIN):roster.push(DOLPHIN)}if(secretUnlocked()&&!roster.includes(MAJIC))roster.push(MAJIC);
 forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
@@ -2911,7 +2912,7 @@ const PFX={
  eagle:{a:'#ffe08a',b:'#ffffff',sc:'#ffe9a0',start:['tornado','feathers','wind'],hit:['spirit:dive','featherburst','gash'],gash:3,gc:'#ffffff'},
  snake:{a:'#8fe04a',b:'#2f6b1a',start:['kcobra'],hit:['kstrike','venom','poison'],gash:0},
  stag:{a:'#9fd86a',b:'#ffe08a',sc:'#a8ff6a',start:['spirit:rise','leafstorm'],hit:['vines','leafburst','shock'],gash:0},
- dolphin:{a:'#4fc3ff',b:'#e4f9ff',sc:'#6fdcff',start:['spirit:rise','drops'],hit:['splash','drops','shock'],gash:0},
+ dolphin:{a:'#4fc3ff',b:'#e4f9ff',sc:'#6fdcff',start:['leap','spirit:rise','drops'],hit:['splash','drops','shock'],gash:0},
  majic:{a:'#b46bff',b:'#7fe6ff',sc:'#b46bff',start:['after','portal','spirit:rise','skybolts'],hit:['bolts','icicles','shock'],gash:0,after:'brightness(.7) saturate(2) hue-rotate(240deg)',sh2:300}
 };
 const PFX_NORMAL=new Set(['claw','double','bite','block','grab','throw']);
@@ -3022,6 +3023,7 @@ function pBurst(f,stage,x,y,big){
   else if(k==='dark')P({kind:'pp',sh:'dark',x:f.x,y:400+f.y-150,life:1.1});
   else if(k==='eyes'){const o=game.fighters[1-game.fighters.indexOf(f)];P({kind:'pp',sh:'eyes',x:(o?o.x:f.x)+d*R(140,220),y:400+(o?o.y:0)-R(250,300),life:1})}
   else if(k==='moon')P({kind:'pp',sh:'moon',x:f.x-d*140,y:120,life:1.4});
+  else if(k==='leap'){P({kind:'pp',sh:'leap',x:f.x,x0:f.x-d*60,dir:d,y:380,life:1.5});sxFx(f,['splash'],f.x-d*230,396,.7)}
   else if(k==='ghostpack'){const o=game.fighters[1-game.fighters.indexOf(f)],ox=o?o.x:f.x+d*300;for(let i=0;i<3;i++)HS(f,{kind:'pp',sh:'spirit',id:'wolf',mode:'charge',x:f.x-d*R(150,260),y:400-R(10,80),x1:ox+d*R(40,140),h:R(120,160),dir:d,color:'#8fc8ff',life:.75,travel:.45,delay:.15+i*.12,alpha:.7,filter:'saturate(.2) brightness(1.3) sepia(.4) hue-rotate(170deg) saturate(2.5)'})}
   else if(k==='pack')for(let i=0;i<3;i++)HS(f,{kind:'pp',sh:'spirit',id:'hyena',mode:'rise',x:f.x+d*(i-1)*140,y:400+f.y-160-(i===1?60:0),h:150,dir:i===0?-d:d,color:'#ff5a3a',life:.9,delay:i*.1,alpha:.75});
   else if(k==='eruption'){const eo=game.fighters[1-game.fighters.indexOf(f)],ex=eo?eo.x:f.x+d*200;P({kind:'pp',sh:'fissure',x:f.x+d*30,x1:ex,y:399,life:.9,seed:Math.random()});HS(f,{kind:'pp',sh:'spirit',id:f.data.id,mode:'emerge',x:ex,delay:.2,y:398,h:230,dir:d,color:th.sc||th.a,life:.9});for(let i=0;i<16;i++)P({kind:'pp',sh:'rock',delay:.2,x:ex+R(-40,40),y:396,vx:R(-260,260),vy:R(-900,-450),g:1700,r:R(7,15),rot:R(0,6),vr:R(-9,9),life:R(.9,1.3),color:i%3?'#6b5440':'#8a7356'});for(let i=0;i<8;i++)P({kind:'pp',sh:'puff',delay:.2,x:ex+R(-50,50),y:396-R(0,120),vx:R(-40,40),vy:R(-160,-60),r:R(18,30),grow:60,life:R(.7,1),color:'#8a7356',alpha:.5})}
@@ -3263,6 +3265,7 @@ function pCobra(p,k){const s=(p.sz||1)*(p.strike?1.05:1)*.75,lunge=p.strike?Math
    case'dark':dDark(p,k);break;
    case'eyes':dEyes(p,k);break;
    case'moon':dMoon(p,k);break;
+   case'leap':dLeap(p);break;
    case'fissure':dFissure(p,k);break;
    case'pool':dPool(p,k);break;
    case'tidal':dTidal(p,k);break;
@@ -3420,12 +3423,12 @@ const SX_GLYPH={'236A':'↓↘→ + ATK','214A':'↓↙← + ATK','236S':'↓↘
 // fs / fh: effects on start / on hit · use: an existing move · grab / launch / down / root / slow / venom / freeze / tele / parry / proj / cost / cd
 const SX={
  dolphin:{m:[
-  {n:'TIDAL WAVE CRUSHER',d:'Summons a towering ocean wave that crashes into the foe and knocks them back',a:['sx3','attack_heavy'],t:1.0,h:[.62],dm:13,st:.85,pu:460,r:520,ry:80,down:1,fs:['drops'],fh:['tidal','splash','wave','quake'],col:'#4fc3ff'},
+  {n:'TIDAL WAVE CRUSHER',d:'Summons a towering ocean wave that crashes into the foe and knocks them back',a:['sx3','attack_heavy'],t:1.0,h:[.62],dm:13,st:.85,pu:460,r:520,ry:80,down:1,fs:['leap','spirit:rise','drops'],fh:['tidal','splash','wave','quake'],col:'#4fc3ff'},
   {n:'SONIC ECHO BLAST',d:'Echolocation shockwave from his mouth · stuns and warps the screen',a:['sx2','attack_heavy'],t:.85,h:[.48],dm:8,st:1.25,pu:220,r:700,ry:90,warp:1,fs:['wave'],fh:['wave','shock'],col:'#b8f0ff'},
   {n:'AQUA TORNADO',d:'Rapid spin inside a water vortex · lifts the foe into the air for juggles',a:['sx1','attack_heavy'],t:.85,h:[.25,.45,.65],dm:4.2,st:.7,pu:90,r:330,vy:-420,launch:1,fs:['vortex'],fh:['vortex','drops','splash'],col:'#3fd2ff'},
-  {n:'DOLPHIN TORPEDO',d:'Launches forward like a torpedo wrapped in water · devastating shoulder strike',a:['special_pounce'],t:.75,h:[.38],dm:12,st:.75,pu:360,r:330,vx:760,fs:['splash','drops'],fh:['splash','drops','shock'],col:'#4fc3ff'},
+  {n:'DOLPHIN TORPEDO',d:'Launches forward like a torpedo wrapped in water · devastating shoulder strike',a:['special_pounce'],t:.75,h:[.38],dm:12,st:.75,pu:360,r:330,vx:760,fs:['leap','splash','drops'],fh:['splash','drops','shock'],col:'#4fc3ff'},
   {n:'TIDAL FIST',d:'Electric water uppercut (25% meter)',a:['attack_heavy','uppercut'],t:.78,h:[.42],dm:11,st:.75,pu:300,r:290,cost:25,fs:['drops'],fh:['splash','wave','shock'],col:'#7fe0ff'}],
-  u:{n:'WRATH OF THE OCEAN',s:'THE OCEAN RISES',col:'#4fc3ff',dark:1,flood:1,seq:[['sx1',.6,['vortex','drops','splash'],7],['uppercut',.5,['vortex','splash','shock'],8,'up'],['jump',.45,['drops'],0,'up'],['sx3',.7,['tidal','splash','wave','quake','shock'],16,'crash']]}},
+  u:{n:'WRATH OF THE OCEAN',s:'THE OCEAN RISES',col:'#4fc3ff',dark:1,flood:1,seq:[['sx1',.6,['leap','vortex','drops','splash'],7],['uppercut',.5,['vortex','splash','shock'],8,'up'],['jump',.45,['drops'],0,'up'],['sx3',.7,['tidal','splash','wave','quake','shock'],16,'crash']]}},
  lion:{m:[
   {n:'ROYAL ROAR',d:'Thunderous roar · golden shockwave pushes the foe back',use:'lionRoar'},
   {n:"KING'S CLAW",d:'Three-claw combination with golden slash trails',a:['sx1','attack_light'],t:.72,h:[.2,.36,.52],dm:4.6,st:.5,pu:120,r:300,vx:220,fh:['gash','embers'],col:'#ffd36b'},
@@ -3840,7 +3843,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.50`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.51`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3975,4 +3978,21 @@ function fightTint(f){const mine=ownTint(f);if(!game)return mine;const F=game.fi
 // Sonic Echo Blast: a short screen ripple when it connects
 {const _rh=resolveHit;resolveHit=function(i,mv){const o=game.fighters[1-i],h0=o.hp+(o.bars||0)*1000;const r=_rh.apply(this,arguments);try{if(mv&&mv.sx&&mv.sx.warp&&h0>o.hp+(o.bars||0)*1000)game.warpT=.7}catch(_){}return r}}
 {const _ct=camTilt;camTilt=function(vw,vh){_ct(vw,vh);if(game&&game.warpT>0){game.warpT=Math.max(0,game.warpT-(frameDt||.016));const k=game.warpT/.7,t=performance.now()/1000,wx=cam.x+vw/2,wy=cam.y+vh/2;c.translate(wx,wy);c.transform(1+Math.sin(t*38)*.025*k,Math.sin(t*29)*.03*k,Math.cos(t*33)*.03*k,1+Math.cos(t*41)*.025*k,0,0);c.translate(-wx,-wy)}}}
+
+// ---------- Dolphin King unlock: win any match in THE TIDAL KINGDOM ----------
+{const _fin=finish;finish=function(){const was=game&&game.over;const r=_fin.apply(this,arguments);
+ try{if(!was&&game&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&!unlockedNew().includes('dolphin')){
+  const [p,q]=game.fighters,tp=total(p),tq=total(q);if(Math.abs(tp-tq)>=.01){const w=tp>tq?p:q;
+   const human=mode==='versus'||(mode==='online'?((tp>tq?0:1)===ON.side):!w.ai);
+   if(human){SAVE.set('unlocked',[...unlockedNew(),'dolphin']);if(!roster.includes(DOLPHIN)){const i=roster.indexOf(MAJIC);i>=0?roster.splice(i,0,DOLPHIN):roster.push(DOLPHIN)}
+    setTimeout(()=>{const c=$('winner-copy');if(c){const n=document.createElement('p');n.className='unlock-note';n.innerHTML='🌊 <b>NEW FIGHTER UNLOCKED · DOLPHIN KING</b><br><small>The King of the Tides rises from the deep. He is now in your roster.</small>';c.after(n)}gmToast('🌊 DOLPHIN KING UNLOCKED','The King of the Tides joins the roster');try{AU&&AU.sfx&&AU.sfx('instinct')}catch(_){}},400)}}}}catch(_){}
+ return r}}
+
+// ---------- Dolphin King: a real dolphin leaps out of the water behind him (like the Wolf's moon) ----------
+const LEAP_IMG=new Image();LEAP_IMG.src='assets/fx/dolphin-leap.webp?v=15.51';try{FXQ_ALWAYS.add('leap')}catch(_){}
+function dLeap(p){if(!LEAP_IMG.complete||!LEAP_IMG.naturalWidth)return;const u=Math.min(1,p.t/p.life),d=p.dir||1;
+ const x=p.x0+d*(-230+520*u),y=392-300*4*u*(1-u),ang=Math.atan2(-300*4*(1-2*u),520*d)*.6;
+ const w=330,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
+ c.globalAlpha=Math.min(1,p.t/.18)*Math.min(1,(p.life-p.t)/.25)*.95;c.translate(x,y);c.rotate(ang);if(d===1)c.scale(-1,1);
+ c.drawImage(LEAP_IMG,-w*.5,-h*.38,w,h)}
 })();

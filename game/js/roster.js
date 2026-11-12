@@ -10,5 +10,4 @@ window.KOTJ_ROSTER=[
 {id:'tiger',name:'TIGER',icon:'🐅',style:'RELENTLESS STRIKER',bio:'Fast claw combinations, leaps, and devastating momentum.',power:8,speed:9,defense:6,color:'#d17d32'},
 {id:'grizzly',name:'GRIZZLY',icon:'🐻',style:'HEAVYWEIGHT',bio:'A heavyweight with huge swipes and armor-breaking power.',power:10,speed:4,defense:9,color:'#76523b'},
 {id:'hippo',name:'HIPPO',icon:'🦛',style:'RIVER TANK',bio:'An immovable force with body checks, stomps, and short bursts.',power:10,speed:3,defense:10,color:'#8d7180'},
-{id:'elephant',name:'ELEPHANT',icon:'🐘',style:'TITAN CONTROL',bio:'A towering heavyweight with trunk strikes, stomps, and reach.',power:10,speed:3,defense:10,color:'#92958c'},
-{id:'dolphin',name:'DOLPHIN KING',icon:'🐬',style:'LORD OF THE TIDES · SPEED & WATER',bio:'A crowned king of the deep. Lightning-fast rushes, water control and agility: Riptide Rush, Whirlpool, Sonar Blast, Breach Slam and the Wrath of the Deep Ultimate.',power:7,speed:9,defense:7,color:'#3f7fc4'}];
+{id:'elephant',name:'ELEPHANT',icon:'🐘',style:'TITAN CONTROL',bio:'A towering heavyweight with trunk strikes, stomps, and reach.',power:10,speed:3,defense:10,color:'#92958c'}];

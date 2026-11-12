@@ -982,7 +982,7 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
  #select.v2sel .fighter-tile strong.long{font-size:8px!important;letter-spacing:0!important}
  html.kotj-touch #select.v2sel .fighter-tile .tap-pick{display:none!important}
  /* arena select: all arenas at once in a 4 x 2 grid, one tap starts the fight */
- #stage .stage-grid{display:grid!important;width:100%;box-sizing:border-box;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;overflow:hidden!important;scroll-snap-type:none!important;gap:10px 12px!important;padding:6px 6px!important;align-items:stretch}
+ #stage .stage-grid{display:grid!important;width:100%;box-sizing:border-box;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important;overflow:hidden!important;scroll-snap-type:none!important;gap:10px 12px!important;padding:6px 6px!important;align-items:stretch}
  #stage .stage-tile,#stage .stage-tile:nth-child(7),#stage .stage-tile:nth-child(8){grid-column:auto!important;height:auto!important;max-height:none!important;width:auto!important;aspect-ratio:auto!important;min-height:0}
  #stage .stage-tile .sf strong{font-size:12px!important;padding:3px 2px!important;bottom:6%!important}
  html.kotj-touch #stage .stage-tile.selected::after{content:none}
@@ -1017,3 +1017,11 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
  .dev-opts{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
  .dev-opt{padding:8px 4px!important;min-height:0!important}
 }
+
+/* 1.5: nine arena tiles (8 arenas + random) — three even rows on big screens */
+#stage .stage-tile:nth-child(7),#stage .stage-tile:nth-child(8){grid-column:span 4}
+/* the Dolphin King's locked tile */
+#select.v2sel .fighter-tile.tidal-lock{cursor:pointer;background:radial-gradient(ellipse at 50% 85%,#0c4a7a,#06223d 60%,#03101e)!important;border-color:#4fb8ff!important}
+#select.v2sel .fighter-tile.tidal-lock .q{color:#9fe3ff!important}
+.unlock-note{margin:6px auto 4px;padding:8px 14px;max-width:520px;border:1px solid #4fb8ff;border-radius:10px;background:rgba(6,34,61,.85);color:#d9f4ff;text-align:center;font:600 14px Inter,sans-serif;box-shadow:0 0 18px rgba(79,184,255,.45)}
+.unlock-note b{color:#9fe3ff;letter-spacing:.08em}

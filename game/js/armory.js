@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const V='15.11';
 const STORE_KEY='kotj.armory';
 const BASE=[...(window.KOTJ_ROSTER||[])].map(f=>({id:f.id,name:f.name,color:f.color}));
-const HIDDEN=[{id:'snake',name:'SNAKE'},{id:'eagle',name:'EAGLE'},{id:'stag',name:'STAG'},{id:'majic',name:'MAJIC'}];
+const HIDDEN=[{id:'snake',name:'SNAKE'},{id:'eagle',name:'EAGLE'},{id:'stag',name:'STAG'},{id:'dolphin',name:'DOLPHIN KING'},{id:'majic',name:'MAJIC'}];
 const FIGHTERS=[...BASE,...HIDDEN];
 const unlocked=()=>{try{return JSON.parse(localStorage.getItem('kotj.unlocked')||'[]')}catch(_){return[]}};
 const isOpen=id=>!HIDDEN.some(h=>h.id===id)||unlocked().includes(id);
