@@ -268,7 +268,7 @@ function selOpts(on){const o=$('sel-opts');const v=on===undefined?o.classList.co
 function selTower(){if(mode==='online'||mode==='tower')return;openSelect('tower')}
 function card(f,i){try{spriteImg[f.id]}catch(_){}$('confirm-fighter').disabled=false;setBackdrop('assets/arenas/jungle-temple.webp');$('fighter-number').textContent=String(i+1).padStart(2,'0');$('fighter-portrait').src=`assets/ui/hero/${f.id}.webp?v=10.16`;$('select').dataset.f=f.id;$('fighter-name').textContent=f.name;$('fighter-style').textContent=f.style;$('fighter-bio').textContent=f.bio;$('power-stat').textContent=f.power;$('speed-stat').textContent=f.speed;$('defense-stat').textContent=f.defense;if(mode==='online')selectWait()}
 $('confirm-fighter').onclick=()=>{
- ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
+ ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;try{if(wantHD())loadHD(chosen.id)}catch(_){} // start downloading the art while the player picks the arena
  if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
  if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:towerKing(roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
   {const S=storyOf(chosen.id)||{};return storyCard({dark:1,fig:{id:chosen.id,anim:'idle',light:.2},eyebrow:'TOWER MODE · '+chosen.name,title:'The jungle doesn’t choose its king. It’s taken.',text:S.intro||''},start)}}
@@ -432,7 +432,7 @@ THE FINAL BATTLE BEGINS.`},start)));
  $('round-label').textContent=tower?(tower.boss?'THE SUMMIT':tower.kind==='forgotten'?`ECHO ${tower.index+1} / 3`:`FIGHT ${tower.index+1} / ${tower.ladder.length}`):'ROUND 1';
  $('p2-face').classList.toggle('echo-face',!!picks[1].echo);
  time=99;paused=false;if(mode==='training')$('timer').textContent='∞';Object.assign(ON,{inp:{h:{},c:{}},used:{},prevOut:{},cnt:{},lp:{},ev:[],snap:null,seq:0,lastSeq:-1});$('pause').classList.toggle('hidden',mode==='online');cam.z=1;cam.snap=true;resStart();
- setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}try{const nx=tower&&tower.ladder&&tower.ladder[tower.index+1];if(nx&&nx.id)setTimeout(()=>spriteImg[nx.id],4000)}catch(_){}},0);
+ setTimeout(()=>{if(wantHD()){loadHD(picks[0].id);loadHD(picks[1].id)}try{const nx=tower&&tower.ladder&&tower.ladder[tower.index+1];if(nx&&nx.id)setTimeout(()=>{spriteImg[nx.id];try{if(wantHD())loadHD(nx.id)}catch(_){}},4000)}catch(_){}},0);
  game={fighters:[fighter(300,1,picks[0]),fighter(800,-1,picks[1])],over:false,ko:0,dt:0,shake:0,hitstop:0,slow:1,slowT:0,flash:0,zoom:1,fx:[],stains:[],banner:null,ultra:null,intro:1.3,dangerSaid:[0,0]};
  if(cpu2)game.fighters[1].ai=cpuBrain(mode==='training'?.12:tower&&tower.boss?1.35:tower?(tower.kind==='forgotten'?Math.min(1,.85+tower.index*.05):Math.min(1,.1+tower.index*.09)):.45);
  ['p1','p2'].forEach(p=>{$(p+'-combo').textContent='';$(p+'-combo').classList.remove('active')});
@@ -824,7 +824,7 @@ function doMove(f,name){
 /* ---------- Hit accuracy: body sizes and reach measured from each fighter's art (js/hitboxes.js) ---------- */
 const HB=window.KOTJ_HIT||{};
 // Fighter art is drawn slightly bigger/wider than the measured sprites (build 9.22–9.23); hit ranges scale to match.
-const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:1.55},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
+const BODY_PRESENCE={badger:1.111,wolf:1.086,hyena:1.104,leopard:1.022,jaguar:1.0,crocodile:1.245,lion:1.108,tiger:1.132,grizzly:1.088,hippo:1.091,elephant:1.121,eagle:1.072,snake:1.064,stag:1.22,dolphin:1.08,majic:0.985},BODY_WIDTH={badger:1.07,wolf:1.025,hyena:1.035,leopard:1.0,jaguar:1.045,crocodile:1.10,lion:1.055,tiger:1.055,grizzly:1.095,hippo:1.12,elephant:1.075,eagle:1.015,snake:1.12,stag:1.10,dolphin:1.0,majic:1.0};
 const artScale=f=>(BODY_PRESENCE[f.data.id]||1)*(BODY_WIDTH[f.data.id]||1);
 const bodyFront=f=>((HB[f.data.id]&&HB[f.data.id].body[0])||85)*artScale(f);
 function moveAnim(f,mv){const S=SPRITES[f.data.id]||{};if(mv.majicFury||mv.majicEclipse)return'ultra_move';if(mv.majicFrost)return'special_c';if(mv.stagCounter)return'attack_heavy';if(mv.snakeCoil)return'special_b';if(mv.snakeVenom)return'bite';if(mv.badgerBreaker)return'special_earth_slam';if(mv.ironCounter)return'attack_heavy';if(mv.tigerPounce||mv.jaguarAmbush||mv.wolfFrenzy||mv.eagleSkyfall||mv.eagleWingCounter||mv.stagAntler)return S.special||'special_pounce';if(mv.grab||mv.jaguarBite||mv.hyenaFeint)return'bite';if(mv.stomp||mv.tuskCounter||mv.bearCounter||mv.riverCounter||mv.charge||mv.hippoRush||mv.grizzlyMaul||mv.grizzlyPaw||mv.lionRoar||mv.lionCounter||mv.tigerSlip||mv.crocodileRoll||mv.tailCounter||mv.wolfCounter||mv.hyenaSlip)return'attack_heavy';
@@ -3551,6 +3551,12 @@ const SX3={dolphin:[0,1,2],lion:[0,1,3],tiger:[1,0,4],jaguar:[0,2,3],leopard:[0,
  grizzly:[1,0,2],crocodile:[2,0,1],hippo:[0,2,4],elephant:[0,1,4],eagle:[1,0,2],stag:[1,0,2],snake:[1,0,3],majic:[1,3,7]};
 for(const id in SX){const D=SX[id],pick=(SX3[id]||[0,1,2]).map(i=>D.m[i]).filter(Boolean);D.m=id==='majic'?[...pick,...D.m.filter(m=>!pick.includes(m))]:pick}
 const SX_SHOW=3;
+// warm up the sheets for each fighter's 3 specials and Ultimate during the intro, so the first special doesn't hitch
+{const _lh=loadHD;loadHD=function(id){const fresh=HD[id]&&!spriteHD[id];const r=_lh.apply(this,arguments);if(!fresh)return r;
+ try{const D=SX[id],want=new Set();if(D){(D.m||[]).slice(0,SX_SHOW).forEach(m=>(m.a||[]).forEach(x=>want.add(x)));const u=D.u||{};(u.a||[]).forEach(x=>want.add(x));(u.seq||[]).forEach(q=>want.add(q[0]))}
+  ['hit_light','hit_heavy','knockdown','victory'].forEach(x=>want.add(x));const seen=new Set();let t=300;
+  want.forEach(k=>{const im=spriteHD[id]&&spriteHD[id][k];if(!im||seen.has(im)||!im.decode)return;seen.add(im);setTimeout(()=>im.decode().catch(()=>{}),t);t+=120})}catch(_){}
+ return r}}
 const SXK=['s1','s2','s3','su'];
 BTN.push(...SXK);
 // ---------- effects quality, screen shake & flash ----------
@@ -3860,7 +3866,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.5`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.6`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
