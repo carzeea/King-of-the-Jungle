@@ -57,13 +57,13 @@ function setGfx(v){GFX=v;try{localStorage.setItem('kotj-gfx',v)}catch(_){}RES.sc
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'tidal-kingdom',name:'THE TIDAL KINGDOM'},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
 const LAIR=ARENAS.find(a=>a.lair),FIGHT_ARENAS=ARENAS.filter(a=>!a.lair);
-const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp';arenaImg[a.id]=im});
+const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp?v=15.52';arenaImg[a.id]=im});
 let arena=ARENAS[0],stagePick=0; // stagePick: index into ARENAS, ARENAS.length = random
 const RND=()=>ARENAS.length;
 function renderStages(){setBackdrop('assets/ui/select-bg.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
  ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(a.lair?' lair':'')+(stagePick===i?' selected':'');
-  b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=7.5" alt=""><strong>${a.name}</strong></span>`;
+  b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=15.52" alt=""><strong>${a.name}</strong></span>`;
   b.onclick=()=>{ac();if(performance.now()<(window.__pickLock||0))return;window.__pickLock=performance.now()+600;stagePick=i;renderStages();setTimeout(()=>$('stage-go').click(),170)};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
  const r=document.createElement('button');r.className='stage-tile random'+(stagePick===RND()?' selected':'');
  r.innerHTML='<span class="sf"><img class="laurel" src="assets/ui/stage-random.webp?v=7.5" alt=""><strong>RANDOM</strong></span>';
@@ -3843,7 +3843,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.51`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.52`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
