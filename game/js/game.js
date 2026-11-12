@@ -3816,4 +3816,11 @@ function LITE(){return FXQ!=='high'}
 {const _ds=drawSprite;drawSprite=function(f){if(!LITE())return _ds.apply(this,arguments);const sb=c.shadowBlur;c.shadowBlur=0;try{return _ds.apply(this,arguments)}finally{c.shadowBlur=sb}}}
 RES.floor=LITE()?.6:.75;
 {const _so=sxOptsRefresh;sxOptsRefresh=function(){const r=_so.apply(this,arguments);RES.floor=LITE()?.6:.75;RES.scale=1;return r}}
+
+// ---------- Speed readout for testing on a device: open the game with ?fps=1 ----------
+if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
+ let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
+  if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'PHONE'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ntouch ${phoneArt()?'yes':'no'}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.36`;n=0;acc=0;worst=0}
+  requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 })();
