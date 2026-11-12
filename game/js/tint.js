@@ -17,7 +17,8 @@ const ZONES={
  majic:{cloth:[328,16,.5,.15]},
  crocodile:{cloth:[82,170,.16,.05],metal:[30,46,.5,.5]},
  snake:{cloth:[72,170,.22,.08]},
- stag:{metal:[32,54,.5,.55]}};
+ stag:{metal:[32,54,.5,.55]},
+ dolphin:{cloth:[205,235,.55,.22],metal:[34,56,.5,.5]}};
 const hex2hsv=h=>{h=h.replace('#','');const n=parseInt(h,16),r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let H=0;if(d){if(mx===r)H=((g-b)/d)%6;else if(mx===g)H=(b-r)/d+2;else H=(r-g)/d+4;H*=60;if(H<0)H+=360}return[H,mx?d/mx:0,mx]};
 const sm=(x,a,b)=>{let t=(x-a)/(b-a);t=t<0?0:t>1?1:t;return t*t*(3-2*t)};
 function hueW(h,a,b){let d;if(a<=b)d=Math.max(a-h,h-b);else d=(h>=a||h<=b)?-1:Math.min(a-h,h-b);const w=1-d/10;return w<0?0:w>1?1:w}

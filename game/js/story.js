@@ -137,6 +137,16 @@ window.KOTJ_STORY={
    "ending": "Eagle holds the crown and looks up instead of down for once.\nHe has always been the one who sees everything. Now he finally knows where to look.",
    "trueEnding": "MAJIC's wings tear free as he falls, and for one moment they spread wide on their own, catching the dawn wind.\nEagle knows that wingspan. He learned to fly underneath it.\nHis father flew to the summit alone, a generation before the Pact, to see what was hiding above the clouds. MAJIC took his wings so the jungle could never look down on him again.\nEagle carries the feathers to the highest cliff and lets the wind take them. His father can finally fly."
   },
+  "dolphin": {
+   "intro": "Dolphin King rules a kingdom no land beast has ever seen. The tides answer to him, and the reef bows when he passes.\nBut the rivers that feed his sea have started to run dark, and something upstream is drinking the jungle dry.\nSo for the first time in his life, the King of the Tides walks out of the water.",
+   "clues": {
+    "3": "Every river he follows bends the same way, toward the mountains, as if something up there is pulling the water to it.",
+    "6": "The Crocodile he beats spits out a warning with the river water. \"Go home, sea king. The last thing that came up here wearing a crown is still up there. It just isn't wearing it anymore.\"",
+    "9": "At the foot of the black tower the streams stop flowing entirely. They pool, still and silent, and in the reflection Dolphin King sees a second crown behind his own."
+   },
+   "ending": "The jungle crowns him on the riverbank so the water can see.\nIt is the first time a king of the sea has worn the jungle's crown. Somewhere above the clouds, something old takes notice.",
+   "trueEnding": "As MAJIC falls, the stolen rivers break free all at once and roar back down the mountain toward the sea.\nMAJIC took a piece of every beast that climbed his tower, but he never took the tide. Nothing ever has.\nDolphin King walks home in the rain, and the oceans rise to meet him."
+  },
   "stag": {
    "intro": "Stag has never lost a head-to-head fight. His father taught him how, before the night he walked into the dark forest and did not come back.\nThe herd says a king of the forest should not chase crowns that belong to the jungle. Stag agrees.\nSo why can he not stop walking toward one?",
    "clues": {

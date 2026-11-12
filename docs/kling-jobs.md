@@ -396,3 +396,18 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - majic sx1 AZ6vsKGGRFo7i2xL8mshLTwdHNxtAHO4Aaax3ZMt_3C-42LZpSo7wr9BKsHhapF7EIqtg4_E
 - majic sx2 Afil1SkIqlJw_4cvdQljhigSEPMBaq_58eu4uy7AebatQW_axA-5VxCntNjH8AJ2-5zBX8RE
 - majic sx3 AcjF6PVltFr9wZkAnnPTGJPEoH28AN2J9Apkvum04yfH0hJbk77x4_jGZ8KwjNo-SmX8eg2h
+
+## Dolphin King (new fighter, side view, 2026-11-11) — starter kling-start/dolphin-side.jpg (design 3, approved by James)
+- idle ATjjNh7tWTLbKuxyV6OzEzcYQgSBh-IkwBlJiC6sXl0mUSCsy80jj19d9Q-mYqDL_WneNKVo
+- walk AdScYCykqO4L6-bVwnHEq7r8U-uy5RsQQJ_RqqjkWJ-z1nsOVLcVMY-dJRdb5vLDK2ZK_GdP
+- light Ad4J1L-8Nk62udCBkq708ZoeTVj38c_w2wy1rrLhG4xGEEyfrDrUbIedDg6_7tP-v0XaUFPP
+- heavy ATab8m1PvfbT4vZx22DAc6ojjZ1pOdRbTFpPX1pdTeiF44uFX-693EDZoslS-NHc4y8359rQ
+- jump AR-Hc9_ZhzX9WpxUkHqTu09agZZygGqgtAIZfihoada_FMFGteMOszFCmutBddIOhWG7kjOs
+- special AdebTbtlLby3iPjM2trn-65B-RU2VkP8adp4eNfRL2cXIghOZS8HPbCBezppZP5PcrI2DdyM
+- hit AZ-geXGJ_CpWYqxeAOgn1TT2BM1c_xlJaWnpjrEzKIpX3SthipVWIZDDb5bn5sFE0yZNfxv7
+- knock AY35u73Ch7TwN2IEc-jNVWICZlH1cYYQ7hDnsTuI--YqmYhWIxzSiR-TDm2zMedvtWsOZB1a
+- victory AUHnBuzeoIqs2P8wKU_pIhQd_dhPY3zYhvi4nZJPxLgGInusKedPO83ox2vRwDDN_rD1gvAh
+- block AeYWk7zNKFFGqExJvWfC-anZLFHdExRlbikAUIawc-pG4t1T4fwWVH3mCo-KsWC6KzOE_xuh
+- sx1 (whirlpool spin) AYaypmKeORc_8Mwp4d5DJVbe6_l8GVeJ7BQLjl2KAYrCYmaGGW7QDQml4otMpEkRcuC094IO
+- sx2 (sonar shout) AS56-34wMcvmrBouB2_E1c3G05ZjKZiS8tzewxZp1vWWauTXVfoldVByYhZ3GpD-dZDGj2v_
+- sx3 (breach slam) Aaxz05E-tgv86EQAdtoxCm2T6ZU76g2iDT7G8pOocs5g2EUKnbxDWm6n0sQZwgnn0dj97NEt
