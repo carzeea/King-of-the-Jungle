@@ -43,7 +43,7 @@ let GFX='auto';try{GFX=localStorage.getItem('kotj-gfx')==='sharp'?'sharp':'auto'
 let frameDt=1/60;
 const RES={scale:1,acc:0,n:0,t:0,slow:0,floor:.75};
 function resStart(){RES.acc=0;RES.n=0;RES.t=0;RES.slow=0;RES.scale=1}
-function resTick(real){RES.t+=real;
+function resTick(real){RES.t+=real;try{autoSmooth(real)}catch(_){}
  if(GFX==='sharp'){RES.scale=1;return}
  if(RES.t<3.5)return;                                   // ignore art loading at fight start
  RES.acc+=real;RES.n++;if(RES.acc<2)return;const avg=RES.acc/RES.n;RES.acc=0;RES.n=0;
@@ -1740,7 +1740,8 @@ function spritesReady(id){const a=spriteImg[id];if(!a)return true;const idle=a.i
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
 // Phones and tablets get phone-size sheets (frames-md: ~1/5 the memory, every sheet <= 4096 px) instead of the full HD art.
-const HDT={};function phoneArt(){try{return matchMedia('(pointer:coarse)').matches||('ontouchstart' in window&&Math.min(screen.width,screen.height)<900)}catch(_){return false}}
+const HDT={};// Lighter sheets for everyone on GRAPHICS: AUTO (looks the same on normal screens); full HD art only with GRAPHICS: SHARP.
+function phoneArt(){return GFX!=='sharp'}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
  const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.35':'.webp?v=15.7');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
 const c=$('game-canvas').getContext('2d',{alpha:false,desynchronized:true})||$('game-canvas').getContext('2d');
@@ -3821,7 +3822,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'PHONE'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ntouch ${phoneArt()?'yes':'no'}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.38`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${GFX.toUpperCase()}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.39`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3831,4 +3832,17 @@ if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.
  if(sd&&sd.set)Object.defineProperty(c,'shadowBlur',{configurable:true,get(){return sd.get.call(this)},set(v){sd.set.call(this,LITE()?0:v)}})}
 RES.floor=LITE()?.5:.75;
 {const _so2=sxOptsRefresh;sxOptsRefresh=function(){const r=_so2.apply(this,arguments);RES.floor=LITE()?.5:.75;return r}}
+
+// ---------- Automatic smooth mode ----------
+// If a fight runs under ~40 fps with Effects HIGH, switch to the lighter MEDIUM mode (no blur/glow, smaller drawing size),
+// say so briefly, and remember it for next time. Players can switch back in Options.
+const AS={t:0,acc:0,n:0,slow:0,done:false};
+function autoSmooth(real){if(!game||AS.done||FXQ!=='high'||game.intro>0||paused)return;AS.t+=real;if(AS.t<2.5)return;AS.acc+=real;AS.n++;if(AS.acc<1.5)return;
+ const fps=AS.n/AS.acc;AS.acc=0;AS.n=0;AS.slow=fps<40?AS.slow+1:0;
+ if(AS.slow>=2){AS.done=true;FXQ='medium';try{localStorage.setItem('kotj-fxq','medium')}catch(_){}sxOptsRefresh();
+  let t=document.getElementById('smooth-toast');if(!t){t=document.createElement('div');t.id='smooth-toast';t.style.cssText='position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:96;background:rgba(10,8,6,.9);border:1px solid #c9a24a;color:#ffe7b0;font:700 14px Inter,sans-serif;padding:10px 16px;border-radius:10px;transition:opacity .5s;text-align:center';document.body.appendChild(t)}
+  t.innerHTML='SMOOTH MODE ON<br><span style="font-weight:500;opacity:.8;font-size:12px">Effects set to MEDIUM for this device · change in Options</span>';t.style.opacity=1;setTimeout(()=>t.style.opacity=0,4000)}}
+{const _rs=resStart;resStart=function(){AS.t=0;AS.acc=0;AS.n=0;AS.slow=0;return _rs.apply(this,arguments)}}
+
+{const _sg=setGfx;setGfx=function(v){const r=_sg.apply(this,arguments);for(const k in spriteHD)delete spriteHD[k];return r}}
 })();
