@@ -1025,3 +1025,10 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
 #select.v2sel .fighter-tile.tidal-lock .q{color:#9fe3ff!important}
 .unlock-note{margin:6px auto 4px;padding:8px 14px;max-width:520px;border:1px solid #4fb8ff;border-radius:10px;background:rgba(6,34,61,.85);color:#d9f4ff;text-align:center;font:600 14px Inter,sans-serif;box-shadow:0 0 18px rgba(79,184,255,.45)}
 .unlock-note b{color:#9fe3ff;letter-spacing:.08em}
+
+/* Dolphin King unlock call-out: top of the screen, clear of the fighters */
+#tide-unlock{position:fixed;left:50%;top:13%;transform:translate(-50%,-10px);z-index:95;pointer-events:none;text-align:center;opacity:0;transition:opacity .45s,transform .45s;padding:10px 26px 12px;border-radius:12px;background:linear-gradient(180deg,rgba(6,34,61,.92),rgba(3,16,30,.88));border:1px solid #6fd0ff;box-shadow:0 0 26px rgba(79,184,255,.55)}
+#tide-unlock.on{opacity:1;transform:translate(-50%,0)}
+#tide-unlock small{display:block;font:800 12px Inter,sans-serif;letter-spacing:.16em;color:#bfeaff}
+#tide-unlock b{display:block;font:900 30px "Barlow Condensed",Impact,sans-serif;letter-spacing:.1em;color:#fff;text-shadow:0 0 14px #4fc3ff}
+@media (max-height:560px){#tide-unlock{top:16%;padding:6px 16px 8px}#tide-unlock b{font-size:22px}#tide-unlock small{font-size:10px}}

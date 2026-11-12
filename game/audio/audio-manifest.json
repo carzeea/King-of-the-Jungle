@@ -907,6 +907,13 @@
    "used_for": "MAJIC uses a special move",
    "source": null,
    "volume": 0.8
+  },
+  "sfx.splash": {
+   "file": "animal/splash.mp3",
+   "label": "Big water splash",
+   "used_for": "Dolphin leaps in the Tidal Kingdom",
+   "source": null,
+   "volume": 1.0
   }
  }
 }
