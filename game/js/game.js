@@ -3845,7 +3845,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.55`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.56`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3993,8 +3993,8 @@ function fightTint(f){const mine=ownTint(f);if(!game)return mine;const F=game.fi
 // ---------- Dolphin King: a real dolphin leaps out of the water behind him (like the Wolf's moon) ----------
 const LEAP_IMG=new Image();LEAP_IMG.src='assets/fx/dolphin-leap.webp?v=15.51';try{FXQ_ALWAYS.add('leap')}catch(_){}
 function dLeap(p){if(!LEAP_IMG.complete||!LEAP_IMG.naturalWidth)return;const u=Math.min(1,p.t/p.life),d=p.dir||1;
- const x=p.x0+d*(-230+520*u),y=392-300*4*u*(1-u),ang=Math.atan2(-300*4*(1-2*u),520*d)*.6;
- const w=330,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
+ const S=p.span||520,Rz=p.rise||300,x=p.x0+d*(-.44*S+S*u),y=(p.y0||392)-Rz*4*u*(1-u),ang=Math.atan2(-Rz*4*(1-2*u),S*d)*.6;
+ const w=p.w||330,h=w*LEAP_IMG.naturalHeight/LEAP_IMG.naturalWidth;
  c.globalAlpha=Math.min(1,p.t/.18)*Math.min(1,(p.life-p.t)/.25)*.95;c.translate(x,y);c.rotate(ang);if(d===1)c.scale(-1,1);
  c.drawImage(LEAP_IMG,-w*.5,-h*.38,w,h)}
 
@@ -4008,4 +4008,12 @@ function animalCall(f,kind,vol){try{if(!AU||!soundOn||!f)return;const id=f.data.
 {const _dmc=doMove;doMove=function(f,name){const a0=f&&f.attack;const r=_dmc.apply(this,arguments);try{if(typeof name==='string'&&(name.startsWith('sx:')||name==='special'||name==='shadow')&&f.attack>0&&f.attack!==a0)animalCall(f,'cry')}catch(_){}return r}}
 {const _usc=sxUltStart;sxUltStart=function(f,o){const r=_usc.apply(this,arguments);try{if(game&&game.sxu&&!(AU&&AU.has('ultra.'+f.data.id)))setTimeout(()=>animalCall(f,'roar',.9),350)}catch(_){}return r}}
 {const _fnc=finish;finish=function(){const was=game&&game.over;const r=_fnc.apply(this,arguments);try{if(!was&&game&&mode!=='training'){const [p,q]=game.fighters,tp=total(p),tq=total(q);if(Math.abs(tp-tq)>=.01){const w=tp>tq?p:q;setTimeout(()=>animalCall(w,'roar',.85),1900)}}}catch(_){}return r}}
+
+// ---------- Tidal Kingdom: until the Dolphin King is unlocked, a real dolphin leaps out of the water as the match is decided ----------
+function tideLeap(){const F=game.fighters,cx=cam&&cam.x!=null&&cam.vx?cam.x+cam.vx*(innerWidth/Math.max(1,innerHeight))*.5:(F[0].x+F[1].x)/2,d=Math.random()<.5?1:-1,life=2.0,S=420,x0=cx;
+ P({kind:'pp',sh:'leap',x:cx,x0,dir:d,y:300,y0:395,w:400,span:S,rise:230,life});
+ const splash=x=>{try{sxFx(F[0],['splash','drops'],x,400,1.4)}catch(_){}};
+ splash(x0-d*.44*S);try{AU&&soundOn&&AU.now('cry.dolphin',.9)}catch(_){}
+ setTimeout(()=>{if(game)splash(x0+d*.56*S)},life*1000*.88)}
+{const _fuT=fxUpdate;fxUpdate=function(dt){const r=_fuT.apply(this,arguments);try{if(game&&game.ko>0&&game.ko<2.15&&!game.tideLeap&&arena&&arena.id==='tidal-kingdom'&&mode!=='training'&&!unlockedNew().includes('dolphin')){game.tideLeap=1;tideLeap()}}catch(_){}return r}}
 })();
