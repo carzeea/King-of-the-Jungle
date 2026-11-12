@@ -1742,7 +1742,7 @@ function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(wi
 // Phones and tablets get phone-size sheets (frames-md: ~1/5 the memory, every sheet <= 4096 px) instead of the full HD art.
 const HDT={};function phoneArt(){try{return matchMedia('(pointer:coarse)').matches||('ontouchstart' in window&&Math.min(screen.width,screen.height)<900)}catch(_){return false}}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
- const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.35':'.webp?v=15.7');cache[file]=im}spriteHD[id][k]=cache[file]}}
+ const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.35':'.webp?v=15.7');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
 const c=$('game-canvas').getContext('2d',{alpha:false,desynchronized:true})||$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -3821,7 +3821,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'PHONE'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ntouch ${phoneArt()?'yes':'no'}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.37`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'PHONE'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ntouch ${phoneArt()?'yes':'no'}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.38`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
