@@ -15,7 +15,7 @@ Voice: **Holden** (voice ID `3c9d6053-6334-592c-8997-4e325286af3f`)
 | **Finish him!** | `holden-finish-him.mp3` | A fighter drops into DANGER (Ultra Combo now possible) |
 | **Flawless victory!** | `holden-flawless-victory.mp3` | Win without losing any health |
 
-## Still to record (32)
+## Still to record (33)
 
 These already work without a recording: the general Holden call or the browser voice covers them. Recording them gives each moment its own line. Save as .mp3 with the exact name shown and send them over.
 
@@ -46,6 +46,7 @@ These already work without a recording: the general Holden call or the browser v
 | **Wolf wins!** | `holden-wolf-wins.mp3` | Wolf wins a fight | Nothing (silent until recorded) |
 | **Hyena wins!** | `holden-hyena-wins.mp3` | Hyena wins a fight | Nothing (silent until recorded) |
 | **Snow Leopard wins!** | `holden-leopard-wins.mp3` | Snow Leopard wins a fight | Nothing (silent until recorded) |
+| **Dolphin King wins!** | `holden-dolphin-wins.mp3` | Dolphin King wins a fight | Nothing (silent until recorded) |
 | **Jaguar wins!** | `holden-jaguar-wins.mp3` | Jaguar wins a fight | Nothing (silent until recorded) |
 | **Crocodile wins!** | `holden-crocodile-wins.mp3` | Crocodile wins a fight | Nothing (silent until recorded) |
 | **Lion wins!** | `holden-lion-wins.mp3` | Lion wins a fight | Nothing (silent until recorded) |

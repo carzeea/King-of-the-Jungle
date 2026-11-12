@@ -411,3 +411,6 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - sx1 (whirlpool spin) AYaypmKeORc_8Mwp4d5DJVbe6_l8GVeJ7BQLjl2KAYrCYmaGGW7QDQml4otMpEkRcuC094IO
 - sx2 (sonar shout) AS56-34wMcvmrBouB2_E1c3G05ZjKZiS8tzewxZp1vWWauTXVfoldVByYhZ3GpD-dZDGj2v_
 - sx3 (breach slam) Aaxz05E-tgv86EQAdtoxCm2T6ZU76g2iDT7G8pOocs5g2EUKnbxDWm6n0sQZwgnn0dj97NEt
+- dolphin walk (redo) ARxjLJjNx-n1Qw6MIkHLN3h7O5IcCb1bmNvuGXRqOtzV00F8lZ5ZbMdCA6dmYuOtuIBcBd9I
+- dolphin sx2 sonic echo (redo) AZiCuFHaNzv6g9wkhx2pByQH8t5kMM-JgaIE64uYfpI7Z8wNW14KIXmQiMYnDhp39y0KWPuS
+- dolphin finisher AVAUNBLeWzW51bV1LboD5YRj5DH_qJoCinOQGLjRCrmezA88QKsbOWIfIi6quHZWEXqo07d6

@@ -633,6 +633,29 @@
    "used_for": "Fight music in Cae's Corner",
    "source": "https://d8j0ntlcm91z4.cloudfront.net/user_3Lfi1yn0Y3VqxESIDjBOn3Galue/hf_20261106_221844_219e389f-ac9b-4601-a28f-b20073431c4f.mp3",
    "volume": 0.42
+  },
+  "ultra.dolphin": {
+   "file": "ultra/ultra-dolphin.mp3",
+   "label": "Dolphin King – Ultra / Ultimate",
+   "used_for": "Dolphin King lands an Ultra Combo or starts Wrath of the Ocean",
+   "source": null,
+   "volume": 1.0
+  },
+  "shadow.dolphin": {
+   "file": "shadow/shadow-dolphin.mp3",
+   "label": "Dolphin King – Shadow move",
+   "used_for": "Dolphin King uses a Shadow move",
+   "source": null,
+   "volume": 1.0
+  },
+  "voice.dolphin-wins": {
+   "file": "voice/holden-dolphin-wins.mp3",
+   "label": "Announcer (Holden) – \"Dolphin King wins!\"",
+   "used_for": "Dolphin King wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Dolphin King wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
   }
  }
 }
