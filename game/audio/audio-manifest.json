@@ -917,12 +917,13 @@
   },
   "voice.cant-be-king": {
    "file": "voice/holden-you-cant-be-king.mp3",
-   "label": "Announcer (Holden) – \"You can't be king!\"",
+   "label": "Announcer – \"You can't be king!\" (generated voice)",
    "used_for": "Said to the loser after a flawless win (replaces \"Flawless victory!\")",
    "source": null,
    "volume": 1.0,
    "line": "You can't be king!",
-   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+   "voice": "Kling-generated announcer (stand-in until Holden records it)",
+   "recorded": true
   }
  }
 }

@@ -1294,7 +1294,7 @@ function finish(){
  let title=draw_?'DRAW':net?(iWon?'YOU WIN':'YOU LOSE'):p1won?(cpu2?'YOU WIN':'PLAYER 1 WINS'):(cpu2?'CPU WINS':'PLAYER 2 WINS');
  let copy=draw_?'Neither fighter claimed the crown.':(p1won?picks[0].name:picks[1].name)+' claims the arena.';
  const winnerF=draw_?null:(p1won?p:q),flawless=!!winnerF&&total(winnerF)>=2*BAR-.01;
- if(flawless)copy='FLAWLESS VICTORY · '+copy;
+ if(flawless)copy='YOU CAN’T BE KING · '+copy;
  $('tower-next').classList.add('hidden');$('rematch').textContent='REMATCH';$('tower-ladder').innerHTML='';
  if(mode==='training'){title='TRAINING SESSION';copy='Practice complete when you are ready. Your dummy does not attack or run out of health.';$('rematch').textContent='KEEP PRACTICING';$('tower-next').classList.add('hidden');}
  if(tower){
