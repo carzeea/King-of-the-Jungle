@@ -1032,3 +1032,25 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
 #tide-unlock small{display:block;font:800 12px Inter,sans-serif;letter-spacing:.16em;color:#bfeaff}
 #tide-unlock b{display:block;font:900 30px "Barlow Condensed",Impact,sans-serif;letter-spacing:.1em;color:#fff;text-shadow:0 0 14px #4fc3ff}
 @media (max-height:560px){#tide-unlock{top:16%;padding:6px 16px 8px}#tide-unlock b{font-size:22px}#tide-unlock small{font-size:10px}}
+
+/* 1.5: one-tap special buttons ★1 ★2 ★3 + ★U (Ultimate) */
+#touch-pad .sx-star,#touch-pad .sx-panel{display:none!important}
+#touch-pad .pad-stars{position:absolute;right:calc(10px + env(safe-area-inset-right));bottom:calc(150px + env(safe-area-inset-bottom));display:flex;gap:8px;pointer-events:auto;z-index:45}
+#touch-pad .pad-stars button{width:56px;height:56px;border-radius:50%;border:2px solid rgba(255,231,160,.85);font:900 17px "Barlow Condensed",Impact,sans-serif;color:#fff;letter-spacing:.02em;box-shadow:0 3px 10px rgba(0,0,0,.45),inset 0 2px 6px rgba(255,255,255,.25);touch-action:none;user-select:none;-webkit-user-select:none}
+#touch-pad .pad-stars .st1{background:radial-gradient(circle at 35% 30%,#ff8a7a,#b3201a)}
+#touch-pad .pad-stars .st2{background:radial-gradient(circle at 35% 30%,#7ab6ff,#1f4fb3)}
+#touch-pad .pad-stars .st3{background:radial-gradient(circle at 35% 30%,#8fe39a,#1f7a35)}
+#touch-pad .pad-stars .stu{background:radial-gradient(circle at 35% 30%,#d9a8ff,#5a1f9a);opacity:.45}
+#touch-pad .pad-stars .stu.ready{opacity:1;background:radial-gradient(circle at 35% 30%,#ffe7a0,#c98a1c);color:#3a2200;animation:stuPulse 1s ease-in-out infinite}
+#touch-pad .pad-stars button.low{opacity:.5}
+#touch-pad .pad-stars button.on{transform:scale(.92);filter:brightness(1.25)}
+@keyframes stuPulse{50%{box-shadow:0 0 18px 4px rgba(255,210,110,.9)}}
+@media (orientation:landscape) and (max-height:560px){#touch-pad .pad-stars{bottom:calc(98px + env(safe-area-inset-bottom))}#touch-pad .pad-stars button{width:50px;height:50px;font-size:15px}}
+@media (orientation:portrait){#touch-pad .pad-stars{bottom:calc(170px + env(safe-area-inset-bottom))}}
+body:not(.fighting) #touch-pad .pad-stars{display:none}
+
+body #touch-pad .pad-stars button.st1{background:radial-gradient(circle at 35% 30%,#ff8a7a,#b3201a)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
+body #touch-pad .pad-stars button.st2{background:radial-gradient(circle at 35% 30%,#7ab6ff,#1f4fb3)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
+body #touch-pad .pad-stars button.st3{background:radial-gradient(circle at 35% 30%,#8fe39a,#1f7a35)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
+body #touch-pad .pad-stars button.stu{background:radial-gradient(circle at 35% 30%,#d9a8ff,#5a1f9a)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
+body #touch-pad .pad-stars button.stu.ready{background:radial-gradient(circle at 35% 30%,#ffe7a0,#c98a1c)!important;color:#3a2200!important;opacity:1}
