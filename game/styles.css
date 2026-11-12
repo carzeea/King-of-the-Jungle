@@ -1054,3 +1054,10 @@ body #touch-pad .pad-stars button.st2{background:radial-gradient(circle at 35% 3
 body #touch-pad .pad-stars button.st3{background:radial-gradient(circle at 35% 30%,#8fe39a,#1f7a35)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
 body #touch-pad .pad-stars button.stu{background:radial-gradient(circle at 35% 30%,#d9a8ff,#5a1f9a)!important;color:#fff!important;border:2px solid rgba(255,231,160,.85)!important}
 body #touch-pad .pad-stars button.stu.ready{background:radial-gradient(circle at 35% 30%,#ffe7a0,#c98a1c)!important;color:#3a2200!important;opacity:1}
+
+/* cover motto */
+.motto{margin:8px 0 0 6px;font:italic 800 clamp(13px,1.5vw,19px) Inter,sans-serif;letter-spacing:.06em;color:#f3c860;text-shadow:0 2px 8px #000,0 0 14px rgba(243,200,96,.35)}
+@media (max-width:760px){.motto{text-align:center;margin:6px 0 0}}
+@media (max-height:560px) and (orientation:landscape){.motto{margin-top:3px;font-size:11px}}
+#menu .motto{margin:4px 0 6px!important;font-size:clamp(13px,1.35vw,18px)!important}
+@media (max-height:560px){#menu .motto{font-size:12px!important;margin:2px 0!important}}

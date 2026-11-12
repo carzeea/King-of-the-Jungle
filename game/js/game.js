@@ -269,7 +269,7 @@ $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
  if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
  if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
-  return start()}
+  {const S=storyOf(chosen.id)||{};return storyCard({dark:1,fig:{id:chosen.id,anim:'idle',light:.2},eyebrow:'TOWER MODE · '+chosen.name,title:'The jungle doesn’t choose its king. It’s taken.',text:S.intro||''},start)}}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
   const others=roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id).sort(()=>Math.random()-.5).slice(0,3).map(f=>({...f,name:'FALLEN '+f.name,echo:true}));
   tower={kind:'forgotten',player:chosen,ladder:others,index:0,startedAt:Date.now()};picks=[chosen,others[0]];arena=towerArena();
@@ -3853,7 +3853,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.1`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.2`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
