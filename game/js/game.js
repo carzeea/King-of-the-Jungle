@@ -396,15 +396,16 @@ function fighter(x,dir,data){return{x,y:0,vx:0,vy:0,dir,hp:BAR,bars:data.id==='m
  action:'idle',actionTime:0,actionTotal:1,move_:null,hitsDone:0,elapsed:0,wasAttack:false,wasSpecial:false,wasIns:false,hitFlash:0,hitAnimTime:0,hitHeavy:false,bossPhase:data.id==='majic'?1:0,
  combo:0,bestCombo:0,usedUltra:false,meter:0,lockout:0,breakWindow:0,instinct:0,down:0,koTime:0,ai:null,trail:[]}}
 function setAction(f,a,t){f.action=a;f.actionTime=t;f.actionTotal=t}
+function hdReady(ids,since){try{if(start._hdSkip||!wantHD()||(since&&performance.now()-since>8000))return true;ids.forEach(id=>loadHD(id));return ids.every(id=>fightArtList(id).every(im=>im.complete))}catch(_){return true}}
 function fighterLoading(on){let el=document.getElementById('fighter-loading');
  if(!el){el=document.createElement('div');el.id='fighter-loading';el.innerHTML='<img src="assets/ui/crown.webp" alt=""><b>THE FIGHTERS ARE ENTERING THE ARENA</b><i></i>';document.body.appendChild(el)}
  el.classList.toggle('on',!!on)}
 function start(){
  // Make sure both fighters' frames have arrived before the bell (slow phone connections).
- if(mode!=='online'&&picks[0]&&picks[1]){const ids=[picks[0].id,picks[1].id],ready=()=>ids.every(id=>{const a=spriteImg[id];return !a||Object.values(a).every(im=>im.complete)});
+ if(mode!=='online'&&!start._hdSkip&&picks[0]&&picks[1]){const ids=[picks[0].id,picks[1].id],ready=()=>ids.every(id=>{const a=spriteImg[id];return !a||Object.values(a).every(im=>im.complete)})&&hdReady(ids,start._waiting);
   if(start._waiting)return;
   if(!ready()){start._waiting=performance.now();fighterLoading(true);
-   const iv=setInterval(()=>{if(ready()||performance.now()-start._waiting>20000){clearInterval(iv);start._waiting=0;fighterLoading(false);start()}},120);return}}
+   const iv=setInterval(()=>{if(ready()||performance.now()-start._waiting>20000){clearInterval(iv);start._waiting=0;fighterLoading(false);start._hdSkip=1;try{start()}finally{start._hdSkip=0}}},120);return}}
  // First arrival at MAJIC's summit gets a one-time, three-beat boss entrance.
  // Mark it before opening the cards so the final callback can safely call start() again.
  if(tower&&tower.boss&&!tower.bossIntroSeen){
@@ -3199,22 +3200,22 @@ function pNormalize(){for(const p of game.fx){if(p._n)continue;p._n=1;if(p.kind!
 function mjBolt(x0,y0,x1,y1,rough,depth,out){const mx=(x0+x1)/2+(Math.random()-.5)*rough,my=(y0+y1)/2+(Math.random()-.5)*rough;
  if(depth<=0){out.push([x0,y0,mx,my,x1,y1]);return}mjBolt(x0,y0,mx,my,rough/2,depth-1,out);mjBolt(mx,my,x1,y1,rough/2,depth-1,out);
  if(depth>=2&&Math.random()<.35){const a=Math.atan2(y1-y0,x1-x0)+(Math.random()<.5?-1:1)*R(.5,1.1),l=Math.hypot(x1-x0,y1-y0)*.45;mjBolt(mx,my,mx+Math.cos(a)*l,my+Math.sin(a)*l,rough/3,depth-2,out)}}
-function mjAura(f,front){const now=performance.now()/1000,H=310,cx=f.x,cy=400+f.y-H*.48;
+function mjAura(f,front){const now=performance.now()/1000,K=(BODY_PRESENCE.majic||1.55)/1.55,H=310*K,cx=f.x,cy=400+f.y-H*.48;
  const lt=typeof LITE==='function'&&LITE();
- if(lt&&!front){c.save();c.globalAlpha=.22+Math.sin(now*5.2)*.05;c.fillStyle='#9a4cff';c.beginPath();c.ellipse(cx,402,120,16,0,0,Math.PI*2);c.fill();c.restore();return}
+ if(lt&&!front){c.save();c.globalAlpha=.22+Math.sin(now*5.2)*.05;c.fillStyle='#9a4cff';c.beginPath();c.ellipse(cx,402,120*K,16,0,0,Math.PI*2);c.fill();c.restore();return}
  if(!front){const pulse=.8+Math.sin(now*5.2)*.12+Math.sin(now*13.7)*.06;c.save();c.globalCompositeOperation='lighter';
   const g=c.createRadialGradient(cx,cy,10,cx,cy,H*.72);g.addColorStop(0,'rgba(190,110,255,'+(.42*pulse)+')');g.addColorStop(.45,'rgba(140,60,255,'+(.28*pulse)+')');g.addColorStop(1,'rgba(90,20,200,0)');
   c.fillStyle=g;c.beginPath();c.ellipse(cx,cy,H*.62,H*.72,0,0,Math.PI*2);c.fill();
-  const fg=c.createRadialGradient(cx,402,4,cx,402,150);fg.addColorStop(0,'rgba(200,130,255,'+(.35*pulse)+')');fg.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=fg;c.beginPath();c.ellipse(cx,402,150,22,0,0,Math.PI*2);c.fill();c.restore();return}
+  const fg=c.createRadialGradient(cx,402,4,cx,402,150*K);fg.addColorStop(0,'rgba(200,130,255,'+(.35*pulse)+')');fg.addColorStop(1,'rgba(120,40,255,0)');c.fillStyle=fg;c.beginPath();c.ellipse(cx,402,150*K,22,0,0,Math.PI*2);c.fill();c.restore();return}
  if(!f._mjB||now-f._mjBt>(lt?R(.16,.26):R(.07,.13))){f._mjBt=now;f._mjB=[];const n=lt?1+(Math.random()<.4):Math.random()<.25?3:2;
-  for(let i=0;i<n;i++){const side=Math.random()<.5?-1:1,a0=R(-2.6,-.5),r0=R(.25,.45)*H,x0=cx+Math.cos(a0)*r0*side*.8,y0=cy+Math.sin(a0)*r0*.9+R(-30,90),ang=R(-1.9,-1.2)+(side>0?R(0,.9):-R(0,.9)),l=R(70,150),segs=[];
+  for(let i=0;i<n;i++){const side=Math.random()<.5?-1:1,a0=R(-2.6,-.5),r0=R(.25,.45)*H,x0=cx+Math.cos(a0)*r0*side*.8,y0=cy+Math.sin(a0)*r0*.9+R(-30,90),ang=R(-1.9,-1.2)+(side>0?R(0,.9):-R(0,.9)),l=R(70,150)*K,segs=[];
    mjBolt(x0,y0,x0+Math.cos(ang)*l*side,y0+Math.sin(ang)*l*(Math.random()<.4?-1:1),l*.45,lt?3:4,segs);f._mjB.push({segs,col:Math.random()<.85?'#b65cff':'#9fe8ff',life:R(.6,1)})}}
  c.save();c.lineCap='round';c.lineJoin='round';const flick=.55+Math.random()*.45;
  for(const b of f._mjB){for(const [w,al,col] of (lt?[[3.5,.9*flick,b.col]]:[[12,.35*flick,'#8a2be2'],[5,.9*flick,b.col],[1.8,.95*flick*b.life,'#fbf3ff']])){c.strokeStyle=col;c.globalAlpha=al;c.lineWidth=w;c.shadowColor=b.col;c.shadowBlur=w>3?16:8;c.beginPath();for(const sg of b.segs){c.moveTo(sg[0],sg[1]);c.lineTo(sg[2],sg[3]);c.lineTo(sg[4],sg[5])}c.stroke()}}
  c.restore()}
 {const _dF2=drawFighter;drawFighter=function(f,i,ghost){
   const mj=!ghost&&game&&f&&f.data&&f.data.id==='majic'&&!(f.hp<=0&&game.over);
-  if(mj)mjAura(f,false);let r;if(mj){const pu=.75+Math.sin(performance.now()/190)*.25;c.save();c.shadowColor='rgba(170,70,255,'+pu+')';c.shadowBlur=26+pu*14;r=_dF2.apply(this,arguments);c.restore()}else r=_dF2.apply(this,arguments);if(mj)mjAura(f,true);return r}}
+  if(mj)mjAura(f,false);let r;if(mj){const pu=.75+Math.sin(performance.now()/190)*.25;c.save();c.shadowColor='rgba(170,70,255,'+pu+')';c.shadowBlur=18+pu*10;r=_dF2.apply(this,arguments);c.restore()}else r=_dF2.apply(this,arguments);if(mj)mjAura(f,true);return r}}
 function pLeaf(r,col){c.fillStyle=col;c.beginPath();c.moveTo(-r,0);c.quadraticCurveTo(-r*.2,-r*.62,r,0);c.quadraticCurveTo(-r*.2,r*.62,-r,0);c.fill();c.strokeStyle='rgba(30,60,15,.75)';c.lineWidth=1.2;c.beginPath();c.moveTo(-r*1.25,0);c.lineTo(r*.9,0);for(let s=-.5;s<=.5;s+=.33){c.moveTo(r*s,0);c.lineTo(r*(s+.25),-r*.3);c.moveTo(r*s,0);c.lineTo(r*(s+.25),r*.3)}c.stroke()}
 function pFlake(r){c.strokeStyle='#ffffff';c.lineWidth=Math.max(1.4,r*.16);c.lineCap='round';c.shadowColor='#8fe6ff';c.shadowBlur=8;c.beginPath();for(let a=0;a<6;a++){const ca=Math.cos(a*1.0472),sa=Math.sin(a*1.0472);c.moveTo(0,0);c.lineTo(ca*r,sa*r);for(const t of[.45,.72]){const bx=ca*r*t,by=sa*r*t,l=r*(t<.5?.36:.24);for(const s of[-1,1]){const aa=a*1.0472+s*.8;c.moveTo(bx,by);c.lineTo(bx+Math.cos(aa)*l,by+Math.sin(aa)*l)}}}c.stroke()}
 function pFeather(r,col){c.strokeStyle='#8a6a40';c.lineWidth=1.5;c.beginPath();c.moveTo(-r,0);c.lineTo(r,0);c.stroke();c.fillStyle=col;c.beginPath();c.moveTo(-r*.6,0);c.quadraticCurveTo(0,-r*.45,r,0);c.quadraticCurveTo(0,r*.32,-r*.6,0);c.fill();c.strokeStyle='rgba(120,90,60,.5)';c.lineWidth=.8;c.beginPath();for(let s=-.5;s<.9;s+=.2){c.moveTo(r*s,0);c.lineTo(r*(s+.18),-r*.3);c.moveTo(r*s,0);c.lineTo(r*(s+.18),r*.22)}c.stroke()}
@@ -3551,6 +3552,10 @@ const SX3={dolphin:[0,1,2],lion:[0,1,3],tiger:[1,0,4],jaguar:[0,2,3],leopard:[0,
  grizzly:[1,0,2],crocodile:[2,0,1],hippo:[0,2,4],elephant:[0,1,4],eagle:[1,0,2],stag:[1,0,2],snake:[1,0,3],majic:[1,3,7]};
 for(const id in SX){const D=SX[id],pick=(SX3[id]||[0,1,2]).map(i=>D.m[i]).filter(Boolean);D.m=id==='majic'?[...pick,...D.m.filter(m=>!pick.includes(m))]:pick}
 const SX_SHOW=3;
+// key sheets for a fighter (moves, hits, their 3 specials + Ultimate): the pre-fight loading screen waits for these (max 8 s)
+function fightArtList(id){const out=new Set(['idle','walk_forward','walk_back','attack_light','attack_heavy','hit_light','hit_heavy','block','jump']);try{const D=SX[id];if(D){(D.m||[]).slice(0,SX_SHOW).forEach(m=>(m.a||[]).forEach(x=>out.add(x)));const u=D.u||{};(u.a||[]).forEach(x=>out.add(x));(u.seq||[]).forEach(q=>out.add(q[0]))}}catch(_){}
+ const S=spriteHD[id];if(!S)return[];const ims=new Set();out.forEach(k=>{if(S[k])ims.add(S[k])});return[...ims]}
+
 // warm up the sheets for each fighter's 3 specials and Ultimate during the intro, so the first special doesn't hitch
 {const _lh=loadHD;loadHD=function(id){const fresh=HD[id]&&!spriteHD[id];const r=_lh.apply(this,arguments);if(!fresh)return r;
  try{const D=SX[id],want=new Set();if(D){(D.m||[]).slice(0,SX_SHOW).forEach(m=>(m.a||[]).forEach(x=>want.add(x)));const u=D.u||{};(u.a||[]).forEach(x=>want.add(x));(u.seq||[]).forEach(q=>want.add(q[0]))}
@@ -3866,7 +3871,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.6`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.7`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
