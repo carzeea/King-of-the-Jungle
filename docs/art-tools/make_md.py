@@ -6,7 +6,7 @@ from PIL import Image
 from concurrent.futures import ProcessPoolExecutor
 Image.MAX_IMAGE_PIXELS=None
 G='/home/claude/king-of-the-jungle/game';K=float(os.environ.get('K','0.55'));LIM=4096
-KF={'majic':0.33}  # MAJIC's frames are ~2.7x bigger than everyone else's: keep his phone sheets small
+KF={'majic':0.33,'hippo':0.45,'elephant':0.45}  # MAJIC's frames are ~2.7x bigger than everyone else's: keep his phone sheets small
 ONLY=[x for x in os.environ.get('ONLY','').split(',') if x]
 HD=json.loads(open(G+'/js/sprites-hd.js').read().split('=',1)[1].strip().rstrip(';'))
 def fitK(n,fw,fh,fid=None):

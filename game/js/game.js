@@ -74,7 +74,9 @@ function openStage(){renderStages();$('stage-back').classList.toggle('hidden',mo
 $('stage-go').onclick=()=>{ac();arena=stagePick>=RND()?ARENAS[Math.floor(Math.random()*ARENAS.length)]:ARENAS[stagePick];if(mode==='online')NET.send({t:'start',a:picks[0].id,b:picks[1].id,arena:arena.id});start()};
 $('stage-back').onclick=()=>{if(mode==='online')return;step=mode==='versus'||mode==='cpu'?2:1;chosen=picks[step-1];render();show('select')};
 // Tower: each floor moves to a new arena; the final boss is always in Majic's Lair.
-function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||LAIR;const n=tower.ladder.length;return tower.index===n-1?LAIR:FIGHT_ARENAS[tower.index%FIGHT_ARENAS.length]}
+// once the Dolphin King is unlocked he joins the Tower climb, right before the final fight, in his own Tidal Kingdom
+function towerKing(l,me){if(me!=='dolphin'&&unlockedNew().includes('dolphin')){const k=roster.find(f=>f.id==='dolphin')||DOLPHIN;l.splice(Math.max(0,l.length-1),0,k)}return l}
+function towerArena(){if(tower.kind==='forgotten')return [ARENAS[4],ARENAS[2],ARENAS[1]][tower.index]||LAIR;const n=tower.ladder.length;if(tower.ladder[tower.index]&&tower.ladder[tower.index].id==='dolphin'){const t=ARENAS.find(a=>a.id==='tidal-kingdom');if(t)return t}return tower.index===n-1?LAIR:FIGHT_ARENAS[tower.index%FIGHT_ARENAS.length]}
 
 const show=id=>{try{guardTaps()}catch(_){}screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.body.classList.toggle('on-cover',id==='menu')};
 // Phones: the tap that opens a screen must not also hit a button that appears under the same finger.
@@ -268,7 +270,7 @@ function card(f,i){try{spriteImg[f.id]}catch(_){}$('confirm-fighter').disabled=f
 $('confirm-fighter').onclick=()=>{
  ac();if(mode==='online'){if(ON.mine)return;ON.mine=chosen.id;NET.send({t:'pick',id:chosen.id});selectWait();return}picks[step-1]=chosen;
  if(mode==='training'){picks=[chosen,roster.find(f=>f.id==='grizzly')||roster[1]];tower=null;arena=ARENAS[0];return start()}
- if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
+ if(mode==='tower'){tower={kind:'tower',player:chosen,ladder:towerKing(roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id),chosen.id),index:0,startedAt:Date.now()};picks=[chosen,tower.ladder[0]];arena=towerArena();
   {const S=storyOf(chosen.id)||{};return storyCard({dark:1,fig:{id:chosen.id,anim:'idle',light:.2},eyebrow:'TOWER MODE · '+chosen.name,title:'The jungle doesn’t choose its king. It’s taken.',text:S.intro||''},start)}}
  if(mode==='forgotten'){if(chosen.id==='majic')return;
   const others=roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==chosen.id).sort(()=>Math.random()-.5).slice(0,3).map(f=>({...f,name:'FALLEN '+f.name,echo:true}));
@@ -1751,7 +1753,7 @@ function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(wi
 const HDT={};// Lighter sheets for everyone on GRAPHICS: AUTO (looks the same on normal screens); full HD art only with GRAPHICS: SHARP.
 function phoneArt(){return GFX!=='sharp'}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
- const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v='+(id==='majic'?'16.4':'15.54'):'.webp?v=15.54');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
+ const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v='+(id==='majic'?'16.4':/^(hippo|elephant)$/.test(id)?'16.5':'15.54'):'.webp?v=15.54');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
 const c=$('game-canvas').getContext('2d',{alpha:false})||$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -2895,7 +2897,7 @@ addUnlocked();if(unlockedNew().includes('dolphin')&&!roster.includes(DOLPHIN)){c
 forgottenMenu();
 render();show('menu');updateGuide();
 addEventListener('resize',()=>{cam.snap=true});addEventListener('orientationchange',()=>{cam.snap=true;setTimeout(()=>{cam.snap=true},300)});
-window.__kotj={fx:(i,st)=>{const f=game&&game.fighters[i],o=game&&game.fighters[1-i];if(f)pBurst(f,st||'start',st==='hit'&&o?o.x-f.dir*20:f.x,st==='hit'&&o?400+o.y-160:300,1)},rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
+window.__kotj={fx:(i,st)=>{const f=game&&game.fighters[i],o=game&&game.fighters[1-i];if(f)pBurst(f,st||'start',st==='hit'&&o?o.x-f.dir*20:f.x,st==='hit'&&o?400+o.y-160:300,1)},rise:()=>playRise(()=>show('menu')),get game(){return game},get tower(){return tower},arena:(i)=>{arena=ARENAS[i]},start:(m,a,b)=>{mode=m;picks=[roster.find(r=>r.id===a),roster.find(r=>r.id===b)];if(m==='tower'){tower={kind:'tower',player:picks[0],ladder:towerKing(roster.filter(f=>BASE_IDS.includes(f.id)&&f.id!==a),a),index:0};picks[1]=tower.ladder[0];arena=towerArena()}start()},kb,sound:v=>{soundOn=v},finish:()=>finish(),towerFinal:()=>{tower.index=tower.ladder.length-1;picks=[tower.player,tower.ladder[tower.index]];arena=towerArena();start()}};
 (()=>{const w=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
  w('so-sound',()=>{$('sound').click();selOpts(true)});w('so-blood',()=>{document.querySelector('.blood-btn').click();selOpts(true)});w('so-gfx',()=>{setGfx(GFX==='sharp'?'auto':'sharp');selOpts(true)});w('so-full',()=>$('fullscreen').click());w('so-close',()=>selOpts(false))})();
 /* ---------- V2 Power Moves & Effects (drawn, recognizable effects; no damage/timing changes) ---------- */
@@ -3586,7 +3588,10 @@ function sxTouchInstall(){const pad=document.getElementById('touch-pad');if(!pad
  box.querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();ac();touch[b.dataset.sx]=0;touchTap[b.dataset.sx]=1;b.classList.add('on')});
   const off=()=>b.classList.remove('on');b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('contextmenu',e=>e.preventDefault())});
  setInterval(()=>{if(!game||!game.fighters)return;const f=game.fighters[0],D=SX[f.data.id];box.querySelector('.stu').classList.toggle('ready',f.meter>=100);
-  if(D)box.querySelectorAll('[data-sx^="s"]:not(.stu)').forEach((b,i)=>{const m=D.m[i];b.title=m?m.n:'';b.classList.toggle('low',!!(m&&m.cost&&f.meter<m.cost))})},250)}
+  if(D)box.querySelectorAll('[data-sx^="s"]:not(.stu)').forEach((b,i)=>{const m=D.m[i];b.title=m?m.n:'';b.classList.toggle('low',!!(m&&m.cost&&f.meter<m.cost))});
+  if(box._fid!==f.data.id){box._fid=f.data.id;box.querySelectorAll('button').forEach((b,i)=>{const m=D?(b.classList.contains('stu')?D.u:D.m[i]):null;let l=b.querySelector('.sxl');if(!l){l=document.createElement('span');l.className='sxl';b.appendChild(l)}l.textContent=m?sxShort(m.n):''})}},250)}
+// short label for the touch star buttons: drop filler words so it fits two small lines
+function sxShort(n){const w=String(n).toUpperCase().replace(/^(THE|A)\s+/,'').split(/\s+/).filter(x=>!/^(OF|THE|A)$/.test(x));return w.join(' ')}
 // ---------- motion input reading ----------
 function sxDirCode(f,inp){const fw=(inp.r&&f.dir===1)||(inp.l&&f.dir===-1),bk=(inp.r&&f.dir===-1)||(inp.l&&f.dir===1),dn=inp.dn||inp.bl,up=inp.j;return dn?(fw?3:bk?1:2):up?(fw?9:bk?7:8):fw?6:bk?4:5}
 const SXM={'236':[[1,2,3],[6,9]],'214':[[1,2,3],[4,7]],'46':[[4,7,1],[6,9,3]],'22':[[2],[5],[2]],'623':[[6],[2,1],[3]],'41236':[[4,7],[1,2],[3],[6,9]],'63214':[[6,9],[3,2],[1],[4,7]],'236236':[[2,1],[3],[6],[2,1],[3],[6,9]]};
@@ -3855,7 +3860,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.4`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.5`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
