@@ -472,7 +472,7 @@ function updateGuide(){
 addEventListener('gamepadconnected',updateGuide);addEventListener('gamepaddisconnected',updateGuide);
 function togglePause(){if(!game||game.over||mode==='online')return;updateGuide();paused=!paused;$('pause').textContent=paused?'RESUME':'PAUSE';document.body.classList.toggle('paused',paused);AU&&AU.pauseMusic(paused)}
 function loop(t){
- if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,.035);last=t;frameDt=real;if(!paused&&rawDt<.5)resTick(rawDt);
+ if(!game)return;const rawDt=(t-last)/1000;let real=Math.min(rawDt,(typeof LITE==='function'&&LITE())?.05:.035);last=t;frameDt=real;if(!paused&&rawDt<.5)resTick(rawDt);
  if(mode==='online'&&ON.side===1){guestFrame(real);if(!game)return;draw();raf=requestAnimationFrame(loop);return}
  if(!paused){
   if(game.slowT>0){game.slowT-=real;if(game.slowT<=0)game.slow=1}
@@ -1739,12 +1739,15 @@ function spritesReady(id){const a=spriteImg[id];if(!a)return true;const idle=a.i
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
 function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
-function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};for(const k in HD[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames-hd/'+k+'.webp?v=15.7';spriteHD[id][k]=im}}
+// Phones and tablets get phone-size sheets (frames-md: ~1/5 the memory, every sheet <= 4096 px) instead of the full HD art.
+const HDT={};function phoneArt(){try{return matchMedia('(pointer:coarse)').matches||('ontouchstart' in window&&Math.min(screen.width,screen.height)<900)}catch(_){return false}}
+function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
+ const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.35':'.webp?v=15.7');cache[file]=im}spriteHD[id][k]=cache[file]}}
 const c=$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
  // Render at the screen's real pixel count, up to 4K (3840 x 2160).
- let pw=Math.max(1,Math.round(rect.width*dpr*RES.scale)),ph=Math.max(1,Math.round(rect.height*dpr*RES.scale));const cap=Math.min(1,3840/pw,2160/ph);pw=Math.round(pw*cap);ph=Math.round(ph*cap);
+ let pw=Math.max(1,Math.round(rect.width*dpr*RES.scale)),ph=Math.max(1,Math.round(rect.height*dpr*RES.scale));const cap=Math.min(1,3840/pw,2160/ph,(typeof LITE==='function'&&LITE())?Math.sqrt(1.25e6/(pw*ph)):1);pw=Math.round(pw*cap);ph=Math.round(ph*cap);
  if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph}
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,pw,ph);c.lineJoin='round';c.miterLimit=2;
  // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
@@ -2711,7 +2714,7 @@ function drawSprite(f){
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
- if(hi&&hi.complete&&hi.naturalWidth){img=hi;meta=HD[f.data.id].anims[anim];sc=HD[f.data.id].s}
+ if(hi&&hi.complete&&hi.naturalWidth){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1)}
  if(!img||!img.complete||!img.naturalWidth)return false;{const tg=(!f.ai&&window.KOTJ_ARMORY&&window.KOTJ_TINT)?KOTJ_ARMORY.fightColors(f.data.id):null;window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
  const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
  // Species-calibrated body presence: modestly enlarges the existing HD art
@@ -2725,7 +2728,7 @@ function drawSprite(f){
  if(f.action==='earthslam'&&ap>.5){c.save();c.globalAlpha=.8*(1-ap);c.strokeStyle='#f4bd43';c.lineWidth=7;const r=40+ap*170;c.beginPath();c.ellipse(0,-6-f.y,r,r*.2,0,0,Math.PI*2);c.stroke();c.restore();}
  const impactTint=FIGHTER_IMPACT[f.data.id]||'#fff0b0';
  if(f.hitFlash>0){
-  c.filter=f.data.echo
+  c.filter=(typeof LITE==='function'&&LITE())?'brightness(2.1)':f.data.echo
    ?`brightness(2.15) drop-shadow(0 0 12px ${impactTint}) drop-shadow(0 0 7px rgba(150,110,255,.9))`
    :`brightness(2.15) drop-shadow(0 0 13px ${impactTint})`;
  }else{
@@ -3805,4 +3808,12 @@ bleed=function(x,y,dir,power,type){if(!blood||!game)return;type=type||BLEED_CTX|
 {const _us=sxUltStep;sxUltStep=function(dt){const u=game.sxu,C=u&&u.cur,before=C&&C.hit;const r=_us.apply(this,arguments);
  if(blood&&u&&C&&!before&&C.hit&&C.dm>0){const f=game.fighters[u.i],o=game.fighters[1-u.i];bleed(o.x-f.dir*bodyFront(o)*.5,o.y-150+(Math.random()-.5)*40,f.dir,C.mode==='crash'?14:7,C.mode==='crash'||C.mode==='up'?'blunt':/bite/.test(C.a)?'bite':/sx2/.test(C.a)&&C.fx.includes('bearhug')?'crush':'slash');o.bleedT=Math.max(o.bleedT||0,1.4);o.woundH=140}
  return r}}
+
+// ---------- Phone performance mode (Effects MEDIUM or LOW — phones start on MEDIUM) ----------
+// Draws at a phone-friendly resolution, skips the costly glow/blur on the fighters' artwork,
+// lets auto-quality step down further, and keeps game speed steady at lower frame rates.
+function LITE(){return FXQ!=='high'}
+{const _ds=drawSprite;drawSprite=function(f){if(!LITE())return _ds.apply(this,arguments);const sb=c.shadowBlur;c.shadowBlur=0;try{return _ds.apply(this,arguments)}finally{c.shadowBlur=sb}}}
+RES.floor=LITE()?.6:.75;
+{const _so=sxOptsRefresh;sxOptsRefresh=function(){const r=_so.apply(this,arguments);RES.floor=LITE()?.6:.75;RES.scale=1;return r}}
 })();
