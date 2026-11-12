@@ -32,8 +32,10 @@ const PRESETS=['#ffd700','#d12a2a','#1f4fd1','#7a2fd1','#1f9e3a','#f4f4f4','#151
 const PACKS=[{id:'starter',name:'STARTER',coins:500,price:4.99},{id:'fighter',name:'FIGHTER',coins:1200,price:9.99},{id:'champion',name:'CHAMPION',coins:2800,price:19.99},{id:'royal',name:'ROYAL',coins:5000,price:34.99},{id:'legendary',name:'LEGENDARY',coins:12000,price:79.99}];
 
 // ---------- save data ----------
-const blank=()=>({coins:12750,owned:{},equipped:{},saved:{},presets:[],receipts:[],v:1});
-let S=(()=>{try{return Object.assign(blank(),JSON.parse(localStorage.getItem(STORE_KEY)||'{}'))}catch(_){return blank()}})();
+// COIN_SALES stays off until Square checkout is set up and the owner switches it on: no Buy Coins tab, no + button.
+const COIN_SALES=false,WELCOME_BONUS=500;
+const blank=()=>({coins:WELCOME_BONUS,owned:{},equipped:{},saved:{},presets:[],receipts:[],v:1,live:1,welcome:0});
+let S=(()=>{try{const raw=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');return raw.live?Object.assign(blank(),raw):blank()}catch(_){return blank()}})(); // test-period wallets start over at launch
 const save=()=>{try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(_){}};
 const owns=key=>key.endsWith('.original')||(!ON_HOLD.has(key.split('.')[1])&&!!S.owned[key]);
 const fmt=n=>n.toLocaleString('en-US');
@@ -110,8 +112,8 @@ function buildScreen(){
  sec.dataset.built='1';
  sec.innerHTML=`
  <div class="arm-head"><div class="arm-title"><h2>THE JUNGLE ARMORY</h2><p>CLOTHING · CUSTOMIZATION · ACCESSORIES</p></div>
-  <div class="arm-wallet" title="Test coins — no real money"><img src="assets/ui/crown.webp" alt=""><div><small>JUNGLE COINS <em>TEST</em></small><b class="jc-balance">0</b></div><button id="arm-buy" class="arm-plus" aria-label="Buy Jungle Coins">+</button></div></div>
- <nav class="arm-tabs">${[['store','STORE'],['wardrobe','WARDROBE'],['colors','COLORS'],['effects','EFFECTS'],['saved','SAVED OUTFITS'],['coins','BUY COINS']].map(([k,l])=>`<button data-tab="${k}">${l}</button>`).join('')}</nav>
+  <div class="arm-wallet" title="Jungle Coins · earned by playing"><img src="assets/ui/crown.webp" alt=""><div><small>JUNGLE COINS</small><b class="jc-balance">0</b></div>${COIN_SALES?'<button id="arm-buy" class="arm-plus" aria-label="Buy Jungle Coins">+</button>':''}</div></div>
+ <nav class="arm-tabs">${[['store','STORE'],['wardrobe','WARDROBE'],['colors','COLORS'],['effects','EFFECTS'],['saved','SAVED OUTFITS']].concat(COIN_SALES?[['coins','BUY COINS']]:[]).map(([k,l])=>`<button data-tab="${k}">${l}</button>`).join('')}</nav>
  <div class="arm-body">
   <aside class="arm-fighters" id="arm-fighters"></aside>
   <aside class="arm-styles"><h3>OUTFIT STYLE</h3><div id="arm-looks"></div><h3 class="arm-saved-h">SAVED OUTFITS <span id="arm-saved-n"></span></h3><div id="arm-saved" class="arm-saved"></div></aside>
@@ -126,7 +128,7 @@ function buildScreen(){
  <div id="arm-modal" class="arm-modal hidden"><div class="arm-modal-box" id="arm-modal-box"></div></div>
  <div id="arm-toast" class="arm-toast"></div>`;
  sec.querySelectorAll('.arm-tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
- $('arm-buy').onclick=()=>{tab='coins';render()};
+ if($('arm-buy'))$('arm-buy').onclick=()=>{tab='coins';render()};
  $('arm-back').onclick=()=>{stopSprite();(window.__kotjShow||(()=>{}))('menu')};
  $('arm-rot-l').onclick=$('arm-rot-r').onclick=()=>{flip=!flip;$('arm-canvas').classList.toggle('flip',flip);$('arm-sprite').classList.toggle('flip',flip)};
  sec.querySelectorAll('[data-anim]').forEach(b=>b.onclick=()=>{anim=b.dataset.anim;playAnim()});
@@ -207,7 +209,7 @@ function renderPanel(){
  if(tab==='effects')return panelEffects(p);
  if(tab==='store')return panelStore(p);
  if(tab==='saved')return panelLocker(p);
- if(tab==='coins')return panelCoins(p);
+ if(tab==='coins'&&!COIN_SALES)tab='store';if(tab==='coins')return panelCoins(p);
 }
 function itemCard(it){
  const own=it.type==='look'?owns(it.fid+'.'+it.look):!!S.owned['aura.'+it.aura];
@@ -306,7 +308,7 @@ function openBuy(it){
  const title=it.type==='look'?`${fname(it.fid)} · ${lookName(it.fid,it.look)}`:AURAS.find(a=>a.id===it.aura).name;
  const price=it.type==='look'?LOOKS.find(l=>l.id===it.look).price:AURAS.find(a=>a.id===it.aura).price;
  const can=S.coins>=price;
- openModal(`<h3>PURCHASE</h3><p class="arm-big">${title}</p><p>Price <b>${fmt(price)} JC</b> · Your balance <b>${fmt(S.coins)} JC</b></p>${can?'':`<p class="warn">Not enough Jungle Coins.</p>`}<p class="arm-sub">Cosmetic only — no gameplay advantage.</p><div class="arm-mbtns"><button class="secondary" id="m-cancel">CANCEL</button>${can?`<button class="arm-equip" id="m-ok">BUY FOR ${fmt(price)} JC</button>`:`<button class="arm-equip" id="m-coins">GET COINS</button>`}</div>`);
+ openModal(`<h3>PURCHASE</h3><p class="arm-big">${title}</p><p>Price <b>${fmt(price)} JC</b> · Your balance <b>${fmt(S.coins)} JC</b></p>${can?'':`<p class="warn">Not enough Jungle Coins.</p>`}<p class="arm-sub">Cosmetic only — no gameplay advantage.</p><div class="arm-mbtns"><button class="secondary" id="m-cancel">CANCEL</button>${can?`<button class="arm-equip" id="m-ok">BUY FOR ${fmt(price)} JC</button>`:(COIN_SALES?`<button class="arm-equip" id="m-coins">GET COINS</button>`:`<span class="arm-sub">Earn more Jungle Coins by winning matches and climbing the Tower.</span>`)}</div>`);
  $('m-cancel').onclick=closeModal;
  if($('m-coins'))$('m-coins').onclick=()=>{closeModal();tab='coins';renderPanel()};
  if($('m-ok'))$('m-ok').onclick=()=>{S.coins-=price;S.owned[it.type==='look'?it.fid+'.'+it.look:'aura.'+it.aura]=Date.now();save();coinPills();closeModal();toast('Purchased! Press EQUIP to wear it');renderLooks();renderPanel();updateNote()};
@@ -352,7 +354,7 @@ function showReward(res){
  el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
 }
 // ---------- hooks into the rest of the game ----------
-function open(startFid){buildScreen();if(startFid&&isOpen(startFid))fid=startFid;loadCurrent();tab='wardrobe';(window.__kotjShow||(()=>{}))('armory');render()}
+function open(startFid){if(!S.welcome){S.welcome=1;save();setTimeout(()=>{try{toast('WELCOME BONUS · 500 Jungle Coins to start your collection!')}catch(_){}},700)}buildScreen();if(startFid&&isOpen(startFid))fid=startFid;loadCurrent();tab='wardrobe';(window.__kotjShow||(()=>{}))('armory');render()}
 function heroInto(id,img){const o=S.equipped[id];if(!o||(o.look==='original'?!origTargets(o):!owns(id+'.'+o.look)))return;outfitURL(id,o,600).then(u=>{if(img.dataset.armFor===id)img.src=u}).catch(()=>{})}
 function auraFor(id){const o=S.equipped[id];return o&&o.aura&&S.owned['aura.'+o.aura]?(AURAS.find(a=>a.id===o.aura)||{}).color:null}
 function cycleOutfit(id){return false;const owned=['original',...['royal','street','hybrid'].filter(l=>owns(id+'.'+l))];if(owned.length<2)return false;const o=S.equipped[id]||freshOutfit();S.lookColors=S.lookColors||{};if(o.look!=='original')S.lookColors[id+'.'+o.look]={colors:o.colors||{},materials:o.materials||{}};const i=owned.indexOf(o.look);o.look=owned[(i+1)%owned.length];const kept=S.lookColors[id+'.'+o.look]||{colors:{},materials:{}};o.colors=JSON.parse(JSON.stringify(kept.colors));o.materials=JSON.parse(JSON.stringify(kept.materials));S.equipped[id]=o;save();return lookName(id,o.look)}
@@ -363,7 +365,7 @@ function addEntryPoints(){
  const menu=document.getElementById('cover-menu');
  if(menu&&!$('open-armory')){const b=document.createElement('button');b.id='open-armory';b.className='secondary armory-btn';b.innerHTML='<b>THE JUNGLE ARMORY</b><small>Outfits · colors · auras · Jungle Coins</small>';const after=$('open-achievement-gallery');after?after.after(b):menu.appendChild(b);b.onclick=()=>open()}
  const top=document.querySelector('.topbar');
- if(top&&!$('jc-top')){const w=document.createElement('button');w.id='jc-top';w.className='jc-top';w.title='Jungle Coins (test)';w.innerHTML='<img src="assets/ui/crown.webp" alt=""><b class="jc-balance">0</b><small>JC</small>';top.appendChild(w);w.onclick=()=>{open();tab='coins';renderPanel()}}
+ if(top&&!$('jc-top')){const w=document.createElement('button');w.id='jc-top';w.className='jc-top';w.title='Jungle Coins';w.innerHTML='<img src="assets/ui/crown.webp" alt=""><b class="jc-balance">0</b><small>JC</small>';top.appendChild(w);w.onclick=()=>{open();if(COIN_SALES){tab='coins';renderPanel()}}}
  const card=document.querySelector('#select .fighter-card');
  if(card&&!$('sel-outfit')){const b=document.createElement('button');b.id='sel-outfit';b.className='secondary sel-outfit';b.textContent='CUSTOMIZE ▸';const conf=$('confirm-fighter');card.insertBefore(b,conf);
   b.onclick=e=>{e.stopPropagation();const id=$('select').dataset.f;if(!id)return;const r=cycleOutfit(id);if(!r){open(id);return}syncSelect(id)}}
