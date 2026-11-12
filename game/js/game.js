@@ -1744,7 +1744,7 @@ const HDT={};// Lighter sheets for everyone on GRAPHICS: AUTO (looks the same on
 function phoneArt(){return GFX!=='sharp'}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
  const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.35':'.webp?v=15.7');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
-const c=$('game-canvas').getContext('2d',{alpha:false,desynchronized:true})||$('game-canvas').getContext('2d');
+const c=$('game-canvas').getContext('2d',{alpha:false})||$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
  // Render at the screen's real pixel count, up to 4K (3840 x 2160).
@@ -2715,7 +2715,8 @@ function drawSprite(f){
  }
  let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
  const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
- if(hi&&hi.complete&&hi.naturalWidth){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1)}
+ if(hi&&hi.complete&&hi.naturalWidth){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1);f._lg={img,meta,sc,fr}}
+ else if(f._lg&&f._lg.img.complete&&f._lg.img.naturalWidth){img=f._lg.img;meta=f._lg.meta;sc=f._lg.sc;fr=f._lg.fr} // sheet still loading: hold the last frame instead of blinking
  if(!img||!img.complete||!img.naturalWidth)return false;{const tg=(!f.ai&&window.KOTJ_ARMORY&&window.KOTJ_TINT)?KOTJ_ARMORY.fightColors(f.data.id):null;window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
  const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
  // Species-calibrated body presence: modestly enlarges the existing HD art
@@ -3822,7 +3823,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.40`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.41`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
