@@ -1748,7 +1748,7 @@ const c=$('game-canvas').getContext('2d',{alpha:false,desynchronized:true})||$('
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
  // Render at the screen's real pixel count, up to 4K (3840 x 2160).
- let pw=Math.max(1,Math.round(rect.width*dpr*RES.scale)),ph=Math.max(1,Math.round(rect.height*dpr*RES.scale));const cap=Math.min(1,3840/pw,2160/ph,(typeof LITE==='function'&&LITE())?Math.sqrt((FXQ==='low'?.6e6:.9e6)/(pw*ph)):1);pw=Math.round(pw*cap);ph=Math.round(ph*cap);
+ let pw=Math.max(1,Math.round(rect.width*dpr*RES.scale)),ph=Math.max(1,Math.round(rect.height*dpr*RES.scale));const cap=Math.min(1,3840/pw,2160/ph,(typeof GMcap==='function'?GMcap(pw,ph):1));pw=Math.round(pw*cap);ph=Math.round(ph*cap);
  if(canvas.width!==pw||canvas.height!==ph){canvas.width=pw;canvas.height=ph}
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,pw,ph);c.lineJoin='round';c.miterLimit=2;
  // ---- Fighting-game camera: fills any screen shape, follows the fighters, zooms in when they're close.
@@ -3822,7 +3822,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${GFX.toUpperCase()}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.39`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.40`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3845,4 +3845,67 @@ function autoSmooth(real){if(!game||AS.done||FXQ!=='high'||game.intro>0||paused)
 {const _rs=resStart;resStart=function(){AS.t=0;AS.acc=0;AS.n=0;AS.slow=0;return _rs.apply(this,arguments)}}
 
 {const _sg=setGfx;setGfx=function(v){const r=_sg.apply(this,arguments);for(const k in spriteHD)delete spriteHD[k];return r}}
+
+/* ================= GRAPHICS MANAGER =================
+   One setting: GRAPHICS AUTO (default) / LOW / BALANCED / ULTRA.
+   AUTO: 1) reads the device at startup (screen, touch, memory, cores, graphics chip) and picks a starting level,
+         2) picks the sprite resolution for that level (light sheets, or full HD on ULTRA),
+         3) measures real FPS during fights,
+         4) lowers render resolution first, then the effects level, when it drops under ~42 fps,
+         5) raises them again after a steady stretch above ~56 fps (with a cool-down so it never flickers back and forth),
+         and remembers what this device can handle for next time.
+   LOW / BALANCED / ULTRA: the player's choice is kept exactly (render resolution still eases down only if a fight really struggles). */
+const GM_TIERS=[
+ {name:'LOW',     fx:'low',   cap:.6e6, floor:.5, hd:false},
+ {name:'BALANCED',fx:'medium',cap:1.0e6,floor:.55,hd:false},
+ {name:'HIGH',    fx:'high',  cap:2.6e6,floor:.7, hd:false},
+ {name:'ULTRA',   fx:'high',  cap:8.3e6,floor:.75,hd:true}];
+const GM={mode:'auto',level:2,max:2,t:0,acc:0,n:0,slow:0,fast:0,cool:0,fails:[0,0,0,0],info:''};
+function gmGPU(){try{const cv=document.createElement('canvas'),gl=cv.getContext('webgl')||cv.getContext('experimental-webgl');if(!gl)return'';const e=gl.getExtension('WEBGL_debug_renderer_info');return String(e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)).toLowerCase()}catch(_){return''}}
+function gmDetect(){const coarse=matchMedia('(pointer:coarse)').matches,mem=navigator.deviceMemory||4,cores=navigator.hardwareConcurrency||4,gpu=gmGPU(),
+  px=(screen.width||1280)*(screen.height||720)*Math.pow(Math.min(devicePixelRatio||1,3),2);
+ let lvl,max;
+ if(/swiftshader|llvmpipe|software|basic render|microsoft basic/.test(gpu)){lvl=0;max=1}
+ else if(coarse){lvl=mem<=3||cores<=4?0:1;max=/apple gpu|adreno \(tm\) 7|adreno 7|mali-g7[1-9]|immortalis/.test(gpu)?2:1}
+ else if(/nvidia|geforce|rtx|gtx|radeon rx|radeon pro|apple m[1-9]|apple gpu/.test(gpu)){lvl=px>=3e6?3:2;max=3}
+ else if(/intel|uhd|iris|radeon\(tm\) graphics|radeon graphics|vega/.test(gpu)){lvl=1;max=2}
+ else{lvl=mem>=8&&cores>=8?2:1;max=2}
+ if(mem<=2||cores<=2){lvl=0;max=Math.min(max,1)}
+ GM.info=`${coarse?'touch':'desktop'} · ${mem}GB · ${cores} cores · ${gpu.slice(0,40)||'gpu ?'}`;
+ return{lvl,max}}
+function gmApply(lvl,why){lvl=Math.max(0,Math.min(3,lvl));const prev=GM.level,T=GM_TIERS[lvl];GM.level=lvl;
+ FXQ=T.fx;RES.floor=T.floor;GFX=T.hd?'sharp':'auto';
+ if(GM_TIERS[prev].hd!==T.hd)for(const k in spriteHD)delete spriteHD[k]; // art changes at the next fight
+ gmLabels();if(why&&prev!==lvl)gmToast(`GRAPHICS ${GM.mode==='auto'?'AUTO · ':''}${T.name}`,why)}
+function gmLabels(){const txt='GRAPHICS: '+(GM.mode==='auto'?'AUTO ('+GM_TIERS[GM.level].name+')':GM.mode.toUpperCase());
+ document.querySelectorAll('.gfx-btn').forEach(b=>b.textContent=txt);const s=$('so-gfx');if(s)s.textContent=txt}
+function gmToast(a,b){let t=document.getElementById('smooth-toast');if(!t){t=document.createElement('div');t.id='smooth-toast';t.style.cssText='position:fixed;left:50%;top:16%;transform:translateX(-50%);z-index:96;background:rgba(10,8,6,.88);border:1px solid #c9a24a;color:#ffe7b0;font:700 13px Inter,sans-serif;padding:8px 14px;border-radius:10px;transition:opacity .5s;text-align:center;pointer-events:none';document.body.appendChild(t)}
+ t.innerHTML=a+(b?`<br><span style="font-weight:500;opacity:.8;font-size:11px">${b}</span>`:'');t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,2600)}
+function gmSave(){try{localStorage.setItem('kotj-gq',GM.mode);if(GM.mode==='auto')localStorage.setItem('kotj-gq-learn',String(GM.level))}catch(_){}}
+function gmSet(mode){GM.mode=mode;GM.fails=[0,0,0,0];GM.cool=0;
+ if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(d.lvl)}else gmApply({low:0,balanced:1,ultra:3}[mode]);
+ RES.scale=1;gmSave()}
+function GMcap(pw,ph){return Math.min(1,Math.sqrt(GM_TIERS[GM.level].cap/(pw*ph)))}
+// measure real frame rate during fights and adjust
+resTick=function(real){if(!game||game.intro>0||paused||game.ko){GM.acc=0;GM.n=0;return}
+ GM.t+=real;GM.cool=Math.max(0,GM.cool-real);if(GM.t<2.5)return;GM.acc+=real;GM.n++;if(GM.acc<1.5)return;
+ const fps=GM.n/GM.acc;GM.acc=0;GM.n=0;GM.slow=fps<42?GM.slow+1:0;GM.fast=fps>=56?GM.fast+1:0;
+ if(GM.slow>=2){GM.slow=0;GM.fast=0;GM.cool=8;
+  if(RES.scale>RES.floor+.01){RES.scale=Math.max(RES.floor,RES.scale*.86);return}
+  if(GM.mode==='auto'&&GM.level>0){GM.fails[GM.level]++;gmApply(GM.level-1,'Lowered to keep the game smooth');RES.scale=1;gmSave()}return}
+ if(GM.fast>=3&&GM.cool<=0){GM.fast=0;GM.cool=6;
+  if(RES.scale<1){RES.scale=Math.min(1,RES.scale*1.12);return}
+  const up=GM.level+1;
+  if(GM.mode==='auto'&&up<=GM.max&&GM.fails[up]<2){if(GM_TIERS[up].hd&&game){GM.pendingUp=up;return} // HD art only switches between fights
+   gmApply(up,'Raised — this device has room to spare');gmSave()}}};
+{const _rs=resStart;resStart=function(){GM.t=0;GM.acc=0;GM.n=0;GM.slow=0;GM.fast=0;if(GM.pendingUp!=null&&GM.mode==='auto'){gmApply(GM.pendingUp,'Raised — this device has room to spare');GM.pendingUp=null;gmSave()}return _rs.apply(this,arguments)}}
+// retire the older one-way smooth mode; the manager replaces it
+autoSmooth=function(){};
+// the graphics buttons now cycle AUTO → LOW → BALANCED → ULTRA
+setGfx=function(){const order=['auto','low','balanced','ultra'];gmSet(order[(order.indexOf(GM.mode)+1)%order.length])};
+{const _so=selOpts;selOpts=function(){const r=_so.apply(this,arguments);gmLabels();return r}}
+// start-up: saved choice, or detect (and use what this device learned last time)
+{let mode='auto',learn=null;try{mode=localStorage.getItem('kotj-gq')||'auto';learn=localStorage.getItem('kotj-gq-learn');localStorage.removeItem('kotj-fxq');localStorage.removeItem('kotj-gfx')}catch(_){}
+ GM.mode=mode;if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(learn!=null&&!isNaN(+learn)?Math.min(+learn,d.max):d.lvl)}else gmApply({low:0,balanced:1,ultra:3}[mode]??2)}
+window.KOTJ_GM={get level(){return GM_TIERS[GM.level].name},get mode(){return GM.mode},get info(){return GM.info},set:gmSet};
 })();
