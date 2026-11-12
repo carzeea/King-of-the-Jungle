@@ -414,3 +414,21 @@ Install: docs/art-tools/install_anims.py wolf <json dir> '{"idle":12,"knockdown"
 - dolphin walk (redo) ARxjLJjNx-n1Qw6MIkHLN3h7O5IcCb1bmNvuGXRqOtzV00F8lZ5ZbMdCA6dmYuOtuIBcBd9I
 - dolphin sx2 sonic echo (redo) AZiCuFHaNzv6g9wkhx2pByQH8t5kMM-JgaIE64uYfpI7Z8wNW14KIXmQiMYnDhp39y0KWPuS
 - dolphin finisher AVAUNBLeWzW51bV1LboD5YRj5DH_qJoCinOQGLjRCrmezA88QKsbOWIfIi6quHZWEXqo07d6
+
+## Real animal sounds (Kling v2.5 text-to-video with audio, 720p, 15 credits each, 2026-11-11) — cut with /tmp/sfx/cut.py into game/audio/animal/<id>-roar.mp3 and <id>-cry.mp3
+- tiger AeXAIrOLgvx7CTnRHerJwgtLZ88bwL6T2AJdM5cxKEGWz7XMdRc4NiMdERhsa1ZoiE-0jEVu
+- jaguar Acetf7uNivoHIbAh4hjvlOR4_6sW3rsrfRKvuKkCAtK5kZa_mQog8s9Rk5L97G-cxQuqOegt
+- wolf AdNEIVJ11YwRU8MS4lvbER5R_8kzx0awPjaDeZQkHdtrTvwoEXWqEcOukem1UT4sBKKx6g-E
+- hyena AW9OnmmL_IVZB6U5f-BpoAoZd_bq1xA8jFYK3tqVpG1rxnsrMKJpOoLVdc1N0vuoa5OzVtJz
+- badger AW1aHIOMcEljboJivjD7uyIZ5XsOEZfSKHIMG1ZRFuEoVxOz4kPHnkG4IFlaK9bpF7iNXr1E
+- grizzly AUeDvIY3wSYjgw_Peu4-uJ5nQt4St25oc62cYRC6T05Vo_YWD9PgNyvqBrHz9l-NQDKqLWrf
+- crocodile AcD-YkIkymynqKsi8y5f97S-GeRUP1AZx8rhjTvnn0hZ-9F1hnGV9yW_m5Wr1aEO2NkuzXjS
+- hippo Ach1lrS31hsdFZBb9amqYleM0hiAtYNEPUWhKkEaHxx8wMLI_CwOyVmkMP11y7Iq8Rj5qdVw
+- elephant ATLX5i672VYVBRpWD4_Wkw_AA4ixn6yGGP9Vvt6anB52jTGYUhswK-yJQ9Dz9Ut3qwKdohaV
+- leopard AUlXXGBhKv_z-ElD1KiUQBSDnuQ4pJXS9EMswI5sgWe6_KxhQFCeFCKhM-pNpIUnOM7Z_Ty2
+- snake AbBgdxihtBc5-SFXSQqK-rTrqEplhwT_SVwlrfZ2RLw65cs1xV0ZfkRZHcLw_VSFKOEwEWjX
+- eagle AWV_AQHVcuQEeRnC_iM7sITOeqDILOuWStlJdZrW4IUOqnqgmGMgUl5o4p8rdO_FlwzIwZ-U
+- stag AadHBkGBosivaVvO8Kak_HUzrPnGr0UY85qiiVxGAy0K-qMakXZ_vazuh-v-uBSgNFGl1m-J
+- dolphin AUTImBptTOmDaYiOFxuEMcogjJxHZZbIrPcxn1C4bl6FgZDtHALQpI_8XbZ38znXFjdqTDi-
+- majic AYK8zNB3-o4jDDHH23_28DA5OtnlV0TABtPW3kMncunM-Fk0dj67lEwItItxsi-McdtCEfAP
+- lion Ae8fJRLHJ31GdKUZjp1AtgE_8e9P_EWanad4wBegz7zx_IH4SON8SdjCFgOCuBwePyiTK_M0

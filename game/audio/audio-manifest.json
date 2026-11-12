@@ -683,6 +683,230 @@
    "volume": 1.0,
    "line": "Stag wins!",
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "roar.lion": {
+   "file": "animal/lion-roar.mp3",
+   "label": "Lion – real animal call (long)",
+   "used_for": "Lion wins, and the start of Lion's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.lion": {
+   "file": "animal/lion-cry.mp3",
+   "label": "Lion – real animal call (short)",
+   "used_for": "Lion uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.tiger": {
+   "file": "animal/tiger-roar.mp3",
+   "label": "Tiger – real animal call (long)",
+   "used_for": "Tiger wins, and the start of Tiger's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.tiger": {
+   "file": "animal/tiger-cry.mp3",
+   "label": "Tiger – real animal call (short)",
+   "used_for": "Tiger uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.jaguar": {
+   "file": "animal/jaguar-roar.mp3",
+   "label": "Jaguar – real animal call (long)",
+   "used_for": "Jaguar wins, and the start of Jaguar's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.jaguar": {
+   "file": "animal/jaguar-cry.mp3",
+   "label": "Jaguar – real animal call (short)",
+   "used_for": "Jaguar uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.wolf": {
+   "file": "animal/wolf-roar.mp3",
+   "label": "Wolf – real animal call (long)",
+   "used_for": "Wolf wins, and the start of Wolf's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.wolf": {
+   "file": "animal/wolf-cry.mp3",
+   "label": "Wolf – real animal call (short)",
+   "used_for": "Wolf uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.hyena": {
+   "file": "animal/hyena-roar.mp3",
+   "label": "Hyena – real animal call (long)",
+   "used_for": "Hyena wins, and the start of Hyena's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.hyena": {
+   "file": "animal/hyena-cry.mp3",
+   "label": "Hyena – real animal call (short)",
+   "used_for": "Hyena uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.badger": {
+   "file": "animal/badger-roar.mp3",
+   "label": "Badger – real animal call (long)",
+   "used_for": "Badger wins, and the start of Badger's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.badger": {
+   "file": "animal/badger-cry.mp3",
+   "label": "Badger – real animal call (short)",
+   "used_for": "Badger uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.grizzly": {
+   "file": "animal/grizzly-roar.mp3",
+   "label": "Grizzly – real animal call (long)",
+   "used_for": "Grizzly wins, and the start of Grizzly's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.grizzly": {
+   "file": "animal/grizzly-cry.mp3",
+   "label": "Grizzly – real animal call (short)",
+   "used_for": "Grizzly uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.crocodile": {
+   "file": "animal/crocodile-roar.mp3",
+   "label": "Crocodile – real animal call (long)",
+   "used_for": "Crocodile wins, and the start of Crocodile's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.crocodile": {
+   "file": "animal/crocodile-cry.mp3",
+   "label": "Crocodile – real animal call (short)",
+   "used_for": "Crocodile uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.hippo": {
+   "file": "animal/hippo-roar.mp3",
+   "label": "Hippo – real animal call (long)",
+   "used_for": "Hippo wins, and the start of Hippo's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.hippo": {
+   "file": "animal/hippo-cry.mp3",
+   "label": "Hippo – real animal call (short)",
+   "used_for": "Hippo uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.elephant": {
+   "file": "animal/elephant-roar.mp3",
+   "label": "Elephant – real animal call (long)",
+   "used_for": "Elephant wins, and the start of Elephant's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.elephant": {
+   "file": "animal/elephant-cry.mp3",
+   "label": "Elephant – real animal call (short)",
+   "used_for": "Elephant uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.leopard": {
+   "file": "animal/leopard-roar.mp3",
+   "label": "Snow Leopard – real animal call (long)",
+   "used_for": "Snow Leopard wins, and the start of Snow Leopard's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.leopard": {
+   "file": "animal/leopard-cry.mp3",
+   "label": "Snow Leopard – real animal call (short)",
+   "used_for": "Snow Leopard uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.snake": {
+   "file": "animal/snake-roar.mp3",
+   "label": "Snake – real animal call (long)",
+   "used_for": "Snake wins, and the start of Snake's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.snake": {
+   "file": "animal/snake-cry.mp3",
+   "label": "Snake – real animal call (short)",
+   "used_for": "Snake uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.eagle": {
+   "file": "animal/eagle-roar.mp3",
+   "label": "Eagle – real animal call (long)",
+   "used_for": "Eagle wins, and the start of Eagle's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.eagle": {
+   "file": "animal/eagle-cry.mp3",
+   "label": "Eagle – real animal call (short)",
+   "used_for": "Eagle uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.stag": {
+   "file": "animal/stag-roar.mp3",
+   "label": "Stag – real animal call (long)",
+   "used_for": "Stag wins, and the start of Stag's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.stag": {
+   "file": "animal/stag-cry.mp3",
+   "label": "Stag – real animal call (short)",
+   "used_for": "Stag uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.dolphin": {
+   "file": "animal/dolphin-roar.mp3",
+   "label": "Dolphin King – real animal call (long)",
+   "used_for": "Dolphin King wins, and the start of Dolphin King's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.dolphin": {
+   "file": "animal/dolphin-cry.mp3",
+   "label": "Dolphin King – real animal call (short)",
+   "used_for": "Dolphin King uses a special move",
+   "source": null,
+   "volume": 0.8
+  },
+  "roar.majic": {
+   "file": "animal/majic-roar.mp3",
+   "label": "MAJIC – real animal call (long)",
+   "used_for": "MAJIC wins, and the start of MAJIC's Ultimate",
+   "source": null,
+   "volume": 0.95
+  },
+  "cry.majic": {
+   "file": "animal/majic-cry.mp3",
+   "label": "MAJIC – real animal call (short)",
+   "used_for": "MAJIC uses a special move",
+   "source": null,
+   "volume": 0.8
   }
  }
 }
