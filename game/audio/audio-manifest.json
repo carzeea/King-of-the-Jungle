@@ -656,6 +656,33 @@
    "volume": 1.0,
    "line": "Dolphin King wins!",
    "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.snake-wins": {
+   "file": "voice/holden-snake-wins.mp3",
+   "label": "Announcer (Holden) – \"Snake wins!\"",
+   "used_for": "Snake wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Snake wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.eagle-wins": {
+   "file": "voice/holden-eagle-wins.mp3",
+   "label": "Announcer (Holden) – \"Eagle wins!\"",
+   "used_for": "Eagle wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Eagle wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
+  },
+  "voice.stag-wins": {
+   "file": "voice/holden-stag-wins.mp3",
+   "label": "Announcer (Holden) – \"Stag wins!\"",
+   "used_for": "Stag wins a fight",
+   "source": null,
+   "volume": 1.0,
+   "line": "Stag wins!",
+   "voice": "Holden 3c9d6053-6334-592c-8997-4e325286af3f"
   }
  }
 }

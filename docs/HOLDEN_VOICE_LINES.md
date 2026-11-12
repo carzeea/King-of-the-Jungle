@@ -15,7 +15,7 @@ Voice: **Holden** (voice ID `3c9d6053-6334-592c-8997-4e325286af3f`)
 | **Finish him!** | `holden-finish-him.mp3` | A fighter drops into DANGER (Ultra Combo now possible) |
 | **Flawless victory!** | `holden-flawless-victory.mp3` | Win without losing any health |
 
-## Still to record (33)
+## Still to record (36)
 
 These already work without a recording: the general Holden call or the browser voice covers them. Recording them gives each moment its own line. Save as .mp3 with the exact name shown and send them over.
 
@@ -47,6 +47,9 @@ These already work without a recording: the general Holden call or the browser v
 | **Hyena wins!** | `holden-hyena-wins.mp3` | Hyena wins a fight | Nothing (silent until recorded) |
 | **Snow Leopard wins!** | `holden-leopard-wins.mp3` | Snow Leopard wins a fight | Nothing (silent until recorded) |
 | **Dolphin King wins!** | `holden-dolphin-wins.mp3` | Dolphin King wins a fight | Nothing (silent until recorded) |
+| **Snake wins!** | `holden-snake-wins.mp3` | Snake wins a fight | Nothing (silent until recorded) |
+| **Eagle wins!** | `holden-eagle-wins.mp3` | Eagle wins a fight | Nothing (silent until recorded) |
+| **Stag wins!** | `holden-stag-wins.mp3` | Stag wins a fight | Nothing (silent until recorded) |
 | **Jaguar wins!** | `holden-jaguar-wins.mp3` | Jaguar wins a fight | Nothing (silent until recorded) |
 | **Crocodile wins!** | `holden-crocodile-wins.mp3` | Crocodile wins a fight | Nothing (silent until recorded) |
 | **Lion wins!** | `holden-lion-wins.mp3` | Lion wins a fight | Nothing (silent until recorded) |
@@ -54,3 +57,7 @@ These already work without a recording: the general Holden call or the browser v
 | **Grizzly wins!** | `holden-grizzly-wins.mp3` | Grizzly wins a fight | Nothing (silent until recorded) |
 | **Hippo wins!** | `holden-hippo-wins.mp3` | Hippo wins a fight | Nothing (silent until recorded) |
 | **Elephant wins!** | `holden-elephant-wins.mp3` | Elephant wins a fight | Nothing (silent until recorded) |
+
+## Winner calls (set up 2026-11-11)
+After every match with a winner (VS CPU, 2 Player, Online, Tower, Quick Fight), Holden says "<Fighter> wins!" for the winning fighter, then "Flawless victory!" if it was flawless. Until a fighter's file is added, the old call plays instead ("You win!" / "You lose.").
+Files: holden-badger-wins, holden-wolf-wins, holden-hyena-wins, holden-leopard-wins ("Snow Leopard wins!"), holden-jaguar-wins, holden-crocodile-wins, holden-lion-wins, holden-tiger-wins, holden-grizzly-wins, holden-hippo-wins, holden-elephant-wins, holden-snake-wins, holden-eagle-wins, holden-stag-wins, holden-dolphin-wins ("Dolphin King wins!"), holden-majic-wins ("MAJIC wins!") — all .mp3 in game/audio/voice/.

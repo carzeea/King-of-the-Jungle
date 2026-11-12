@@ -57,13 +57,13 @@ function setGfx(v){GFX=v;try{localStorage.setItem('kotj-gfx',v)}catch(_){}RES.sc
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'tidal-kingdom',name:'THE TIDAL KINGDOM'},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
 const LAIR=ARENAS.find(a=>a.lair),FIGHT_ARENAS=ARENAS.filter(a=>!a.lair);
-const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp?v=15.52';arenaImg[a.id]=im});
+const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp?v=15.54';arenaImg[a.id]=im});
 let arena=ARENAS[0],stagePick=0; // stagePick: index into ARENAS, ARENAS.length = random
 const RND=()=>ARENAS.length;
 function renderStages(){setBackdrop('assets/ui/select-bg.webp');
  $('stage-vs').textContent=picks[0].name+' VS '+picks[1].name;$('stage-grid').innerHTML='';
  ARENAS.forEach((a,i)=>{const b=document.createElement('button');b.className='stage-tile'+(a.lair?' lair':'')+(stagePick===i?' selected':'');
-  b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=15.52" alt=""><strong>${a.name}</strong></span>`;
+  b.innerHTML=`<span class="sf"><img src="assets/arenas/${a.id}-thumb.webp?v=15.54" alt=""><strong>${a.name}</strong></span>`;
   b.onclick=()=>{ac();if(performance.now()<(window.__pickLock||0))return;window.__pickLock=performance.now()+600;stagePick=i;renderStages();setTimeout(()=>$('stage-go').click(),170)};b.ondblclick=()=>$('stage-go').click();$('stage-grid').append(b)});
  const r=document.createElement('button');r.className='stage-tile random'+(stagePick===RND()?' selected':'');
  r.innerHTML='<span class="sf"><img class="laurel" src="assets/ui/stage-random.webp?v=7.5" alt=""><strong>RANDOM</strong></span>';
@@ -1315,7 +1315,9 @@ function finish(){
  $('winner-title').textContent=title;$('winner-copy').textContent=copy;
  if(soundOn&&AU){const champId=resultChampId;
   const line=title==='KING OF THE JUNGLE'?'voice.king-of-the-jungle':flawless?'voice.flawless-victory':(cpu2||net)&&!draw_?(iWon?'voice.you-win':'voice.you-lose'):champId?'voice.'+champId+'-wins':null;
-  if(line&&title!=='KING OF THE JUNGLE')setTimeout(()=>AU.now(line),450)}
+  // Holden names the winner after every decided match; falls back to the old call until that line is recorded
+  const winLine=!draw_&&champId&&mode!=='training'&&title!=='KING OF THE JUNGLE'?'voice.'+champId+'-wins':null;
+  setTimeout(()=>{const named=winLine&&AU.now(winLine,1);if(!named&&line&&title!=='KING OF THE JUNGLE')AU.now(line);if(named&&flawless)setTimeout(()=>AU.now('voice.flawless-victory'),1500)},450)}
  const champ=draw_?picks[0]:(p1won?picks[0]:picks[1]);$('winner-portrait').src=winArt(champ.id);$('winner-portrait').alt=champ.name;const champRec=SAVE.get('fighterAchievements',{})[champ.id]||{},champMastery=masteryFor(champRec),champReward=MASTERY_REWARDS[champ.id]||{title:'JUNGLE ELITE',aura:'#e8b95b'};$('winner-portrait').classList.toggle('mastery-legend-portrait',champMastery.level>=5);$('winner-portrait').style.setProperty('--mastery-aura',champReward.aura);$('winner-portrait').title=champMastery.level>=2?champReward.title:'';
  $('winner-portrait').classList.toggle('echo-face',!!(tower&&tower.reveal));
  $('result').classList.toggle('defeat',(cpu2||net)&&!iWon&&!draw_);
@@ -1723,7 +1725,7 @@ const SPRITES={
  leopard:{s:0.6,anims:{"idle":[32,165,157,119,261],"walk_forward":[24,171,163,136,270],"walk_back":[24,171,163,136,270],"run":[24,171,163,136,270],"dash":[24,171,163,136,270],"crouch":[6,128,155,102,256],"block":[17,169,160,122,265],"attack_light":[50,180,153,108,254],"bite":[35,195,153,100,254],"special_pounce":[72,263,175,133,287,60],"special_b":[70,228,163,134,270],"special_c":[72,263,175,133,287,60],"special_d":[56,199,164,89,273],"ultra_move":[70,228,163,134,270],"attack_heavy":[56,199,164,89,273],"uppercut":[56,199,164,89,273],"victory":[60,160,173,115,287],"jump":[27,196,173,153,284],"hit_light":[20,161,162,117,269],"hit_heavy":[20,161,162,117,269],"knockdown":[46,291,158,180,252],"knockdown_getup":[25,193,162,170,267],"defeat":[46,291,158,180,252],"finisher":[61,275,166,153,264,58],"sx2":[76,202,173,105,287],"sx3":[76,248,152,107,252,64],"sx1":[44,245,158,119,261]},
   double:['attack_heavy','bite'],special:'special_pounce',shadow:'special_b',ultra:['ultra_move','special_d','attack_heavy','uppercut'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]],ko:['knockdown',45]},
- dolphin:{s:0.6,anims:{"attack_light":[50,196,176,149,289],"hit_light":[20,279,198,168,328],"hit_heavy":[20,279,198,168,328],"walk_forward":[38,203,187,149,306],"walk_back":[38,203,187,149,306],"run":[38,203,187,149,306],"bite":[26,184,180,141,298],"knockdown":[35,366,204,313,328],"defeat":[35,366,204,313,328],"jump":[25,209,196,193,322],"block":[17,184,176,142,291],"attack_heavy":[56,249,192,213,317],"uppercut":[56,249,192,213,317],"idle":[27,186,175,146,289],"victory":[61,214,199,171,328],"knockdown_getup":[24,280,184,313,301],"special_pounce":[45,263,171,175,283],"special_b":[45,263,171,175,283],"sx2":[76,197,174,155,288],"sx3":[69,206,205,132,328],"sx1":[52,257,186,197,305]},
+ dolphin:{s:0.6,anims:{"attack_light":[50,196,176,149,289],"hit_light":[20,279,198,168,328],"hit_heavy":[20,279,198,168,328],"walk_forward":[39,200,184,155,301],"walk_back":[39,200,184,155,301],"run":[39,200,184,155,301],"bite":[26,184,180,141,298],"knockdown":[35,366,204,313,328],"defeat":[35,366,204,313,328],"jump":[25,209,196,193,322],"block":[17,184,176,142,291],"attack_heavy":[56,249,192,213,317],"uppercut":[56,249,192,213,317],"idle":[27,186,175,146,289],"victory":[61,214,199,171,328],"knockdown_getup":[24,280,184,313,301],"special_pounce":[45,263,171,175,283],"special_b":[45,263,171,175,283],"sx2":[70,238,198,149,328,67],"sx3":[69,206,205,132,328],"sx1":[52,257,186,197,305],"finisher":[61,245,206,166,328]},
   double:['attack_heavy','attack_light'],special:'special_pounce',shadow:null,ultra:['attack_heavy','bite','uppercut','attack_light'],
   fall:['knockdown',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],getup:['knockdown_getup',[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]],ko:['knockdown',34]},
  lion:{s:0.6,anims:{"idle":[29,124,162,110,268],"walk_forward":[23,130,166,97,275],"walk_back":[23,130,166,97,275],"run":[23,130,166,97,275],"block":[17,137,162,104,267],"attack_light":[50,159,160,95,265],"bite":[40,147,158,95,261],"special_pounce":[62,292,161,239,259,54],"attack_heavy":[42,164,170,84,282],"uppercut":[42,164,170,84,282],"victory":[61,124,164,88,271],"jump":[29,131,181,95,299],"hit_light":[20,244,182,190,302],"hit_heavy":[20,244,182,190,302],"knockdown":[36,307,183,219,302],"knockdown_getup":[26,186,164,213,267],"defeat":[36,307,183,219,302],"special_b":[70,211,182,111,302],"finisher":[61,247,183,134,298],"ultra_move":[70,211,182,111,302],"sx2":[76,143,183,94,302],"sx1":[76,163,161,94,268]},
@@ -1749,7 +1751,7 @@ function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(wi
 const HDT={};// Lighter sheets for everyone on GRAPHICS: AUTO (looks the same on normal screens); full HD art only with GRAPHICS: SHARP.
 function phoneArt(){return GFX!=='sharp'}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
- const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.50':'.webp?v=15.7');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
+ const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v=15.54':'.webp?v=15.54');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
 const c=$('game-canvas').getContext('2d',{alpha:false})||$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -3843,7 +3845,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.53`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.54`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
