@@ -1792,10 +1792,12 @@ function draw(){
  if(cam.snap){cam.x=tx;cam.y=ty;cam.snap=false}else{cam.x+=(tx-cam.x)*cameraEase;cam.y+=(ty-cam.y)*cameraEase}
  const sc=ph/vh;c.setTransform(sc,0,0,sc,-cam.x*sc,-cam.y*sc);
  if(game.shake>0)c.translate((Math.random()-.5)*22*Math.min(1,game.shake/.3),(Math.random()-.5)*14*Math.min(1,game.shake/.3));
+ if(typeof camTilt==='function')camTilt(vw,vh);
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
  const t=performance.now()/1000;
  const bgi=arenaImg[arena.id];
- if(bgi&&bgi.complete&&bgi.naturalWidth){c.drawImage(bgi,550-610*artK,400-430*artK,1220*artK,580*artK);
+ if(bgi&&bgi.complete&&bgi.naturalWidth){if(TILT.cur){const U=1.45;c.drawImage(bgi,550-610*artK*U,400-140*artK-290*artK*U,1220*artK*U,580*artK*U)} // fills the corners while the camera is tilted
+  c.drawImage(bgi,550-610*artK,400-430*artK,1220*artK,580*artK);
   // soft vignette + floor shade so fighters stay readable on bright stages
   const vy0=400-430*artK,vy1=400+150*artK,vg=c.createLinearGradient(0,vy0,0,vy1);vg.addColorStop(0,'rgba(0,0,0,.35)');vg.addColorStop(.35,'rgba(0,0,0,.05)');vg.addColorStop(.75,'rgba(0,0,0,.08)');vg.addColorStop(1,'rgba(0,0,0,.45)');c.fillStyle=vg;c.fillRect(550-610*artK,vy0,1220*artK,vy1-vy0);
   // flicker on the braziers
@@ -3526,22 +3528,24 @@ const SX={
 const SXK=['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','su'];
 BTN.push(...SXK);
 // ---------- effects quality, screen shake & flash ----------
-let FXQ='high',RSHAKE=false,RFLASH=false;
+let FXQ='high',RSHAKE=false,RFLASH=false,CAMTILT=true;try{CAMTILT=localStorage.getItem('kotj-tilt')!=='0'}catch(_){}
+const TILT={a:0,kick:0,cur:0};
 try{FXQ=localStorage.getItem('kotj-fxq')||(matchMedia('(pointer:coarse)').matches?'medium':'high');RSHAKE=localStorage.getItem('kotj-rshake')==='1';RFLASH=localStorage.getItem('kotj-rflash')==='1'}catch(_){}
 const FXQ_KEEP={low:.35,medium:.65,high:1},FXQ_ALWAYS=new Set(['spirit','bearhug','proj','cracks','fissure','pool','tidal','aftermark','gash','ring','gring','cobra','kcobra','vbite','vpuddle','icecluster','frostcone','frostpatch','dark','eyes','moon','tornado','vines','portal','skybolt','ha','roar','sheet','wave','vortex','goldaura','fog']);
 {const _P=P;P=function(o){if(FXQ!=='high'&&!FXQ_ALWAYS.has(o.sh)&&Math.random()>FXQ_KEEP[FXQ])return;return _P(o)}}
 {const _fu=fxUpdate;fxUpdate=function(dt){const r=_fu.apply(this,arguments);if(game){if(RSHAKE)game.shake=Math.min(game.shake||0,.05);if(RFLASH)game.flash=Math.min(game.flash||0,.12)}return r}}
-function sxOptLabel(){return{fxq:'EFFECTS: '+FXQ.toUpperCase(),shake:'SCREEN SHAKE: '+(RSHAKE?'LOW':'FULL'),flash:'FLASHES: '+(RFLASH?'LOW':'FULL')}}
-function sxOptsRefresh(){const L=sxOptLabel();document.querySelectorAll('.fxq-btn').forEach(b=>b.textContent=L.fxq);document.querySelectorAll('.rshake-btn').forEach(b=>b.textContent=L.shake);document.querySelectorAll('.rflash-btn').forEach(b=>b.textContent=L.flash)}
+function sxOptLabel(){return{tilt:'CAMERA TILT: '+(CAMTILT?'ON':'OFF'),fxq:'EFFECTS: '+FXQ.toUpperCase(),shake:'SCREEN SHAKE: '+(RSHAKE?'LOW':'FULL'),flash:'FLASHES: '+(RFLASH?'LOW':'FULL')}}
+function sxOptsRefresh(){const L=sxOptLabel();document.querySelectorAll('.fxq-btn').forEach(b=>b.textContent=L.fxq);document.querySelectorAll('.rshake-btn').forEach(b=>b.textContent=L.shake);document.querySelectorAll('.rflash-btn').forEach(b=>b.textContent=L.flash);document.querySelectorAll('.tilt-btn').forEach(b=>b.textContent=L.tilt)}
 function sxOptsInstall(){
  const mk=(cls,parentSel,before)=>document.querySelectorAll(parentSel).forEach(p=>{if(p.querySelector('.'+cls))return;const b=document.createElement('button');b.className='secondary '+cls+(p.classList.contains('cover-menu')?' cover-setting':'');const ref=before?p.querySelector(before):null;ref?p.insertBefore(b,ref):p.appendChild(b)});
- for(const c of['fxq-btn','rshake-btn','rflash-btn']){mk(c,'.fight-actions');mk(c,'#sel-opts','#so-close')}
+ for(const c of['fxq-btn','rshake-btn','rflash-btn','tilt-btn']){mk(c,'.fight-actions');mk(c,'#sel-opts','#so-close')}
  mk('sx-moves-btn','.fight-actions');mk('sx-moves-btn','#sel-opts','#so-close');
  document.querySelectorAll('.sx-moves-btn').forEach(b=>b.textContent='MOVE LIST');
  sxOptsRefresh()}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b)return;
  if(b.classList.contains('fxq-btn')){FXQ={high:'low',low:'medium',medium:'high'}[FXQ];try{localStorage.setItem('kotj-fxq',FXQ)}catch(_){}sxOptsRefresh()}
  else if(b.classList.contains('rshake-btn')){RSHAKE=!RSHAKE;try{localStorage.setItem('kotj-rshake',RSHAKE?'1':'0')}catch(_){}sxOptsRefresh()}
+ else if(b.classList.contains('tilt-btn')){CAMTILT=!CAMTILT;try{localStorage.setItem('kotj-tilt',CAMTILT?'1':'0')}catch(_){}sxOptsRefresh()}
  else if(b.classList.contains('rflash-btn')){RFLASH=!RFLASH;try{localStorage.setItem('kotj-rflash',RFLASH?'1':'0')}catch(_){}sxOptsRefresh()}
  else if(b.classList.contains('sx-moves-btn')){const id=game&&game.fighters?game.fighters[0].data.id:(document.getElementById('select')&&document.getElementById('select').dataset.f)||'lion';sxMoveList(id)}});
 // ---------- move list ----------
@@ -3824,7 +3828,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.42`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 15.43`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3910,4 +3914,20 @@ setGfx=function(){const order=['auto','low','balanced','ultra'];gmSet(order[(ord
 {let mode='auto',learn=null;try{mode=localStorage.getItem('kotj-gq')||'auto';learn=localStorage.getItem('kotj-gq-learn');localStorage.removeItem('kotj-fxq');localStorage.removeItem('kotj-gfx')}catch(_){}
  GM.mode=mode;if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(learn!=null&&!isNaN(+learn)?Math.min(+learn,d.max):d.lvl)}else gmApply({low:0,balanced:1,ultra:3}[mode]??2)}
 window.KOTJ_GM={get level(){return GM_TIERS[GM.level].name},get mode(){return GM.mode},get info(){return GM.info},set:gmSet};
+
+if(window.__kotj)window.__kotj.ult=()=>sxUltStart(game.fighters[0],game.fighters[1]);
+// ---------- theater camera tilt: ultimates lean, heavy hits jolt, knockouts tip ----------
+function camTilt(vw,vh){const dt=Math.min(.05,frameDt||.016),D=Math.PI/180;let tgt=0;
+ if(!CAMTILT||!game||game.intro>0){TILT.a=0;TILT.kick=0;TILT.cur=0;return}
+ const F=game.fighters;
+ if(game.sxu){const f=F[game.sxu.i];tgt=(f.dir||1)*5*D}
+ else if(game.ko>0){const v=F.find(f=>f.hp<=0);if(v)tgt=(v.x<cam.x+vw/2?-1:1)*3.5*D}
+ TILT.a+=(tgt-TILT.a)*(1-Math.pow(tgt?.955:.88,dt*60));
+ TILT.kick*=Math.exp(-dt*7.5);
+ let a=TILT.a+TILT.kick;if(Math.abs(a)<2e-4){TILT.cur=0;return}TILT.cur=a;
+ const wx=cam.x+vw/2,wy=cam.y+vh*.55,z=1+Math.abs(a)*.9;
+ c.translate(wx,wy);c.rotate(a);c.scale(z,z);c.translate(-wx,-wy)}
+{const _rh=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i],h0=o.hp+(o.bars||0)*1000,s0=o.stun||0;const r=_rh.apply(this,arguments);
+ try{const d=h0-(o.hp+(o.bars||0)*1000);if(CAMTILT&&d>0&&(o.hitHeavy||(mv&&mv.sx)||(o.stun||0)>s0+.35)){const D=Math.PI/180,k=(o.hitHeavy?1.8:1.2)*(RSHAKE?.5:1)*(game.sxu?.6:1);TILT.kick=Math.max(-3*D,Math.min(3*D,TILT.kick+(f.dir||1)*k*D))}}catch(_){}
+ return r}}
 })();
