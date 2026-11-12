@@ -989,3 +989,31 @@ body #touch-pad .sx-star,body.fighting #touch-pad .sx-star{background:radial-gra
  html.kotj-touch #stage #stage-go{display:none!important}
  #stage .stage-actions button{min-height:40px!important}
 }
+
+/* ===== 1.5: Dojo + touch controls on phones — nothing covers the buttons ===== */
+@media (orientation:landscape) and (max-height:560px){
+ /* the trial card becomes a slim strip that shows only the current step and never takes taps */
+ #fight .dojo-challenge-hud{position:fixed!important;top:calc(82px + env(safe-area-inset-top))!important;left:50%!important;transform:translateX(-50%);width:auto!important;max-width:54vw!important;margin:0!important;padding:4px 14px 5px!important;pointer-events:none!important;z-index:6!important;background:rgba(10,8,12,.74)!important;box-shadow:none!important;border-radius:10px!important}
+ #fight .dojo-challenge-hud .dojo-challenge-top{gap:10px;font-size:10px!important;line-height:1.2}
+ #fight .dojo-challenge-hud .dojo-challenge-top *{font-size:10px!important}
+ #fight .dojo-challenge-hud ol{margin:2px 0 3px!important;padding:0!important;list-style:none!important;display:block!important}
+ #fight .dojo-challenge-hud li{display:none!important;font-size:12px!important;padding:0!important;margin:0!important;border:0!important;background:none!important;min-height:0!important;text-align:center}
+ #fight .dojo-challenge-hud li:not(.done){display:block!important}
+ #fight .dojo-challenge-hud li:not(.done)~li{display:none!important}
+ #fight .dojo-challenge-hud .dojo-challenge-progress{height:3px!important;margin:0!important}
+ body:has(#touch-pad .sx-panel:not(.hidden)) #fight .dojo-challenge-hud{opacity:0}
+ /* special-move panel: 3 across, sits above the action buttons, always on top */
+ body #touch-pad .sx-panel,body.fighting #touch-pad .sx-panel{grid-template-columns:repeat(3,minmax(0,1fr))!important;width:min(480px,64vw)!important;bottom:calc(98px + env(safe-area-inset-bottom))!important;z-index:60!important;gap:6px!important}
+ body #touch-pad .sx-panel button,body.fighting #touch-pad .sx-panel button{min-height:40px!important;font-size:12.5px!important;padding:6px 4px!important}
+ /* thumb-sized fight buttons */
+ body.fighting #touch-pad .pad-left button[data-k]:not(.wide){width:58px!important;height:58px!important}
+ body.fighting #touch-pad .pad-left .wide{height:44px!important}
+ body.fighting #touch-pad .pad-right .ins{width:48px!important;height:48px!important}
+ body.fighting #touch-pad .pad-right .sp,body.fighting #touch-pad .sx-star{width:58px!important;height:58px!important}
+ body.fighting #touch-pad .pad-right .at{width:76px!important;height:76px!important}
+ /* device question fits on one screen */
+ .dev-card{padding:12px 14px!important;max-height:96vh!important}
+ .dev-card h3{font-size:22px!important}.dev-card p{margin:2px 0 10px!important;font-size:12px!important}
+ .dev-opts{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
+ .dev-opt{padding:8px 4px!important;min-height:0!important}
+}
