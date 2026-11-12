@@ -1063,3 +1063,24 @@ body #touch-pad .pad-stars button.stu.ready{background:radial-gradient(circle at
 @media (max-height:560px) and (orientation:landscape){.motto{margin-top:3px;font-size:11px}}
 #menu .motto{margin:4px 0 6px!important;font-size:clamp(13px,1.35vw,18px)!important}
 @media (max-height:560px){#menu .motto{font-size:12px!important;margin:2px 0!important}}
+/* pop-up (save/restore, install) */
+#kotj-modal{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);padding:14px}
+#kotj-modal .km-card{width:min(520px,100%);max-height:94vh;overflow:auto;background:linear-gradient(#1b130a,#0c0805);border:1px solid rgba(232,185,91,.55);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:9px;color:#f3e6c8;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#kotj-modal h3{margin:0;font:900 22px "Barlow Condensed",Impact,sans-serif;letter-spacing:.08em;color:#ffd77a}
+#kotj-modal h4{margin:8px 0 0;font:800 15px "Barlow Condensed",Impact,sans-serif;letter-spacing:.08em;color:#e8b95b}
+#kotj-modal .km-sub{margin:0;font-size:14px;line-height:1.4;opacity:.9}
+#kotj-modal .km-sum{margin:0;font-size:13px;color:#ffe7a0}
+#kotj-modal textarea{width:100%;box-sizing:border-box;background:#070504;color:#f3e6c8;border:1px solid rgba(232,185,91,.4);border-radius:8px;padding:8px;font:12px/1.3 ui-monospace,monospace;resize:none;word-break:break-all}
+#kotj-modal button{min-height:44px}
+#kotj-modal .km-msg{margin:0;font-size:13px;min-height:1em}#kotj-modal .km-msg.bad{color:#ff9a8a}#kotj-modal .km-msg.ok{color:#a8f0b0}
+#kotj-modal .km-steps{margin:0;padding-left:20px;font-size:15px;line-height:1.6}
+/* first-fight tutorial coach */
+#tut-box{position:absolute;left:50%;top:21%;transform:translateX(-50%);z-index:55;max-width:min(560px,80%);padding:9px 16px;border-radius:12px;background:rgba(12,8,4,.82);border:1px solid rgba(255,214,120,.7);color:#fff3d6;font:700 clamp(13px,1.6vw,18px)/1.3 "Barlow Condensed",Inter,sans-serif;letter-spacing:.03em;text-align:center;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+#tut-box b{color:#ffd77a}#tut-box i{font-style:normal;color:#e8b95b;margin-right:6px;font-weight:900}
+#tut-box.done{border-color:#7fe08a}#tut-box.pop{animation:tutPop .28s ease-out}
+@keyframes tutPop{from{transform:translateX(-50%) scale(.85);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+#kotj-modal textarea{height:58px;min-height:58px}
+@media (max-height:560px){#kotj-modal{padding:8px}#kotj-modal .km-card{gap:6px;padding:10px 14px}#kotj-modal h3{font-size:18px}#kotj-modal h4{margin-top:2px;font-size:13px}#kotj-modal .km-sub{font-size:12.5px;line-height:1.3}#kotj-modal .km-sum{font-size:12px}#kotj-modal textarea{height:44px;min-height:44px}#kotj-modal button{min-height:38px}#kotj-modal .km-steps{font-size:13.5px;line-height:1.45}}
+.cover-menu .cover-settings{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.cover-menu .cover-settings .cover-setting{margin-top:0!important;align-self:auto}
+.cover-menu .cover-settings .hidden{display:none!important}

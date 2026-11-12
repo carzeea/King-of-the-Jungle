@@ -3598,7 +3598,7 @@ function sxTouchInstall(){const pad=document.getElementById('touch-pad');if(!pad
  pad.appendChild(box);
  box.querySelectorAll('button').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();ac();touch[b.dataset.sx]=0;touchTap[b.dataset.sx]=1;b.classList.add('on')});
   const off=()=>b.classList.remove('on');b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('contextmenu',e=>e.preventDefault())});
- setInterval(()=>{if(!game||!game.fighters)return;const f=game.fighters[0],D=SX[f.data.id];box.querySelector('.stu').classList.toggle('ready',f.meter>=100);
+ setInterval(()=>{if(!game||!game.fighters)return;const f=game.fighters[(mode==='online'&&ON.side===1)?1:0],D=SX[f.data.id];box.querySelector('.stu').classList.toggle('ready',f.meter>=100);
   if(D)box.querySelectorAll('[data-sx^="s"]:not(.stu)').forEach((b,i)=>{const m=D.m[i];b.title=m?m.n:'';b.classList.toggle('low',!!(m&&m.cost&&f.meter<m.cost))});
   if(box._fid!==f.data.id){box._fid=f.data.id;box.querySelectorAll('button').forEach((b,i)=>{const m=D?(b.classList.contains('stu')?D.u:D.m[i]):null;let l=b.querySelector('.sxl');if(!l){l=document.createElement('span');l.className='sxl';b.appendChild(l)}l.textContent=m?sxShort(m.n):''})}},250)}
 // short label for the touch star buttons: drop filler words so it fits two small lines
@@ -3871,7 +3871,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.7`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.8`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -4098,5 +4098,83 @@ $('tower-next').addEventListener('click',()=>$('rematch').classList.remove('hidd
 
 // ---------- MAJIC: the final boss soaks hits (3 full health bars, takes 40% less damage from players) ----------
 {const _rhM=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i];const h0=o.hp,b0=o.bars;const r=_rhM.apply(this,arguments);
- try{if(o.data.id==='majic'&&o.ai&&!o.baneWeak&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.4)}}catch(_){}return r}}
+ try{if(o.data.id==='majic'&&o.ai&&!o._simHuman&&!o.baneWeak&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.4)}}catch(_){}return r}}
+
+/* ================= PROGRESS BACKUP · INSTALL AS APP · FIRST-FIGHT TUTORIAL ================= */
+// small shared pop-up
+function kModal(html,onOpen){let m=document.getElementById('kotj-modal');if(m)m.remove();m=document.createElement('div');m.id='kotj-modal';
+ m.innerHTML='<div class="km-card">'+html+'<button class="secondary km-close">CLOSE</button></div>';document.body.appendChild(m);
+ const close=()=>m.remove();m.querySelector('.km-close').onclick=close;m.addEventListener('pointerdown',e=>{if(e.target===m)close()});m.addEventListener('keydown',e=>e.stopPropagation());if(onOpen)onOpen(m,close);return m}
+function kCopy(text,btn){const done=()=>{if(btn){const t=btn.textContent;btn.textContent='COPIED ✓';setTimeout(()=>btn.textContent=t,1600)}};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,()=>fallback());else fallback();
+ function fallback(){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(_){}ta.remove()}}
+// ---- backup code: every saved bit of progress (unlocks, crowns, coins, outfits, achievements) in one copy/paste code
+function backupMake(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf('kotj.')===0)o[k]=localStorage.getItem(k)}
+ const raw=JSON.stringify({v:1,t:Date.now(),d:o}),b=btoa(unescape(encodeURIComponent(raw)));let h=0;for(let i=0;i<b.length;i++)h=(h*31+b.charCodeAt(i))>>>0;
+ return 'KOTJ1-'+(h%46656).toString(36).padStart(3,'0').toUpperCase()+'-'+b}
+function backupRead(code){code=String(code||'').replace(/\s+/g,'');const m=/^KOTJ1-([0-9A-Z]{3})-(.+)$/i.exec(code);if(!m)return null;let h=0;for(let i=0;i<m[2].length;i++)h=(h*31+m[2].charCodeAt(i))>>>0;
+ if((h%46656).toString(36).padStart(3,'0').toUpperCase()!==m[1].toUpperCase())return null;try{const j=JSON.parse(decodeURIComponent(escape(atob(m[2]))));return j&&j.v===1&&j.d?j:null}catch(_){return null}}
+function backupSummary(d){const g=k=>{try{return JSON.parse(d['kotj.'+k]||'null')}catch(_){return null}};const u=(g('unlocked')||[]).length,c=(g('crowns')||[]).length;let coins=0;try{coins=(JSON.parse(d['kotj.armory']||'{}').coins)|0}catch(_){}
+ return `${u} hidden unlock${u===1?'':'s'} · ${c} Tower crown${c===1?'':'s'} · ${coins} coins${d['kotj.secret']==='true'?' · MAJIC unlocked':''}`}
+function backupOpen(){const code=backupMake();const cur={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf('kotj.')===0)cur[k]=localStorage.getItem(k)}
+ kModal(`<h3>SAVE / RESTORE PROGRESS</h3><p class="km-sub">Your unlocks, crowns and coins live on this device only. Copy this code somewhere safe (notes, a text to yourself). Paste it on any phone or computer to bring everything back.</p>
+ <p class="km-sum">This device: ${backupSummary(cur)}</p><textarea id="bk-code" readonly rows="3"></textarea><button class="primary" id="bk-copy">COPY MY CODE</button>
+ <h4>RESTORE FROM A CODE</h4><textarea id="bk-in" rows="3" placeholder="Paste a KOTJ1-… code here"></textarea><p id="bk-msg" class="km-msg"></p><button class="secondary" id="bk-load">RESTORE</button>`,(m)=>{
+  m.querySelector('#bk-code').value=code;m.querySelector('#bk-copy').onclick=e=>kCopy(code,e.currentTarget);m.querySelector('#bk-code').onclick=e=>e.target.select();
+  const msg=m.querySelector('#bk-msg'),btn=m.querySelector('#bk-load');let armed=null;
+  btn.onclick=()=>{const j=backupRead(m.querySelector('#bk-in').value);if(!j){msg.textContent='That code didn’t work. Copy the whole thing, starting with KOTJ1-.';msg.className='km-msg bad';armed=null;btn.textContent='RESTORE';return}
+   if(!armed){armed=j;msg.textContent='Code found: '+backupSummary(j.d)+'. This replaces the progress on this device. Tap again to confirm.';msg.className='km-msg ok';btn.textContent='YES, RESTORE';return}
+   for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf('kotj.')===0)localStorage.removeItem(k)}for(const k in armed.d)if(k.indexOf('kotj.')===0)localStorage.setItem(k,armed.d[k]);
+   msg.textContent='Restored! Reloading…';setTimeout(()=>location.reload(),700)}})}
+// ---- install as an app (home-screen icon, full screen, sideways)
+let instEvt=null;const standalone=()=>matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEvt=e;menuExtras()});addEventListener('appinstalled',()=>{instEvt=null;menuExtras()});
+function installOpen(){if(instEvt){const ev=instEvt;ev.prompt();ev.userChoice.finally(()=>{instEvt=null;menuExtras()});return}
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ kModal(`<h3>INSTALL THE GAME</h3><p class="km-sub">Put King of the Jungle on your home screen. It opens full screen, sideways, with no browser bars, like a real app.</p>`+(ios?
+  `<ol class="km-steps"><li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button (the square with the arrow).</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>`:
+  `<ol class="km-steps"><li>Open the browser menu (<b>⋮</b> in Chrome, top right).</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Open King of the Jungle from your home screen.</li></ol>`))}
+function menuExtras(){const cm=document.getElementById('cover-menu');if(!cm)return;
+ if(!cm.querySelector('.backup-btn')){const b=document.createElement('button');b.className='cover-setting backup-btn';b.textContent='SAVE / RESTORE';b.onclick=e=>{e.stopPropagation();backupOpen()};cm.appendChild(b)}
+ let ib=cm.querySelector('.install-btn');if(!ib){ib=document.createElement('button');ib.className='cover-setting install-btn';ib.textContent='INSTALL APP';ib.onclick=e=>{e.stopPropagation();installOpen()};cm.appendChild(ib)}
+ ib.classList.toggle('hidden',standalone());
+ let row=cm.querySelector('.cover-settings');if(!row){row=document.createElement('div');row.className='cover-settings';cm.appendChild(row)}
+ let tb=cm.querySelector('.tut-btn');if(!tb){tb=document.createElement('button');tb.className='cover-setting tut-btn';tb.textContent='HOW TO PLAY';tb.onclick=e=>{e.stopPropagation();SAVE.set('tutDone',false);tb.textContent='TUTORIAL ON ✓';setTimeout(()=>tb.textContent='HOW TO PLAY',1800)};cm.appendChild(tb)}
+ cm.querySelectorAll(':scope > .cover-setting').forEach(b=>row.appendChild(b))}
+menuExtras();
+// ---- first-fight tutorial: short coaching on the player's first VS CPU / Tower fight (replay from HOW TO PLAY on the cover)
+function tutSteps(){const d=devNow(),S=STAR_BTN[d]||STAR_BTN.keyboard,B=DEV_BTN[d]||DEV_BTN.keyboard,touch=d==='touch';
+ const mv=touch?'◀ ▶':B.mv,at=touch?'ATK':B.at,bl=touch?'BLOCK':B.bl;
+ return[
+  {t:`MOVE · hold <b>${mv}</b> to step in`,ok:(f,T)=>Math.abs(f.x-T.x0)>70},
+  {t:`ATTACK · tap <b>${at}</b> to strike`,ok:(f,T)=>T.atk},
+  {t:`BLOCK · hold <b>${bl}</b> to guard`,ok:f=>f.block&&f.blockTime>.25},
+  {t:`SPECIAL · press <b>${S[0]}</b> for your first special move (${S[1]} and ${S[2]} are the other two)`,ok:(f,T)=>T.sx},
+  {t:`ULTIMATE · when <b>${S[3]}</b> glows gold, press it to unleash your Ultimate`,ok:(f,T)=>T.ult,wait:f=>f.meter>=100,skipAfter:14}]}
+function tutBox(html,done){let el=document.getElementById('tut-box');if(!el){el=document.createElement('div');el.id='tut-box';($('game-canvas').parentElement||document.body).appendChild(el)}
+ el.innerHTML=html;el.classList.toggle('done',!!done);el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')}
+function tutEnd(){const el=document.getElementById('tut-box');if(el)el.remove();if(game)game.tut=null}
+{const _st3=start;start=function(){const r=_st3.apply(this,arguments);try{tutEnd();if(game&&(mode==='cpu'||mode==='tower')&&!SAVE.get('tutDone',false)&&!(tower&&tower.boss)){game.tut={i:0,x0:null,t:0,stepT:0,ult:false,steps:tutSteps()}}}catch(_){}return r}}
+{const _dmT=doMove;doMove=function(f){const r=_dmT.apply(this,arguments);try{const T=game&&game.tut;if(T&&game.fighters[0]===f&&f.move_){if(f.move_.sx)T.sx=1;else T.atk=1}}catch(_){}return r}}
+// while the tutorial is coaching, the CPU's hits do half damage so new players have time to read
+{const _rhT=resolveHit;resolveHit=function(i){const T=game&&game.tut,o=game&&game.fighters[1-i],h0=o?o.hp:0,b0=o?o.bars:0;const r=_rhT.apply(this,arguments);try{if(T&&i===1&&o&&o.bars===b0&&o.hp<h0&&o.hp>0)o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.5)}catch(_){}return r}}
+{const _us=sxUltStart;sxUltStart=function(f){try{if(game&&game.tut&&game.fighters[0]===f)game.tut.ult=true}catch(_){}return _us.apply(this,arguments)}}
+setInterval(()=>{const T=game&&game.tut;if(!T)return;if(game.over||game.ko){tutEnd();return}if(paused||game.intro>0)return;const f=game.fighters[0];if(T.x0===null)T.x0=f.x;
+ T.t+=.15;T.stepT+=.15;const st=T.steps[T.i];if(!st){tutEnd();return}
+ if(st.wait&&!st.wait(f)&&!T.waitShown){T.waitShown=1;tutBox(`<i>NICE!</i> Keep fighting: landing and taking hits fills your meter. Your Ultimate unlocks when it’s full.`);T.stepT=0;return}
+ if(st.wait&&!st.wait(f))return;
+ if(!T.shown&&T.stepT<0)return;
+ if(!T.shown){T.shown=1;T.stepT=0;T.atk=T.sx=0;tutBox(`<i>${T.i+1} / ${T.steps.length}</i> ${st.t}`)}
+ if(st.ok(f,T)||(st.skipAfter&&T.stepT>st.skipAfter)){T.i++;T.shown=0;T.waitShown=0;if(T.i>=T.steps.length){SAVE.set('tutDone',true);tutBox('<i>YOU’RE READY</i> Win the fight. The throne is waiting.',1);setTimeout(()=>{if(game&&game.tut===T)tutEnd()},2600);game.tut=null;return}
+  tutBox(`<i>✓</i> Got it!`,1);T.stepT=-.9}},150);
+
+
+// ---- balance test hook (testing only; never used in play): fast CPU-vs-CPU fights with no drawing
+window.__kotjSim=(a,b,lvl=.6,maxSec=99)=>{SAVE.set('tutDone',true);mode='cpu';tower=null;picks=[roster.find(r=>r.id===a)||(a==='majic'?MAJIC:null),roster.find(r=>r.id===b)||(b==='majic'?MAJIC:null)];arena=ARENAS[0];
+ start._hdSkip=1;try{start()}finally{start._hdSkip=0}cancelAnimationFrame(raf);if(!game)return null;game.intro=0;const F=game.fighters;F[0].ai=cpuBrain(lvl);F[1].ai=cpuBrain(lvl);F[0]._simHuman=1;time=maxSec;
+ const dt=1/60;let t=0;while(t<maxSec+8){if(game.slowT>0){game.slowT-=dt;if(game.slowT<=0)game.slow=1}const d=dt*game.slow;game.dt=d;try{fxUpdate(dt)}catch(_){}
+  if(game.ultra)ultraStep(d);else if(game.hitstop>0)game.hitstop-=dt;else{time=Math.max(0,time-d);update(d);if(!game.ko&&time===0)game.ko=2}
+  t+=dt;if(game.ko)break}
+ const sc=f=>f.bars*BAR+Math.max(0,f.hp),s0=sc(F[0]),s1=sc(F[1]);const r={w:s0>s1?0:s1>s0?1:-1,t:Math.round(t),left:[s0,s1].map(v=>Math.round(v))};game.fx=[];game=null;return r};
+
 })();
