@@ -526,8 +526,8 @@ function update(dt){
    if(f.sec&&!'BBJJA'.startsWith(f.sec.slice(-5))&&!'BBJJA'.startsWith(f.sec))f.sec=f.sec.endsWith('B')?'B':'';
    // 1st correct entry: MAJIC loses a whole life bar. 2nd correct entry: he falls for good.
    if(f.sec&&f.sec.endsWith('BBJJA')){game.bane=i+1;game.baneN=(game.baneN||0)+1;f.sec='';f.secT=0;
-    if(game.baneN===1){if(o.bars>1){o.bars--;o.hp=BAR;o.potential=0;majicBossPhase(o)}
-     banner("TITAN'S BANE",'MAJIC IS WEAKENED · ENTER IT AGAIN TO FINISH HIM',2,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
+    if(game.baneN===1){const left=Math.max(1,total(o)/2);o.bars=Math.max(1,Math.ceil(left/BAR));o.hp=left-(o.bars-1)*BAR;o.potential=0;o.baneWeak=1;majicBossPhase(o);hud();
+     banner("TITAN'S BANE",'MAJIC LOSES HALF HIS POWER · ENTER IT AGAIN TO FINISH HIM',2.2,'#7fe8ff');game.shake=.5;game.flash=.4;floatText(o.x,o.y-340,'WEAKENED','#7fe8ff')}
     else{o.bars=1;o.hp=0;o.potential=0;o.stun=0;o.attack=0;o.vx=f.dir*480;o.vy=-420;o.ground=false;game.shake=.7;game.flash=1;
      spark(o.x,o.y-150,'#7fe8ff',40);floatText(o.x,o.y-340,"TITAN'S BANE",'#7fe8ff');hud();koFinish(o,f)}}
    f.secPrev={bl:inp.bl,j:inp.j,l:inp.l,r:inp.r}}
@@ -3853,7 +3853,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.0`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.1`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -4080,5 +4080,5 @@ $('tower-next').addEventListener('click',()=>$('rematch').classList.remove('hidd
 
 // ---------- MAJIC: the final boss soaks hits (3 full health bars, takes 40% less damage from players) ----------
 {const _rhM=resolveHit;resolveHit=function(i,mv){const f=game.fighters[i],o=game.fighters[1-i];const h0=o.hp,b0=o.bars;const r=_rhM.apply(this,arguments);
- try{if(o.data.id==='majic'&&o.ai&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.4)}}catch(_){}return r}}
+ try{if(o.data.id==='majic'&&o.ai&&!o.baneWeak&&f.data.id!=='majic'&&o.bars===b0&&o.hp<h0&&o.hp>0){o.hp=Math.min(BAR,o.hp+(h0-o.hp)*.4)}}catch(_){}return r}}
 })();
