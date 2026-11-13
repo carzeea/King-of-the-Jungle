@@ -3873,7 +3873,7 @@ RES.floor=LITE()?.6:.75;
 if(/[?&]fps=1/.test(location.search)){const el=document.createElement('div');el.id='fps-meter';el.style.cssText='position:fixed;left:6px;top:50%;z-index:99;background:rgba(0,0,0,.72);color:#9f9;font:600 11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;white-space:pre';document.body.appendChild(el);
  let n=0,acc=0,worst=0,last=performance.now();const tick=()=>{const t=performance.now(),d=t-last;last=t;n++;acc+=d;worst=Math.max(worst,d);
   if(acc>=1000){const cv=$('game-canvas'),id=game&&game.fighters?game.fighters[0].data.id:null;
-   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 16.9`;n=0;acc=0;worst=0}
+   el.textContent=`FPS ${Math.round(n*1000/acc)}  worst ${Math.round(worst)}ms\ncanvas ${cv.width}x${cv.height} dpr ${devicePixelRatio}\nart ${id?(HDT[id]?(HDT[id]===HD[id]?'HD':'LIGHT'):'LOW'):'-'}  fx ${FXQ}  res ${Math.round(RES.scale*100)}%\ngfx ${KOTJ_GM.mode.toUpperCase()}:${KOTJ_GM.level}  colors ${window.KOTJ_TINT&&id&&window.KOTJ_ARMORY&&KOTJ_ARMORY.fightColors(id)?'on':'off'}\nbuild 17.0`;n=0;acc=0;worst=0}
   requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 
 // Phones (Effects MEDIUM/LOW): canvas filters and shadow blur are the slowest things a phone browser can draw,
@@ -3934,17 +3934,17 @@ function gmToast(a,b){let t=document.getElementById('smooth-toast');if(!t){t=doc
  t.innerHTML=a+(b?`<br><span style="font-weight:500;opacity:.8;font-size:11px">${b}</span>`:'');t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,2600)}
 function gmSave(){try{localStorage.setItem('kotj-gq',GM.mode);if(GM.mode==='auto')localStorage.setItem('kotj-gq-learn',String(GM.level))}catch(_){}}
 function gmSet(mode){GM.mode=mode;GM.fails=[0,0,0,0];GM.cool=0;
- if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(d.lvl)}else gmApply({low:0,balanced:1,ultra:3}[mode]);
+ if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(0,'Starts smooth, steps up if your device can handle more')}else gmApply({low:0,balanced:1,ultra:3}[mode]);
  RES.scale=1;gmSave()}
 function GMcap(pw,ph){return Math.min(1,Math.sqrt(GM_TIERS[GM.level].cap/(pw*ph)))}
 // measure real frame rate during fights and adjust
 resTick=function(real){if(!game||game.intro>0||paused||game.ko){GM.acc=0;GM.n=0;return}
  GM.t+=real;GM.cool=Math.max(0,GM.cool-real);if(GM.t<2.5)return;GM.acc+=real;GM.n++;if(GM.acc<1.5)return;
- const fps=GM.n/GM.acc;GM.acc=0;GM.n=0;GM.slow=fps<42?GM.slow+1:0;GM.fast=fps>=56?GM.fast+1:0;
+ const fps=GM.n/GM.acc;GM.acc=0;GM.n=0;GM.slow=fps<42?GM.slow+1:0;GM.fast=fps>=57?GM.fast+1:0;
  if(GM.slow>=2){GM.slow=0;GM.fast=0;GM.cool=8;
   if(RES.scale>RES.floor+.01){RES.scale=Math.max(RES.floor,RES.scale*.86);return}
   if(GM.mode==='auto'&&GM.level>0){GM.fails[GM.level]++;gmApply(GM.level-1,'Lowered to keep the game smooth');RES.scale=1;gmSave()}return}
- if(GM.fast>=3&&GM.cool<=0){GM.fast=0;GM.cool=6;
+ if(GM.fast>=4&&GM.cool<=0){GM.fast=0;GM.cool=6;
   if(RES.scale<1){RES.scale=Math.min(1,RES.scale*1.12);return}
   const up=GM.level+1;
   if(GM.mode==='auto'&&up<=GM.max&&GM.fails[up]<2){if(GM_TIERS[up].hd&&game){GM.pendingUp=up;return} // HD art only switches between fights
@@ -3953,11 +3953,19 @@ resTick=function(real){if(!game||game.intro>0||paused||game.ko){GM.acc=0;GM.n=0;
 // retire the older one-way smooth mode; the manager replaces it
 autoSmooth=function(){};
 // the graphics buttons now cycle AUTO → LOW → BALANCED → ULTRA
-setGfx=function(){const order=['auto','low','balanced','ultra'];gmSet(order[(order.indexOf(GM.mode)+1)%order.length])};
+// the graphics buttons open a simple picker (AUTO recommended)
+setGfx=function(){const opts=[['auto','AUTO (RECOMMENDED)','Starts on LOW, then steps up by itself while your device stays smooth. Drops back down the moment it lags.'],
+  ['low','LOW','Smoothest. Best for older phones or when the game stutters.'],['balanced','BALANCED','More effects. Good for newer phones and tablets.'],['ultra','ULTRA','Sharpest art and every effect. For gaming PCs and high-end devices.']];
+ kModal('<h3>GRAPHICS</h3><p class="km-sub">Now: '+(GM.mode==='auto'?'AUTO · '+GM_TIERS[GM.level].name:GM.mode.toUpperCase())+'</p><div class="gq-list">'+opts.map(o=>`<button class="gq-opt${GM.mode===o[0]?' on':''}" data-m="${o[0]}"><b>${o[1]}</b><span>${o[2]}</span></button>`).join('')+'</div>',(m,close)=>{
+  m.querySelectorAll('.gq-opt').forEach(b=>b.onclick=()=>{gmSet(b.dataset.m);close();if(b.dataset.m!=='auto')gmToast('GRAPHICS · '+b.dataset.m.toUpperCase(),'Change it any time in GRAPHICS.')})})};
 {const _so=selOpts;selOpts=function(){const r=_so.apply(this,arguments);gmLabels();return r}}
 // start-up: saved choice, or detect (and use what this device learned last time)
-{let mode='auto',learn=null;try{mode=localStorage.getItem('kotj-gq')||'auto';learn=localStorage.getItem('kotj-gq-learn');localStorage.removeItem('kotj-fxq');localStorage.removeItem('kotj-gfx')}catch(_){}
- GM.mode=mode;if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(learn!=null&&!isNaN(+learn)?Math.min(+learn,d.max):d.lvl)}else gmApply({low:0,balanced:1,ultra:3}[mode]??2)}
+// start-up: everyone begins on AUTO at LOW (smoothest); AUTO then steps up on its own once this device proves it runs smooth,
+// and remembers the level it earned. A one-time reset moves every existing player onto this (v17.0); they can change it any time.
+{let mode='auto',learn=null,fresh=false;try{if(!localStorage.getItem('kotj-gq-v17')){localStorage.setItem('kotj-gq','auto');localStorage.setItem('kotj-gq-learn','0');localStorage.setItem('kotj-gq-v17','1');fresh=true}
+  mode=localStorage.getItem('kotj-gq')||'auto';learn=localStorage.getItem('kotj-gq-learn');localStorage.removeItem('kotj-fxq');localStorage.removeItem('kotj-gfx')}catch(_){}
+ GM.mode=mode;if(mode==='auto'){const d=gmDetect();GM.max=d.max;gmApply(learn!=null&&!isNaN(+learn)?Math.min(+learn,d.max):0)}else gmApply({low:0,balanced:1,ultra:3}[mode]??0);
+ if(fresh)setTimeout(()=>gmToast('GRAPHICS · AUTO · starting on LOW','Steps up by itself if your device runs smooth. Change it any time in GRAPHICS.'),2200)}
 window.KOTJ_GM={get level(){return GM_TIERS[GM.level].name},get mode(){return GM.mode},get info(){return GM.info},set:gmSet};
 
 if(window.__kotj){window.__kotj.ult=()=>sxUltStart(game.fighters[0],game.fighters[1]);window.__kotj.sx=i=>doMove(game.fighters[0],'sx:'+i)}

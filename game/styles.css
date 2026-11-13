@@ -1084,3 +1084,10 @@ body #touch-pad .pad-stars button.stu.ready{background:radial-gradient(circle at
 .cover-menu .cover-settings{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
 .cover-menu .cover-settings .cover-setting{margin-top:0!important;align-self:auto}
 .cover-menu .cover-settings .hidden{display:none!important}
+#kotj-modal .gq-list{display:flex;flex-direction:column;gap:7px}
+#kotj-modal .gq-opt{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(232,185,91,.35);color:#f3e6c8;cursor:pointer}
+#kotj-modal .gq-opt b{font:900 15px "Barlow Condensed",Impact,sans-serif;letter-spacing:.08em;color:#ffd77a}
+#kotj-modal .gq-opt span{font-size:12.5px;line-height:1.3;opacity:.85}
+#kotj-modal .gq-opt.on{border-color:#ffd77a;background:rgba(255,215,122,.14)}
+#kotj-modal .gq-opt span{letter-spacing:0;font-weight:500}
+@media (max-height:560px){#kotj-modal .gq-list{gap:5px}#kotj-modal .gq-opt{padding:5px 10px}#kotj-modal .gq-opt b{font-size:13.5px}#kotj-modal .gq-opt span{font-size:11.5px}}
