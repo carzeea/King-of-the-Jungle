@@ -114,3 +114,8 @@
 .jc-reward span{font:700 12px Inter;color:#e9d9b0;letter-spacing:.04em}.jc-reward em{font:600 11px Inter;color:#ffb36b;font-style:normal}
 .jc-reward.pop b{animation:jcPop .7s cubic-bezier(.3,1.5,.5,1)}@keyframes jcPop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
 .arm-earn{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}.arm-earn span{display:flex;justify-content:space-between;font:600 12px Inter;color:#e9d9b0;padding:4px 6px;border-bottom:1px solid #ffffff10}.arm-earn b{color:#ffd76a}
+
+/* v17.1 next-goal box on the results screen */
+.jc-goals{margin:8px auto 0;max-width:520px;padding:8px 14px;border:1px solid rgba(255,207,90,.45);border-radius:10px;background:rgba(10,6,2,.72);display:flex;flex-direction:column;gap:3px;text-align:left;font-size:14px;color:#f3e6c4}
+.jc-goals b{font-size:11px;letter-spacing:.18em;color:#ffcf5a}
+.jc-goals:empty{display:none}

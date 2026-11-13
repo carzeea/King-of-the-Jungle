@@ -358,7 +358,18 @@ function open(startFid){if(!S.welcome){S.welcome=1;save();setTimeout(()=>{try{to
 function heroInto(id,img){const o=S.equipped[id];if(!o||(o.look==='original'?!origTargets(o):!owns(id+'.'+o.look)))return;outfitURL(id,o,600).then(u=>{if(img.dataset.armFor===id)img.src=u}).catch(()=>{})}
 function auraFor(id){const o=S.equipped[id];return o&&o.aura&&S.owned['aura.'+o.aura]?(AURAS.find(a=>a.id===o.aura)||{}).color:null}
 function cycleOutfit(id){return false;const owned=['original',...['royal','street','hybrid'].filter(l=>owns(id+'.'+l))];if(owned.length<2)return false;const o=S.equipped[id]||freshOutfit();S.lookColors=S.lookColors||{};if(o.look!=='original')S.lookColors[id+'.'+o.look]={colors:o.colors||{},materials:o.materials||{}};const i=owned.indexOf(o.look);o.look=owned[(i+1)%owned.length];const kept=S.lookColors[id+'.'+o.look]||{colors:{},materials:{}};o.colors=JSON.parse(JSON.stringify(kept.colors));o.materials=JSON.parse(JSON.stringify(kept.materials));S.equipped[id]=o;save();return lookName(id,o.look)}
-window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,fightColors,reward:r=>{const x=reward(r);showReward(x);return x},lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
+// v17.1: always show the next goal under the coins, so there's a reason for one more fight
+function nextGoals(r){const g=[];if(!r)return g;
+ if(r.tower&&!r.towerDone&&r.floors){const left=Math.max(0,r.floors-r.floor);if(left>0)g.push(['🏰',`${left} more win${left===1?'':'s'} to claim the throne`])}
+ else if(r.tower&&r.towerDone&&r.crownsAll)g.push(['👑',`Tower crowns ${r.crowns}/${r.crownsAll} — climb with another fighter to earn the next`]);
+ const next=AURAS.filter(a=>!S.owned['aura.'+a.id]).sort((a,b)=>a.price-b.price)[0];
+ if(next){const need=next.price-S.coins;g.push(need>0?['💰',`${fmt(need)} more coins until the ${next.name}`]:['✨',`You can afford the ${next.name} — visit the Jungle Armory`])}
+ const d=today();if(!(S.earn&&S.earn.day===d&&S.earn.firstWin))g.push(['⭐',`Win a fight today for a +${EARN.firstWin} bonus`]);
+ return g.slice(0,2)}
+function showGoals(r){const box=document.getElementById('jc-reward');if(!box)return;let el=document.getElementById('jc-goals');
+ if(!el){el=document.createElement('div');el.id='jc-goals';el.className='jc-goals';box.after(el)}
+ const g=nextGoals(r);el.innerHTML=g.length?'<b>NEXT UP</b>'+g.map(([i,t])=>`<span>${i} ${t}</span>`).join(''):'';}
+window.KOTJ_ARMORY={open,heroInto,auraFor,cycleOutfit,fightColors,reward:r=>{const x=reward(r);showReward(x);try{showGoals(r)}catch(_){}return x},lookName:id=>lookName(id,(S.equipped[id]||{}).look||'original'),coins:()=>S.coins,refresh:coinPills};
 
 function addEntryPoints(){
  buildScreen();

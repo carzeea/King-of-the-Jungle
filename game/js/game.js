@@ -57,7 +57,8 @@ function setGfx(v){GFX=v;try{localStorage.setItem('kotj-gfx',v)}catch(_){}RES.sc
 const ARENAS=[{id:'jungle-temple',name:'JUNGLE TEMPLE'},{id:'inferno-fortress',name:'INFERNO FORTRESS'},{id:'frozen-kingdom',name:'FROZEN KINGDOM'},
  {id:'savage-plains',name:'SAVAGE PLAINS'},{id:'shadow-swamp',name:'SHADOW SWAMP'},{id:'caes-corner',name:"CAE'S CORNER"},{id:'tidal-kingdom',name:'THE TIDAL KINGDOM'},{id:'royal-colosseum',name:"MAJIC'S LAIR",lair:1}];
 const LAIR=ARENAS.find(a=>a.lair),FIGHT_ARENAS=ARENAS.filter(a=>!a.lair);
-const arenaImg={};ARENAS.forEach(a=>{const im=new Image();im.src='assets/arenas/'+a.id+'.webp?v=15.54';arenaImg[a.id]=im});
+// v17.1: arena paintings load when an arena is chosen/fought in, not all at start-up
+const arenaImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&ARENAS.some(a=>a.id===id)){const im=new Image();im.src='assets/arenas/'+id+'.webp?v=15.54';t[id]=im}return t[id]}});
 let arena=ARENAS[0],stagePick=0; // stagePick: index into ARENAS, ARENAS.length = random
 const RND=()=>ARENAS.length;
 function renderStages(){setBackdrop('assets/ui/select-bg.webp');
@@ -401,8 +402,9 @@ function fighterLoading(on){let el=document.getElementById('fighter-loading');
  if(!el){el=document.createElement('div');el.id='fighter-loading';el.innerHTML='<img src="assets/ui/crown.webp" alt=""><b>THE FIGHTERS ARE ENTERING THE ARENA</b><i></i>';document.body.appendChild(el)}
  el.classList.toggle('on',!!on)}
 function start(){
+ try{loadRT()}catch(_){}
  // Make sure both fighters' frames have arrived before the bell (slow phone connections).
- if(mode!=='online'&&!start._hdSkip&&picks[0]&&picks[1]){const ids=[picks[0].id,picks[1].id],ready=()=>ids.every(id=>{const a=spriteImg[id];return !a||Object.values(a).every(im=>im.complete)})&&hdReady(ids,start._waiting);
+ if(mode!=='online'&&!start._hdSkip&&picks[0]&&picks[1]){const ids=[picks[0].id,picks[1].id],ready=()=>ids.every(id=>{const a=spriteImg[id];return !a||Object.values(a).every(im=>im.complete)})&&hdReady(ids,start._waiting)&&(()=>{try{const b=arena&&arenaImg[arena.id];return !b||b.complete}catch(_){return true}})();
   if(start._waiting)return;
   if(!ready()){start._waiting=performance.now();fighterLoading(true);
    const iv=setInterval(()=>{if(ready()||performance.now()-start._waiting>20000){clearInterval(iv);start._waiting=0;fighterLoading(false);start._hdSkip=1;try{start()}finally{start._hdSkip=0}}},120);return}}
@@ -1313,7 +1315,7 @@ function finish(){
  }
  const resultChampId=draw_?null:(p1won?picks[0].id:picks[1].id);
  const winnerIndex=draw_?-1:(p1won?0:1),medals=winnerIndex>=0&&!game.fighters[winnerIndex].ai?awardFighterAchievements(game.fighters[winnerIndex],true,flawless,!!(tower&&tower.boss&&winnerIndex===0)):[];renderAchievementAwards(medals,winnerIndex>=0&&!game.fighters[winnerIndex].ai?game.fighters[winnerIndex]:null);
- try{if(window.KOTJ_ARMORY&&mode!=='training'){const me=(net&&ON&&ON.side===1)?1:0,local=mode==='versus'&&!net,won=!draw_&&(local?true:(net?iWon:winnerIndex===me)),hum=game.fighters.filter(x=>!x.ai);KOTJ_ARMORY.reward({mode,draw:draw_,won,flawless:!!flawless,combo:Math.max(0,...hum.map(x=>x.bestCombo||0)),tower:!!tower,towerDone:!!(tower&&tower.done),titan:!!(tower&&tower.boss)})}}catch(_){}
+ try{if(window.KOTJ_ARMORY&&mode!=='training'){const me=(net&&ON&&ON.side===1)?1:0,local=mode==='versus'&&!net,won=!draw_&&(local?true:(net?iWon:winnerIndex===me)),hum=game.fighters.filter(x=>!x.ai);KOTJ_ARMORY.reward({mode,draw:draw_,won,flawless:!!flawless,combo:Math.max(0,...hum.map(x=>x.bestCombo||0)),tower:!!tower,towerDone:!!(tower&&tower.done),titan:!!(tower&&tower.boss),floor:tower&&tower.ladder?tower.index:0,floors:tower&&tower.ladder?tower.ladder.length:0,crowns:(()=>{try{return crowns().filter(id=>BASE_IDS.includes(id)).length}catch(_){return 0}})(),crownsAll:BASE_IDS.length})}}catch(_){}
  if(resultChampId==='leopard'&&!draw_){copy='❄ FROST VICTORY · '+copy;if(soundOn)sfx('frost')}
  if(resultChampId==='majic'&&!draw_){title='THE JUNGLE TITAN';copy='THE TRUE FORM IS REVEALED · THE JUNGLE BOWS TO MAJIC';}
  if(tower&&tower.boss&&!draw_){if(resultChampId==='majic'){title='THE JUNGLE TITAN';copy='“I AM THE LAW OF THIS WILD. THE CROWN WAS ALWAYS MINE.” · MAJIC HOLDS THE SUMMIT';}else{title='THE TITAN FALLS';copy='“IMPOSSIBLE... THE JUNGLE HAS CHOSEN YOU.” · MAJIC’S TRUE FORM IS DEFEATED';}}
@@ -1747,16 +1749,24 @@ const FIN_DUR=3,FIN_GAP=150;function finDur(f){const h=typeof SPRITES_HD!=='unde
 const VFPS={eagle:{idle:10,knockdown:20,victory:12,hit:36,block:40},wolf:{idle:12,knockdown:20,victory:12,hit:36,block:40},lion:{idle:12,knockdown:20,victory:12,hit:36,block:40},tiger:{idle:12,knockdown:20,victory:12,hit:36,block:40},jaguar:{idle:12,knockdown:20,victory:12,hit:36,block:40},leopard:{idle:12,knockdown:20,victory:12,hit:36,block:40},grizzly:{idle:12,knockdown:20,victory:12,hit:36,block:40},badger:{idle:12,knockdown:20,victory:12,hit:36,block:40},hyena:{idle:12,knockdown:20,victory:12,hit:36,block:40},crocodile:{idle:12,knockdown:20,victory:12,hit:36,block:40},elephant:{idle:12,knockdown:20,victory:12,hit:36,block:40},hippo:{idle:12,knockdown:20,victory:12,hit:36,block:40},snake:{idle:12,knockdown:20,victory:12,hit:36,block:40},stag:{idle:12,knockdown:20,victory:12,hit:36,block:40},majic:{idle:12,knockdown:20,victory:12,hit:36,block:40},dolphin:{idle:12,knockdown:20,victory:12,hit:36,block:40}}; // video-made animations: playback frames per second
 const SPRITE_X2={"lion":{},"tiger":{},"jaguar":{},"wolf":{},"hyena":{},"badger":{"crouch":1},"grizzly":{},"crocodile":{},"hippo":{},"elephant":{},"leopard":{"crouch":1},"snake":{"crouch":1},"eagle":{"crouch":1},"stag":{"crouch":1},"majic":{"crouch":1},"dolphin":{}}; // sheets with generated in-between frames (2x)
 // Fighter frames load only when a fighter is first needed (highlighted on select, or in a fight), not all 15 at start-up.
-const spriteImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&SPRITES[id]){t[id]={};for(const k in SPRITES[id].anims){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+'/frames/'+k+'.webp?v=15.7';t[id][k]=im}}return t[id]}});
+// v17.1: frames load lazily, one animation at a time, only when drawn. Screens that use the phone/HD sheets
+// (most phones and laptops) only pre-load the small idle sheet here, since the sharper sheets take over in fights.
+function lowSrc(id,k){return 'assets/characters/'+id+'/frames/'+k+'.webp?v=15.7'}
+function usesMD(id){try{return phoneArt()&&typeof SPRITES_MD!=='undefined'&&!!SPRITES_MD[id]&&wantHD()}catch(_){return false}}
+const spriteImg=new Proxy({},{get(t,id){if(!(id in t)&&typeof id==='string'&&SPRITES[id]){const hold={};
+  t[id]=new Proxy(hold,{get(h,k){if(!(k in h)&&typeof k==='string'&&SPRITES[id].anims[k]){const im=new Image();im.decoding='async';im.src=lowSrc(id,k);h[k]=im}return h[k]}});
+  const pre=usesMD(id)?['idle']:Object.keys(SPRITES[id].anims);pre.forEach(k=>t[id][k])}return t[id]}});
 function spritesReady(id){const a=spriteImg[id];if(!a)return true;const idle=a.idle||a[Object.keys(a)[0]];return !!(idle&&idle.complete&&idle.naturalWidth)}
 // High-detail art for big, sharp screens (laptops, TVs, 4K): loaded per fight, only for the two fighters in it.
 const HD=typeof SPRITES_HD!=='undefined'?SPRITES_HD:{},spriteHD={};
-function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3);return r.height*d>=560}
+function wantHD(){const r=$('game-canvas').getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,3),h=r.height||Math.min(window.innerHeight,window.innerWidth*.5625);return h*d>=560}
 // Phones and tablets get phone-size sheets (frames-md: ~1/5 the memory, every sheet <= 4096 px) instead of the full HD art.
 const HDT={};// Lighter sheets for everyone on GRAPHICS: AUTO (looks the same on normal screens); full HD art only with GRAPHICS: SHARP.
 function phoneArt(){return GFX!=='sharp'}
 function loadHD(id){if(!HD[id]||spriteHD[id])return;spriteHD[id]={};const md=phoneArt()&&typeof SPRITES_MD!=='undefined'&&SPRITES_MD[id];HDT[id]=md||HD[id];
- const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';im.src='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v='+(id==='majic'?'16.4':/^(hippo|elephant)$/.test(id)?'16.5':'15.54'):'.webp?v=15.54');cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}spriteHD[id][k]=cache[file]}}
+ let ess=null;try{ess=fightArtNames(id)}catch(_){}const later=[];
+ const cache={};for(const k in HDT[id].anims){const file=md?(md.files[k]||k):k;if(!cache[file]){const im=new Image();im.decoding='async';const url='assets/characters/'+id+(md?'/frames-md/':'/frames-hd/')+file+(md?'.webp?v='+(id==='majic'?'16.4':/^(hippo|elephant)$/.test(id)?'16.5':'15.54'):'.webp?v=15.54');if(!ess||ess.has(k))im.src=url;else{im._src=url;later.push(im)}cache[file]=im;if(md&&/^(idle|walk_forward|attack_light|attack_heavy|hit_light|hit_heavy|block|jump|bite)$/.test(k)&&im.decode)im.decode().catch(()=>{})}else if(ess&&ess.has(k)&&!cache[file].src)cache[file].src=cache[file]._src;spriteHD[id][k]=cache[file]}
+ later.forEach((im,i)=>setTimeout(()=>{if(!im.src&&im._src)im.src=im._src},2500+i*300))}
 const c=$('game-canvas').getContext('2d',{alpha:false})||$('game-canvas').getContext('2d');
 function draw(){
  const canvas=$('game-canvas'),rect=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,3),w=1100,h=520;
@@ -2728,9 +2738,9 @@ function drawSprite(f){
   case'victory':{anim='victory';const n=A.victory[0],rate=(VFPS[f.data.id]&&VFPS[f.data.id].victory)||8*X('victory'),wT=Math.max(0,f.winT-(f.finOff||0)),intro=Math.min(n-1,Math.floor(wT*rate));const loopStart=Math.max(0,Math.floor(n*.55));fr=wT<(n/rate)?intro:loopStart+(Math.floor((wT-n/rate)*rate)%(n-loopStart));break;}
   default:anim='idle';{const idleRate={badger:6.4,wolf:8.2,hyena:9.2,leopard:10.5,jaguar:8.8,crocodile:5.4,lion:6.8,tiger:9.4,grizzly:5.2,hippo:4.8,elephant:4.2,eagle:7.8,snake:5.8,stag:6.9,majic:7.2}[f.data.id]||8;const ir=(VFPS[f.data.id]&&VFPS[f.data.id].idle)||idleRate*X('idle');fr=Math.floor(now*ir);f._ifr=now*ir-fr};
  }
- let img=spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
- const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];
- if(hi&&hi.complete&&hi.naturalWidth){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1);f._lg={img,meta,sc,fr}}
+ const hi=spriteHD[f.data.id]&&spriteHD[f.data.id][anim];if(hi&&!hi.src&&hi._src)hi.src=hi._src;const hiOk=!!(hi&&hi.src&&hi.complete&&hi.naturalWidth),holdLg=!hiOk&&hi&&f._lg&&f._lg.img.complete&&f._lg.img.naturalWidth;
+ let img=hiOk||holdLg?null:spriteImg[f.data.id][anim],meta=A[anim],sc=S.s;
+ if(hiOk){const T=HDT[f.data.id]||HD[f.data.id];img=hi;meta=T.anims[anim];sc=T.s*(meta[6]||1);f._lg={img,meta,sc,fr}}
  else if(f._lg&&f._lg.img.complete&&f._lg.img.naturalWidth){img=f._lg.img;meta=f._lg.meta;sc=f._lg.sc;fr=f._lg.fr} // sheet still loading: hold the last frame instead of blinking
  if(!img||!img.complete||!img.naturalWidth)return false;{const tg=fightTint(f);window.__tintSrc=tg?{img,fid:f.data.id,targets:tg}:null;}
  const [n,fw,fh,px,py,cols]=meta;const CC=cols||1e9;fr=((fr|0)%n+n)%n;
@@ -2933,8 +2943,9 @@ function HS(f,o){const side=game.fighters.indexOf(f);if(side<0)return;const now=
  const img=el.firstChild;img.src='assets/fx/spirit-'+id+'.webp?v=13';img.style.filter=o.filter||'none';el.style.setProperty('--sp',col);
  el.classList.remove('on');void el.offsetWidth;setTimeout(()=>el.classList.add('on'),Math.round((o.delay||0)*1000));}
 // ---- Realistic effect images (assets/fx/real): real fire, snow, ice, water, embers, smoke, venom, leaves, feathers, rocks, bear arm ----
-const RT={};{const V='?v=1';for(const n of['fire','snow','ice','water','ember','smoke','venom','leaf','feather','rock']){RT[n]=[];for(let i=0;i<9;i++){const im=new Image();im.decoding='async';im.src='assets/fx/real/'+n+'-'+i+'.webp'+V;RT[n].push(im)}}
- RT.paw=new Image();RT.paw.src='assets/fx/real/paw.webp'+V}
+const RT={};{const V='?v=1';for(const n of['fire','snow','ice','water','ember','smoke','venom','leaf','feather','rock']){RT[n]=[];for(let i=0;i<9;i++){const im=new Image();im.decoding='async';im._src='assets/fx/real/'+n+'-'+i+'.webp'+V;RT[n].push(im)}}
+ RT.paw=new Image();RT.paw._src='assets/fx/real/paw.webp'+V}
+function loadRT(){if(loadRT.done)return;loadRT.done=1;for(const k in RT)(Array.isArray(RT[k])?RT[k]:[RT[k]]).forEach(im=>{if(im._src&&!im.src)im.src=im._src})}
 const _rtOk=im=>im&&im.complete&&im.naturalWidth>0;
 function rtPick(p,n,idx){if(p._tn!==n){p._tn=n;p._ti=idx?idx[Math.floor(Math.random()*idx.length)]:Math.floor(Math.random()*9);p._tf=Math.random()<.5?-1:1}const im=RT[n][p._ti];return _rtOk(im)?im:null}
 function rtDraw(im,size,flip){const s=size/Math.max(im.naturalWidth,im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;if(flip<0)c.scale(-1,1);c.drawImage(im,-w/2,-h/2,w,h)}
@@ -3555,7 +3566,8 @@ const SX3={dolphin:[0,1,2],lion:[0,1,3],tiger:[1,0,4],jaguar:[0,2,3],leopard:[0,
 for(const id in SX){const D=SX[id],pick=(SX3[id]||[0,1,2]).map(i=>D.m[i]).filter(Boolean);D.m=id==='majic'?[...pick,...D.m.filter(m=>!pick.includes(m))]:pick}
 const SX_SHOW=3;
 // key sheets for a fighter (moves, hits, their 3 specials + Ultimate): the pre-fight loading screen waits for these (max 8 s)
-function fightArtList(id){const out=new Set(['idle','walk_forward','walk_back','attack_light','attack_heavy','hit_light','hit_heavy','block','jump']);try{const D=SX[id];if(D){(D.m||[]).slice(0,SX_SHOW).forEach(m=>(m.a||[]).forEach(x=>out.add(x)));const u=D.u||{};(u.a||[]).forEach(x=>out.add(x));(u.seq||[]).forEach(q=>out.add(q[0]))}}catch(_){}
+function fightArtNames(id){const out=new Set(['idle','walk_forward','walk_back','run','attack_light','attack_heavy','bite','uppercut','hit_light','hit_heavy','block','jump']);try{const D=SX[id];if(D){(D.m||[]).slice(0,SX_SHOW).forEach(m=>(m.a||[]).forEach(x=>out.add(x)));const u=D.u||{};(u.a||[]).forEach(x=>out.add(x));(u.seq||[]).forEach(q=>out.add(q[0]))}}catch(_){}return out}
+function fightArtList(id){const out=fightArtNames(id);
  const S=spriteHD[id];if(!S)return[];const ims=new Set();out.forEach(k=>{if(S[k])ims.add(S[k])});return[...ims]}
 
 // warm up the sheets for each fighter's 3 specials and Ultimate during the intro, so the first special doesn't hitch
@@ -4187,4 +4199,30 @@ window.__kotjSim=(a,b,lvl=.6,maxSec=99)=>{SAVE.set('tutDone',true);mode='cpu';to
   t+=dt;if(game.ko)break}
  const sc=f=>f.bars*BAR+Math.max(0,f.hp),s0=sc(F[0]),s1=sc(F[1]);const r={w:s0>s1?0:s1>s0?1:-1,t:Math.round(t),left:[s0,s1].map(v=>Math.round(v))};game.fx=[];game=null;return r};
 
+// ---- v17.1: a brand-new player's first tap goes straight into a guided fight (the tutorial coaches it).
+// Returning players (or anyone who has done the tutorial) land on the menu as before.
+(function(){const m=$('menu');if(!m)return;const isNew=!SAVE.get('visited',false)&&!SAVE.get('tutDone',false);
+ if(!isNew){SAVE.set('visited',true);return}
+ // warm up the first fight's art in the background once the title is showing
+ {const warm=()=>setTimeout(()=>{try{arenaImg['jungle-temple'];['lion','wolf'].forEach(id=>{spriteImg[id];if(wantHD())loadHD(id)})}catch(_){}},600);if(document.readyState==='complete')warm();else addEventListener('load',warm)}
+ const ob=new MutationObserver(()=>{if(!m.classList.contains('started'))return;ob.disconnect();SAVE.set('visited',true);
+  try{window.KOTJTrack&&KOTJTrack('first_visit_autofight')}catch(_){}
+  setTimeout(()=>{try{if(!$('fight').classList.contains('hidden'))return;
+   const me=roster.find(f=>f.id==='lion')||roster[0],foe=roster.find(f=>f.id==='wolf')||roster.find(f=>f.id!==me.id);
+   mode='cpu';step=2;tower=null;picks=[me,foe];arena=ARENAS.find(a=>a.id==='jungle-temple')||ARENAS[0];start()}catch(_){}},450)});
+ ob.observe(m,{attributes:true,attributeFilter:['class']})})();
+
+// ---- v17.1: analytics funnel hooks (do nothing until a Google Analytics ID is set in js/track.js)
+(function(){const T=window.KOTJTrack;if(!T)return;
+ const m=$('menu');if(m){const ob=new MutationObserver(()=>{if(m.classList.contains('started')){ob.disconnect();T('start_tap')}});ob.observe(m,{attributes:true,attributeFilter:['class']})}
+ {const _s=start;start=function(){const was=!!(game&&$('fight')&&!$('fight').classList.contains('hidden'));const r=_s.apply(this,arguments);
+   try{if(game&&!start._waiting&&picks&&picks[0]&&picks[1]&&game!==start._last){start._last=game;T.fightStart({mode,fighter:picks[0].id,opponent:picks[1].id,arena:arena&&arena.id,floor:tower?tower.index+1:0})}}catch(_){}return r}}
+ // the Armory script loads after this one, so hook it once the page has loaded
+ const hookArm=()=>{const A=window.KOTJ_ARMORY;if(!A||A._trk)return;A._trk=1;const _r=A.reward;
+  A.reward=function(x){const out=_r.apply(this,arguments);try{T.fightEnd({mode:x.mode,won:!!x.won,draw:!!x.draw,flawless:!!x.flawless,best_combo:x.combo||0,tower_floor:x.floor||0});if(x.towerDone)T('tower_clear',{titan:!!x.titan})}catch(_){}return out}};
+ if(document.readyState==='complete')hookArm();else addEventListener('load',hookArm);setTimeout(hookArm,0);
+ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#open-armory,#quick-fight,[data-mode]');if(!b)return;T('menu_pick',{choice:b.id||b.dataset.mode})},true);
 })();
+
+})();
+

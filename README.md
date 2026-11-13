@@ -380,3 +380,11 @@ The fight system is rebuilt around KI-style combo mechanics, with original names
 
 ## Web build 6.8: Roaring Elephant card
 - The Elephant's select card now shows him trumpeting with his mouth open like the rest of the roster, recolored to his original black-and-gold armor and warmed to match the other cards. Source: `docs/sprite-sheets/select-cards/elephant-roar.png`.
+
+
+## Version 1.7 (web build 17.1): keeping new players locked in
+Based on research into what keeps fighting-game players engaged (fast start, one-tap play, a visible next goal).
+- **Faster first load on phones:** the title screen now downloads about 4–5 MB instead of about 16 MB. Fighter frames load one animation at a time, only when drawn; phones skip the old low-detail sheets they never used; arena paintings and effect images load only when a fight needs them; each fighter's core moves load first and the rest stream in during the fight.
+- **First visit goes straight into a fight:** a brand-new player's first tap starts a guided Lion vs Wolf fight in the Jungle Temple with the existing tutorial coaching. Returning players land on the menu as before.
+- **NEXT UP box on the results screen:** shows how many wins are left in the Tower, how many Jungle Coins until the next aura (or that you can afford it), and the daily first-win bonus.
+- **Analytics ready (off for now):** `game/js/track.js` sends title view, start tap, menu picks, first/second fight started, fight finished, and Tower cleared events to Google Analytics once a Measurement ID (G-…) is pasted into it. A one-line notice appears on the cover when it's on. Add `?trackdebug` to the address to see events in the browser console.
